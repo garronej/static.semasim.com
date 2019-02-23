@@ -1,0 +1,13 @@
+/* -----------------------------------------
+   Custom.css - put your own changes here 
+----------------------------------------- */
+
+.custom-icon {
+  display: inline-block;
+  width: 1em;
+  height: 0.9em;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+  font-size: 20px;
+}
