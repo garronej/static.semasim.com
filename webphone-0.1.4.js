@@ -152,6 +152,7 @@ function fromByteArray (uint8) {
 }
 
 },{}],2:[function(require,module,exports){
+(function (Buffer){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1930,7 +1931,8 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":1,"ieee754":3}],3:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"base64-js":1,"buffer":2,"ieee754":3}],3:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -3337,7 +3339,7 @@ var JsSipSocket = /** @class */ (function () {
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/gateway":165,"../../../shared/dist/lib/toBackend/connection":166,"../../../shared/dist/lib/toBackend/localApiHandlers":167,"../../../shared/dist/lib/toBackend/remoteApiCaller":168,"buffer":2,"phone-number":133,"run-exclusive":134,"ts-events-extended":146,"ts-sip":156}],10:[function(require,module,exports){
+},{"../../../shared/dist/gateway":166,"../../../shared/dist/lib/toBackend/connection":167,"../../../shared/dist/lib/toBackend/localApiHandlers":168,"../../../shared/dist/lib/toBackend/remoteApiCaller":169,"buffer":2,"phone-number":134,"run-exclusive":135,"ts-events-extended":147,"ts-sip":155}],10:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -3346,7 +3348,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -3676,7 +3678,7 @@ var UiBubble = /** @class */ (function () {
 })(UiBubble || (UiBubble = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../../../shared/dist/lib/types":172,"../templates/UiConversation.html":158,"../templates/UiConversation.less":159,"buffer":2,"moment":130,"phone-number":133,"ts-events-extended":146}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":171,"../../../shared/dist/lib/types":173,"../templates/UiConversation.html":159,"../templates/UiConversation.less":160,"buffer":2,"moment":130,"phone-number":134,"ts-events-extended":147}],11:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -3760,7 +3762,7 @@ var UiHeader = /** @class */ (function () {
 }());
 exports.UiHeader = UiHeader;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../templates/UiHeader.html":160,"phone-number":133}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":171,"../templates/UiHeader.html":161,"phone-number":134}],12:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __values = (this && this.__values) || function (o) {
@@ -3995,7 +3997,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../../../shared/dist/lib/types":172,"../templates/UiPhonebook.html":161,"phone-number":133,"ts-events-extended":146}],13:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":171,"../../../shared/dist/lib/types":173,"../templates/UiPhonebook.html":162,"phone-number":134,"ts-events-extended":147}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -4116,7 +4118,7 @@ var UiQuickAction = /** @class */ (function () {
 }());
 exports.UiQuickAction = UiQuickAction;
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":169,"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../templates/UiQuickAction.html":162,"phone-number":133,"ts-events-extended":146}],14:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":170,"../../../shared/dist/lib/tools/loadUiClassHtml":171,"../templates/UiQuickAction.html":163,"phone-number":134,"ts-events-extended":147}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -4297,7 +4299,7 @@ var UiVoiceCall = /** @class */ (function () {
 }());
 exports.UiVoiceCall = UiVoiceCall;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../../../shared/dist/lib/tools/modal_stack":171,"../templates/UiVoiceCall.html":163,"phone-number":133,"ts-events-extended":146}],15:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":171,"../../../shared/dist/lib/tools/modal_stack":172,"../templates/UiVoiceCall.html":164,"phone-number":134,"ts-events-extended":147}],15:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4867,7 +4869,7 @@ var UiWebphoneController = /** @class */ (function () {
 }());
 exports.UiWebphoneController = UiWebphoneController;
 
-},{"../../../shared/dist/lib/toBackend/localApiHandlers":167,"../../../shared/dist/lib/toBackend/remoteApiCaller":168,"../../../shared/dist/lib/tools/bootbox_custom":169,"../../../shared/dist/lib/tools/loadUiClassHtml":170,"../templates/UiWebphoneController.html":164,"./Ua":9,"./UiConversation":10,"./UiHeader":11,"./UiPhonebook":12,"./UiQuickAction":13,"./UiVoiceCall":14,"detectrtc":37,"phone-number":133}],16:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/localApiHandlers":168,"../../../shared/dist/lib/toBackend/remoteApiCaller":169,"../../../shared/dist/lib/tools/bootbox_custom":170,"../../../shared/dist/lib/tools/loadUiClassHtml":171,"../templates/UiWebphoneController.html":165,"./Ua":9,"./UiConversation":10,"./UiHeader":11,"./UiPhonebook":12,"./UiQuickAction":13,"./UiVoiceCall":14,"detectrtc":37,"phone-number":134}],16:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -5019,7 +5021,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/toBackend/connection":166,"../../../shared/dist/lib/toBackend/localApiHandlers":167,"../../../shared/dist/lib/toBackend/remoteApiCaller":168,"../../../shared/dist/lib/tools/bootbox_custom":169,"../../../shared/dist/lib/types":172,"../../../shared/dist/lib/webApiCaller":173,"./Ua":9,"./UiWebphoneController":15,"array.prototype.find":18,"detectrtc":37,"es6-map/implement":104,"es6-weak-map/implement":115}],17:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":167,"../../../shared/dist/lib/toBackend/localApiHandlers":168,"../../../shared/dist/lib/toBackend/remoteApiCaller":169,"../../../shared/dist/lib/tools/bootbox_custom":170,"../../../shared/dist/lib/types":173,"../../../shared/dist/lib/webApiCaller":174,"./Ua":9,"./UiWebphoneController":15,"array.prototype.find":18,"detectrtc":37,"es6-map/implement":104,"es6-weak-map/implement":115}],17:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -5212,7 +5214,7 @@ function applyStyle() {
   var args = Array.prototype.slice.call(arguments);
 
   var str = args.map(function(arg) {
-    if (arg != undefined && arg.constructor === String) {
+    if (arg !== undefined && arg.constructor === String) {
       return arg;
     } else {
       return util.inspect(arg);
@@ -5318,7 +5320,7 @@ module['exports'] = function runTheTrap(text, options) {
     c: ['\u00a9', '\u023b', '\u03fe'],
     d: ['\u00d0', '\u018a', '\u0500', '\u0501', '\u0502', '\u0503'],
     e: ['\u00cb', '\u0115', '\u018e', '\u0258', '\u03a3', '\u03be', '\u04bc',
-         '\u0a6c'],
+      '\u0a6c'],
     f: ['\u04fa'],
     g: ['\u0262'],
     h: ['\u0126', '\u0195', '\u04a2', '\u04ba', '\u04c7', '\u050a'],
@@ -5329,7 +5331,7 @@ module['exports'] = function runTheTrap(text, options) {
     m: ['\u028d', '\u04cd', '\u04ce', '\u0520', '\u0521', '\u0d69'],
     n: ['\u00d1', '\u014b', '\u019d', '\u0376', '\u03a0', '\u048a'],
     o: ['\u00d8', '\u00f5', '\u00f8', '\u01fe', '\u0298', '\u047a', '\u05dd',
-         '\u06dd', '\u0e4f'],
+      '\u06dd', '\u0e4f'],
     p: ['\u01f7', '\u048e'],
     q: ['\u09cd'],
     r: ['\u00ae', '\u01a6', '\u0210', '\u024c', '\u0280', '\u042f'],
@@ -5433,21 +5435,21 @@ module['exports'] = function zalgo(text, options) {
       result = result + text[l];
       counts = {'up': 0, 'down': 0, 'mid': 0};
       switch (options.size) {
-      case 'mini':
-        counts.up = randomNumber(8);
-        counts.mid = randomNumber(2);
-        counts.down = randomNumber(8);
-        break;
-      case 'maxi':
-        counts.up = randomNumber(16) + 3;
-        counts.mid = randomNumber(4) + 1;
-        counts.down = randomNumber(64) + 3;
-        break;
-      default:
-        counts.up = randomNumber(8) + 1;
-        counts.mid = randomNumber(6) / 2;
-        counts.down = randomNumber(8) + 1;
-        break;
+        case 'mini':
+          counts.up = randomNumber(8);
+          counts.mid = randomNumber(2);
+          counts.down = randomNumber(8);
+          break;
+        case 'maxi':
+          counts.up = randomNumber(16) + 3;
+          counts.mid = randomNumber(4) + 1;
+          counts.down = randomNumber(64) + 3;
+          break;
+        default:
+          counts.up = randomNumber(8) + 1;
+          counts.mid = randomNumber(6) / 2;
+          counts.down = randomNumber(8) + 1;
+          break;
       }
 
       var arr = ['up', 'mid', 'down'];
@@ -5543,16 +5545,22 @@ module['exports'] = function() {
       } else {
         if (typeof(theme[prop]) === 'string') {
           colors[prop] = colors[theme[prop]];
+          addProperty(prop, function() {
+            return colors[prop](this);
+          });
         } else {
-          var tmp = colors[theme[prop][0]];
-          for (var t = 1; t < theme[prop].length; t++) {
-            tmp = tmp[theme[prop][t]];
-          }
-          colors[prop] = tmp;
+          var themePropApplicator = function(str) {
+            var ret = str || this;
+            for (var t = 0; t < theme[prop].length; t++) {
+              ret = colors[theme[prop][t]](ret);
+            }
+            return ret;
+          };
+          addProperty(prop, themePropApplicator);
+          colors[prop] = function(str) {
+            return themePropApplicator(str);
+          };
         }
-        addProperty(prop, function() {
-          return colors[prop](this);
-        });
       }
     });
   }
@@ -5566,7 +5574,7 @@ module['exports'] = function() {
         '\'/../themes/generic-logging.js\'); The new syntax looks like '+
         'colors.setTheme(require(__dirname + ' +
         '\'/../themes/generic-logging.js\'));');
-       return;
+      return;
     } else {
       applyTheme(theme);
     }
@@ -5621,7 +5629,7 @@ module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return letter === ' ' ? letter :
       colors[
-        available[Math.round(Math.random() * (available.length - 2))]
+          available[Math.round(Math.random() * (available.length - 2))]
       ](letter);
   };
 };
@@ -6104,7 +6112,7 @@ defineProperties.supportsDescriptors = !!supportsDescriptors;
 
 module.exports = defineProperties;
 
-},{"object-keys":131}],37:[function(require,module,exports){
+},{"object-keys":132}],37:[function(require,module,exports){
 (function (process,global){
 'use strict';
 
@@ -8227,7 +8235,7 @@ delete ES6.CheckObjectCoercible; // renamed in ES6 to RequireObjectCoercible
 
 module.exports = ES6;
 
-},{"./GetIntrinsic":38,"./es5":40,"./helpers/assertRecord":42,"./helpers/assign":43,"./helpers/isFinite":44,"./helpers/isNaN":45,"./helpers/isPrimitive":46,"./helpers/mod":47,"./helpers/sign":48,"es-to-primitive/es6":51,"function-bind":121,"has":124,"is-regex":127,"object-keys":131}],40:[function(require,module,exports){
+},{"./GetIntrinsic":38,"./es5":40,"./helpers/assertRecord":42,"./helpers/assign":43,"./helpers/isFinite":44,"./helpers/isNaN":45,"./helpers/isPrimitive":46,"./helpers/mod":47,"./helpers/sign":48,"es-to-primitive/es6":51,"function-bind":121,"has":124,"is-regex":127,"object-keys":132}],40:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('./GetIntrinsic');
@@ -11741,22 +11749,36 @@ module.exports = require('cssify');
     function createDate (y, m, d, h, M, s, ms) {
         // can't just apply() to create a date:
         // https://stackoverflow.com/q/181348
-        var date = new Date(y, m, d, h, M, s, ms);
-
+        var date;
         // the date constructor remaps years 0-99 to 1900-1999
-        if (y < 100 && y >= 0 && isFinite(date.getFullYear())) {
-            date.setFullYear(y);
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            date = new Date(y + 400, m, d, h, M, s, ms);
+            if (isFinite(date.getFullYear())) {
+                date.setFullYear(y);
+            }
+        } else {
+            date = new Date(y, m, d, h, M, s, ms);
         }
+
         return date;
     }
 
     function createUTCDate (y) {
-        var date = new Date(Date.UTC.apply(null, arguments));
-
+        var date;
         // the Date.UTC function remaps years 0-99 to 1900-1999
-        if (y < 100 && y >= 0 && isFinite(date.getUTCFullYear())) {
-            date.setUTCFullYear(y);
+        if (y < 100 && y >= 0) {
+            var args = Array.prototype.slice.call(arguments);
+            // preserve leap years using a full 400 year cycle, then reset
+            args[0] = y + 400;
+            date = new Date(Date.UTC.apply(null, args));
+            if (isFinite(date.getUTCFullYear())) {
+                date.setUTCFullYear(y);
+            }
+        } else {
+            date = new Date(Date.UTC.apply(null, arguments));
         }
+
         return date;
     }
 
@@ -11858,7 +11880,7 @@ module.exports = require('cssify');
 
     var defaultLocaleWeek = {
         dow : 0, // Sunday is the first day of the week.
-        doy : 6  // The week that contains Jan 1st is the first week of the year.
+        doy : 6  // The week that contains Jan 6th is the first week of the year.
     };
 
     function localeFirstDayOfWeek () {
@@ -11967,25 +11989,28 @@ module.exports = require('cssify');
     }
 
     // LOCALES
+    function shiftWeekdays (ws, n) {
+        return ws.slice(n, 7).concat(ws.slice(0, n));
+    }
 
     var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_');
     function localeWeekdays (m, format) {
-        if (!m) {
-            return isArray(this._weekdays) ? this._weekdays :
-                this._weekdays['standalone'];
-        }
-        return isArray(this._weekdays) ? this._weekdays[m.day()] :
-            this._weekdays[this._weekdays.isFormat.test(format) ? 'format' : 'standalone'][m.day()];
+        var weekdays = isArray(this._weekdays) ? this._weekdays :
+            this._weekdays[(m && m !== true && this._weekdays.isFormat.test(format)) ? 'format' : 'standalone'];
+        return (m === true) ? shiftWeekdays(weekdays, this._week.dow)
+            : (m) ? weekdays[m.day()] : weekdays;
     }
 
     var defaultLocaleWeekdaysShort = 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_');
     function localeWeekdaysShort (m) {
-        return (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
+        return (m === true) ? shiftWeekdays(this._weekdaysShort, this._week.dow)
+            : (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
     }
 
     var defaultLocaleWeekdaysMin = 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_');
     function localeWeekdaysMin (m) {
-        return (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
+        return (m === true) ? shiftWeekdays(this._weekdaysMin, this._week.dow)
+            : (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
     }
 
     function handleStrictParse$1(weekdayName, format, strict) {
@@ -12734,13 +12759,13 @@ module.exports = require('cssify');
                     weekdayOverflow = true;
                 }
             } else if (w.e != null) {
-                // local weekday -- counting starts from begining of week
+                // local weekday -- counting starts from beginning of week
                 weekday = w.e + dow;
                 if (w.e < 0 || w.e > 6) {
                     weekdayOverflow = true;
                 }
             } else {
-                // default to begining of week
+                // default to beginning of week
                 weekday = dow;
             }
         }
@@ -13334,7 +13359,7 @@ module.exports = require('cssify');
             years = normalizedInput.year || 0,
             quarters = normalizedInput.quarter || 0,
             months = normalizedInput.month || 0,
-            weeks = normalizedInput.week || 0,
+            weeks = normalizedInput.week || normalizedInput.isoWeek || 0,
             days = normalizedInput.day || 0,
             hours = normalizedInput.hour || 0,
             minutes = normalizedInput.minute || 0,
@@ -13638,7 +13663,7 @@ module.exports = require('cssify');
                 ms : toInt(absRound(match[MILLISECOND] * 1000)) * sign // the millisecond decimal point is included in the match
             };
         } else if (!!(match = isoRegex.exec(input))) {
-            sign = (match[1] === '-') ? -1 : (match[1] === '+') ? 1 : 1;
+            sign = (match[1] === '-') ? -1 : 1;
             duration = {
                 y : parseIso(match[2], sign),
                 M : parseIso(match[3], sign),
@@ -13680,7 +13705,7 @@ module.exports = require('cssify');
     }
 
     function positiveMomentsDifference(base, other) {
-        var res = {milliseconds: 0, months: 0};
+        var res = {};
 
         res.months = other.month() - base.month() +
             (other.year() - base.year()) * 12;
@@ -13789,7 +13814,7 @@ module.exports = require('cssify');
         if (!(this.isValid() && localInput.isValid())) {
             return false;
         }
-        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
+        units = normalizeUnits(units) || 'millisecond';
         if (units === 'millisecond') {
             return this.valueOf() > localInput.valueOf();
         } else {
@@ -13802,7 +13827,7 @@ module.exports = require('cssify');
         if (!(this.isValid() && localInput.isValid())) {
             return false;
         }
-        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
+        units = normalizeUnits(units) || 'millisecond';
         if (units === 'millisecond') {
             return this.valueOf() < localInput.valueOf();
         } else {
@@ -13811,9 +13836,14 @@ module.exports = require('cssify');
     }
 
     function isBetween (from, to, units, inclusivity) {
+        var localFrom = isMoment(from) ? from : createLocal(from),
+            localTo = isMoment(to) ? to : createLocal(to);
+        if (!(this.isValid() && localFrom.isValid() && localTo.isValid())) {
+            return false;
+        }
         inclusivity = inclusivity || '()';
-        return (inclusivity[0] === '(' ? this.isAfter(from, units) : !this.isBefore(from, units)) &&
-            (inclusivity[1] === ')' ? this.isBefore(to, units) : !this.isAfter(to, units));
+        return (inclusivity[0] === '(' ? this.isAfter(localFrom, units) : !this.isBefore(localFrom, units)) &&
+            (inclusivity[1] === ')' ? this.isBefore(localTo, units) : !this.isAfter(localTo, units));
     }
 
     function isSame (input, units) {
@@ -13822,7 +13852,7 @@ module.exports = require('cssify');
         if (!(this.isValid() && localInput.isValid())) {
             return false;
         }
-        units = normalizeUnits(units || 'millisecond');
+        units = normalizeUnits(units) || 'millisecond';
         if (units === 'millisecond') {
             return this.valueOf() === localInput.valueOf();
         } else {
@@ -13832,11 +13862,11 @@ module.exports = require('cssify');
     }
 
     function isSameOrAfter (input, units) {
-        return this.isSame(input, units) || this.isAfter(input,units);
+        return this.isSame(input, units) || this.isAfter(input, units);
     }
 
     function isSameOrBefore (input, units) {
-        return this.isSame(input, units) || this.isBefore(input,units);
+        return this.isSame(input, units) || this.isBefore(input, units);
     }
 
     function diff (input, units, asFloat) {
@@ -14013,62 +14043,130 @@ module.exports = require('cssify');
         return this._locale;
     }
 
+    var MS_PER_SECOND = 1000;
+    var MS_PER_MINUTE = 60 * MS_PER_SECOND;
+    var MS_PER_HOUR = 60 * MS_PER_MINUTE;
+    var MS_PER_400_YEARS = (365 * 400 + 97) * 24 * MS_PER_HOUR;
+
+    // actual modulo - handles negative numbers (for dates before 1970):
+    function mod$1(dividend, divisor) {
+        return (dividend % divisor + divisor) % divisor;
+    }
+
+    function localStartOfDate(y, m, d) {
+        // the date constructor remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            return new Date(y + 400, m, d) - MS_PER_400_YEARS;
+        } else {
+            return new Date(y, m, d).valueOf();
+        }
+    }
+
+    function utcStartOfDate(y, m, d) {
+        // Date.UTC remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            return Date.UTC(y + 400, m, d) - MS_PER_400_YEARS;
+        } else {
+            return Date.UTC(y, m, d);
+        }
+    }
+
     function startOf (units) {
+        var time;
         units = normalizeUnits(units);
-        // the following switch intentionally omits break keywords
-        // to utilize falling through the cases.
+        if (units === undefined || units === 'millisecond' || !this.isValid()) {
+            return this;
+        }
+
+        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
         switch (units) {
             case 'year':
-                this.month(0);
-                /* falls through */
+                time = startOfDate(this.year(), 0, 1);
+                break;
             case 'quarter':
+                time = startOfDate(this.year(), this.month() - this.month() % 3, 1);
+                break;
             case 'month':
-                this.date(1);
-                /* falls through */
+                time = startOfDate(this.year(), this.month(), 1);
+                break;
             case 'week':
+                time = startOfDate(this.year(), this.month(), this.date() - this.weekday());
+                break;
             case 'isoWeek':
+                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1));
+                break;
             case 'day':
             case 'date':
-                this.hours(0);
-                /* falls through */
+                time = startOfDate(this.year(), this.month(), this.date());
+                break;
             case 'hour':
-                this.minutes(0);
-                /* falls through */
+                time = this._d.valueOf();
+                time -= mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR);
+                break;
             case 'minute':
-                this.seconds(0);
-                /* falls through */
+                time = this._d.valueOf();
+                time -= mod$1(time, MS_PER_MINUTE);
+                break;
             case 'second':
-                this.milliseconds(0);
+                time = this._d.valueOf();
+                time -= mod$1(time, MS_PER_SECOND);
+                break;
         }
 
-        // weeks are a special case
-        if (units === 'week') {
-            this.weekday(0);
-        }
-        if (units === 'isoWeek') {
-            this.isoWeekday(1);
-        }
-
-        // quarters are also special
-        if (units === 'quarter') {
-            this.month(Math.floor(this.month() / 3) * 3);
-        }
-
+        this._d.setTime(time);
+        hooks.updateOffset(this, true);
         return this;
     }
 
     function endOf (units) {
+        var time;
         units = normalizeUnits(units);
-        if (units === undefined || units === 'millisecond') {
+        if (units === undefined || units === 'millisecond' || !this.isValid()) {
             return this;
         }
 
-        // 'date' is an alias for 'day', so it should be considered as such.
-        if (units === 'date') {
-            units = 'day';
+        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
+        switch (units) {
+            case 'year':
+                time = startOfDate(this.year() + 1, 0, 1) - 1;
+                break;
+            case 'quarter':
+                time = startOfDate(this.year(), this.month() - this.month() % 3 + 3, 1) - 1;
+                break;
+            case 'month':
+                time = startOfDate(this.year(), this.month() + 1, 1) - 1;
+                break;
+            case 'week':
+                time = startOfDate(this.year(), this.month(), this.date() - this.weekday() + 7) - 1;
+                break;
+            case 'isoWeek':
+                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1) + 7) - 1;
+                break;
+            case 'day':
+            case 'date':
+                time = startOfDate(this.year(), this.month(), this.date() + 1) - 1;
+                break;
+            case 'hour':
+                time = this._d.valueOf();
+                time += MS_PER_HOUR - mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR) - 1;
+                break;
+            case 'minute':
+                time = this._d.valueOf();
+                time += MS_PER_MINUTE - mod$1(time, MS_PER_MINUTE) - 1;
+                break;
+            case 'second':
+                time = this._d.valueOf();
+                time += MS_PER_SECOND - mod$1(time, MS_PER_SECOND) - 1;
+                break;
         }
 
-        return this.startOf(units).add(1, (units === 'isoWeek' ? 'week' : units)).subtract(1, 'ms');
+        this._d.setTime(time);
+        hooks.updateOffset(this, true);
+        return this;
     }
 
     function valueOf () {
@@ -14774,10 +14872,14 @@ module.exports = require('cssify');
 
         units = normalizeUnits(units);
 
-        if (units === 'month' || units === 'year') {
-            days   = this._days   + milliseconds / 864e5;
+        if (units === 'month' || units === 'quarter' || units === 'year') {
+            days = this._days + milliseconds / 864e5;
             months = this._months + daysToMonths(days);
-            return units === 'month' ? months : months / 12;
+            switch (units) {
+                case 'month':   return months;
+                case 'quarter': return months / 3;
+                case 'year':    return months / 12;
+            }
         } else {
             // handle milliseconds separately because of floating point math errors (issue #1867)
             days = this._days + Math.round(monthsToDays(this._months));
@@ -14820,6 +14922,7 @@ module.exports = require('cssify');
     var asDays         = makeAs('d');
     var asWeeks        = makeAs('w');
     var asMonths       = makeAs('M');
+    var asQuarters     = makeAs('Q');
     var asYears        = makeAs('y');
 
     function clone$1 () {
@@ -15011,6 +15114,7 @@ module.exports = require('cssify');
     proto$2.asDays         = asDays;
     proto$2.asWeeks        = asWeeks;
     proto$2.asMonths       = asMonths;
+    proto$2.asQuarters     = asQuarters;
     proto$2.asYears        = asYears;
     proto$2.valueOf        = valueOf$1;
     proto$2._bubble        = bubble;
@@ -15055,7 +15159,7 @@ module.exports = require('cssify');
     // Side effect imports
 
 
-    hooks.version = '2.22.2';
+    hooks.version = '2.24.0';
 
     setHookCallback(createLocal);
 
@@ -15096,7 +15200,7 @@ module.exports = require('cssify');
         TIME: 'HH:mm',                                  // <input type="time" />
         TIME_SECONDS: 'HH:mm:ss',                       // <input type="time" step="1" />
         TIME_MS: 'HH:mm:ss.SSS',                        // <input type="time" step="0.001" />
-        WEEK: 'YYYY-[W]WW',                             // <input type="week" />
+        WEEK: 'GGGG-[W]WW',                             // <input type="week" />
         MONTH: 'YYYY-MM'                                // <input type="month" />
     };
 
@@ -15107,136 +15211,149 @@ module.exports = require('cssify');
 },{}],131:[function(require,module,exports){
 'use strict';
 
-// modified from https://github.com/es-shims/es5-shim
-var has = Object.prototype.hasOwnProperty;
-var toStr = Object.prototype.toString;
-var slice = Array.prototype.slice;
-var isArgs = require('./isArguments');
-var isEnumerable = Object.prototype.propertyIsEnumerable;
-var hasDontEnumBug = !isEnumerable.call({ toString: null }, 'toString');
-var hasProtoEnumBug = isEnumerable.call(function () {}, 'prototype');
-var dontEnums = [
-	'toString',
-	'toLocaleString',
-	'valueOf',
-	'hasOwnProperty',
-	'isPrototypeOf',
-	'propertyIsEnumerable',
-	'constructor'
-];
-var equalsConstructorPrototype = function (o) {
-	var ctor = o.constructor;
-	return ctor && ctor.prototype === o;
-};
-var excludedKeys = {
-	$applicationCache: true,
-	$console: true,
-	$external: true,
-	$frame: true,
-	$frameElement: true,
-	$frames: true,
-	$innerHeight: true,
-	$innerWidth: true,
-	$outerHeight: true,
-	$outerWidth: true,
-	$pageXOffset: true,
-	$pageYOffset: true,
-	$parent: true,
-	$scrollLeft: true,
-	$scrollTop: true,
-	$scrollX: true,
-	$scrollY: true,
-	$self: true,
-	$webkitIndexedDB: true,
-	$webkitStorageInfo: true,
-	$window: true
-};
-var hasAutomationEqualityBug = (function () {
-	/* global window */
-	if (typeof window === 'undefined') { return false; }
-	for (var k in window) {
+var keysShim;
+if (!Object.keys) {
+	// modified from https://github.com/es-shims/es5-shim
+	var has = Object.prototype.hasOwnProperty;
+	var toStr = Object.prototype.toString;
+	var isArgs = require('./isArguments'); // eslint-disable-line global-require
+	var isEnumerable = Object.prototype.propertyIsEnumerable;
+	var hasDontEnumBug = !isEnumerable.call({ toString: null }, 'toString');
+	var hasProtoEnumBug = isEnumerable.call(function () {}, 'prototype');
+	var dontEnums = [
+		'toString',
+		'toLocaleString',
+		'valueOf',
+		'hasOwnProperty',
+		'isPrototypeOf',
+		'propertyIsEnumerable',
+		'constructor'
+	];
+	var equalsConstructorPrototype = function (o) {
+		var ctor = o.constructor;
+		return ctor && ctor.prototype === o;
+	};
+	var excludedKeys = {
+		$applicationCache: true,
+		$console: true,
+		$external: true,
+		$frame: true,
+		$frameElement: true,
+		$frames: true,
+		$innerHeight: true,
+		$innerWidth: true,
+		$outerHeight: true,
+		$outerWidth: true,
+		$pageXOffset: true,
+		$pageYOffset: true,
+		$parent: true,
+		$scrollLeft: true,
+		$scrollTop: true,
+		$scrollX: true,
+		$scrollY: true,
+		$self: true,
+		$webkitIndexedDB: true,
+		$webkitStorageInfo: true,
+		$window: true
+	};
+	var hasAutomationEqualityBug = (function () {
+		/* global window */
+		if (typeof window === 'undefined') { return false; }
+		for (var k in window) {
+			try {
+				if (!excludedKeys['$' + k] && has.call(window, k) && window[k] !== null && typeof window[k] === 'object') {
+					try {
+						equalsConstructorPrototype(window[k]);
+					} catch (e) {
+						return true;
+					}
+				}
+			} catch (e) {
+				return true;
+			}
+		}
+		return false;
+	}());
+	var equalsConstructorPrototypeIfNotBuggy = function (o) {
+		/* global window */
+		if (typeof window === 'undefined' || !hasAutomationEqualityBug) {
+			return equalsConstructorPrototype(o);
+		}
 		try {
-			if (!excludedKeys['$' + k] && has.call(window, k) && window[k] !== null && typeof window[k] === 'object') {
-				try {
-					equalsConstructorPrototype(window[k]);
-				} catch (e) {
-					return true;
+			return equalsConstructorPrototype(o);
+		} catch (e) {
+			return false;
+		}
+	};
+
+	keysShim = function keys(object) {
+		var isObject = object !== null && typeof object === 'object';
+		var isFunction = toStr.call(object) === '[object Function]';
+		var isArguments = isArgs(object);
+		var isString = isObject && toStr.call(object) === '[object String]';
+		var theKeys = [];
+
+		if (!isObject && !isFunction && !isArguments) {
+			throw new TypeError('Object.keys called on a non-object');
+		}
+
+		var skipProto = hasProtoEnumBug && isFunction;
+		if (isString && object.length > 0 && !has.call(object, 0)) {
+			for (var i = 0; i < object.length; ++i) {
+				theKeys.push(String(i));
+			}
+		}
+
+		if (isArguments && object.length > 0) {
+			for (var j = 0; j < object.length; ++j) {
+				theKeys.push(String(j));
+			}
+		} else {
+			for (var name in object) {
+				if (!(skipProto && name === 'prototype') && has.call(object, name)) {
+					theKeys.push(String(name));
 				}
 			}
-		} catch (e) {
-			return true;
 		}
-	}
-	return false;
-}());
-var equalsConstructorPrototypeIfNotBuggy = function (o) {
-	/* global window */
-	if (typeof window === 'undefined' || !hasAutomationEqualityBug) {
-		return equalsConstructorPrototype(o);
-	}
-	try {
-		return equalsConstructorPrototype(o);
-	} catch (e) {
-		return false;
-	}
-};
 
-var keysShim = function keys(object) {
-	var isObject = object !== null && typeof object === 'object';
-	var isFunction = toStr.call(object) === '[object Function]';
-	var isArguments = isArgs(object);
-	var isString = isObject && toStr.call(object) === '[object String]';
-	var theKeys = [];
+		if (hasDontEnumBug) {
+			var skipConstructor = equalsConstructorPrototypeIfNotBuggy(object);
 
-	if (!isObject && !isFunction && !isArguments) {
-		throw new TypeError('Object.keys called on a non-object');
-	}
-
-	var skipProto = hasProtoEnumBug && isFunction;
-	if (isString && object.length > 0 && !has.call(object, 0)) {
-		for (var i = 0; i < object.length; ++i) {
-			theKeys.push(String(i));
-		}
-	}
-
-	if (isArguments && object.length > 0) {
-		for (var j = 0; j < object.length; ++j) {
-			theKeys.push(String(j));
-		}
-	} else {
-		for (var name in object) {
-			if (!(skipProto && name === 'prototype') && has.call(object, name)) {
-				theKeys.push(String(name));
+			for (var k = 0; k < dontEnums.length; ++k) {
+				if (!(skipConstructor && dontEnums[k] === 'constructor') && has.call(object, dontEnums[k])) {
+					theKeys.push(dontEnums[k]);
+				}
 			}
 		}
-	}
+		return theKeys;
+	};
+}
+module.exports = keysShim;
 
-	if (hasDontEnumBug) {
-		var skipConstructor = equalsConstructorPrototypeIfNotBuggy(object);
+},{"./isArguments":133}],132:[function(require,module,exports){
+'use strict';
 
-		for (var k = 0; k < dontEnums.length; ++k) {
-			if (!(skipConstructor && dontEnums[k] === 'constructor') && has.call(object, dontEnums[k])) {
-				theKeys.push(dontEnums[k]);
-			}
-		}
-	}
-	return theKeys;
-};
+var slice = Array.prototype.slice;
+var isArgs = require('./isArguments');
+
+var origKeys = Object.keys;
+var keysShim = origKeys ? function keys(o) { return origKeys(o); } : require('./implementation');
+
+var originalKeys = Object.keys;
 
 keysShim.shim = function shimObjectKeys() {
 	if (Object.keys) {
 		var keysWorksWithArguments = (function () {
 			// Safari 5.0 bug
-			return (Object.keys(arguments) || '').length === 2;
+			var args = Object.keys(arguments);
+			return args && args.length === arguments.length;
 		}(1, 2));
 		if (!keysWorksWithArguments) {
-			var originalKeys = Object.keys;
 			Object.keys = function keys(object) { // eslint-disable-line func-name-matching
 				if (isArgs(object)) {
 					return originalKeys(slice.call(object));
-				} else {
-					return originalKeys(object);
 				}
+				return originalKeys(object);
 			};
 		}
 	} else {
@@ -15247,7 +15364,7 @@ keysShim.shim = function shimObjectKeys() {
 
 module.exports = keysShim;
 
-},{"./isArguments":132}],132:[function(require,module,exports){
+},{"./implementation":131,"./isArguments":133}],133:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -15266,7 +15383,7 @@ module.exports = function isArguments(value) {
 	return isArgs;
 };
 
-},{}],133:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 (function (process,global){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -15288,7 +15405,7 @@ var phoneNumber;
         if (typeof process !== "undefined" &&
             process.release.name === "node") {
             //Trick browserify so it does not bundle.
-            var path = "../../node_modules/intl-tel-input/build/js/utils";
+            var path = "../../res/utils";
             require(path);
         }
         else {
@@ -15456,7 +15573,7 @@ var phoneNumber;
 })(phoneNumber = exports.phoneNumber || (exports.phoneNumber = {}));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":6}],134:[function(require,module,exports){
+},{"_process":6}],135:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -15748,7 +15865,7 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{}],135:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 'use strict'
 /* eslint no-proto: 0 */
 module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
@@ -15767,7 +15884,7 @@ function mixinProperties (obj, proto) {
   return obj
 }
 
-},{}],136:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -16102,7 +16219,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":124}],137:[function(require,module,exports){
+},{"has":124}],138:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -16152,7 +16269,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":136}],138:[function(require,module,exports){
+},{"super-json":137}],139:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -16164,7 +16281,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":137,"./stringTransform":139,"./stringTransformExt":140,"./testing":141}],139:[function(require,module,exports){
+},{"./JSON_CUSTOM":138,"./stringTransform":140,"./stringTransformExt":141,"./testing":142}],140:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -16226,7 +16343,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],140:[function(require,module,exports){
+},{"buffer":2}],141:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -16294,7 +16411,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":139}],141:[function(require,module,exports){
+},{"./stringTransform":140}],142:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -16563,7 +16680,7 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":139}],142:[function(require,module,exports){
+},{"./stringTransform":140}],143:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -16604,7 +16721,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":143}],143:[function(require,module,exports){
+},{"./SyncEventBase":144}],144:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -16822,7 +16939,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":144}],144:[function(require,module,exports){
+},{"./SyncEventBaseProtected":145}],145:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -17107,7 +17224,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":145,"run-exclusive":134}],145:[function(require,module,exports){
+},{"./defs":146,"run-exclusive":135}],146:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17148,7 +17265,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{"setprototypeof":135}],146:[function(require,module,exports){
+},{"setprototypeof":136}],147:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -17157,7 +17274,7 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":142,"./defs":145}],147:[function(require,module,exports){
+},{"./SyncEvent":143,"./defs":146}],148:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17329,7 +17446,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":146}],148:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":147}],149:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -17641,7 +17758,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":147,"./api/ApiMessage":149,"./core":153,"./misc":157,"colors":25,"ts-events-extended":146}],149:[function(require,module,exports){
+},{"./IConnection":148,"./api/ApiMessage":150,"./core":154,"./misc":158,"colors":25,"ts-events-extended":147}],150:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17722,7 +17839,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":153,"../misc":157,"buffer":2,"transfer-tools":138}],150:[function(require,module,exports){
+},{"../core":154,"../misc":158,"buffer":2,"transfer-tools":139}],151:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -17904,7 +18021,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":157,"./ApiMessage":149,"colors":25,"util":8}],151:[function(require,module,exports){
+},{"../misc":158,"./ApiMessage":150,"colors":25,"util":8}],152:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -18123,7 +18240,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":157,"./ApiMessage":149,"setprototypeof":135}],152:[function(require,module,exports){
+},{"../misc":158,"./ApiMessage":150,"setprototypeof":136}],153:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -18131,7 +18248,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":150,"./client":151}],153:[function(require,module,exports){
+},{"./Server":151,"./client":152}],154:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -18148,8 +18265,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var sip = require("./core/sip");
-var _sdp_ = require("./core/sdp");
+var sip = require("./legacy/sip");
+var _sdp_ = require("./legacy/sdp");
 var setPrototypeOf = require("setprototypeof");
 function makeStreamParser(handler, floodHandler) {
     var streamParser = (function () {
@@ -18215,7 +18332,19 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./core/sdp":154,"./core/sip":155,"buffer":2,"setprototypeof":135}],154:[function(require,module,exports){
+},{"./legacy/sdp":156,"./legacy/sip":157,"buffer":2,"setprototypeof":136}],155:[function(require,module,exports){
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+__export(require("./core"));
+__export(require("./Socket"));
+__export(require("./misc"));
+var api = require("./api");
+exports.api = api;
+
+},{"./Socket":149,"./api":153,"./core":154,"./misc":158}],156:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -18331,7 +18460,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],155:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18722,19 +18851,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],156:[function(require,module,exports){
-"use strict";
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./core"));
-__export(require("./Socket"));
-__export(require("./misc"));
-var api = require("./api");
-exports.api = api;
-
-},{"./Socket":148,"./api":152,"./core":153,"./misc":157}],157:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -18747,6 +18864,36 @@ var __assign = (this && this.__assign) || function () {
         return t;
     };
     return __assign.apply(this, arguments);
+};
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core = require("./core");
@@ -18779,16 +18926,35 @@ function getPacketContent(sipPacket) {
 }
 exports.getPacketContent = getPacketContent;
 function readSrflxAddrInSdp(sdp) {
-    for (var _i = 0, _a = core.parseSdp(sdp).m; _i < _a.length; _i++) {
-        var m_i = _a[_i];
-        if (m_i.media !== "audio")
-            continue;
-        for (var _b = 0, _c = m_i.a; _b < _c.length; _b++) {
-            var a_i = _c[_b];
-            var match = a_i.match(/^candidate(?:[^\s]+\s){4}((?:[0-9]{1,3}\.){3}[0-9]{1,3})\s(?:[^\s]+\s){2}srflx/);
-            if (match)
-                return match[1];
+    var e_1, _a, e_2, _b;
+    try {
+        for (var _c = __values(core.parseSdp(sdp).m), _d = _c.next(); !_d.done; _d = _c.next()) {
+            var m_i = _d.value;
+            if (m_i.media !== "audio")
+                continue;
+            try {
+                for (var _e = __values(m_i.a), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    var a_i = _f.value;
+                    var match = a_i.match(/^candidate(?:[^\s]+\s){4}((?:[0-9]{1,3}\.){3}[0-9]{1,3})\s(?:[^\s]+\s){2}srflx/);
+                    if (match)
+                        return match[1];
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
         }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+        }
+        finally { if (e_1) throw e_1.error; }
     }
     return undefined;
 }
@@ -18842,6 +19008,7 @@ function addOptionTag(headers, headerField, optionTag) {
 }
 exports.addOptionTag = addOptionTag;
 function filterSdpCandidates(keep, sdp) {
+    var e_3, _a;
     var shouldKeepCandidate = function (candidateLine) {
         return ((keep.host && !!candidateLine.match(/host/)) ||
             (keep.srflx && !!candidateLine.match(/srflx/)) ||
@@ -18849,13 +19016,22 @@ function filterSdpCandidates(keep, sdp) {
     };
     var parsedSdp = core.parseSdp(sdp);
     var arr = parsedSdp.m[0].a;
-    for (var _i = 0, _a = arr.slice(); _i < _a.length; _i++) {
-        var line = _a[_i];
-        if (!line.match(/^candidate/))
-            continue;
-        if (!shouldKeepCandidate(line)) {
-            arr.splice(arr.indexOf(line), 1);
+    try {
+        for (var _b = __values(__spread(arr)), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var line = _c.value;
+            if (!line.match(/^candidate/))
+                continue;
+            if (!shouldKeepCandidate(line)) {
+                arr.splice(arr.indexOf(line), 1);
+            }
         }
+    }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+        }
+        finally { if (e_3) throw e_3.error; }
     }
     return core.stringifySdp(sdp);
 }
@@ -18973,21 +19149,21 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":153,"buffer":2}],158:[function(require,module,exports){
+},{"./core":154,"buffer":2}],159:[function(require,module,exports){
 module.exports = "<div class=\"id_UiConversation panel panel-default\">\r\n    <div class=\"panel-heading pr5\">\r\n        <h4 class=\"panel-title\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-chat\"></use>\r\n                </svg>\r\n            </i>\r\n            <span class=\"id_name\"></span>\r\n            <span class=\"id_number ml10\"></span>\r\n        </h4>\r\n        <button class=\"id_updateContact btn btn-primary ml10\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                </svg>\r\n            </i>\r\n        </button>\r\n        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n            <i class=\"glyphicon glyphicon-trash\"></i>\r\n        </button>\r\n        <div class=\"pull-right mt5\">\r\n            <button class=\"id_call btn btn-primary\" type=\"button\">\r\n                <i>\r\n                    <svg class=\"custom-icon\">\r\n                        <use xlink:href=\"#icon-call\"></use>\r\n                    </svg>\r\n                </i>\r\n                <span>Call</span>\r\n            </button>\r\n        </div>\r\n    </div>\r\n    <div class=\"panel-body bnb\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"panel-footer white-bg\">\r\n        <form action=\"#\" role=\"form\" class=\"mb5 mr5 ml5\">\r\n                <textarea class=\"form-control elastic\" rows=\"1\"> </textarea>\r\n                <a class=\"id_send\" href=\"javascript:void(0);\">\r\n                    <i class=\"fa fa-send s20\"></i>\r\n                </a>\r\n        </form>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div class=\"message\">\r\n            <p class=\"id_emitter\"></p>\r\n            <div class=\"id_status\">\r\n                <span class=\"id_date\"></span>\r\n                <span class=\"id_check\"></span>\r\n            </div>\r\n            <p class=\"id_content\">\r\n            </p>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
-},{}],159:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 var css = "div.id_UiConversation .panel-heading {\n  cursor: default;\n}\ndiv.id_UiConversation .panel-title {\n  display: inline-block;\n}\ndiv.id_UiConversation .panel-title span {\n  cursor: text;\n}\ndiv.id_UiConversation .panel-body {\n  padding: 0;\n}\ndiv.id_UiConversation .panel-footer {\n  padding: 0;\n}\ndiv.id_UiConversation form {\n  position: relative;\n}\ndiv.id_UiConversation textarea {\n  padding-right: 36px;\n}\ndiv.id_UiConversation a.id_send {\n  position: absolute;\n  top: 7px;\n  right: 0px;\n  left: auto;\n  width: 33px;\n}\ndiv.id_UiConversation ul {\n  margin: 0 10px 0;\n  padding: 0;\n  list-style: none;\n}\ndiv.id_UiConversation ul li {\n  margin-bottom: 5px;\n  margin-top: 5px;\n}\ndiv.id_UiConversation ul li div.message {\n  border-radius: 4px;\n  padding: 5px 10px;\n  border: 1px solid #ecf0f1;\n  position: relative;\n}\ndiv.id_UiConversation ul li div.message.notification {\n  background-color: #ecefde;\n  text-align: center;\n  font-style: italic;\n  margin-left: 80px;\n  margin-right: 80px;\n}\ndiv.id_UiConversation ul li div.message.in,\ndiv.id_UiConversation ul li div.message.out {\n  background-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.in:before,\ndiv.id_UiConversation ul li div.message.out:before {\n  top: 20px;\n  border: solid transparent;\n  content: '';\n  position: absolute;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.out:after {\n  border-width: 8px;\n  margin-top: -8px;\n}\ndiv.id_UiConversation ul li div.message.in {\n  margin-left: 7px;\n  margin-right: 60px;\n}\ndiv.id_UiConversation ul li div.message.in:after,\ndiv.id_UiConversation ul li div.message.in:before {\n  right: 100%;\n}\ndiv.id_UiConversation ul li div.message.in:after {\n  border-right-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message.out {\n  margin-left: 60px;\n  margin-right: 7px;\n}\ndiv.id_UiConversation ul li div.message.out:after,\ndiv.id_UiConversation ul li div.message.out:before {\n  left: 100%;\n}\ndiv.id_UiConversation ul li div.message.out:after {\n  border-left-color: #ecf0f1;\n}\ndiv.id_UiConversation ul li div.message p.id_emitter {\n  color: #95a5a6;\n  margin-bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message div.id_status {\n  float: right;\n  padding: 2px 0;\n  position: absolute;\n  right: 10px;\n  bottom: 2px;\n}\ndiv.id_UiConversation ul li div.message span.id_date {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message span.id_check {\n  font-size: 75%;\n  font-style: italic;\n}\ndiv.id_UiConversation ul li div.message p.id_content {\n  font-size: 13px;\n  line-height: 18px;\n  margin-bottom: 0;\n  padding-bottom: 15px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":129}],160:[function(require,module,exports){
+},{"lessify":129}],161:[function(require,module,exports){
 module.exports = "<style>\r\n    div.id_flag {\r\n        display: inline-block;\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiHeader page-header\">\r\n    <!--\r\n    <div class=\"pull-right\">\r\n        <button class=\"id_up btn btn-info btn-round btn-sm\">\r\n            <i class=\"glyphicon glyphicon-chevron-up\"></i>\r\n        </button>\r\n    </div>\r\n    -->\r\n    <h4>\r\n        <i class=\"id_icon_sim_up\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <i class=\"id_icon_sim_down\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card_alert\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <span class=\"id_number\"></span>\r\n        &nbsp;\r\n        <span class=\"id_offline color-red\"><b>Offline</b></span>\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Current location: </strong>\r\n        <span class=\"id_geoInfo\"></span>\r\n    </div>\r\n\r\n</div>";
-},{}],161:[function(require,module,exports){
-module.exports = "<style>\r\n    div.id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li .id_number {\r\n        cursor: text !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected > div,\r\n    div.id_UiPhonebook ul li > div:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages > div {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number pl15\"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
 },{}],162:[function(require,module,exports){
-module.exports = "<style>\r\n    .id_UiQuickAction .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <!-- Start .panel -->\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-arrow-right18\"></i>\r\n            <span>Quick action </span>\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12 mt5 mb10 pl20 pr20\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input form-control\" type=\"text\" required>\r\n                        <!--<input type=\"tel\" class=\"id_input form-control\" placeholder=\"+33636786385\">-->\r\n                    </div>\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12\">\r\n\r\n                        <div class=\"st_flex\">\r\n\r\n                            <button type=\"button\" class=\"id_call btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-call\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-sms\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-add_contact\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">New Contact</span>\r\n                            </button>\r\n\r\n                        </div>\r\n\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
+module.exports = "<style>\r\n    div.id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li .id_number {\r\n        cursor: text !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected > div,\r\n    div.id_UiPhonebook ul li > div:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.has-messages > div {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number pl15\"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
 },{}],163:[function(require,module,exports){
-module.exports = "<style>\r\n\r\n    .panel-title {\r\n        float: none;\r\n        text-align: center;\r\n        margin-right: 0px !important;\r\n        font-size: 14px !important;\r\n    }\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n\r\n    .modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n\r\n    .modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n        /* Adjusts for spacing */\r\n    }\r\n\r\n    .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n\r\n    .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_numpad .btn {\r\n    margin-bottom: 10px !important;\r\n    margin-right: 5px !important;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_me\"></span></p>\r\n                                    <p><span class=\"id_me_under\"></span></p>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-2 text-center mt10\">\r\n                                <span class=\"id_timer\"></span>\r\n                                <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_contact\"> <span></p>\r\n                                    <p><span class=\"id_contact_under\"></span></p>\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
+module.exports = "<style>\r\n    .id_UiQuickAction .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <!-- Start .panel -->\r\n    <!--\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\">\r\n            <i class=\"im-arrow-right18\"></i>\r\n            <span>Quick action </span>\r\n        </h4>\r\n    </div>\r\n    -->\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12 mt5 mb10 pl20 pr20\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input form-control\" type=\"text\" required>\r\n                        <!--<input type=\"tel\" class=\"id_input form-control\" placeholder=\"+33636786385\">-->\r\n                    </div>\r\n\r\n                    <div class=\"col-lg-12 col-md-12 col-sm-12 col-xs-12\">\r\n\r\n                        <div class=\"st_flex\">\r\n\r\n                            <button type=\"button\" class=\"id_call btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-call\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-sms\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-add_contact\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">New Contact</span>\r\n                            </button>\r\n\r\n                        </div>\r\n\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
 },{}],164:[function(require,module,exports){
-module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-5 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-7 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
+module.exports = "<style>\r\n\r\n    .panel-title {\r\n        float: none;\r\n        text-align: center;\r\n        margin-right: 0px !important;\r\n        font-size: 14px !important;\r\n    }\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n\r\n    .modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n\r\n    .modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n        /* Adjusts for spacing */\r\n    }\r\n\r\n    .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n\r\n    .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_numpad .btn {\r\n    margin-bottom: 10px !important;\r\n    margin-right: 5px !important;\r\n    }\r\n\r\n\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_me\"></span></p>\r\n                                    <p><span class=\"id_me_under\"></span></p>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-2 text-center mt10\">\r\n                                <span class=\"id_timer\"></span>\r\n                                <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                            </div>\r\n                            <div class=\"col-sm-1 mt10\">\r\n                                <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                            </div>\r\n                            <div class=\"col-sm-4 text-center\">\r\n                                    <p><span class=\"id_contact\"> <span></p>\r\n                                    <p><span class=\"id_contact_under\"></span></p>\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
 },{}],165:[function(require,module,exports){
+module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-5 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-7 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
+},{}],166:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var types = require("../../../gateway/dist/lib/types");
@@ -18999,7 +19175,7 @@ exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 exports.urlSafeB64 = bundledData_1.urlSafeB64;
 
-},{"../../../gateway/dist/lib/misc/bundledData":218,"../../../gateway/dist/lib/misc/sipRouting":219,"../../../gateway/dist/lib/types":220}],166:[function(require,module,exports){
+},{"../../../gateway/dist/lib/misc/bundledData":219,"../../../gateway/dist/lib/misc/sipRouting":220,"../../../gateway/dist/lib/types":221}],167:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -19211,7 +19387,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../tools/bootbox_custom":169,"./localApiHandlers":167,"./remoteApiCaller":168,"ts-events-extended":206,"ts-sip":216}],167:[function(require,module,exports){
+},{"../tools/bootbox_custom":170,"./localApiHandlers":168,"./remoteApiCaller":169,"ts-events-extended":207,"ts-sip":215}],168:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -19797,7 +19973,7 @@ exports.iceServers = [
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":175,"../tools/bootbox_custom":169,"./remoteApiCaller":168,"chan-dongle-extended-client/dist/lib/types":177,"ts-events-extended":206}],168:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":176,"../tools/bootbox_custom":170,"./remoteApiCaller":169,"chan-dongle-extended-client/dist/lib/types":178,"ts-events-extended":207}],169:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -20652,7 +20828,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":174,"../types":172,"./connection":166,"phone-number":193,"ts-events-extended":206,"ts-sip":216}],169:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":175,"../types":173,"./connection":167,"phone-number":194,"ts-events-extended":207,"ts-sip":215}],170:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -20760,7 +20936,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":171}],170:[function(require,module,exports){
+},{"./modal_stack":172}],171:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -20774,7 +20950,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],171:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -20893,7 +21069,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],172:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -21108,7 +21284,7 @@ var webphoneData;
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
 
-},{}],173:[function(require,module,exports){
+},{}],174:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -21263,7 +21439,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":176,"transfer-tools/dist/lib/JSON_CUSTOM":197}],174:[function(require,module,exports){
+},{"../web_api_declaration":177,"transfer-tools/dist/lib/JSON_CUSTOM":198}],175:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -21358,7 +21534,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],175:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -21411,7 +21587,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],176:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -21452,7 +21628,7 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],177:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -21473,564 +21649,87 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],178:[function(require,module,exports){
-/*
-
-The MIT License (MIT)
-
-Original Library
-  - Copyright (c) Marak Squires
-
-Additional functionality
- - Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-*/
-
-var colors = {};
-module['exports'] = colors;
-
-colors.themes = {};
-
-var util = require('util');
-var ansiStyles = colors.styles = require('./styles');
-var defineProps = Object.defineProperties;
-var newLineRegex = new RegExp(/[\r\n]+/g);
-
-colors.supportsColor = require('./system/supports-colors').supportsColor;
-
-if (typeof colors.enabled === 'undefined') {
-  colors.enabled = colors.supportsColor() !== false;
-}
-
-colors.enable = function() {
-  colors.enabled = true;
-};
-
-colors.disable = function() {
-  colors.enabled = false;
-};
-
-colors.stripColors = colors.strip = function(str) {
-  return ('' + str).replace(/\x1B\[\d+m/g, '');
-};
-
-// eslint-disable-next-line no-unused-vars
-var stylize = colors.stylize = function stylize(str, style) {
-  if (!colors.enabled) {
-    return str+'';
-  }
-
-  return ansiStyles[style].open + str + ansiStyles[style].close;
-};
-
-var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
-var escapeStringRegexp = function(str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('Expected a string');
-  }
-  return str.replace(matchOperatorsRe, '\\$&');
-};
-
-function build(_styles) {
-  var builder = function builder() {
-    return applyStyle.apply(builder, arguments);
-  };
-  builder._styles = _styles;
-  // __proto__ is used because we must return a function, but there is
-  // no way to create a function with a different prototype.
-  builder.__proto__ = proto;
-  return builder;
-}
-
-var styles = (function() {
-  var ret = {};
-  ansiStyles.grey = ansiStyles.gray;
-  Object.keys(ansiStyles).forEach(function(key) {
-    ansiStyles[key].closeRe =
-      new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
-    ret[key] = {
-      get: function() {
-        return build(this._styles.concat(key));
-      },
-    };
-  });
-  return ret;
-})();
-
-var proto = defineProps(function colors() {}, styles);
-
-function applyStyle() {
-  var args = Array.prototype.slice.call(arguments);
-
-  var str = args.map(function(arg) {
-    if (arg !== undefined && arg.constructor === String) {
-      return arg;
-    } else {
-      return util.inspect(arg);
-    }
-  }).join(' ');
-
-  if (!colors.enabled || !str) {
-    return str;
-  }
-
-  var newLinesPresent = str.indexOf('\n') != -1;
-
-  var nestedStyles = this._styles;
-
-  var i = nestedStyles.length;
-  while (i--) {
-    var code = ansiStyles[nestedStyles[i]];
-    str = code.open + str.replace(code.closeRe, code.open) + code.close;
-    if (newLinesPresent) {
-      str = str.replace(newLineRegex, function(match) {
-        return code.close + match + code.open;
-      });
-    }
-  }
-
-  return str;
-}
-
-colors.setTheme = function(theme) {
-  if (typeof theme === 'string') {
-    console.log('colors.setTheme now only accepts an object, not a string.  ' +
-      'If you are trying to set a theme from a file, it is now your (the ' +
-      'caller\'s) responsibility to require the file.  The old syntax ' +
-      'looked like colors.setTheme(__dirname + ' +
-      '\'/../themes/generic-logging.js\'); The new syntax looks like '+
-      'colors.setTheme(require(__dirname + ' +
-      '\'/../themes/generic-logging.js\'));');
-    return;
-  }
-  for (var style in theme) {
-    (function(style) {
-      colors[style] = function(str) {
-        if (typeof theme[style] === 'object') {
-          var out = str;
-          for (var i in theme[style]) {
-            out = colors[theme[style][i]](out);
-          }
-          return out;
-        }
-        return colors[theme[style]](str);
-      };
-    })(style);
-  }
-};
-
-function init() {
-  var ret = {};
-  Object.keys(styles).forEach(function(name) {
-    ret[name] = {
-      get: function() {
-        return build([name]);
-      },
-    };
-  });
-  return ret;
-}
-
-var sequencer = function sequencer(map, str) {
-  var exploded = str.split('');
-  exploded = exploded.map(map);
-  return exploded.join('');
-};
-
-// custom formatter methods
-colors.trap = require('./custom/trap');
-colors.zalgo = require('./custom/zalgo');
-
-// maps
-colors.maps = {};
-colors.maps.america = require('./maps/america')(colors);
-colors.maps.zebra = require('./maps/zebra')(colors);
-colors.maps.rainbow = require('./maps/rainbow')(colors);
-colors.maps.random = require('./maps/random')(colors);
-
-for (var map in colors.maps) {
-  (function(map) {
-    colors[map] = function(str) {
-      return sequencer(colors.maps[map], str);
-    };
-  })(map);
-}
-
-defineProps(colors, init());
-
-},{"./custom/trap":179,"./custom/zalgo":180,"./maps/america":183,"./maps/rainbow":184,"./maps/random":185,"./maps/zebra":186,"./styles":187,"./system/supports-colors":189,"util":8}],179:[function(require,module,exports){
-module['exports'] = function runTheTrap(text, options) {
-  var result = '';
-  text = text || 'Run the trap, drop the bass';
-  text = text.split('');
-  var trap = {
-    a: ['\u0040', '\u0104', '\u023a', '\u0245', '\u0394', '\u039b', '\u0414'],
-    b: ['\u00df', '\u0181', '\u0243', '\u026e', '\u03b2', '\u0e3f'],
-    c: ['\u00a9', '\u023b', '\u03fe'],
-    d: ['\u00d0', '\u018a', '\u0500', '\u0501', '\u0502', '\u0503'],
-    e: ['\u00cb', '\u0115', '\u018e', '\u0258', '\u03a3', '\u03be', '\u04bc',
-      '\u0a6c'],
-    f: ['\u04fa'],
-    g: ['\u0262'],
-    h: ['\u0126', '\u0195', '\u04a2', '\u04ba', '\u04c7', '\u050a'],
-    i: ['\u0f0f'],
-    j: ['\u0134'],
-    k: ['\u0138', '\u04a0', '\u04c3', '\u051e'],
-    l: ['\u0139'],
-    m: ['\u028d', '\u04cd', '\u04ce', '\u0520', '\u0521', '\u0d69'],
-    n: ['\u00d1', '\u014b', '\u019d', '\u0376', '\u03a0', '\u048a'],
-    o: ['\u00d8', '\u00f5', '\u00f8', '\u01fe', '\u0298', '\u047a', '\u05dd',
-      '\u06dd', '\u0e4f'],
-    p: ['\u01f7', '\u048e'],
-    q: ['\u09cd'],
-    r: ['\u00ae', '\u01a6', '\u0210', '\u024c', '\u0280', '\u042f'],
-    s: ['\u00a7', '\u03de', '\u03df', '\u03e8'],
-    t: ['\u0141', '\u0166', '\u0373'],
-    u: ['\u01b1', '\u054d'],
-    v: ['\u05d8'],
-    w: ['\u0428', '\u0460', '\u047c', '\u0d70'],
-    x: ['\u04b2', '\u04fe', '\u04fc', '\u04fd'],
-    y: ['\u00a5', '\u04b0', '\u04cb'],
-    z: ['\u01b5', '\u0240'],
-  };
-  text.forEach(function(c) {
-    c = c.toLowerCase();
-    var chars = trap[c] || [' '];
-    var rand = Math.floor(Math.random() * chars.length);
-    if (typeof trap[c] !== 'undefined') {
-      result += trap[c][rand];
-    } else {
-      result += c;
-    }
-  });
-  return result;
-};
-
-},{}],180:[function(require,module,exports){
-// please no
-module['exports'] = function zalgo(text, options) {
-  text = text || '   he is here   ';
-  var soul = {
-    'up': [
-      '̍', '̎', '̄', '̅',
-      '̿', '̑', '̆', '̐',
-      '͒', '͗', '͑', '̇',
-      '̈', '̊', '͂', '̓',
-      '̈', '͊', '͋', '͌',
-      '̃', '̂', '̌', '͐',
-      '̀', '́', '̋', '̏',
-      '̒', '̓', '̔', '̽',
-      '̉', 'ͣ', 'ͤ', 'ͥ',
-      'ͦ', 'ͧ', 'ͨ', 'ͩ',
-      'ͪ', 'ͫ', 'ͬ', 'ͭ',
-      'ͮ', 'ͯ', '̾', '͛',
-      '͆', '̚',
-    ],
-    'down': [
-      '̖', '̗', '̘', '̙',
-      '̜', '̝', '̞', '̟',
-      '̠', '̤', '̥', '̦',
-      '̩', '̪', '̫', '̬',
-      '̭', '̮', '̯', '̰',
-      '̱', '̲', '̳', '̹',
-      '̺', '̻', '̼', 'ͅ',
-      '͇', '͈', '͉', '͍',
-      '͎', '͓', '͔', '͕',
-      '͖', '͙', '͚', '̣',
-    ],
-    'mid': [
-      '̕', '̛', '̀', '́',
-      '͘', '̡', '̢', '̧',
-      '̨', '̴', '̵', '̶',
-      '͜', '͝', '͞',
-      '͟', '͠', '͢', '̸',
-      '̷', '͡', ' ҉',
-    ],
-  };
-  var all = [].concat(soul.up, soul.down, soul.mid);
-
-  function randomNumber(range) {
-    var r = Math.floor(Math.random() * range);
-    return r;
-  }
-
-  function isChar(character) {
-    var bool = false;
-    all.filter(function(i) {
-      bool = (i === character);
-    });
-    return bool;
-  }
-
-
-  function heComes(text, options) {
-    var result = '';
-    var counts;
-    var l;
-    options = options || {};
-    options['up'] =
-      typeof options['up'] !== 'undefined' ? options['up'] : true;
-    options['mid'] =
-      typeof options['mid'] !== 'undefined' ? options['mid'] : true;
-    options['down'] =
-      typeof options['down'] !== 'undefined' ? options['down'] : true;
-    options['size'] =
-      typeof options['size'] !== 'undefined' ? options['size'] : 'maxi';
-    text = text.split('');
-    for (l in text) {
-      if (isChar(l)) {
-        continue;
-      }
-      result = result + text[l];
-      counts = {'up': 0, 'down': 0, 'mid': 0};
-      switch (options.size) {
-        case 'mini':
-          counts.up = randomNumber(8);
-          counts.mid = randomNumber(2);
-          counts.down = randomNumber(8);
-          break;
-        case 'maxi':
-          counts.up = randomNumber(16) + 3;
-          counts.mid = randomNumber(4) + 1;
-          counts.down = randomNumber(64) + 3;
-          break;
-        default:
-          counts.up = randomNumber(8) + 1;
-          counts.mid = randomNumber(6) / 2;
-          counts.down = randomNumber(8) + 1;
-          break;
-      }
-
-      var arr = ['up', 'mid', 'down'];
-      for (var d in arr) {
-        var index = arr[d];
-        for (var i = 0; i <= counts[index]; i++) {
-          if (options[index]) {
-            result = result + soul[index][randomNumber(soul[index].length)];
-          }
-        }
-      }
-    }
-    return result;
-  }
-  // don't summon him
-  return heComes(text, options);
-};
-
-
-},{}],181:[function(require,module,exports){
-var colors = require('./colors');
-
-module['exports'] = function() {
-  //
-  // Extends prototype of native string object to allow for "foo".red syntax
-  //
-  var addProperty = function(color, func) {
-    String.prototype.__defineGetter__(color, func);
-  };
-
-  addProperty('strip', function() {
-    return colors.strip(this);
-  });
-
-  addProperty('stripColors', function() {
-    return colors.strip(this);
-  });
-
-  addProperty('trap', function() {
-    return colors.trap(this);
-  });
-
-  addProperty('zalgo', function() {
-    return colors.zalgo(this);
-  });
-
-  addProperty('zebra', function() {
-    return colors.zebra(this);
-  });
-
-  addProperty('rainbow', function() {
-    return colors.rainbow(this);
-  });
-
-  addProperty('random', function() {
-    return colors.random(this);
-  });
-
-  addProperty('america', function() {
-    return colors.america(this);
-  });
-
-  //
-  // Iterate through all default styles and colors
-  //
-  var x = Object.keys(colors.styles);
-  x.forEach(function(style) {
-    addProperty(style, function() {
-      return colors.stylize(this, style);
-    });
-  });
-
-  function applyTheme(theme) {
-    //
-    // Remark: This is a list of methods that exist
-    // on String that you should not overwrite.
-    //
-    var stringPrototypeBlacklist = [
-      '__defineGetter__', '__defineSetter__', '__lookupGetter__',
-      '__lookupSetter__', 'charAt', 'constructor', 'hasOwnProperty',
-      'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString',
-      'valueOf', 'charCodeAt', 'indexOf', 'lastIndexOf', 'length',
-      'localeCompare', 'match', 'repeat', 'replace', 'search', 'slice',
-      'split', 'substring', 'toLocaleLowerCase', 'toLocaleUpperCase',
-      'toLowerCase', 'toUpperCase', 'trim', 'trimLeft', 'trimRight',
-    ];
-
-    Object.keys(theme).forEach(function(prop) {
-      if (stringPrototypeBlacklist.indexOf(prop) !== -1) {
-        console.log('warn: '.red + ('String.prototype' + prop).magenta +
-          ' is probably something you don\'t want to override.  ' +
-          'Ignoring style name');
-      } else {
-        if (typeof(theme[prop]) === 'string') {
-          colors[prop] = colors[theme[prop]];
-          addProperty(prop, function() {
-            return colors[prop](this);
-          });
-        } else {
-          var themePropApplicator = function(str) {
-            var ret = str || this;
-            for (var t = 0; t < theme[prop].length; t++) {
-              ret = colors[theme[prop][t]](ret);
-            }
-            return ret;
-          };
-          addProperty(prop, themePropApplicator);
-          colors[prop] = function(str) {
-            return themePropApplicator(str);
-          };
-        }
-      }
-    });
-  }
-
-  colors.setTheme = function(theme) {
-    if (typeof theme === 'string') {
-      console.log('colors.setTheme now only accepts an object, not a string. ' +
-        'If you are trying to set a theme from a file, it is now your (the ' +
-        'caller\'s) responsibility to require the file.  The old syntax ' +
-        'looked like colors.setTheme(__dirname + ' +
-        '\'/../themes/generic-logging.js\'); The new syntax looks like '+
-        'colors.setTheme(require(__dirname + ' +
-        '\'/../themes/generic-logging.js\'));');
-      return;
-    } else {
-      applyTheme(theme);
-    }
-  };
-};
-
-},{"./colors":178}],182:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"./custom/trap":180,"./custom/zalgo":181,"./maps/america":184,"./maps/rainbow":185,"./maps/random":186,"./maps/zebra":187,"./styles":188,"./system/supports-colors":190,"dup":21,"util":8}],180:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"dup":22}],181:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23}],182:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./colors":179,"dup":24}],183:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"./colors":178,"./extendStringPrototype":181,"dup":25}],183:[function(require,module,exports){
+},{"./colors":179,"./extendStringPrototype":182,"dup":25}],184:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],184:[function(require,module,exports){
+},{"dup":26}],185:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],185:[function(require,module,exports){
-module['exports'] = function(colors) {
-  var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
-    'blue', 'white', 'cyan', 'magenta'];
-  return function(letter, i, exploded) {
-    return letter === ' ' ? letter :
-      colors[
-          available[Math.round(Math.random() * (available.length - 2))]
-      ](letter);
-  };
-};
-
-},{}],186:[function(require,module,exports){
+},{"dup":27}],186:[function(require,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"dup":28}],187:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],187:[function(require,module,exports){
+},{"dup":29}],188:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],188:[function(require,module,exports){
+},{"dup":30}],189:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"_process":6,"dup":31}],189:[function(require,module,exports){
+},{"_process":6,"dup":31}],190:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"./has-flag.js":188,"_process":6,"dup":32,"os":5}],190:[function(require,module,exports){
+},{"./has-flag.js":189,"_process":6,"dup":32,"os":5}],191:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"dup":120}],191:[function(require,module,exports){
+},{"dup":120}],192:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"./implementation":190,"dup":121}],192:[function(require,module,exports){
+},{"./implementation":191,"dup":121}],193:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"dup":124,"function-bind":191}],193:[function(require,module,exports){
-arguments[4][133][0].apply(exports,arguments)
-},{"_process":6,"dup":133}],194:[function(require,module,exports){
+},{"dup":124,"function-bind":192}],194:[function(require,module,exports){
 arguments[4][134][0].apply(exports,arguments)
-},{"dup":134}],195:[function(require,module,exports){
+},{"_process":6,"dup":134}],195:[function(require,module,exports){
 arguments[4][135][0].apply(exports,arguments)
 },{"dup":135}],196:[function(require,module,exports){
 arguments[4][136][0].apply(exports,arguments)
-},{"dup":136,"has":192}],197:[function(require,module,exports){
+},{"dup":136}],197:[function(require,module,exports){
 arguments[4][137][0].apply(exports,arguments)
-},{"dup":137,"super-json":196}],198:[function(require,module,exports){
+},{"dup":137,"has":193}],198:[function(require,module,exports){
 arguments[4][138][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":197,"./stringTransform":199,"./stringTransformExt":200,"./testing":201,"dup":138}],199:[function(require,module,exports){
+},{"dup":138,"super-json":197}],199:[function(require,module,exports){
 arguments[4][139][0].apply(exports,arguments)
-},{"buffer":2,"dup":139}],200:[function(require,module,exports){
+},{"./JSON_CUSTOM":198,"./stringTransform":200,"./stringTransformExt":201,"./testing":202,"dup":139}],200:[function(require,module,exports){
 arguments[4][140][0].apply(exports,arguments)
-},{"./stringTransform":199,"dup":140}],201:[function(require,module,exports){
+},{"buffer":2,"dup":140}],201:[function(require,module,exports){
 arguments[4][141][0].apply(exports,arguments)
-},{"./stringTransform":199,"dup":141}],202:[function(require,module,exports){
+},{"./stringTransform":200,"dup":141}],202:[function(require,module,exports){
 arguments[4][142][0].apply(exports,arguments)
-},{"./SyncEventBase":203,"dup":142}],203:[function(require,module,exports){
+},{"./stringTransform":200,"dup":142}],203:[function(require,module,exports){
 arguments[4][143][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":204,"dup":143}],204:[function(require,module,exports){
+},{"./SyncEventBase":204,"dup":143}],204:[function(require,module,exports){
 arguments[4][144][0].apply(exports,arguments)
-},{"./defs":205,"dup":144,"run-exclusive":194}],205:[function(require,module,exports){
+},{"./SyncEventBaseProtected":205,"dup":144}],205:[function(require,module,exports){
 arguments[4][145][0].apply(exports,arguments)
-},{"dup":145,"setprototypeof":195}],206:[function(require,module,exports){
+},{"./defs":206,"dup":145,"run-exclusive":195}],206:[function(require,module,exports){
 arguments[4][146][0].apply(exports,arguments)
-},{"./SyncEvent":202,"./defs":205,"dup":146}],207:[function(require,module,exports){
+},{"dup":146,"setprototypeof":196}],207:[function(require,module,exports){
 arguments[4][147][0].apply(exports,arguments)
-},{"buffer":2,"dup":147,"ts-events-extended":206}],208:[function(require,module,exports){
+},{"./SyncEvent":203,"./defs":206,"dup":147}],208:[function(require,module,exports){
 arguments[4][148][0].apply(exports,arguments)
-},{"./IConnection":207,"./api/ApiMessage":209,"./core":213,"./misc":217,"colors":182,"dup":148,"ts-events-extended":206}],209:[function(require,module,exports){
+},{"buffer":2,"dup":148,"ts-events-extended":207}],209:[function(require,module,exports){
 arguments[4][149][0].apply(exports,arguments)
-},{"../core":213,"../misc":217,"buffer":2,"dup":149,"transfer-tools":198}],210:[function(require,module,exports){
+},{"./IConnection":208,"./api/ApiMessage":210,"./core":214,"./misc":218,"colors":183,"dup":149,"ts-events-extended":207}],210:[function(require,module,exports){
 arguments[4][150][0].apply(exports,arguments)
-},{"../misc":217,"./ApiMessage":209,"colors":182,"dup":150,"util":8}],211:[function(require,module,exports){
+},{"../core":214,"../misc":218,"buffer":2,"dup":150,"transfer-tools":199}],211:[function(require,module,exports){
 arguments[4][151][0].apply(exports,arguments)
-},{"../misc":217,"./ApiMessage":209,"dup":151,"setprototypeof":195}],212:[function(require,module,exports){
+},{"../misc":218,"./ApiMessage":210,"colors":183,"dup":151,"util":8}],212:[function(require,module,exports){
 arguments[4][152][0].apply(exports,arguments)
-},{"./Server":210,"./client":211,"dup":152}],213:[function(require,module,exports){
+},{"../misc":218,"./ApiMessage":210,"dup":152,"setprototypeof":196}],213:[function(require,module,exports){
 arguments[4][153][0].apply(exports,arguments)
-},{"./core/sdp":214,"./core/sip":215,"buffer":2,"dup":153,"setprototypeof":195}],214:[function(require,module,exports){
+},{"./Server":211,"./client":212,"dup":153}],214:[function(require,module,exports){
 arguments[4][154][0].apply(exports,arguments)
-},{"dup":154}],215:[function(require,module,exports){
+},{"./legacy/sdp":216,"./legacy/sip":217,"buffer":2,"dup":154,"setprototypeof":196}],215:[function(require,module,exports){
 arguments[4][155][0].apply(exports,arguments)
-},{"dup":155}],216:[function(require,module,exports){
+},{"./Socket":209,"./api":213,"./core":214,"./misc":218,"dup":155}],216:[function(require,module,exports){
 arguments[4][156][0].apply(exports,arguments)
-},{"./Socket":208,"./api":212,"./core":213,"./misc":217,"dup":156}],217:[function(require,module,exports){
+},{"dup":156}],217:[function(require,module,exports){
 arguments[4][157][0].apply(exports,arguments)
-},{"./core":213,"buffer":2,"dup":157}],218:[function(require,module,exports){
+},{"dup":157}],218:[function(require,module,exports){
+arguments[4][158][0].apply(exports,arguments)
+},{"./core":214,"buffer":2,"dup":158}],219:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -22097,7 +21796,7 @@ function extractBundledDataFromHeaders(headers) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"transfer-tools/dist/lib/stringTransform":241}],219:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":242}],220:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 var __read = (this && this.__read) || function (o, n) {
@@ -22182,86 +21881,86 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"transfer-tools/dist/lib/stringTransform":241,"ts-sip":258}],220:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":242,"ts-sip":257}],221:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],221:[function(require,module,exports){
-arguments[4][178][0].apply(exports,arguments)
-},{"./custom/trap":222,"./custom/zalgo":223,"./maps/america":226,"./maps/rainbow":227,"./maps/random":228,"./maps/zebra":229,"./styles":230,"./system/supports-colors":232,"dup":178,"util":8}],222:[function(require,module,exports){
-arguments[4][179][0].apply(exports,arguments)
-},{"dup":179}],223:[function(require,module,exports){
-arguments[4][180][0].apply(exports,arguments)
-},{"dup":180}],224:[function(require,module,exports){
-arguments[4][181][0].apply(exports,arguments)
-},{"./colors":221,"dup":181}],225:[function(require,module,exports){
+},{}],222:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"./custom/trap":223,"./custom/zalgo":224,"./maps/america":227,"./maps/rainbow":228,"./maps/random":229,"./maps/zebra":230,"./styles":231,"./system/supports-colors":233,"dup":21,"util":8}],223:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"dup":22}],224:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23}],225:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./colors":222,"dup":24}],226:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"./colors":221,"./extendStringPrototype":224,"dup":25}],226:[function(require,module,exports){
+},{"./colors":222,"./extendStringPrototype":225,"dup":25}],227:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],227:[function(require,module,exports){
+},{"dup":26}],228:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],228:[function(require,module,exports){
-arguments[4][185][0].apply(exports,arguments)
-},{"dup":185}],229:[function(require,module,exports){
+},{"dup":27}],229:[function(require,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"dup":28}],230:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],230:[function(require,module,exports){
+},{"dup":29}],231:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],231:[function(require,module,exports){
+},{"dup":30}],232:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"_process":6,"dup":31}],232:[function(require,module,exports){
+},{"_process":6,"dup":31}],233:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"./has-flag.js":231,"_process":6,"dup":32,"os":5}],233:[function(require,module,exports){
+},{"./has-flag.js":232,"_process":6,"dup":32,"os":5}],234:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"dup":120}],234:[function(require,module,exports){
+},{"dup":120}],235:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"./implementation":233,"dup":121}],235:[function(require,module,exports){
+},{"./implementation":234,"dup":121}],236:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"dup":124,"function-bind":234}],236:[function(require,module,exports){
-arguments[4][134][0].apply(exports,arguments)
-},{"dup":134}],237:[function(require,module,exports){
+},{"dup":124,"function-bind":235}],237:[function(require,module,exports){
 arguments[4][135][0].apply(exports,arguments)
 },{"dup":135}],238:[function(require,module,exports){
 arguments[4][136][0].apply(exports,arguments)
-},{"dup":136,"has":235}],239:[function(require,module,exports){
+},{"dup":136}],239:[function(require,module,exports){
 arguments[4][137][0].apply(exports,arguments)
-},{"dup":137,"super-json":238}],240:[function(require,module,exports){
+},{"dup":137,"has":236}],240:[function(require,module,exports){
 arguments[4][138][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":239,"./stringTransform":241,"./stringTransformExt":242,"./testing":243,"dup":138}],241:[function(require,module,exports){
+},{"dup":138,"super-json":239}],241:[function(require,module,exports){
 arguments[4][139][0].apply(exports,arguments)
-},{"buffer":2,"dup":139}],242:[function(require,module,exports){
+},{"./JSON_CUSTOM":240,"./stringTransform":242,"./stringTransformExt":243,"./testing":244,"dup":139}],242:[function(require,module,exports){
 arguments[4][140][0].apply(exports,arguments)
-},{"./stringTransform":241,"dup":140}],243:[function(require,module,exports){
+},{"buffer":2,"dup":140}],243:[function(require,module,exports){
 arguments[4][141][0].apply(exports,arguments)
-},{"./stringTransform":241,"dup":141}],244:[function(require,module,exports){
+},{"./stringTransform":242,"dup":141}],244:[function(require,module,exports){
 arguments[4][142][0].apply(exports,arguments)
-},{"./SyncEventBase":245,"dup":142}],245:[function(require,module,exports){
+},{"./stringTransform":242,"dup":142}],245:[function(require,module,exports){
 arguments[4][143][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":246,"dup":143}],246:[function(require,module,exports){
+},{"./SyncEventBase":246,"dup":143}],246:[function(require,module,exports){
 arguments[4][144][0].apply(exports,arguments)
-},{"./defs":247,"dup":144,"run-exclusive":236}],247:[function(require,module,exports){
+},{"./SyncEventBaseProtected":247,"dup":144}],247:[function(require,module,exports){
 arguments[4][145][0].apply(exports,arguments)
-},{"dup":145,"setprototypeof":237}],248:[function(require,module,exports){
+},{"./defs":248,"dup":145,"run-exclusive":237}],248:[function(require,module,exports){
 arguments[4][146][0].apply(exports,arguments)
-},{"./SyncEvent":244,"./defs":247,"dup":146}],249:[function(require,module,exports){
+},{"dup":146,"setprototypeof":238}],249:[function(require,module,exports){
 arguments[4][147][0].apply(exports,arguments)
-},{"buffer":2,"dup":147,"ts-events-extended":248}],250:[function(require,module,exports){
+},{"./SyncEvent":245,"./defs":248,"dup":147}],250:[function(require,module,exports){
 arguments[4][148][0].apply(exports,arguments)
-},{"./IConnection":249,"./api/ApiMessage":251,"./core":255,"./misc":259,"colors":225,"dup":148,"ts-events-extended":248}],251:[function(require,module,exports){
+},{"buffer":2,"dup":148,"ts-events-extended":249}],251:[function(require,module,exports){
 arguments[4][149][0].apply(exports,arguments)
-},{"../core":255,"../misc":259,"buffer":2,"dup":149,"transfer-tools":240}],252:[function(require,module,exports){
+},{"./IConnection":250,"./api/ApiMessage":252,"./core":256,"./misc":260,"colors":226,"dup":149,"ts-events-extended":249}],252:[function(require,module,exports){
 arguments[4][150][0].apply(exports,arguments)
-},{"../misc":259,"./ApiMessage":251,"colors":225,"dup":150,"util":8}],253:[function(require,module,exports){
+},{"../core":256,"../misc":260,"buffer":2,"dup":150,"transfer-tools":241}],253:[function(require,module,exports){
 arguments[4][151][0].apply(exports,arguments)
-},{"../misc":259,"./ApiMessage":251,"dup":151,"setprototypeof":237}],254:[function(require,module,exports){
+},{"../misc":260,"./ApiMessage":252,"colors":226,"dup":151,"util":8}],254:[function(require,module,exports){
 arguments[4][152][0].apply(exports,arguments)
-},{"./Server":252,"./client":253,"dup":152}],255:[function(require,module,exports){
+},{"../misc":260,"./ApiMessage":252,"dup":152,"setprototypeof":238}],255:[function(require,module,exports){
 arguments[4][153][0].apply(exports,arguments)
-},{"./core/sdp":256,"./core/sip":257,"buffer":2,"dup":153,"setprototypeof":237}],256:[function(require,module,exports){
+},{"./Server":253,"./client":254,"dup":153}],256:[function(require,module,exports){
 arguments[4][154][0].apply(exports,arguments)
-},{"dup":154}],257:[function(require,module,exports){
+},{"./legacy/sdp":258,"./legacy/sip":259,"buffer":2,"dup":154,"setprototypeof":238}],257:[function(require,module,exports){
 arguments[4][155][0].apply(exports,arguments)
-},{"dup":155}],258:[function(require,module,exports){
+},{"./Socket":251,"./api":255,"./core":256,"./misc":260,"dup":155}],258:[function(require,module,exports){
 arguments[4][156][0].apply(exports,arguments)
-},{"./Socket":250,"./api":254,"./core":255,"./misc":259,"dup":156}],259:[function(require,module,exports){
+},{"dup":156}],259:[function(require,module,exports){
 arguments[4][157][0].apply(exports,arguments)
-},{"./core":255,"buffer":2,"dup":157}]},{},[16]);
+},{"dup":157}],260:[function(require,module,exports){
+arguments[4][158][0].apply(exports,arguments)
+},{"./core":256,"buffer":2,"dup":158}]},{},[16]);

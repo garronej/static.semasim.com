@@ -152,6 +152,7 @@ function fromByteArray (uint8) {
 }
 
 },{}],2:[function(require,module,exports){
+(function (Buffer){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1930,7 +1931,8 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":1,"ieee754":3}],3:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"base64-js":1,"buffer":2,"ieee754":3}],3:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -2234,7 +2236,7 @@ var UiController = /** @class */ (function () {
 exports.UiController = UiController;
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/currencyByCountry":129,"../../../shared/dist/lib/tools/bootbox_custom":130,"../../../shared/dist/lib/tools/getURLParameter":131,"../../../shared/dist/lib/tools/loadUiClassHtml":132,"../../../shared/dist/lib/webApiCaller":134,"../templates/UiController.html":120,"../templates/UiController.less":121,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"buffer":2,"ts-events-extended":119}],5:[function(require,module,exports){
+},{"../../../shared/dist/lib/currencyByCountry":131,"../../../shared/dist/lib/tools/bootbox_custom":132,"../../../shared/dist/lib/tools/getURLParameter":133,"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../../../shared/dist/lib/webApiCaller":136,"../templates/UiController.html":122,"../templates/UiController.less":123,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"buffer":2,"ts-events-extended":121}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -2247,7 +2249,7 @@ var UiDownloadButtons = /** @class */ (function () {
 }());
 exports.UiDownloadButtons = UiDownloadButtons;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":132,"../templates/UiDownloadButtons.html":122}],6:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiDownloadButtons.html":124}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -2286,7 +2288,7 @@ var UiMySubscription = /** @class */ (function () {
 }());
 exports.UiMySubscription = UiMySubscription;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":132,"../templates/UiMySubscription.html":123,"../templates/UiMySubscription.less":124,"moment":111,"ts-events-extended":119}],7:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiMySubscription.html":125,"../templates/UiMySubscription.less":126,"moment":111,"ts-events-extended":121}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -2301,7 +2303,7 @@ var UiNegativeBalanceWarning = /** @class */ (function () {
 }());
 exports.UiNegativeBalanceWarning = UiNegativeBalanceWarning;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":132,"../templates/UiNegativeBalanceWarning.html":125}],8:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiNegativeBalanceWarning.html":127}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -2323,7 +2325,7 @@ var UiPaymentMethod = /** @class */ (function () {
 }());
 exports.UiPaymentMethod = UiPaymentMethod;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":132,"../templates/UiPaymentMethod.html":126,"../templates/UiPaymentMethod.less":127,"ts-events-extended":119}],9:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiPaymentMethod.html":128,"../templates/UiPaymentMethod.less":129,"ts-events-extended":121}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
@@ -2342,7 +2344,7 @@ var UiSubscribe = /** @class */ (function () {
 }());
 exports.UiSubscribe = UiSubscribe;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":132,"../templates/UiSubscribe.html":128,"ts-events-extended":119}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiSubscribe.html":130,"ts-events-extended":121}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2414,7 +2416,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":130,"../../../shared/dist/lib/webApiCaller":134,"./UiController":4,"array.prototype.find":12,"es6-map/implement":85,"es6-weak-map/implement":96}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":132,"../../../shared/dist/lib/webApiCaller":136,"./UiController":4,"array.prototype.find":12,"es6-map/implement":85,"es6-weak-map/implement":96}],11:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -2697,7 +2699,7 @@ defineProperties.supportsDescriptors = !!supportsDescriptors;
 
 module.exports = defineProperties;
 
-},{"object-keys":112}],19:[function(require,module,exports){
+},{"object-keys":113}],19:[function(require,module,exports){
 'use strict';
 
 /* globals
@@ -3668,7 +3670,7 @@ delete ES6.CheckObjectCoercible; // renamed in ES6 to RequireObjectCoercible
 
 module.exports = ES6;
 
-},{"./GetIntrinsic":19,"./es5":21,"./helpers/assertRecord":23,"./helpers/assign":24,"./helpers/isFinite":25,"./helpers/isNaN":26,"./helpers/isPrimitive":27,"./helpers/mod":28,"./helpers/sign":29,"es-to-primitive/es6":32,"function-bind":102,"has":105,"is-regex":108,"object-keys":112}],21:[function(require,module,exports){
+},{"./GetIntrinsic":19,"./es5":21,"./helpers/assertRecord":23,"./helpers/assign":24,"./helpers/isFinite":25,"./helpers/isNaN":26,"./helpers/isPrimitive":27,"./helpers/mod":28,"./helpers/sign":29,"es-to-primitive/es6":32,"function-bind":102,"has":105,"is-regex":108,"object-keys":113}],21:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('./GetIntrinsic');
@@ -7182,22 +7184,36 @@ module.exports = require('cssify');
     function createDate (y, m, d, h, M, s, ms) {
         // can't just apply() to create a date:
         // https://stackoverflow.com/q/181348
-        var date = new Date(y, m, d, h, M, s, ms);
-
+        var date;
         // the date constructor remaps years 0-99 to 1900-1999
-        if (y < 100 && y >= 0 && isFinite(date.getFullYear())) {
-            date.setFullYear(y);
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            date = new Date(y + 400, m, d, h, M, s, ms);
+            if (isFinite(date.getFullYear())) {
+                date.setFullYear(y);
+            }
+        } else {
+            date = new Date(y, m, d, h, M, s, ms);
         }
+
         return date;
     }
 
     function createUTCDate (y) {
-        var date = new Date(Date.UTC.apply(null, arguments));
-
+        var date;
         // the Date.UTC function remaps years 0-99 to 1900-1999
-        if (y < 100 && y >= 0 && isFinite(date.getUTCFullYear())) {
-            date.setUTCFullYear(y);
+        if (y < 100 && y >= 0) {
+            var args = Array.prototype.slice.call(arguments);
+            // preserve leap years using a full 400 year cycle, then reset
+            args[0] = y + 400;
+            date = new Date(Date.UTC.apply(null, args));
+            if (isFinite(date.getUTCFullYear())) {
+                date.setUTCFullYear(y);
+            }
+        } else {
+            date = new Date(Date.UTC.apply(null, arguments));
         }
+
         return date;
     }
 
@@ -7299,7 +7315,7 @@ module.exports = require('cssify');
 
     var defaultLocaleWeek = {
         dow : 0, // Sunday is the first day of the week.
-        doy : 6  // The week that contains Jan 1st is the first week of the year.
+        doy : 6  // The week that contains Jan 6th is the first week of the year.
     };
 
     function localeFirstDayOfWeek () {
@@ -7408,25 +7424,28 @@ module.exports = require('cssify');
     }
 
     // LOCALES
+    function shiftWeekdays (ws, n) {
+        return ws.slice(n, 7).concat(ws.slice(0, n));
+    }
 
     var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_');
     function localeWeekdays (m, format) {
-        if (!m) {
-            return isArray(this._weekdays) ? this._weekdays :
-                this._weekdays['standalone'];
-        }
-        return isArray(this._weekdays) ? this._weekdays[m.day()] :
-            this._weekdays[this._weekdays.isFormat.test(format) ? 'format' : 'standalone'][m.day()];
+        var weekdays = isArray(this._weekdays) ? this._weekdays :
+            this._weekdays[(m && m !== true && this._weekdays.isFormat.test(format)) ? 'format' : 'standalone'];
+        return (m === true) ? shiftWeekdays(weekdays, this._week.dow)
+            : (m) ? weekdays[m.day()] : weekdays;
     }
 
     var defaultLocaleWeekdaysShort = 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_');
     function localeWeekdaysShort (m) {
-        return (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
+        return (m === true) ? shiftWeekdays(this._weekdaysShort, this._week.dow)
+            : (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
     }
 
     var defaultLocaleWeekdaysMin = 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_');
     function localeWeekdaysMin (m) {
-        return (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
+        return (m === true) ? shiftWeekdays(this._weekdaysMin, this._week.dow)
+            : (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
     }
 
     function handleStrictParse$1(weekdayName, format, strict) {
@@ -8175,13 +8194,13 @@ module.exports = require('cssify');
                     weekdayOverflow = true;
                 }
             } else if (w.e != null) {
-                // local weekday -- counting starts from begining of week
+                // local weekday -- counting starts from beginning of week
                 weekday = w.e + dow;
                 if (w.e < 0 || w.e > 6) {
                     weekdayOverflow = true;
                 }
             } else {
-                // default to begining of week
+                // default to beginning of week
                 weekday = dow;
             }
         }
@@ -8775,7 +8794,7 @@ module.exports = require('cssify');
             years = normalizedInput.year || 0,
             quarters = normalizedInput.quarter || 0,
             months = normalizedInput.month || 0,
-            weeks = normalizedInput.week || 0,
+            weeks = normalizedInput.week || normalizedInput.isoWeek || 0,
             days = normalizedInput.day || 0,
             hours = normalizedInput.hour || 0,
             minutes = normalizedInput.minute || 0,
@@ -9079,7 +9098,7 @@ module.exports = require('cssify');
                 ms : toInt(absRound(match[MILLISECOND] * 1000)) * sign // the millisecond decimal point is included in the match
             };
         } else if (!!(match = isoRegex.exec(input))) {
-            sign = (match[1] === '-') ? -1 : (match[1] === '+') ? 1 : 1;
+            sign = (match[1] === '-') ? -1 : 1;
             duration = {
                 y : parseIso(match[2], sign),
                 M : parseIso(match[3], sign),
@@ -9121,7 +9140,7 @@ module.exports = require('cssify');
     }
 
     function positiveMomentsDifference(base, other) {
-        var res = {milliseconds: 0, months: 0};
+        var res = {};
 
         res.months = other.month() - base.month() +
             (other.year() - base.year()) * 12;
@@ -9230,7 +9249,7 @@ module.exports = require('cssify');
         if (!(this.isValid() && localInput.isValid())) {
             return false;
         }
-        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
+        units = normalizeUnits(units) || 'millisecond';
         if (units === 'millisecond') {
             return this.valueOf() > localInput.valueOf();
         } else {
@@ -9243,7 +9262,7 @@ module.exports = require('cssify');
         if (!(this.isValid() && localInput.isValid())) {
             return false;
         }
-        units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
+        units = normalizeUnits(units) || 'millisecond';
         if (units === 'millisecond') {
             return this.valueOf() < localInput.valueOf();
         } else {
@@ -9252,9 +9271,14 @@ module.exports = require('cssify');
     }
 
     function isBetween (from, to, units, inclusivity) {
+        var localFrom = isMoment(from) ? from : createLocal(from),
+            localTo = isMoment(to) ? to : createLocal(to);
+        if (!(this.isValid() && localFrom.isValid() && localTo.isValid())) {
+            return false;
+        }
         inclusivity = inclusivity || '()';
-        return (inclusivity[0] === '(' ? this.isAfter(from, units) : !this.isBefore(from, units)) &&
-            (inclusivity[1] === ')' ? this.isBefore(to, units) : !this.isAfter(to, units));
+        return (inclusivity[0] === '(' ? this.isAfter(localFrom, units) : !this.isBefore(localFrom, units)) &&
+            (inclusivity[1] === ')' ? this.isBefore(localTo, units) : !this.isAfter(localTo, units));
     }
 
     function isSame (input, units) {
@@ -9263,7 +9287,7 @@ module.exports = require('cssify');
         if (!(this.isValid() && localInput.isValid())) {
             return false;
         }
-        units = normalizeUnits(units || 'millisecond');
+        units = normalizeUnits(units) || 'millisecond';
         if (units === 'millisecond') {
             return this.valueOf() === localInput.valueOf();
         } else {
@@ -9273,11 +9297,11 @@ module.exports = require('cssify');
     }
 
     function isSameOrAfter (input, units) {
-        return this.isSame(input, units) || this.isAfter(input,units);
+        return this.isSame(input, units) || this.isAfter(input, units);
     }
 
     function isSameOrBefore (input, units) {
-        return this.isSame(input, units) || this.isBefore(input,units);
+        return this.isSame(input, units) || this.isBefore(input, units);
     }
 
     function diff (input, units, asFloat) {
@@ -9454,62 +9478,130 @@ module.exports = require('cssify');
         return this._locale;
     }
 
+    var MS_PER_SECOND = 1000;
+    var MS_PER_MINUTE = 60 * MS_PER_SECOND;
+    var MS_PER_HOUR = 60 * MS_PER_MINUTE;
+    var MS_PER_400_YEARS = (365 * 400 + 97) * 24 * MS_PER_HOUR;
+
+    // actual modulo - handles negative numbers (for dates before 1970):
+    function mod$1(dividend, divisor) {
+        return (dividend % divisor + divisor) % divisor;
+    }
+
+    function localStartOfDate(y, m, d) {
+        // the date constructor remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            return new Date(y + 400, m, d) - MS_PER_400_YEARS;
+        } else {
+            return new Date(y, m, d).valueOf();
+        }
+    }
+
+    function utcStartOfDate(y, m, d) {
+        // Date.UTC remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            return Date.UTC(y + 400, m, d) - MS_PER_400_YEARS;
+        } else {
+            return Date.UTC(y, m, d);
+        }
+    }
+
     function startOf (units) {
+        var time;
         units = normalizeUnits(units);
-        // the following switch intentionally omits break keywords
-        // to utilize falling through the cases.
+        if (units === undefined || units === 'millisecond' || !this.isValid()) {
+            return this;
+        }
+
+        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
         switch (units) {
             case 'year':
-                this.month(0);
-                /* falls through */
+                time = startOfDate(this.year(), 0, 1);
+                break;
             case 'quarter':
+                time = startOfDate(this.year(), this.month() - this.month() % 3, 1);
+                break;
             case 'month':
-                this.date(1);
-                /* falls through */
+                time = startOfDate(this.year(), this.month(), 1);
+                break;
             case 'week':
+                time = startOfDate(this.year(), this.month(), this.date() - this.weekday());
+                break;
             case 'isoWeek':
+                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1));
+                break;
             case 'day':
             case 'date':
-                this.hours(0);
-                /* falls through */
+                time = startOfDate(this.year(), this.month(), this.date());
+                break;
             case 'hour':
-                this.minutes(0);
-                /* falls through */
+                time = this._d.valueOf();
+                time -= mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR);
+                break;
             case 'minute':
-                this.seconds(0);
-                /* falls through */
+                time = this._d.valueOf();
+                time -= mod$1(time, MS_PER_MINUTE);
+                break;
             case 'second':
-                this.milliseconds(0);
+                time = this._d.valueOf();
+                time -= mod$1(time, MS_PER_SECOND);
+                break;
         }
 
-        // weeks are a special case
-        if (units === 'week') {
-            this.weekday(0);
-        }
-        if (units === 'isoWeek') {
-            this.isoWeekday(1);
-        }
-
-        // quarters are also special
-        if (units === 'quarter') {
-            this.month(Math.floor(this.month() / 3) * 3);
-        }
-
+        this._d.setTime(time);
+        hooks.updateOffset(this, true);
         return this;
     }
 
     function endOf (units) {
+        var time;
         units = normalizeUnits(units);
-        if (units === undefined || units === 'millisecond') {
+        if (units === undefined || units === 'millisecond' || !this.isValid()) {
             return this;
         }
 
-        // 'date' is an alias for 'day', so it should be considered as such.
-        if (units === 'date') {
-            units = 'day';
+        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
+        switch (units) {
+            case 'year':
+                time = startOfDate(this.year() + 1, 0, 1) - 1;
+                break;
+            case 'quarter':
+                time = startOfDate(this.year(), this.month() - this.month() % 3 + 3, 1) - 1;
+                break;
+            case 'month':
+                time = startOfDate(this.year(), this.month() + 1, 1) - 1;
+                break;
+            case 'week':
+                time = startOfDate(this.year(), this.month(), this.date() - this.weekday() + 7) - 1;
+                break;
+            case 'isoWeek':
+                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1) + 7) - 1;
+                break;
+            case 'day':
+            case 'date':
+                time = startOfDate(this.year(), this.month(), this.date() + 1) - 1;
+                break;
+            case 'hour':
+                time = this._d.valueOf();
+                time += MS_PER_HOUR - mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR) - 1;
+                break;
+            case 'minute':
+                time = this._d.valueOf();
+                time += MS_PER_MINUTE - mod$1(time, MS_PER_MINUTE) - 1;
+                break;
+            case 'second':
+                time = this._d.valueOf();
+                time += MS_PER_SECOND - mod$1(time, MS_PER_SECOND) - 1;
+                break;
         }
 
-        return this.startOf(units).add(1, (units === 'isoWeek' ? 'week' : units)).subtract(1, 'ms');
+        this._d.setTime(time);
+        hooks.updateOffset(this, true);
+        return this;
     }
 
     function valueOf () {
@@ -10215,10 +10307,14 @@ module.exports = require('cssify');
 
         units = normalizeUnits(units);
 
-        if (units === 'month' || units === 'year') {
-            days   = this._days   + milliseconds / 864e5;
+        if (units === 'month' || units === 'quarter' || units === 'year') {
+            days = this._days + milliseconds / 864e5;
             months = this._months + daysToMonths(days);
-            return units === 'month' ? months : months / 12;
+            switch (units) {
+                case 'month':   return months;
+                case 'quarter': return months / 3;
+                case 'year':    return months / 12;
+            }
         } else {
             // handle milliseconds separately because of floating point math errors (issue #1867)
             days = this._days + Math.round(monthsToDays(this._months));
@@ -10261,6 +10357,7 @@ module.exports = require('cssify');
     var asDays         = makeAs('d');
     var asWeeks        = makeAs('w');
     var asMonths       = makeAs('M');
+    var asQuarters     = makeAs('Q');
     var asYears        = makeAs('y');
 
     function clone$1 () {
@@ -10452,6 +10549,7 @@ module.exports = require('cssify');
     proto$2.asDays         = asDays;
     proto$2.asWeeks        = asWeeks;
     proto$2.asMonths       = asMonths;
+    proto$2.asQuarters     = asQuarters;
     proto$2.asYears        = asYears;
     proto$2.valueOf        = valueOf$1;
     proto$2._bubble        = bubble;
@@ -10496,7 +10594,7 @@ module.exports = require('cssify');
     // Side effect imports
 
 
-    hooks.version = '2.22.2';
+    hooks.version = '2.24.0';
 
     setHookCallback(createLocal);
 
@@ -10537,7 +10635,7 @@ module.exports = require('cssify');
         TIME: 'HH:mm',                                  // <input type="time" />
         TIME_SECONDS: 'HH:mm:ss',                       // <input type="time" step="1" />
         TIME_MS: 'HH:mm:ss.SSS',                        // <input type="time" step="0.001" />
-        WEEK: 'YYYY-[W]WW',                             // <input type="week" />
+        WEEK: 'GGGG-[W]WW',                             // <input type="week" />
         MONTH: 'YYYY-MM'                                // <input type="month" />
     };
 
@@ -10548,136 +10646,149 @@ module.exports = require('cssify');
 },{}],112:[function(require,module,exports){
 'use strict';
 
-// modified from https://github.com/es-shims/es5-shim
-var has = Object.prototype.hasOwnProperty;
-var toStr = Object.prototype.toString;
-var slice = Array.prototype.slice;
-var isArgs = require('./isArguments');
-var isEnumerable = Object.prototype.propertyIsEnumerable;
-var hasDontEnumBug = !isEnumerable.call({ toString: null }, 'toString');
-var hasProtoEnumBug = isEnumerable.call(function () {}, 'prototype');
-var dontEnums = [
-	'toString',
-	'toLocaleString',
-	'valueOf',
-	'hasOwnProperty',
-	'isPrototypeOf',
-	'propertyIsEnumerable',
-	'constructor'
-];
-var equalsConstructorPrototype = function (o) {
-	var ctor = o.constructor;
-	return ctor && ctor.prototype === o;
-};
-var excludedKeys = {
-	$applicationCache: true,
-	$console: true,
-	$external: true,
-	$frame: true,
-	$frameElement: true,
-	$frames: true,
-	$innerHeight: true,
-	$innerWidth: true,
-	$outerHeight: true,
-	$outerWidth: true,
-	$pageXOffset: true,
-	$pageYOffset: true,
-	$parent: true,
-	$scrollLeft: true,
-	$scrollTop: true,
-	$scrollX: true,
-	$scrollY: true,
-	$self: true,
-	$webkitIndexedDB: true,
-	$webkitStorageInfo: true,
-	$window: true
-};
-var hasAutomationEqualityBug = (function () {
-	/* global window */
-	if (typeof window === 'undefined') { return false; }
-	for (var k in window) {
+var keysShim;
+if (!Object.keys) {
+	// modified from https://github.com/es-shims/es5-shim
+	var has = Object.prototype.hasOwnProperty;
+	var toStr = Object.prototype.toString;
+	var isArgs = require('./isArguments'); // eslint-disable-line global-require
+	var isEnumerable = Object.prototype.propertyIsEnumerable;
+	var hasDontEnumBug = !isEnumerable.call({ toString: null }, 'toString');
+	var hasProtoEnumBug = isEnumerable.call(function () {}, 'prototype');
+	var dontEnums = [
+		'toString',
+		'toLocaleString',
+		'valueOf',
+		'hasOwnProperty',
+		'isPrototypeOf',
+		'propertyIsEnumerable',
+		'constructor'
+	];
+	var equalsConstructorPrototype = function (o) {
+		var ctor = o.constructor;
+		return ctor && ctor.prototype === o;
+	};
+	var excludedKeys = {
+		$applicationCache: true,
+		$console: true,
+		$external: true,
+		$frame: true,
+		$frameElement: true,
+		$frames: true,
+		$innerHeight: true,
+		$innerWidth: true,
+		$outerHeight: true,
+		$outerWidth: true,
+		$pageXOffset: true,
+		$pageYOffset: true,
+		$parent: true,
+		$scrollLeft: true,
+		$scrollTop: true,
+		$scrollX: true,
+		$scrollY: true,
+		$self: true,
+		$webkitIndexedDB: true,
+		$webkitStorageInfo: true,
+		$window: true
+	};
+	var hasAutomationEqualityBug = (function () {
+		/* global window */
+		if (typeof window === 'undefined') { return false; }
+		for (var k in window) {
+			try {
+				if (!excludedKeys['$' + k] && has.call(window, k) && window[k] !== null && typeof window[k] === 'object') {
+					try {
+						equalsConstructorPrototype(window[k]);
+					} catch (e) {
+						return true;
+					}
+				}
+			} catch (e) {
+				return true;
+			}
+		}
+		return false;
+	}());
+	var equalsConstructorPrototypeIfNotBuggy = function (o) {
+		/* global window */
+		if (typeof window === 'undefined' || !hasAutomationEqualityBug) {
+			return equalsConstructorPrototype(o);
+		}
 		try {
-			if (!excludedKeys['$' + k] && has.call(window, k) && window[k] !== null && typeof window[k] === 'object') {
-				try {
-					equalsConstructorPrototype(window[k]);
-				} catch (e) {
-					return true;
+			return equalsConstructorPrototype(o);
+		} catch (e) {
+			return false;
+		}
+	};
+
+	keysShim = function keys(object) {
+		var isObject = object !== null && typeof object === 'object';
+		var isFunction = toStr.call(object) === '[object Function]';
+		var isArguments = isArgs(object);
+		var isString = isObject && toStr.call(object) === '[object String]';
+		var theKeys = [];
+
+		if (!isObject && !isFunction && !isArguments) {
+			throw new TypeError('Object.keys called on a non-object');
+		}
+
+		var skipProto = hasProtoEnumBug && isFunction;
+		if (isString && object.length > 0 && !has.call(object, 0)) {
+			for (var i = 0; i < object.length; ++i) {
+				theKeys.push(String(i));
+			}
+		}
+
+		if (isArguments && object.length > 0) {
+			for (var j = 0; j < object.length; ++j) {
+				theKeys.push(String(j));
+			}
+		} else {
+			for (var name in object) {
+				if (!(skipProto && name === 'prototype') && has.call(object, name)) {
+					theKeys.push(String(name));
 				}
 			}
-		} catch (e) {
-			return true;
 		}
-	}
-	return false;
-}());
-var equalsConstructorPrototypeIfNotBuggy = function (o) {
-	/* global window */
-	if (typeof window === 'undefined' || !hasAutomationEqualityBug) {
-		return equalsConstructorPrototype(o);
-	}
-	try {
-		return equalsConstructorPrototype(o);
-	} catch (e) {
-		return false;
-	}
-};
 
-var keysShim = function keys(object) {
-	var isObject = object !== null && typeof object === 'object';
-	var isFunction = toStr.call(object) === '[object Function]';
-	var isArguments = isArgs(object);
-	var isString = isObject && toStr.call(object) === '[object String]';
-	var theKeys = [];
+		if (hasDontEnumBug) {
+			var skipConstructor = equalsConstructorPrototypeIfNotBuggy(object);
 
-	if (!isObject && !isFunction && !isArguments) {
-		throw new TypeError('Object.keys called on a non-object');
-	}
-
-	var skipProto = hasProtoEnumBug && isFunction;
-	if (isString && object.length > 0 && !has.call(object, 0)) {
-		for (var i = 0; i < object.length; ++i) {
-			theKeys.push(String(i));
-		}
-	}
-
-	if (isArguments && object.length > 0) {
-		for (var j = 0; j < object.length; ++j) {
-			theKeys.push(String(j));
-		}
-	} else {
-		for (var name in object) {
-			if (!(skipProto && name === 'prototype') && has.call(object, name)) {
-				theKeys.push(String(name));
+			for (var k = 0; k < dontEnums.length; ++k) {
+				if (!(skipConstructor && dontEnums[k] === 'constructor') && has.call(object, dontEnums[k])) {
+					theKeys.push(dontEnums[k]);
+				}
 			}
 		}
-	}
+		return theKeys;
+	};
+}
+module.exports = keysShim;
 
-	if (hasDontEnumBug) {
-		var skipConstructor = equalsConstructorPrototypeIfNotBuggy(object);
+},{"./isArguments":114}],113:[function(require,module,exports){
+'use strict';
 
-		for (var k = 0; k < dontEnums.length; ++k) {
-			if (!(skipConstructor && dontEnums[k] === 'constructor') && has.call(object, dontEnums[k])) {
-				theKeys.push(dontEnums[k]);
-			}
-		}
-	}
-	return theKeys;
-};
+var slice = Array.prototype.slice;
+var isArgs = require('./isArguments');
+
+var origKeys = Object.keys;
+var keysShim = origKeys ? function keys(o) { return origKeys(o); } : require('./implementation');
+
+var originalKeys = Object.keys;
 
 keysShim.shim = function shimObjectKeys() {
 	if (Object.keys) {
 		var keysWorksWithArguments = (function () {
 			// Safari 5.0 bug
-			return (Object.keys(arguments) || '').length === 2;
+			var args = Object.keys(arguments);
+			return args && args.length === arguments.length;
 		}(1, 2));
 		if (!keysWorksWithArguments) {
-			var originalKeys = Object.keys;
 			Object.keys = function keys(object) { // eslint-disable-line func-name-matching
 				if (isArgs(object)) {
 					return originalKeys(slice.call(object));
-				} else {
-					return originalKeys(object);
 				}
+				return originalKeys(object);
 			};
 		}
 	} else {
@@ -10688,7 +10799,7 @@ keysShim.shim = function shimObjectKeys() {
 
 module.exports = keysShim;
 
-},{"./isArguments":113}],113:[function(require,module,exports){
+},{"./implementation":112,"./isArguments":114}],114:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -10707,7 +10818,7 @@ module.exports = function isArguments(value) {
 	return isArgs;
 };
 
-},{}],114:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -10999,7 +11110,26 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{}],115:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
+'use strict'
+/* eslint no-proto: 0 */
+module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
+
+function setProtoOf (obj, proto) {
+  obj.__proto__ = proto
+  return obj
+}
+
+function mixinProperties (obj, proto) {
+  for (var prop in proto) {
+    if (!obj.hasOwnProperty(prop)) {
+      obj[prop] = proto[prop]
+    }
+  }
+  return obj
+}
+
+},{}],117:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -11040,7 +11170,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":116}],116:[function(require,module,exports){
+},{"./SyncEventBase":118}],118:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -11258,7 +11388,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":117}],117:[function(require,module,exports){
+},{"./SyncEventBaseProtected":119}],119:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -11543,7 +11673,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":118,"run-exclusive":114}],118:[function(require,module,exports){
+},{"./defs":120,"run-exclusive":115}],120:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -11556,6 +11686,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 exports.__esModule = true;
+var setPrototypeOf = require("setprototypeof");
 var EvtError;
 (function (EvtError) {
     var Timeout = /** @class */ (function (_super) {
@@ -11564,7 +11695,7 @@ var EvtError;
             var _newTarget = this.constructor;
             var _this = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
             _this.timeout = timeout;
-            Object.setPrototypeOf(_this, _newTarget.prototype);
+            setPrototypeOf(_this, _newTarget.prototype);
             return _this;
         }
         return Timeout;
@@ -11575,7 +11706,7 @@ var EvtError;
         function Detached() {
             var _newTarget = this.constructor;
             var _this = _super.call(this, "Evt handler detached") || this;
-            Object.setPrototypeOf(_this, _newTarget.prototype);
+            setPrototypeOf(_this, _newTarget.prototype);
             return _this;
         }
         return Detached;
@@ -11583,7 +11714,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{}],119:[function(require,module,exports){
+},{"setprototypeof":116}],121:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -11592,30 +11723,30 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":115,"./defs":118}],120:[function(require,module,exports){
+},{"./SyncEvent":117,"./defs":120}],122:[function(require,module,exports){
 module.exports = "<div class=\"id_UiController row\">\r\n\r\n    <div class=\"col-lg-9\">\r\n\r\n        <div class=\"id_placeholder_UiNegativeBalanceWarning\">\r\n        </div>\r\n\r\n        <div class=\"row\">\r\n\r\n            <div class=\"id_placeholder_UiSubscribe\">\r\n\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiMySubscription col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiPaymentMethod col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiDownloadButtons col-md-6\">\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],121:[function(require,module,exports){
-var css = "div.id_UiController .heading-1 {\n  font-size: 20px;\n  font-weight: normal;\n  margin-bottom: 16px;\n}\ndiv.id_UiController .heading-2 {\n  color: #007FEB;\n  font-size: 26px;\n  margin-bottom: 7px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":110}],122:[function(require,module,exports){
-module.exports = "<div class=\"id_UiDownloadButtons panel plain mt10\">\r\n\r\n    <div class=\"panel-body text-center\">\r\n\r\n        <a href='https://play.google.com/store/apps/details?id=com.semasim.android&ah=2KIGba1mmZ33bXvBLhumK535eEY&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>\r\n            <img alt='Get it on Google Play' height=\"90px\" src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' />\r\n        </a>\r\n\r\n    </div>\r\n</div>";
 },{}],123:[function(require,module,exports){
+var css = "div.id_UiController .heading-1 {\n  font-size: 20px;\n  font-weight: normal;\n  margin-bottom: 16px;\n}\ndiv.id_UiController .heading-2 {\n  color: #007FEB;\n  font-size: 26px;\n  margin-bottom: 7px;\n}\n";(require('lessify'))(css); module.exports = css;
+},{"lessify":110}],124:[function(require,module,exports){
+module.exports = "<div class=\"id_UiDownloadButtons panel plain mt10\">\r\n\r\n    <div class=\"panel-body text-center\">\r\n\r\n        <a href='https://play.google.com/store/apps/details?id=com.semasim.android&ah=2KIGba1mmZ33bXvBLhumK535eEY&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>\r\n            <img alt='Get it on Google Play' height=\"90px\" src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' />\r\n        </a>\r\n\r\n    </div>\r\n</div>";
+},{}],125:[function(require,module,exports){
 module.exports = "<div class=\"id_UiMySubscription panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"payment-subscription\">\r\n                <h1 class=\"heading-1\">My subscription</h1>\r\n                <h2 class=\"heading-2\">Active</h2>\r\n                <p class=\"payment-text\">Cancels in <strong class=\"id_days_left\">X</strong> days</p>\r\n            </div>\r\n            <div class=\"payment-next clearfix\">\r\n                <h2 class=\"heading-1\">Next payment due</h2>\r\n\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">DATE</dt>\r\n                    <dt class=\"id_nextBillDate payment-list-info\">13/12/18</dt>\r\n                </dl>\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">AMOUNT</dt>\r\n                    <dt class=\"payment-list-info\"><span class=\"id_amount\">3.07€</span></dt>\r\n                </dl>\r\n            </div>\r\n            <div class=\"payment-actions mt10\">\r\n                <button class=\"btn btn-primary\" type=\"button\">\r\n                    Cancel subscription\r\n                </button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],124:[function(require,module,exports){
-var css = "div.id_UiMySubscription .payment-list {\n  float: left;\n  line-height: 20px;\n  width: 50%;\n}\ndiv.id_UiMySubscription .payment-text {\n  color: #72727D;\n  font-size: 14px;\n  line-height: 20px;\n  margin-bottom: 15px;\n  text-align: left;\n}\ndiv.id_UiMySubscription .payment-subscription {\n  border-bottom: solid 1px #EFEFF2;\n  padding-bottom: 16px;\n}\ndiv.id_UiMySubscription .payment-list-title {\n  color: #72727D;\n  font-size: 14px;\n}\ndiv.id_UiMySubscription .payment-list-info {\n  font-weight: normal;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":110}],125:[function(require,module,exports){
-module.exports = "<div class=\"id_UiNegativeBalanceWarning alert alert-warning fade in mt10 mb0\">\r\n    <i class=\"glyphicon glyphicon-warning-sign alert-icon \"></i>\r\n    <strong>Warning!</strong> Your current balance is <span class=\"id_val\">-22€</span>, Please update your payment method.\r\n</div>";
 },{}],126:[function(require,module,exports){
+var css = "div.id_UiMySubscription .payment-list {\n  float: left;\n  line-height: 20px;\n  width: 50%;\n}\ndiv.id_UiMySubscription .payment-text {\n  color: #72727D;\n  font-size: 14px;\n  line-height: 20px;\n  margin-bottom: 15px;\n  text-align: left;\n}\ndiv.id_UiMySubscription .payment-subscription {\n  border-bottom: solid 1px #EFEFF2;\n  padding-bottom: 16px;\n}\ndiv.id_UiMySubscription .payment-list-title {\n  color: #72727D;\n  font-size: 14px;\n}\ndiv.id_UiMySubscription .payment-list-info {\n  font-weight: normal;\n}\n";(require('lessify'))(css); module.exports = css;
+},{"lessify":110}],127:[function(require,module,exports){
+module.exports = "<div class=\"id_UiNegativeBalanceWarning alert alert-warning fade in mt10 mb0\">\r\n    <i class=\"glyphicon glyphicon-warning-sign alert-icon \"></i>\r\n    <strong>Warning!</strong> Your current balance is <span class=\"id_val\">-22€</span>, Please update your payment method.\r\n</div>";
+},{}],128:[function(require,module,exports){
 module.exports = "<div class=\"id_UiPaymentMethod panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"page-subscription-payment-method clearfix\">\r\n                <h2 class=\"heading-1\">Payment method</h2>\r\n                <div class=\"alert alert-danger fade in\">\r\n                    <i class=\"glyphicon glyphicon-ban-circle alert-icon \"></i>\r\n                    <strong>No longer valid</strong> please register a new credit card\r\n                </div>\r\n                <dl class=\"page-subscription-payment-method-list card-number\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Card number</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\">XXX...<span class=\"id_last4\">1234</span></span></dt>\r\n                </dl>\r\n                <dl class=\"page-subscription-payment-method-list expiry\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Expiration date</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\"><span class=\"id_expire\">12/19</span></dt>\r\n                </dl>\r\n            </div>\r\n            <button class=\"btn btn-primary\">\r\n                Change credit card\r\n            </button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],127:[function(require,module,exports){
-var css = "div.id_UiPaymentMethod .card-number {\n  width: 210px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list {\n  float: left;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-title {\n  color: #5F5E6A;\n  font-size: 14px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-info {\n  font-weight: normal;\n  font-size: 14px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":110}],128:[function(require,module,exports){
-module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>For enabling semasim on your android devices</p>\r\n            <button class=\"btn btn-primary\">Subscribe for <span class=\"id_amount\">XX€</span>/Month</button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
 },{}],129:[function(require,module,exports){
+var css = "div.id_UiPaymentMethod .card-number {\n  width: 210px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list {\n  float: left;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-title {\n  color: #5F5E6A;\n  font-size: 14px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-info {\n  font-weight: normal;\n  font-size: 14px;\n}\n";(require('lessify'))(css); module.exports = css;
+},{"lessify":110}],130:[function(require,module,exports){
+module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>For enabling semasim on your android devices</p>\r\n            <button class=\"btn btn-primary\">Subscribe for <span class=\"id_amount\">XX€</span>/Month</button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
+},{}],131:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.currencyByCountry = require("../../res/currency.json");
 
-},{"../../res/currency.json":141}],130:[function(require,module,exports){
+},{"../../res/currency.json":143}],132:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11723,7 +11854,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":133}],131:[function(require,module,exports){
+},{"./modal_stack":135}],133:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getURLParameter(sParam) {
@@ -11738,7 +11869,7 @@ function getURLParameter(sParam) {
 }
 exports.getURLParameter = getURLParameter;
 
-},{}],132:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -11752,7 +11883,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],133:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -11871,7 +12002,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],134:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12026,7 +12157,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":135,"transfer-tools/dist/lib/JSON_CUSTOM":140}],135:[function(require,module,exports){
+},{"../web_api_declaration":137,"transfer-tools/dist/lib/JSON_CUSTOM":142}],137:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -12067,13 +12198,13 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],136:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 arguments[4][101][0].apply(exports,arguments)
-},{"dup":101}],137:[function(require,module,exports){
+},{"dup":101}],139:[function(require,module,exports){
 arguments[4][102][0].apply(exports,arguments)
-},{"./implementation":136,"dup":102}],138:[function(require,module,exports){
+},{"./implementation":138,"dup":102}],140:[function(require,module,exports){
 arguments[4][105][0].apply(exports,arguments)
-},{"dup":105,"function-bind":137}],139:[function(require,module,exports){
+},{"dup":105,"function-bind":139}],141:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -12408,7 +12539,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":138}],140:[function(require,module,exports){
+},{"has":140}],142:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -12458,7 +12589,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":139}],141:[function(require,module,exports){
+},{"super-json":141}],143:[function(require,module,exports){
 module.exports={
   "bd": "bdt",
   "be": "eur",

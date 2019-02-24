@@ -152,6 +152,7 @@ function fromByteArray (uint8) {
 }
 
 },{}],2:[function(require,module,exports){
+(function (Buffer){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1930,7 +1931,8 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":1,"ieee754":3}],3:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"base64-js":1,"buffer":2,"ieee754":3}],3:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -2956,7 +2958,7 @@ var UiButtonBar = /** @class */ (function () {
 }());
 exports.UiButtonBar = UiButtonBar;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../templates/UiButtonBar.html":127,"ts-events-extended":126}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../templates/UiButtonBar.html":128,"ts-events-extended":127}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -3471,7 +3473,7 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../../../shared/dist/lib/toBackend/localApiHandlers":135,"../../../shared/dist/lib/toBackend/remoteApiCaller":136,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../../../shared/dist/lib/types":141,"../templates/UiController.html":128,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":119,"ts-events-extended":126}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/localApiHandlers":136,"../../../shared/dist/lib/toBackend/remoteApiCaller":137,"../../../shared/dist/lib/tools/bootbox_custom":138,"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../../../shared/dist/lib/types":142,"../templates/UiController.html":129,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":120,"ts-events-extended":127}],11:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -4008,7 +4010,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/toBackend/connection":134,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../../../shared/dist/lib/tools/modal_stack":140,"../../../shared/dist/lib/types":141,"../templates/UiPhonebook.html":129,"phone-number":119,"ts-events-extended":126}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":135,"../../../shared/dist/lib/tools/bootbox_custom":138,"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../../../shared/dist/lib/tools/modal_stack":141,"../../../shared/dist/lib/types":142,"../templates/UiPhonebook.html":130,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4240,7 +4242,7 @@ var UiShareSim = /** @class */ (function () {
 }());
 exports.UiShareSim = UiShareSim;
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../../../shared/dist/lib/tools/modal_stack":140,"../templates/UiShareSim.html":130,"../templates/UiShareSim.less":131,"ts-events-extended":126}],13:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":138,"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../../../shared/dist/lib/tools/modal_stack":141,"../templates/UiShareSim.html":131,"../templates/UiShareSim.less":132,"ts-events-extended":127}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -4395,7 +4397,7 @@ var UiSimRow = /** @class */ (function () {
 }());
 exports.UiSimRow = UiSimRow;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":139,"../templates/UiSimRow.html":132,"../templates/UiSimRow.less":133,"ts-events-extended":126}],14:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../templates/UiSimRow.html":133,"../templates/UiSimRow.less":134,"ts-events-extended":127}],14:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -4496,7 +4498,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
 }); });
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/toBackend/connection":134,"../../../shared/dist/lib/toBackend/remoteApiCaller":136,"../../../shared/dist/lib/tools/bootbox_custom":137,"../../../shared/dist/lib/tools/getURLParameter":138,"../../../shared/dist/lib/webApiCaller":142,"./UiController":10,"array-from":15,"array.prototype.find":18,"buffer":2,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":135,"../../../shared/dist/lib/toBackend/remoteApiCaller":137,"../../../shared/dist/lib/tools/bootbox_custom":138,"../../../shared/dist/lib/tools/getURLParameter":139,"../../../shared/dist/lib/webApiCaller":143,"./UiController":10,"array-from":15,"array.prototype.find":18,"buffer":2,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
 module.exports = (typeof Array.from === 'function' ?
   Array.from :
   require('./polyfill')
@@ -4999,7 +5001,7 @@ defineProperties.supportsDescriptors = !!supportsDescriptors;
 
 module.exports = defineProperties;
 
-},{"object-keys":117}],25:[function(require,module,exports){
+},{"object-keys":118}],25:[function(require,module,exports){
 'use strict';
 
 /* globals
@@ -5970,7 +5972,7 @@ delete ES6.CheckObjectCoercible; // renamed in ES6 to RequireObjectCoercible
 
 module.exports = ES6;
 
-},{"./GetIntrinsic":25,"./es5":27,"./helpers/assertRecord":29,"./helpers/assign":30,"./helpers/isFinite":31,"./helpers/isNaN":32,"./helpers/isPrimitive":33,"./helpers/mod":34,"./helpers/sign":35,"es-to-primitive/es6":38,"function-bind":108,"has":111,"is-regex":114,"object-keys":117}],27:[function(require,module,exports){
+},{"./GetIntrinsic":25,"./es5":27,"./helpers/assertRecord":29,"./helpers/assign":30,"./helpers/isFinite":31,"./helpers/isNaN":32,"./helpers/isPrimitive":33,"./helpers/mod":34,"./helpers/sign":35,"es-to-primitive/es6":38,"function-bind":108,"has":111,"is-regex":114,"object-keys":118}],27:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('./GetIntrinsic');
@@ -8342,136 +8344,149 @@ module.exports = require('cssify');
 },{"cssify":21}],117:[function(require,module,exports){
 'use strict';
 
-// modified from https://github.com/es-shims/es5-shim
-var has = Object.prototype.hasOwnProperty;
-var toStr = Object.prototype.toString;
-var slice = Array.prototype.slice;
-var isArgs = require('./isArguments');
-var isEnumerable = Object.prototype.propertyIsEnumerable;
-var hasDontEnumBug = !isEnumerable.call({ toString: null }, 'toString');
-var hasProtoEnumBug = isEnumerable.call(function () {}, 'prototype');
-var dontEnums = [
-	'toString',
-	'toLocaleString',
-	'valueOf',
-	'hasOwnProperty',
-	'isPrototypeOf',
-	'propertyIsEnumerable',
-	'constructor'
-];
-var equalsConstructorPrototype = function (o) {
-	var ctor = o.constructor;
-	return ctor && ctor.prototype === o;
-};
-var excludedKeys = {
-	$applicationCache: true,
-	$console: true,
-	$external: true,
-	$frame: true,
-	$frameElement: true,
-	$frames: true,
-	$innerHeight: true,
-	$innerWidth: true,
-	$outerHeight: true,
-	$outerWidth: true,
-	$pageXOffset: true,
-	$pageYOffset: true,
-	$parent: true,
-	$scrollLeft: true,
-	$scrollTop: true,
-	$scrollX: true,
-	$scrollY: true,
-	$self: true,
-	$webkitIndexedDB: true,
-	$webkitStorageInfo: true,
-	$window: true
-};
-var hasAutomationEqualityBug = (function () {
-	/* global window */
-	if (typeof window === 'undefined') { return false; }
-	for (var k in window) {
+var keysShim;
+if (!Object.keys) {
+	// modified from https://github.com/es-shims/es5-shim
+	var has = Object.prototype.hasOwnProperty;
+	var toStr = Object.prototype.toString;
+	var isArgs = require('./isArguments'); // eslint-disable-line global-require
+	var isEnumerable = Object.prototype.propertyIsEnumerable;
+	var hasDontEnumBug = !isEnumerable.call({ toString: null }, 'toString');
+	var hasProtoEnumBug = isEnumerable.call(function () {}, 'prototype');
+	var dontEnums = [
+		'toString',
+		'toLocaleString',
+		'valueOf',
+		'hasOwnProperty',
+		'isPrototypeOf',
+		'propertyIsEnumerable',
+		'constructor'
+	];
+	var equalsConstructorPrototype = function (o) {
+		var ctor = o.constructor;
+		return ctor && ctor.prototype === o;
+	};
+	var excludedKeys = {
+		$applicationCache: true,
+		$console: true,
+		$external: true,
+		$frame: true,
+		$frameElement: true,
+		$frames: true,
+		$innerHeight: true,
+		$innerWidth: true,
+		$outerHeight: true,
+		$outerWidth: true,
+		$pageXOffset: true,
+		$pageYOffset: true,
+		$parent: true,
+		$scrollLeft: true,
+		$scrollTop: true,
+		$scrollX: true,
+		$scrollY: true,
+		$self: true,
+		$webkitIndexedDB: true,
+		$webkitStorageInfo: true,
+		$window: true
+	};
+	var hasAutomationEqualityBug = (function () {
+		/* global window */
+		if (typeof window === 'undefined') { return false; }
+		for (var k in window) {
+			try {
+				if (!excludedKeys['$' + k] && has.call(window, k) && window[k] !== null && typeof window[k] === 'object') {
+					try {
+						equalsConstructorPrototype(window[k]);
+					} catch (e) {
+						return true;
+					}
+				}
+			} catch (e) {
+				return true;
+			}
+		}
+		return false;
+	}());
+	var equalsConstructorPrototypeIfNotBuggy = function (o) {
+		/* global window */
+		if (typeof window === 'undefined' || !hasAutomationEqualityBug) {
+			return equalsConstructorPrototype(o);
+		}
 		try {
-			if (!excludedKeys['$' + k] && has.call(window, k) && window[k] !== null && typeof window[k] === 'object') {
-				try {
-					equalsConstructorPrototype(window[k]);
-				} catch (e) {
-					return true;
+			return equalsConstructorPrototype(o);
+		} catch (e) {
+			return false;
+		}
+	};
+
+	keysShim = function keys(object) {
+		var isObject = object !== null && typeof object === 'object';
+		var isFunction = toStr.call(object) === '[object Function]';
+		var isArguments = isArgs(object);
+		var isString = isObject && toStr.call(object) === '[object String]';
+		var theKeys = [];
+
+		if (!isObject && !isFunction && !isArguments) {
+			throw new TypeError('Object.keys called on a non-object');
+		}
+
+		var skipProto = hasProtoEnumBug && isFunction;
+		if (isString && object.length > 0 && !has.call(object, 0)) {
+			for (var i = 0; i < object.length; ++i) {
+				theKeys.push(String(i));
+			}
+		}
+
+		if (isArguments && object.length > 0) {
+			for (var j = 0; j < object.length; ++j) {
+				theKeys.push(String(j));
+			}
+		} else {
+			for (var name in object) {
+				if (!(skipProto && name === 'prototype') && has.call(object, name)) {
+					theKeys.push(String(name));
 				}
 			}
-		} catch (e) {
-			return true;
 		}
-	}
-	return false;
-}());
-var equalsConstructorPrototypeIfNotBuggy = function (o) {
-	/* global window */
-	if (typeof window === 'undefined' || !hasAutomationEqualityBug) {
-		return equalsConstructorPrototype(o);
-	}
-	try {
-		return equalsConstructorPrototype(o);
-	} catch (e) {
-		return false;
-	}
-};
 
-var keysShim = function keys(object) {
-	var isObject = object !== null && typeof object === 'object';
-	var isFunction = toStr.call(object) === '[object Function]';
-	var isArguments = isArgs(object);
-	var isString = isObject && toStr.call(object) === '[object String]';
-	var theKeys = [];
+		if (hasDontEnumBug) {
+			var skipConstructor = equalsConstructorPrototypeIfNotBuggy(object);
 
-	if (!isObject && !isFunction && !isArguments) {
-		throw new TypeError('Object.keys called on a non-object');
-	}
-
-	var skipProto = hasProtoEnumBug && isFunction;
-	if (isString && object.length > 0 && !has.call(object, 0)) {
-		for (var i = 0; i < object.length; ++i) {
-			theKeys.push(String(i));
-		}
-	}
-
-	if (isArguments && object.length > 0) {
-		for (var j = 0; j < object.length; ++j) {
-			theKeys.push(String(j));
-		}
-	} else {
-		for (var name in object) {
-			if (!(skipProto && name === 'prototype') && has.call(object, name)) {
-				theKeys.push(String(name));
+			for (var k = 0; k < dontEnums.length; ++k) {
+				if (!(skipConstructor && dontEnums[k] === 'constructor') && has.call(object, dontEnums[k])) {
+					theKeys.push(dontEnums[k]);
+				}
 			}
 		}
-	}
+		return theKeys;
+	};
+}
+module.exports = keysShim;
 
-	if (hasDontEnumBug) {
-		var skipConstructor = equalsConstructorPrototypeIfNotBuggy(object);
+},{"./isArguments":119}],118:[function(require,module,exports){
+'use strict';
 
-		for (var k = 0; k < dontEnums.length; ++k) {
-			if (!(skipConstructor && dontEnums[k] === 'constructor') && has.call(object, dontEnums[k])) {
-				theKeys.push(dontEnums[k]);
-			}
-		}
-	}
-	return theKeys;
-};
+var slice = Array.prototype.slice;
+var isArgs = require('./isArguments');
+
+var origKeys = Object.keys;
+var keysShim = origKeys ? function keys(o) { return origKeys(o); } : require('./implementation');
+
+var originalKeys = Object.keys;
 
 keysShim.shim = function shimObjectKeys() {
 	if (Object.keys) {
 		var keysWorksWithArguments = (function () {
 			// Safari 5.0 bug
-			return (Object.keys(arguments) || '').length === 2;
+			var args = Object.keys(arguments);
+			return args && args.length === arguments.length;
 		}(1, 2));
 		if (!keysWorksWithArguments) {
-			var originalKeys = Object.keys;
 			Object.keys = function keys(object) { // eslint-disable-line func-name-matching
 				if (isArgs(object)) {
 					return originalKeys(slice.call(object));
-				} else {
-					return originalKeys(object);
 				}
+				return originalKeys(object);
 			};
 		}
 	} else {
@@ -8482,7 +8497,7 @@ keysShim.shim = function shimObjectKeys() {
 
 module.exports = keysShim;
 
-},{"./isArguments":118}],118:[function(require,module,exports){
+},{"./implementation":117,"./isArguments":119}],119:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -8501,7 +8516,7 @@ module.exports = function isArguments(value) {
 	return isArgs;
 };
 
-},{}],119:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 (function (process,global){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -8523,7 +8538,7 @@ var phoneNumber;
         if (typeof process !== "undefined" &&
             process.release.name === "node") {
             //Trick browserify so it does not bundle.
-            var path = "../../node_modules/intl-tel-input/build/js/utils";
+            var path = "../../res/utils";
             require(path);
         }
         else {
@@ -8691,7 +8706,7 @@ var phoneNumber;
 })(phoneNumber = exports.phoneNumber || (exports.phoneNumber = {}));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":6}],120:[function(require,module,exports){
+},{"_process":6}],121:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -8983,7 +8998,7 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{}],121:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 'use strict'
 /* eslint no-proto: 0 */
 module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
@@ -9002,7 +9017,7 @@ function mixinProperties (obj, proto) {
   return obj
 }
 
-},{}],122:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -9043,7 +9058,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":123}],123:[function(require,module,exports){
+},{"./SyncEventBase":124}],124:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -9261,7 +9276,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":124}],124:[function(require,module,exports){
+},{"./SyncEventBaseProtected":125}],125:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -9546,7 +9561,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":125,"run-exclusive":120}],125:[function(require,module,exports){
+},{"./defs":126,"run-exclusive":121}],126:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -9587,7 +9602,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{"setprototypeof":121}],126:[function(require,module,exports){
+},{"setprototypeof":122}],127:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -9596,21 +9611,21 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":122,"./defs":125}],127:[function(require,module,exports){
+},{"./SyncEvent":123,"./defs":126}],128:[function(require,module,exports){
 module.exports = "<style>\r\n    .id_UiButtonBar .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiButtonBar .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n    @media (min-width: 768px) {\r\n        .id_UiButtonBar .id_g1 {\r\n            padding-right: 0px !important;\r\n        }\r\n        .id_UiButtonBar .id_g2 {\r\n            padding-left: 0px !important;\r\n        }\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiButtonBar col-xs-12 mb10\">\r\n\r\n    <div class=\"row\">\r\n\r\n        <div class=\"id_g1 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-default\">Details</button>\r\n                <button type=\"button\" class=\"btn btn-default\"> <i class=\"fa fa-arrow-left\"></i> </button>\r\n                <button type=\"button\" class=\"btn btn-danger\">Delete</button>\r\n                <button type=\"button\" class=\"btn btn-primary\">Contacts</button>\r\n            </div>\r\n        </div>\r\n        <div class=\"id_g2 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-success\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Make SIM usable by other Semasim users\">Share</button>\r\n                <button type=\"button\" class=\"btn btn-default\">Rename</button>\r\n                <button type=\"button\" class=\"btn btn-default\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Restart the GSM dongle that hold the SIM\">Reboot</button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n    \r\n</div>\r\n";
-},{}],128:[function(require,module,exports){
-module.exports = "\r\n<div class=\"id_UiController container-fluid panel-body row\">\r\n\r\n\r\n</div>";
 },{}],129:[function(require,module,exports){
-module.exports = "<style>\r\n\r\n    div.id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li > div .id_number {\r\n        cursor: text;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected > div {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n</style>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_number \"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>\r\n\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiPhonebook modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Sim Phonebook</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body p0\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row\">\r\n\r\n                                <div class=\"col-xd-12 pt15 pr15 pl15 pb5\">\r\n\r\n                                    <div style=\"float: right\">\r\n\r\n                                        <button class=\"id_edit btn btn-primary\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                        </button>\r\n                                        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n                                            <i class=\"glyphicon glyphicon-trash\"></i>\r\n                                            <span></span>\r\n                                        </button>\r\n                                        <button class=\"id_createContact btn btn-success btn-sm\" type=\"button\" >\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-add_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                        </button>\r\n\r\n                                    </div>\r\n                                    <div style=\"overflow: hidden; padding-right: .5em;\">\r\n                                        <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search\"  style=\"width: 100%;\"/>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                                <div class=\"col-xs-12 pb15 bl15 pr15\">\r\n\r\n                                    <ul class=\"nav \">\r\n                                    </ul>\r\n\r\n                                </div>\r\n\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n";
+module.exports = "\r\n<div class=\"id_UiController container-fluid panel-body row\">\r\n\r\n\r\n</div>";
 },{}],130:[function(require,module,exports){
-module.exports = "<style>\r\n</style>\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiShareSim modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Share SIM card</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row _toHideIfNotShared\">\r\n\r\n                                <div class=\"col-md-12\">\r\n\r\n                                    <label class=\"pt5\">Allowed users:</label>\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"id_stopSharing btn btn-danger btn-sm\" type=\"button\">\r\n                                            <span>Stop sharing</span>\r\n                                        </button>\r\n                                    </div>\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n                            <div class=\"id_list row b mt10 _toHideIfNotShared\">\r\n\r\n                            </div>\r\n\r\n                            <div class=\"row mt10\">\r\n\r\n                                <label class=\"col-md-12 pt5\">Invite users:</label>\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10\">\r\n                                    <input type=\"text\" class=\"id_emails\" name=\"email\">\r\n                                </div>\r\n\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10 id_message\">\r\n                                    <textarea class=\"form-control\" rows=\"2\">I would like to share SIM Free (06 34 39 39 99 ) with you.</textarea>\r\n                                    <i class=\"fa fa-comments textarea-icon s16\"></i>\r\n                                </div>\r\n\r\n                                <div class=\"col-md-12 mt10\">\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"btn btn-success id_submit\" type=\"button\">\r\n                                            <span>Submit share request</span>\r\n                                        </button>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_row col-md-12 pt10 pb10\">\r\n        <i class=\"glyphicon glyphicon-user mr10\"></i>\r\n        <span class=\"mr10 strong id_email\"></span>\r\n        <span class=\"mr10 text-nowrap id_isConfirmed\"></span>\r\n    </div>\r\n\r\n</div>";
+module.exports = "<style>\r\n\r\n    div.id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li > div .id_number {\r\n        cursor: text;\r\n    }\r\n\r\n    div.id_UiPhonebook ul li.selected > div {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n</style>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_number \"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>\r\n\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiPhonebook modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Sim Phonebook</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body p0\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row\">\r\n\r\n                                <div class=\"col-xd-12 pt15 pr15 pl15 pb5\">\r\n\r\n                                    <div style=\"float: right\">\r\n\r\n                                        <button class=\"id_edit btn btn-primary\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                        </button>\r\n                                        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n                                            <i class=\"glyphicon glyphicon-trash\"></i>\r\n                                            <span></span>\r\n                                        </button>\r\n                                        <button class=\"id_createContact btn btn-success btn-sm\" type=\"button\" >\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-add_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                        </button>\r\n\r\n                                    </div>\r\n                                    <div style=\"overflow: hidden; padding-right: .5em;\">\r\n                                        <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search\"  style=\"width: 100%;\"/>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                                <div class=\"col-xs-12 pb15 bl15 pr15\">\r\n\r\n                                    <ul class=\"nav \">\r\n                                    </ul>\r\n\r\n                                </div>\r\n\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n";
 },{}],131:[function(require,module,exports){
+module.exports = "<style>\r\n</style>\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiShareSim modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Share SIM card</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row _toHideIfNotShared\">\r\n\r\n                                <div class=\"col-md-12\">\r\n\r\n                                    <label class=\"pt5\">Allowed users:</label>\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"id_stopSharing btn btn-danger btn-sm\" type=\"button\">\r\n                                            <span>Stop sharing</span>\r\n                                        </button>\r\n                                    </div>\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n                            <div class=\"id_list row b mt10 _toHideIfNotShared\">\r\n\r\n                            </div>\r\n\r\n                            <div class=\"row mt10\">\r\n\r\n                                <label class=\"col-md-12 pt5\">Invite users:</label>\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10\">\r\n                                    <input type=\"text\" class=\"id_emails\" name=\"email\">\r\n                                </div>\r\n\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10 id_message\">\r\n                                    <textarea class=\"form-control\" rows=\"2\">I would like to share SIM Free (06 34 39 39 99 ) with you.</textarea>\r\n                                    <i class=\"fa fa-comments textarea-icon s16\"></i>\r\n                                </div>\r\n\r\n                                <div class=\"col-md-12 mt10\">\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"btn btn-success id_submit\" type=\"button\">\r\n                                            <span>Submit share request</span>\r\n                                        </button>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_row col-md-12 pt10 pb10\">\r\n        <i class=\"glyphicon glyphicon-user mr10\"></i>\r\n        <span class=\"mr10 strong id_email\"></span>\r\n        <span class=\"mr10 text-nowrap id_isConfirmed\"></span>\r\n    </div>\r\n\r\n</div>";
+},{}],132:[function(require,module,exports){
 var css = "div.id_UiShareSim .id_row {\n  cursor: pointer;\n}\ndiv.id_UiShareSim .selected {\n  background-color: #e2e0db;\n}\ndiv.id_UiShareSim .id_message textarea {\n  padding-left: 32px;\n}\ndiv.id_UiShareSim .id_message i {\n  position: absolute;\n  top: 7px;\n  left: 8px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":116}],132:[function(require,module,exports){
+},{"lessify":116}],133:[function(require,module,exports){
 module.exports = "<div class=\"id_UiSimRow col-xs-12\">\r\n    <div class=\"id_row  bb p10\">\r\n        <i>\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <span class=\"id_simId strong mr10\">---My sim1 (0654996385)---</span>\r\n        <span class=\"id_connectivity mr10\">---Online---</span>\r\n        <span class=\"id_ownership hidden-xs\">---Owned---</span>\r\n    </div>\r\n    <div class=\"id_details pr0 pl0 pt15\">\r\n        <p>\r\n            <span class=\"strong p10\">Physical location:</span>\r\n            <span class=\"id_gw_location\">---Montpellier, Languedoc Rousillong, FR ( 82.302.102.2 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Owner:</span>\r\n            <span class=\"id_owner\">---foo@gmail.com---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Phone number:</span>\r\n            <span class=\"id_number\">---0636786385 ( +33636786385 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Service provider:</span>\r\n            <span class=\"id_serviceProvider\">---Free Mobile ( France )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle model:</span>\r\n            <span class=\"id_dongle_model\">---Huawei E160X</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle firmware:</span>\r\n            <span class=\"id_dongle_firm\">---10.12222---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle imei:</span>\r\n            <span class=\"id_dongle_imei\">---111111111111111---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle voice support:</span>\r\n            <span class=\"id_voice_support\">---yes---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM IMSI:</span>\r\n            <span class=\"id_imsi\">---332344242344---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM ICCID:</span>\r\n            <span class=\"id_iccid\">---2343334340342343---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM Phonebook memory usage:</span>\r\n            <span class=\"id_phonebook\">--12/123---</span>\r\n        </p>\r\n    </div>\r\n</div>";
-},{}],133:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 var css = "div.id_UiSimRow .id_row {\n  cursor: pointer;\n}\ndiv.id_UiSimRow .selected {\n  background-color: #e2e0db;\n}\ndiv.id_UiSimRow .offline {\n  opacity: 0.6;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":116}],134:[function(require,module,exports){
+},{"lessify":116}],135:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9822,7 +9837,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../tools/bootbox_custom":137,"./localApiHandlers":135,"./remoteApiCaller":136,"ts-events-extended":175,"ts-sip":185}],135:[function(require,module,exports){
+},{"../tools/bootbox_custom":138,"./localApiHandlers":136,"./remoteApiCaller":137,"ts-events-extended":176,"ts-sip":184}],136:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10408,7 +10423,7 @@ exports.iceServers = [
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":144,"../tools/bootbox_custom":137,"./remoteApiCaller":136,"chan-dongle-extended-client/dist/lib/types":146,"ts-events-extended":175}],136:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":145,"../tools/bootbox_custom":138,"./remoteApiCaller":137,"chan-dongle-extended-client/dist/lib/types":147,"ts-events-extended":176}],137:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -11263,7 +11278,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":143,"../types":141,"./connection":134,"phone-number":162,"ts-events-extended":175,"ts-sip":185}],137:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":144,"../types":142,"./connection":135,"phone-number":163,"ts-events-extended":176,"ts-sip":184}],138:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11371,7 +11386,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":140}],138:[function(require,module,exports){
+},{"./modal_stack":141}],139:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getURLParameter(sParam) {
@@ -11386,7 +11401,7 @@ function getURLParameter(sParam) {
 }
 exports.getURLParameter = getURLParameter;
 
-},{}],139:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -11400,7 +11415,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],140:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -11519,7 +11534,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],141:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -11734,7 +11749,7 @@ var webphoneData;
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
 
-},{}],142:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11889,7 +11904,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":145,"transfer-tools/dist/lib/JSON_CUSTOM":166}],143:[function(require,module,exports){
+},{"../web_api_declaration":146,"transfer-tools/dist/lib/JSON_CUSTOM":167}],144:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -11984,7 +11999,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],144:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -12037,7 +12052,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],145:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -12078,7 +12093,7 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],146:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -12099,7 +12114,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],147:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -12302,7 +12317,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":148,"./custom/zalgo":149,"./maps/america":152,"./maps/rainbow":153,"./maps/random":154,"./maps/zebra":155,"./styles":156,"./system/supports-colors":158,"util":8}],148:[function(require,module,exports){
+},{"./custom/trap":149,"./custom/zalgo":150,"./maps/america":153,"./maps/rainbow":154,"./maps/random":155,"./maps/zebra":156,"./styles":157,"./system/supports-colors":159,"util":8}],149:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -12350,7 +12365,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],149:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -12462,7 +12477,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],150:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -12574,7 +12589,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":147}],151:[function(require,module,exports){
+},{"./colors":148}],152:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -12589,7 +12604,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":147,"./extendStringPrototype":150}],152:[function(require,module,exports){
+},{"./colors":148,"./extendStringPrototype":151}],153:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -12601,7 +12616,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],153:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -12615,7 +12630,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],154:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -12627,14 +12642,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],155:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],156:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -12713,7 +12728,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],157:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -12752,7 +12767,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],158:[function(require,module,exports){
+},{"_process":6}],159:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -12907,19 +12922,19 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":157,"_process":6,"os":5}],159:[function(require,module,exports){
+},{"./has-flag.js":158,"_process":6,"os":5}],160:[function(require,module,exports){
 arguments[4][107][0].apply(exports,arguments)
-},{"dup":107}],160:[function(require,module,exports){
+},{"dup":107}],161:[function(require,module,exports){
 arguments[4][108][0].apply(exports,arguments)
-},{"./implementation":159,"dup":108}],161:[function(require,module,exports){
+},{"./implementation":160,"dup":108}],162:[function(require,module,exports){
 arguments[4][111][0].apply(exports,arguments)
-},{"dup":111,"function-bind":160}],162:[function(require,module,exports){
-arguments[4][119][0].apply(exports,arguments)
-},{"_process":6,"dup":119}],163:[function(require,module,exports){
+},{"dup":111,"function-bind":161}],163:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"dup":120}],164:[function(require,module,exports){
+},{"_process":6,"dup":120}],164:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
 },{"dup":121}],165:[function(require,module,exports){
+arguments[4][122][0].apply(exports,arguments)
+},{"dup":122}],166:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -13254,7 +13269,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":161}],166:[function(require,module,exports){
+},{"has":162}],167:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -13304,7 +13319,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":165}],167:[function(require,module,exports){
+},{"super-json":166}],168:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -13316,7 +13331,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":166,"./stringTransform":168,"./stringTransformExt":169,"./testing":170}],168:[function(require,module,exports){
+},{"./JSON_CUSTOM":167,"./stringTransform":169,"./stringTransformExt":170,"./testing":171}],169:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -13378,7 +13393,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],169:[function(require,module,exports){
+},{"buffer":2}],170:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -13446,7 +13461,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":168}],170:[function(require,module,exports){
+},{"./stringTransform":169}],171:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -13715,17 +13730,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":168}],171:[function(require,module,exports){
-arguments[4][122][0].apply(exports,arguments)
-},{"./SyncEventBase":172,"dup":122}],172:[function(require,module,exports){
+},{"./stringTransform":169}],172:[function(require,module,exports){
 arguments[4][123][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":173,"dup":123}],173:[function(require,module,exports){
+},{"./SyncEventBase":173,"dup":123}],173:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"./defs":174,"dup":124,"run-exclusive":163}],174:[function(require,module,exports){
+},{"./SyncEventBaseProtected":174,"dup":124}],174:[function(require,module,exports){
 arguments[4][125][0].apply(exports,arguments)
-},{"dup":125,"setprototypeof":164}],175:[function(require,module,exports){
+},{"./defs":175,"dup":125,"run-exclusive":164}],175:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"./SyncEvent":171,"./defs":174,"dup":126}],176:[function(require,module,exports){
+},{"dup":126,"setprototypeof":165}],176:[function(require,module,exports){
+arguments[4][127][0].apply(exports,arguments)
+},{"./SyncEvent":172,"./defs":175,"dup":127}],177:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -13897,7 +13912,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":175}],177:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":176}],178:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -14209,7 +14224,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":176,"./api/ApiMessage":178,"./core":182,"./misc":186,"colors":151,"ts-events-extended":175}],178:[function(require,module,exports){
+},{"./IConnection":177,"./api/ApiMessage":179,"./core":183,"./misc":187,"colors":152,"ts-events-extended":176}],179:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14290,7 +14305,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":182,"../misc":186,"buffer":2,"transfer-tools":167}],179:[function(require,module,exports){
+},{"../core":183,"../misc":187,"buffer":2,"transfer-tools":168}],180:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14472,7 +14487,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":186,"./ApiMessage":178,"colors":151,"util":8}],180:[function(require,module,exports){
+},{"../misc":187,"./ApiMessage":179,"colors":152,"util":8}],181:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -14691,7 +14706,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":186,"./ApiMessage":178,"setprototypeof":164}],181:[function(require,module,exports){
+},{"../misc":187,"./ApiMessage":179,"setprototypeof":165}],182:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -14699,7 +14714,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":179,"./client":180}],182:[function(require,module,exports){
+},{"./Server":180,"./client":181}],183:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -14716,8 +14731,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var sip = require("./core/sip");
-var _sdp_ = require("./core/sdp");
+var sip = require("./legacy/sip");
+var _sdp_ = require("./legacy/sdp");
 var setPrototypeOf = require("setprototypeof");
 function makeStreamParser(handler, floodHandler) {
     var streamParser = (function () {
@@ -14783,7 +14798,19 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./core/sdp":183,"./core/sip":184,"buffer":2,"setprototypeof":164}],183:[function(require,module,exports){
+},{"./legacy/sdp":185,"./legacy/sip":186,"buffer":2,"setprototypeof":165}],184:[function(require,module,exports){
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+__export(require("./core"));
+__export(require("./Socket"));
+__export(require("./misc"));
+var api = require("./api");
+exports.api = api;
+
+},{"./Socket":178,"./api":182,"./core":183,"./misc":187}],185:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -14899,7 +14926,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],184:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -15290,19 +15317,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],185:[function(require,module,exports){
-"use strict";
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./core"));
-__export(require("./Socket"));
-__export(require("./misc"));
-var api = require("./api");
-exports.api = api;
-
-},{"./Socket":177,"./api":181,"./core":182,"./misc":186}],186:[function(require,module,exports){
+},{}],187:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -15315,6 +15330,36 @@ var __assign = (this && this.__assign) || function () {
         return t;
     };
     return __assign.apply(this, arguments);
+};
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core = require("./core");
@@ -15347,16 +15392,35 @@ function getPacketContent(sipPacket) {
 }
 exports.getPacketContent = getPacketContent;
 function readSrflxAddrInSdp(sdp) {
-    for (var _i = 0, _a = core.parseSdp(sdp).m; _i < _a.length; _i++) {
-        var m_i = _a[_i];
-        if (m_i.media !== "audio")
-            continue;
-        for (var _b = 0, _c = m_i.a; _b < _c.length; _b++) {
-            var a_i = _c[_b];
-            var match = a_i.match(/^candidate(?:[^\s]+\s){4}((?:[0-9]{1,3}\.){3}[0-9]{1,3})\s(?:[^\s]+\s){2}srflx/);
-            if (match)
-                return match[1];
+    var e_1, _a, e_2, _b;
+    try {
+        for (var _c = __values(core.parseSdp(sdp).m), _d = _c.next(); !_d.done; _d = _c.next()) {
+            var m_i = _d.value;
+            if (m_i.media !== "audio")
+                continue;
+            try {
+                for (var _e = __values(m_i.a), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    var a_i = _f.value;
+                    var match = a_i.match(/^candidate(?:[^\s]+\s){4}((?:[0-9]{1,3}\.){3}[0-9]{1,3})\s(?:[^\s]+\s){2}srflx/);
+                    if (match)
+                        return match[1];
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
         }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+        }
+        finally { if (e_1) throw e_1.error; }
     }
     return undefined;
 }
@@ -15410,6 +15474,7 @@ function addOptionTag(headers, headerField, optionTag) {
 }
 exports.addOptionTag = addOptionTag;
 function filterSdpCandidates(keep, sdp) {
+    var e_3, _a;
     var shouldKeepCandidate = function (candidateLine) {
         return ((keep.host && !!candidateLine.match(/host/)) ||
             (keep.srflx && !!candidateLine.match(/srflx/)) ||
@@ -15417,13 +15482,22 @@ function filterSdpCandidates(keep, sdp) {
     };
     var parsedSdp = core.parseSdp(sdp);
     var arr = parsedSdp.m[0].a;
-    for (var _i = 0, _a = arr.slice(); _i < _a.length; _i++) {
-        var line = _a[_i];
-        if (!line.match(/^candidate/))
-            continue;
-        if (!shouldKeepCandidate(line)) {
-            arr.splice(arr.indexOf(line), 1);
+    try {
+        for (var _b = __values(__spread(arr)), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var line = _c.value;
+            if (!line.match(/^candidate/))
+                continue;
+            if (!shouldKeepCandidate(line)) {
+                arr.splice(arr.indexOf(line), 1);
+            }
         }
+    }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+        }
+        finally { if (e_3) throw e_3.error; }
     }
     return core.stringifySdp(sdp);
 }
@@ -15541,4 +15615,4 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":182,"buffer":2}]},{},[14]);
+},{"./core":183,"buffer":2}]},{},[14]);
