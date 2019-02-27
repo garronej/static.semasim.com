@@ -3064,14 +3064,17 @@ var Ua = /** @class */ (function () {
         });
         this.jsSipSocket.setMessageOkDelay(request, pr);
     };
-    Ua.prototype.sendMessage = function (number, text, exactSendDate) {
+    Ua.prototype.sendMessage = function (number, text, exactSendDate, appendPromotionalMessage) {
         var _this = this;
         var extraHeaders = (function () {
             var headers = gateway_1.smuggleBundledDataInHeaders((function () {
                 var bundledData = {
                     "type": "MESSAGE",
-                    exactSendDate: exactSendDate
+                    exactSendDate: exactSendDate,
                 };
+                if (appendPromotionalMessage) {
+                    bundledData.appendPromotionalMessage = true;
+                }
                 return bundledData;
             })());
             var out = [];
@@ -4681,9 +4684,9 @@ var UiWebphoneController = /** @class */ (function () {
             });
         }); });
         uiConversation.evtSendText.attach(function (text) { return __awaiter(_this, void 0, void 0, function () {
-            var exactSendDate, wdMessage, error_1, wdMessageUpdated;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var exactSendDate, wdMessage, _a, _b, _c, error_1, wdMessageUpdated;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
                         exactSendDate = new Date();
                         return [4 /*yield*/, remoteApiCaller.newWdMessage(uiConversation.wdChat, (function () {
@@ -4696,24 +4699,29 @@ var UiWebphoneController = /** @class */ (function () {
                                 return message;
                             })())];
                     case 1:
-                        wdMessage = _a.sent();
+                        wdMessage = _d.sent();
                         uiConversation.newMessage(wdMessage);
-                        _a.label = 2;
+                        _d.label = 2;
                     case 2:
-                        _a.trys.push([2, 4, , 6]);
-                        return [4 /*yield*/, this.ua.sendMessage(uiConversation.wdChat.contactNumber, text, exactSendDate)];
-                    case 3:
-                        _a.sent();
-                        return [3 /*break*/, 6];
+                        _d.trys.push([2, 5, , 7]);
+                        _b = (_a = this.ua).sendMessage;
+                        _c = [uiConversation.wdChat.contactNumber,
+                            text,
+                            exactSendDate];
+                        return [4 /*yield*/, remoteApiCaller.shouldAppendPromotionalMessage()];
+                    case 3: return [4 /*yield*/, _b.apply(_a, _c.concat([_d.sent()]))];
                     case 4:
-                        error_1 = _a.sent();
+                        _d.sent();
+                        return [3 /*break*/, 7];
+                    case 5:
+                        error_1 = _d.sent();
                         console.log("ua send message error", error_1);
                         return [4 /*yield*/, remoteApiCaller.notifyUaFailedToSendMessage(uiConversation.wdChat, wdMessage)];
-                    case 5:
-                        wdMessageUpdated = _a.sent();
+                    case 6:
+                        wdMessageUpdated = _d.sent();
                         uiConversation.newMessage(wdMessageUpdated);
-                        return [3 /*break*/, 6];
-                    case 6: return [2 /*return*/];
+                        return [3 /*break*/, 7];
+                    case 7: return [2 /*return*/];
                 }
             });
         }); });
@@ -20360,6 +20368,17 @@ exports.deleteContact = (function () {
         });
     };
 })();
+/** Api only called once */
+exports.shouldAppendPromotionalMessage = (function () {
+    var methodName = apiDeclaration.shouldAppendPromotionalMessage.methodName;
+    var cachedResponse = undefined;
+    return function () {
+        if (cachedResponse !== undefined) {
+            return cachedResponse;
+        }
+        return sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
+    };
+})();
 //WebData sync things :
 exports.getUaInstanceIdAndEmail = (function () {
     var methodName = apiDeclaration.getUaInstanceIdAndEmail.methodName;
@@ -21498,6 +21517,10 @@ var deleteContact;
 (function (deleteContact) {
     deleteContact.methodName = "deleteContact";
 })(deleteContact = exports.deleteContact || (exports.deleteContact = {}));
+var shouldAppendPromotionalMessage;
+(function (shouldAppendPromotionalMessage) {
+    shouldAppendPromotionalMessage.methodName = "shouldAppendSenTWithSemasim";
+})(shouldAppendPromotionalMessage = exports.shouldAppendPromotionalMessage || (exports.shouldAppendPromotionalMessage = {}));
 //WebphoneData Sync things:
 var getUaInstanceIdAndEmail;
 (function (getUaInstanceIdAndEmail) {

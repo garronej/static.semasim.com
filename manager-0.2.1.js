@@ -10810,6 +10810,17 @@ exports.deleteContact = (function () {
         });
     };
 })();
+/** Api only called once */
+exports.shouldAppendPromotionalMessage = (function () {
+    var methodName = apiDeclaration.shouldAppendPromotionalMessage.methodName;
+    var cachedResponse = undefined;
+    return function () {
+        if (cachedResponse !== undefined) {
+            return cachedResponse;
+        }
+        return sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
+    };
+})();
 //WebData sync things :
 exports.getUaInstanceIdAndEmail = (function () {
     var methodName = apiDeclaration.getUaInstanceIdAndEmail.methodName;
@@ -11963,6 +11974,10 @@ var deleteContact;
 (function (deleteContact) {
     deleteContact.methodName = "deleteContact";
 })(deleteContact = exports.deleteContact || (exports.deleteContact = {}));
+var shouldAppendPromotionalMessage;
+(function (shouldAppendPromotionalMessage) {
+    shouldAppendPromotionalMessage.methodName = "shouldAppendSenTWithSemasim";
+})(shouldAppendPromotionalMessage = exports.shouldAppendPromotionalMessage || (exports.shouldAppendPromotionalMessage = {}));
 //WebphoneData Sync things:
 var getUaInstanceIdAndEmail;
 (function (getUaInstanceIdAndEmail) {
