@@ -2881,7 +2881,7 @@ function hasOwnProperty(obj, prop) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiButtonBar.html"), "UiButtonBar");
 var UiButtonBar = /** @class */ (function () {
     function UiButtonBar() {
@@ -2958,7 +2958,7 @@ var UiButtonBar = /** @class */ (function () {
 }());
 exports.UiButtonBar = UiButtonBar;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../templates/UiButtonBar.html":128,"ts-events-extended":127}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":136,"../templates/UiButtonBar.html":128,"ts-events-extended":127}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -3000,7 +3000,8 @@ var ts_events_extended_1 = require("ts-events-extended");
 var types = require("../../../shared/dist/lib/types");
 var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
+var backToAndroidAppUrl_1 = require("../../../shared/dist/lib/backToAndroidAppUrl");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var UiButtonBar_1 = require("./UiButtonBar");
 var UiPhonebook_1 = require("./UiPhonebook");
@@ -3008,7 +3009,6 @@ var UiSimRow_1 = require("./UiSimRow");
 var UiShareSim_1 = require("./UiShareSim");
 var phone_number_1 = require("phone-number");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
-var backToAppUrl = "semasim://main";
 var UiController = /** @class */ (function () {
     function UiController(userSims, action) {
         var _this = this;
@@ -3212,7 +3212,7 @@ var UiController = /** @class */ (function () {
                     case 1:
                         userSim = _a.sent();
                         if (!userSim) {
-                            window.location.href = backToAppUrl;
+                            window.location.href = backToAndroidAppUrl_1.backToAppUrl;
                             return [2 /*return*/];
                         }
                         if (!!userSim.isOnline) return [3 /*break*/, 3];
@@ -3221,7 +3221,7 @@ var UiController = /** @class */ (function () {
                             })];
                     case 2:
                         _a.sent();
-                        window.location.href = backToAppUrl;
+                        window.location.href = backToAndroidAppUrl_1.backToAppUrl;
                         return [2 /*return*/];
                     case 3:
                         uiSimRow = this.uiSimRows.find(function (uiSimRow) { return uiSimRow.userSim === userSim; });
@@ -3319,7 +3319,7 @@ var UiController = /** @class */ (function () {
                     case 2:
                         if (!!this.action) return [3 /*break*/, 3];
                         uiPhonebook.showModal();
-                        return [3 /*break*/, 5];
+                        return [3 /*break*/, 6];
                     case 3:
                         pr = void 0;
                         switch (this.action.type) {
@@ -3337,9 +3337,18 @@ var UiController = /** @class */ (function () {
                         return [4 /*yield*/, pr];
                     case 4:
                         _a.sent();
-                        window.location.href = backToAppUrl;
-                        _a.label = 5;
-                    case 5: return [2 /*return*/];
+                        //NOTE: Do not remove this feedback as it leave the time 
+                        //to the push notification to land before we go back to app.
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.alert("Success", function () { return resolve(); });
+                            })];
+                    case 5:
+                        //NOTE: Do not remove this feedback as it leave the time 
+                        //to the push notification to land before we go back to app.
+                        _a.sent();
+                        window.location.href = backToAndroidAppUrl_1.backToAppUrl;
+                        _a.label = 6;
+                    case 6: return [2 /*return*/];
                 }
             });
         }); });
@@ -3473,7 +3482,7 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../../../shared/dist/lib/toBackend/localApiHandlers":136,"../../../shared/dist/lib/toBackend/remoteApiCaller":137,"../../../shared/dist/lib/tools/bootbox_custom":138,"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../../../shared/dist/lib/types":142,"../templates/UiController.html":129,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":120,"ts-events-extended":127}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/backToAndroidAppUrl":135,"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/toBackend/localApiHandlers":138,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/types":144,"../templates/UiController.html":129,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":120,"ts-events-extended":127}],11:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -3512,12 +3521,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var types = require("../../../shared/dist/lib/types");
 var connection_1 = require("../../../shared/dist/lib/toBackend/connection");
 var ts_events_extended_1 = require("ts-events-extended");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var modal_stack = require("../../../shared/dist/lib/tools/modal_stack");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var isAscendingAlphabeticalOrder_1 = require("../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var phone_number_1 = require("phone-number");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiPhonebook.html"), "UiPhonebook");
 var UiPhonebook = /** @class */ (function () {
@@ -3656,7 +3665,7 @@ var UiPhonebook = /** @class */ (function () {
             if (!hasContactName(contact2)) {
                 return 1;
             }
-            return types.webphoneData.isAscendingAlphabeticalOrder(contact1.name, contact2.name) ? 1 : -1;
+            return isAscendingAlphabeticalOrder_1.isAscendingAlphabeticalOrder(contact1.name, contact2.name) ? 1 : -1;
         }
         else {
             return contact1.number_raw < contact2.number_raw ? -1 : 1;
@@ -4010,7 +4019,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/toBackend/connection":135,"../../../shared/dist/lib/tools/bootbox_custom":138,"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../../../shared/dist/lib/tools/modal_stack":141,"../../../shared/dist/lib/types":142,"../templates/UiPhonebook.html":130,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/toBackend/connection":137,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder":142,"../../../shared/dist/lib/tools/modal_stack":143,"../templates/UiPhonebook.html":130,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4050,7 +4059,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var modal_stack = require("../../../shared/dist/lib/tools/modal_stack");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiShareSim.html"), "UiShareSim");
 require("../templates/UiShareSim.less");
@@ -4242,11 +4251,11 @@ var UiShareSim = /** @class */ (function () {
 }());
 exports.UiShareSim = UiShareSim;
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":138,"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../../../shared/dist/lib/tools/modal_stack":141,"../templates/UiShareSim.html":131,"../templates/UiShareSim.less":132,"ts-events-extended":127}],13:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/modal_stack":143,"../templates/UiShareSim.html":131,"../templates/UiShareSim.less":132,"ts-events-extended":127}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiSimRow.html"), "UiSimRow");
 require("../templates/UiSimRow.less");
 var UiSimRow = /** @class */ (function () {
@@ -4397,7 +4406,7 @@ var UiSimRow = /** @class */ (function () {
 }());
 exports.UiSimRow = UiSimRow;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":140,"../templates/UiSimRow.html":133,"../templates/UiSimRow.less":134,"ts-events-extended":127}],14:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":136,"../templates/UiSimRow.html":133,"../templates/UiSimRow.less":134,"ts-events-extended":127}],14:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -4498,7 +4507,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
 }); });
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/toBackend/connection":135,"../../../shared/dist/lib/toBackend/remoteApiCaller":137,"../../../shared/dist/lib/tools/bootbox_custom":138,"../../../shared/dist/lib/tools/getURLParameter":139,"../../../shared/dist/lib/webApiCaller":143,"./UiController":10,"array-from":15,"array.prototype.find":18,"buffer":2,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":137,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/getURLParameter":141,"../../../shared/dist/lib/webApiCaller":145,"./UiController":10,"array-from":15,"array.prototype.find":18,"buffer":2,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
 module.exports = (typeof Array.from === 'function' ?
   Array.from :
   require('./polyfill')
@@ -9627,6 +9636,25 @@ module.exports = "<div class=\"id_UiSimRow col-xs-12\">\r\n    <div class=\"id_r
 var css = "div.id_UiSimRow .id_row {\n  cursor: pointer;\n}\ndiv.id_UiSimRow .selected {\n  background-color: #e2e0db;\n}\ndiv.id_UiSimRow .offline {\n  opacity: 0.6;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":116}],135:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.backToAppUrl = "semasim://main";
+
+},{}],136:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/** Assert jQuery is loaded on the page. */
+function loadUiClassHtml(html, widgetClassName) {
+    var wrap = $("<div>").html(html);
+    $("head").append(wrap.find("style"));
+    return {
+        "structure": wrap.find(".id_" + widgetClassName),
+        "templates": wrap.find(".templates")
+    };
+}
+exports.loadUiClassHtml = loadUiClassHtml;
+
+},{}],137:[function(require,module,exports){
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -9839,7 +9867,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../tools/bootbox_custom":138,"./localApiHandlers":136,"./remoteApiCaller":137,"js-cookie":163,"ts-events-extended":177,"ts-sip":185}],136:[function(require,module,exports){
+},{"../tools/bootbox_custom":140,"./localApiHandlers":138,"./remoteApiCaller":139,"js-cookie":165,"ts-events-extended":179,"ts-sip":187}],138:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10425,7 +10453,7 @@ exports.iceServers = [
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":145,"../tools/bootbox_custom":138,"./remoteApiCaller":137,"chan-dongle-extended-client/dist/lib/types":147,"ts-events-extended":177}],137:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":147,"../tools/bootbox_custom":140,"./remoteApiCaller":139,"chan-dongle-extended-client/dist/lib/types":149,"ts-events-extended":179}],139:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -11291,7 +11319,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":144,"../types":142,"./connection":135,"phone-number":164,"ts-events-extended":177,"ts-sip":185}],138:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":146,"../types":144,"./connection":137,"phone-number":166,"ts-events-extended":179,"ts-sip":187}],140:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11399,7 +11427,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":141}],139:[function(require,module,exports){
+},{"./modal_stack":143}],141:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getURLParameter(sParam) {
@@ -11414,21 +11442,30 @@ function getURLParameter(sParam) {
 }
 exports.getURLParameter = getURLParameter;
 
-},{}],140:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-/** Assert jQuery is loaded on the page. */
-function loadUiClassHtml(html, widgetClassName) {
-    var wrap = $("<div>").html(html);
-    $("head").append(wrap.find("style"));
-    return {
-        "structure": wrap.find(".id_" + widgetClassName),
-        "templates": wrap.find(".templates")
+function isAscendingAlphabeticalOrder(a, b) {
+    if (!a || !b) {
+        return a.length < b.length;
+    }
+    var getWeight = function (str) {
+        var val = str.charAt(0).toLowerCase().charCodeAt(0);
+        if (!(96 < val && val < 123)) {
+            return 123;
+        }
+        return val;
     };
+    var vA = getWeight(a);
+    var vB = getWeight(b);
+    if (vA === vB) {
+        return isAscendingAlphabeticalOrder(a.substr(1), b.substr(1));
+    }
+    return vA < vB;
 }
-exports.loadUiClassHtml = loadUiClassHtml;
+exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
 
-},{}],141:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -11547,7 +11584,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],142:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -11560,6 +11597,7 @@ var __values = (this && this.__values) || function (o) {
     };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var isAscendingAlphabeticalOrder_1 = require("./tools/isAscendingAlphabeticalOrder");
 var UserSim;
 (function (UserSim) {
     var Owned;
@@ -11718,32 +11756,13 @@ var webphoneData;
             if (!hasContactName(chat2)) {
                 return 1;
             }
-            return isAscendingAlphabeticalOrder(chat1.contactName, chat2.contactName) ? 1 : -1;
+            return isAscendingAlphabeticalOrder_1.isAscendingAlphabeticalOrder(chat1.contactName, chat2.contactName) ? 1 : -1;
         }
         else {
             return chat1.contactNumber < chat2.contactNumber ? -1 : 1;
         }
     }
     webphoneData.compareChat = compareChat;
-    function isAscendingAlphabeticalOrder(a, b) {
-        if (!a || !b) {
-            return a.length < b.length;
-        }
-        var getWeight = function (str) {
-            var val = str.charAt(0).toLowerCase().charCodeAt(0);
-            if (!(96 < val && val < 123)) {
-                return 123;
-            }
-            return val;
-        };
-        var vA = getWeight(a);
-        var vB = getWeight(b);
-        if (vA === vB) {
-            return isAscendingAlphabeticalOrder(a.substr(1), b.substr(1));
-        }
-        return vA < vB;
-    }
-    webphoneData.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
     function getUnreadMessagesCount(wdChat) {
         var count = 0;
         for (var i = wdChat.messages.length - 1; i >= 0; i--) {
@@ -11762,7 +11781,7 @@ var webphoneData;
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
 
-},{}],143:[function(require,module,exports){
+},{"./tools/isAscendingAlphabeticalOrder":142}],145:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11917,7 +11936,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":146,"transfer-tools/dist/lib/JSON_CUSTOM":168}],144:[function(require,module,exports){
+},{"../web_api_declaration":148,"transfer-tools/dist/lib/JSON_CUSTOM":170}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -12016,7 +12035,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],145:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -12069,7 +12088,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],146:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -12110,7 +12129,7 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],147:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -12131,7 +12150,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],148:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -12334,7 +12353,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":149,"./custom/zalgo":150,"./maps/america":153,"./maps/rainbow":154,"./maps/random":155,"./maps/zebra":156,"./styles":157,"./system/supports-colors":159,"util":8}],149:[function(require,module,exports){
+},{"./custom/trap":151,"./custom/zalgo":152,"./maps/america":155,"./maps/rainbow":156,"./maps/random":157,"./maps/zebra":158,"./styles":159,"./system/supports-colors":161,"util":8}],151:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -12382,7 +12401,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],150:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -12494,7 +12513,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],151:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -12606,7 +12625,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":148}],152:[function(require,module,exports){
+},{"./colors":150}],154:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -12621,7 +12640,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":148,"./extendStringPrototype":151}],153:[function(require,module,exports){
+},{"./colors":150,"./extendStringPrototype":153}],155:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -12633,7 +12652,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],154:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -12647,7 +12666,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],155:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -12659,14 +12678,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],156:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],157:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -12745,7 +12764,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],158:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -12784,7 +12803,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],159:[function(require,module,exports){
+},{"_process":6}],161:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -12939,13 +12958,13 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":158,"_process":6,"os":5}],160:[function(require,module,exports){
+},{"./has-flag.js":160,"_process":6,"os":5}],162:[function(require,module,exports){
 arguments[4][107][0].apply(exports,arguments)
-},{"dup":107}],161:[function(require,module,exports){
+},{"dup":107}],163:[function(require,module,exports){
 arguments[4][108][0].apply(exports,arguments)
-},{"./implementation":160,"dup":108}],162:[function(require,module,exports){
+},{"./implementation":162,"dup":108}],164:[function(require,module,exports){
 arguments[4][111][0].apply(exports,arguments)
-},{"dup":111,"function-bind":161}],163:[function(require,module,exports){
+},{"dup":111,"function-bind":163}],165:[function(require,module,exports){
 /*!
  * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
@@ -13112,13 +13131,13 @@ arguments[4][111][0].apply(exports,arguments)
 	return init(function () {});
 }));
 
-},{}],164:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"_process":6,"dup":120}],165:[function(require,module,exports){
+},{"_process":6,"dup":120}],167:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"dup":121}],166:[function(require,module,exports){
+},{"dup":121}],168:[function(require,module,exports){
 arguments[4][122][0].apply(exports,arguments)
-},{"dup":122}],167:[function(require,module,exports){
+},{"dup":122}],169:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -13453,7 +13472,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":162}],168:[function(require,module,exports){
+},{"has":164}],170:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -13503,7 +13522,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":167}],169:[function(require,module,exports){
+},{"super-json":169}],171:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -13515,7 +13534,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":168,"./stringTransform":170,"./stringTransformExt":171,"./testing":172}],170:[function(require,module,exports){
+},{"./JSON_CUSTOM":170,"./stringTransform":172,"./stringTransformExt":173,"./testing":174}],172:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -13577,7 +13596,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],171:[function(require,module,exports){
+},{"buffer":2}],173:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -13645,7 +13664,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":170}],172:[function(require,module,exports){
+},{"./stringTransform":172}],174:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -13914,17 +13933,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":170}],173:[function(require,module,exports){
+},{"./stringTransform":172}],175:[function(require,module,exports){
 arguments[4][123][0].apply(exports,arguments)
-},{"./SyncEventBase":174,"dup":123}],174:[function(require,module,exports){
+},{"./SyncEventBase":176,"dup":123}],176:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":175,"dup":124}],175:[function(require,module,exports){
+},{"./SyncEventBaseProtected":177,"dup":124}],177:[function(require,module,exports){
 arguments[4][125][0].apply(exports,arguments)
-},{"./defs":176,"dup":125,"run-exclusive":165}],176:[function(require,module,exports){
+},{"./defs":178,"dup":125,"run-exclusive":167}],178:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"dup":126,"setprototypeof":166}],177:[function(require,module,exports){
+},{"dup":126,"setprototypeof":168}],179:[function(require,module,exports){
 arguments[4][127][0].apply(exports,arguments)
-},{"./SyncEvent":173,"./defs":176,"dup":127}],178:[function(require,module,exports){
+},{"./SyncEvent":175,"./defs":178,"dup":127}],180:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14096,7 +14115,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":177}],179:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":179}],181:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -14408,7 +14427,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":178,"./api/ApiMessage":180,"./core":184,"./misc":188,"colors":152,"ts-events-extended":177}],180:[function(require,module,exports){
+},{"./IConnection":180,"./api/ApiMessage":182,"./core":186,"./misc":190,"colors":154,"ts-events-extended":179}],182:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14489,7 +14508,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":184,"../misc":188,"buffer":2,"transfer-tools":169}],181:[function(require,module,exports){
+},{"../core":186,"../misc":190,"buffer":2,"transfer-tools":171}],183:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14671,7 +14690,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":188,"./ApiMessage":180,"colors":152,"util":8}],182:[function(require,module,exports){
+},{"../misc":190,"./ApiMessage":182,"colors":154,"util":8}],184:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -14890,7 +14909,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":188,"./ApiMessage":180,"setprototypeof":166}],183:[function(require,module,exports){
+},{"../misc":190,"./ApiMessage":182,"setprototypeof":168}],185:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -14898,7 +14917,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":181,"./client":182}],184:[function(require,module,exports){
+},{"./Server":183,"./client":184}],186:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -14982,7 +15001,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":186,"./legacy/sip":187,"buffer":2,"setprototypeof":166}],185:[function(require,module,exports){
+},{"./legacy/sdp":188,"./legacy/sip":189,"buffer":2,"setprototypeof":168}],187:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -14994,7 +15013,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":179,"./api":183,"./core":184,"./misc":188}],186:[function(require,module,exports){
+},{"./Socket":181,"./api":185,"./core":186,"./misc":190}],188:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -15110,7 +15129,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],187:[function(require,module,exports){
+},{}],189:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -15501,7 +15520,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],188:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -15799,4 +15818,4 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":184,"buffer":2}]},{},[14]);
+},{"./core":186,"buffer":2}]},{},[14]);

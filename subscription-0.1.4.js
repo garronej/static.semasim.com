@@ -2058,7 +2058,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
+var backToAndroidAppUrl_1 = require("../../../shared/dist/lib/backToAndroidAppUrl");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var ts_events_extended_1 = require("ts-events-extended");
 var currencyByCountry_1 = require("../../../shared/dist/lib/currencyByCountry");
@@ -2071,8 +2072,9 @@ var UiNegativeBalanceWarning_1 = require("./UiNegativeBalanceWarning");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
 require("../templates/UiController.less");
 var UiController = /** @class */ (function () {
-    function UiController(subscriptionInfos) {
+    function UiController(subscriptionInfos, shouldRedirectToAndroidApp) {
         var _this = this;
+        this.shouldRedirectToAndroidApp = shouldRedirectToAndroidApp;
         this.structure = html.structure.clone();
         var uiDownloadButton = new UiDownloadButtons_1.UiDownloadButtons();
         this.structure.find(".id_placeholder_UiDownloadButtons")
@@ -2145,7 +2147,7 @@ var UiController = /** @class */ (function () {
                         case 1:
                             _a.sent();
                             bootbox_custom.dismissLoading();
-                            location.reload();
+                            this.reloadOrRedirectToApp();
                             return [2 /*return*/];
                     }
                 });
@@ -2194,10 +2196,13 @@ var UiController = /** @class */ (function () {
                         case 5:
                             _a.sent();
                             bootbox_custom.dismissLoading();
+                            if (!!shouldRedirectToAndroidApp) return [3 /*break*/, 7];
                             return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert("You can now use the semasim Android application", function () { return resolve(); }); })];
                         case 6:
                             _a.sent();
-                            location.reload();
+                            _a.label = 7;
+                        case 7:
+                            this.reloadOrRedirectToApp();
                             return [2 /*return*/];
                     }
                 });
@@ -2231,15 +2236,23 @@ var UiController = /** @class */ (function () {
                 .append(uiPaymentMethod.structure);
         }
     }
+    UiController.prototype.reloadOrRedirectToApp = function () {
+        if (this.shouldRedirectToAndroidApp) {
+            window.location.href = backToAndroidAppUrl_1.backToAppUrl;
+        }
+        else {
+            location.reload();
+        }
+    };
     return UiController;
 }());
 exports.UiController = UiController;
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/currencyByCountry":131,"../../../shared/dist/lib/tools/bootbox_custom":132,"../../../shared/dist/lib/tools/getURLParameter":133,"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../../../shared/dist/lib/webApiCaller":136,"../templates/UiController.html":122,"../templates/UiController.less":123,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"buffer":2,"ts-events-extended":121}],5:[function(require,module,exports){
+},{"../../../shared/dist/lib/backToAndroidAppUrl":131,"../../../shared/dist/lib/currencyByCountry":132,"../../../shared/dist/lib/loadUiClassHtml":133,"../../../shared/dist/lib/tools/bootbox_custom":134,"../../../shared/dist/lib/tools/getURLParameter":135,"../../../shared/dist/lib/webApiCaller":137,"../templates/UiController.html":122,"../templates/UiController.less":123,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"buffer":2,"ts-events-extended":121}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiDownloadButtons.html"), "UiDownloadButtons");
 var UiDownloadButtons = /** @class */ (function () {
     function UiDownloadButtons() {
@@ -2249,10 +2262,10 @@ var UiDownloadButtons = /** @class */ (function () {
 }());
 exports.UiDownloadButtons = UiDownloadButtons;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiDownloadButtons.html":124}],6:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":133,"../templates/UiDownloadButtons.html":124}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var ts_events_extended_1 = require("ts-events-extended");
 var moment = require("moment");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiMySubscription.html"), "UiMySubscription");
@@ -2288,10 +2301,10 @@ var UiMySubscription = /** @class */ (function () {
 }());
 exports.UiMySubscription = UiMySubscription;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiMySubscription.html":125,"../templates/UiMySubscription.less":126,"moment":111,"ts-events-extended":121}],7:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":133,"../templates/UiMySubscription.html":125,"../templates/UiMySubscription.less":126,"moment":111,"ts-events-extended":121}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiNegativeBalanceWarning.html"), "UiNegativeBalanceWarning");
 var UiNegativeBalanceWarning = /** @class */ (function () {
     function UiNegativeBalanceWarning(due) {
@@ -2303,10 +2316,10 @@ var UiNegativeBalanceWarning = /** @class */ (function () {
 }());
 exports.UiNegativeBalanceWarning = UiNegativeBalanceWarning;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiNegativeBalanceWarning.html":127}],8:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":133,"../templates/UiNegativeBalanceWarning.html":127}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var ts_events_extended_1 = require("ts-events-extended");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiPaymentMethod.html"), "UiPaymentMethod");
 require("../templates/UiPaymentMethod.less");
@@ -2325,10 +2338,10 @@ var UiPaymentMethod = /** @class */ (function () {
 }());
 exports.UiPaymentMethod = UiPaymentMethod;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiPaymentMethod.html":128,"../templates/UiPaymentMethod.less":129,"ts-events-extended":121}],9:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":133,"../templates/UiPaymentMethod.html":128,"../templates/UiPaymentMethod.less":129,"ts-events-extended":121}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/tools/loadUiClassHtml");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var ts_events_extended_1 = require("ts-events-extended");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiSubscribe.html"), "UiSubscribe");
 var UiSubscribe = /** @class */ (function () {
@@ -2344,7 +2357,7 @@ var UiSubscribe = /** @class */ (function () {
 }());
 exports.UiSubscribe = UiSubscribe;
 
-},{"../../../shared/dist/lib/tools/loadUiClassHtml":134,"../templates/UiSubscribe.html":130,"ts-events-extended":121}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":133,"../templates/UiSubscribe.html":130,"ts-events-extended":121}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2389,8 +2402,9 @@ require("array.prototype.find").shim();
 var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var UiController_1 = require("./UiController");
+var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var subscriptionInfos, uiController;
+    var subscriptionInfos, redirectToAndroidApp, uiController;
     var _this = this;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -2409,14 +2423,15 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                 subscriptionInfos = _a.sent();
                 bootbox_custom.dismissLoading();
                 console.log(JSON.stringify(subscriptionInfos, null, 2));
-                uiController = new UiController_1.UiController(subscriptionInfos);
+                redirectToAndroidApp = !!getURLParameter_1.getURLParameter("email_as_hex");
+                uiController = new UiController_1.UiController(subscriptionInfos, redirectToAndroidApp);
                 $("#page-payload").html("").append(uiController.structure);
                 return [2 /*return*/];
         }
     });
 }); });
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":132,"../../../shared/dist/lib/webApiCaller":136,"./UiController":4,"array.prototype.find":12,"es6-map/implement":85,"es6-weak-map/implement":96}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":134,"../../../shared/dist/lib/tools/getURLParameter":135,"../../../shared/dist/lib/webApiCaller":137,"./UiController":4,"array.prototype.find":12,"es6-map/implement":85,"es6-weak-map/implement":96}],11:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -11740,13 +11755,32 @@ module.exports = "<div class=\"id_UiPaymentMethod panel plain mt10\">\r\n\r\n   
 },{}],129:[function(require,module,exports){
 var css = "div.id_UiPaymentMethod .card-number {\n  width: 210px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list {\n  float: left;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-title {\n  color: #5F5E6A;\n  font-size: 14px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-info {\n  font-weight: normal;\n  font-size: 14px;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":110}],130:[function(require,module,exports){
-module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>\r\n                For enabling semasim on your <b>Android</b> devices\r\n                <br>\r\n                and stop including <b>\"Sent with Semasim\"</b> in your SMSs.\r\n                <br>\r\n                <br>\r\n                Subscription cancelable anytime.\r\n            </p>\r\n            <button class=\"btn btn-primary\">Subscribe for <span class=\"id_amount\">XX€</span>/Month</button>\r\n        </div>\r\n\r\n    <div class=\"container\">\r\n        <div class=\"footer\">\r\n            By subscribing you agree to our :\r\n            <a href=\"http://www.semasim.com/terms-conditions\">terms</a>\r\n            <span> &amp; </span>\r\n            <a href=\"http://www.semasim.com/privacy-policy\">privacy policy</a>\r\n        </div>\r\n    </div>\r\n\r\n\r\n    </div>\r\n\r\n</div>";
+module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>\r\n                For enabling semasim on your <b>Android</b> devices\r\n                <br>\r\n                and stop including <b>\"Sent with Semasim\"</b> in your SMSs.\r\n                <br>\r\n                <br>\r\n                Subscription cancelable anytime.\r\n            </p>\r\n            <button class=\"btn btn-primary\">Subscribe for <span class=\"id_amount\">XX€</span>/Month</button>\r\n        </div>\r\n\r\n        <div class=\"container\">\r\n            <div class=\"footer\">\r\n                By subscribing you agree to our :\r\n                <a href=\"http://www.semasim.com/terms-conditions\">terms</a>\r\n                <span> &amp; </span>\r\n                <a href=\"http://www.semasim.com/privacy-policy\">privacy policy</a>\r\n            </div>\r\n        </div>\r\n\r\n\r\n    </div>\r\n\r\n</div>";
 },{}],131:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.backToAppUrl = "semasim://main";
+
+},{}],132:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.currencyByCountry = require("../../res/currency.json");
 
-},{"../../res/currency.json":143}],132:[function(require,module,exports){
+},{"../../res/currency.json":144}],133:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/** Assert jQuery is loaded on the page. */
+function loadUiClassHtml(html, widgetClassName) {
+    var wrap = $("<div>").html(html);
+    $("head").append(wrap.find("style"));
+    return {
+        "structure": wrap.find(".id_" + widgetClassName),
+        "templates": wrap.find(".templates")
+    };
+}
+exports.loadUiClassHtml = loadUiClassHtml;
+
+},{}],134:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11854,7 +11888,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":135}],133:[function(require,module,exports){
+},{"./modal_stack":136}],135:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getURLParameter(sParam) {
@@ -11869,21 +11903,7 @@ function getURLParameter(sParam) {
 }
 exports.getURLParameter = getURLParameter;
 
-},{}],134:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-/** Assert jQuery is loaded on the page. */
-function loadUiClassHtml(html, widgetClassName) {
-    var wrap = $("<div>").html(html);
-    $("head").append(wrap.find("style"));
-    return {
-        "structure": wrap.find(".id_" + widgetClassName),
-        "templates": wrap.find(".templates")
-    };
-}
-exports.loadUiClassHtml = loadUiClassHtml;
-
-},{}],135:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -12002,7 +12022,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],136:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12157,7 +12177,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":137,"transfer-tools/dist/lib/JSON_CUSTOM":142}],137:[function(require,module,exports){
+},{"../web_api_declaration":138,"transfer-tools/dist/lib/JSON_CUSTOM":143}],138:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -12198,13 +12218,13 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],138:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 arguments[4][101][0].apply(exports,arguments)
-},{"dup":101}],139:[function(require,module,exports){
+},{"dup":101}],140:[function(require,module,exports){
 arguments[4][102][0].apply(exports,arguments)
-},{"./implementation":138,"dup":102}],140:[function(require,module,exports){
+},{"./implementation":139,"dup":102}],141:[function(require,module,exports){
 arguments[4][105][0].apply(exports,arguments)
-},{"dup":105,"function-bind":139}],141:[function(require,module,exports){
+},{"dup":105,"function-bind":140}],142:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -12539,7 +12559,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":140}],142:[function(require,module,exports){
+},{"has":141}],143:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -12589,7 +12609,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":141}],143:[function(require,module,exports){
+},{"super-json":142}],144:[function(require,module,exports){
 module.exports={
   "bd": "bdt",
   "be": "eur",
