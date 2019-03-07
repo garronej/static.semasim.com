@@ -468,7 +468,7 @@
   color: #d69840 !important;
 }
 .color-white {
-  color: #ffffff !important;
+  color: #fff !important;
 }
 .color-dark {
   color: #262d37 !important;
@@ -491,54 +491,54 @@
 /* ------------------ Backgrounds --------------------*/
 .white-bg {
   color: #333333 !important;
-  background-color: #ffffff !important;
+  background-color: #fff !important;
 }
 .red-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #db5565 !important;
 }
 .red-light-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #df6a78 !important;
 }
 .red-dark-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #c04b59 !important;
 }
 .blue-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #0bacd3 !important;
 }
 .blue-light-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #29b6d8 !important;
 }
 .blue-dark-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #0a97b9 !important;
 }
 .green-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #51bf87 !important;
 }
 .green-light-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #66c796 !important;
 }
 .green-dark-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #47a877 !important;
 }
 .yellow-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #f4ad49 !important;
 }
 .yellow-light-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #f5b75f !important;
 }
 .yellow-dark-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #d69840 !important;
 }
 .gray-bg {
@@ -562,15 +562,15 @@
   background-color: #222222 !important;
 }
 .dark-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #262d37 !important;
 }
 .dark-light-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #303946 !important;
 }
 .dark-dark-bg {
-  color: #ffffff !important;
+  color: #fff !important;
   background-color: #1c2128 !important;
 }
 /* ------------------ Opacity --------------------*/
@@ -660,126 +660,151 @@ a.text-dark:focus {
 .rotate0 {
   -webkit-transform: rotate(0deg);
   -ms-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
   transform: rotate(0deg);
 }
 .rotate15 {
   -webkit-transform: rotate(15deg);
   -ms-transform: rotate(15deg);
+  -o-transform: rotate(15deg);
   transform: rotate(15deg);
 }
 .rotate30 {
   -webkit-transform: rotate(30deg);
   -ms-transform: rotate(30deg);
+  -o-transform: rotate(30deg);
   transform: rotate(30deg);
 }
 .rotate45 {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
   transform: rotate(45deg);
 }
 .rotate60 {
   -webkit-transform: rotate(60deg);
   -ms-transform: rotate(60deg);
+  -o-transform: rotate(60deg);
   transform: rotate(60deg);
 }
 .rotate75 {
   -webkit-transform: rotate(75deg);
   -ms-transform: rotate(75deg);
+  -o-transform: rotate(75deg);
   transform: rotate(75deg);
 }
 .rotate90 {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
   transform: rotate(90deg);
 }
 .rotate105 {
   -webkit-transform: rotate(105deg);
   -ms-transform: rotate(105deg);
+  -o-transform: rotate(105deg);
   transform: rotate(105deg);
 }
 .rotate120 {
   -webkit-transform: rotate(120deg);
   -ms-transform: rotate(120deg);
+  -o-transform: rotate(120deg);
   transform: rotate(120deg);
 }
 .rotate135 {
   -webkit-transform: rotate(135deg);
   -ms-transform: rotate(135deg);
+  -o-transform: rotate(135deg);
   transform: rotate(135deg);
 }
 .rotate150 {
   -webkit-transform: rotate(150deg);
   -ms-transform: rotate(150deg);
+  -o-transform: rotate(150deg);
   transform: rotate(150deg);
 }
 .rotate165 {
   -webkit-transform: rotate(165deg);
   -ms-transform: rotate(165deg);
+  -o-transform: rotate(165deg);
   transform: rotate(165deg);
 }
 .rotate180 {
   -webkit-transform: rotate(180deg);
   -ms-transform: rotate(180deg);
+  -o-transform: rotate(180deg);
   transform: rotate(180deg);
 }
 .rotateM15 {
   -webkit-transform: rotate(-15deg);
   -ms-transform: rotate(-15deg);
+  -o-transform: rotate(-15deg);
   transform: rotate(-15deg);
 }
 .rotateM30 {
   -webkit-transform: rotate(-30deg);
   -ms-transform: rotate(-30deg);
+  -o-transform: rotate(-30deg);
   transform: rotate(-30deg);
 }
 .rotateM45 {
   -webkit-transform: rotate(-45deg);
   -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
   transform: rotate(-45deg);
 }
 .rotateM60 {
   -webkit-transform: rotate(-60deg);
   -ms-transform: rotate(-60deg);
+  -o-transform: rotate(-60deg);
   transform: rotate(-60deg);
 }
 .rotateM75 {
   -webkit-transform: rotate(-75deg);
   -ms-transform: rotate(-75deg);
+  -o-transform: rotate(-75deg);
   transform: rotate(-75deg);
 }
 .rotateM90 {
   -webkit-transform: rotate(-90deg);
   -ms-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
   transform: rotate(-90deg);
 }
 .rotateM105 {
   -webkit-transform: rotate(-105deg);
   -ms-transform: rotate(-105deg);
+  -o-transform: rotate(-105deg);
   transform: rotate(-105deg);
 }
 .rotateM120 {
   -webkit-transform: rotate(-120deg);
   -ms-transform: rotate(-120deg);
+  -o-transform: rotate(-120deg);
   transform: rotate(-120deg);
 }
 .rotateM135 {
   -webkit-transform: rotate(-135deg);
   -ms-transform: rotate(-135deg);
+  -o-transform: rotate(-135deg);
   transform: rotate(-135deg);
 }
 .rotateM150 {
   -webkit-transform: rotate(-150deg);
   -ms-transform: rotate(-150deg);
+  -o-transform: rotate(-150deg);
   transform: rotate(-150deg);
 }
 .rotateM165 {
   -webkit-transform: rotate(-165deg);
   -ms-transform: rotate(-165deg);
+  -o-transform: rotate(-165deg);
   transform: rotate(-165deg);
 }
 .rotateM180 {
   -webkit-transform: rotate(-180deg);
   -ms-transform: rotate(-180deg);
+  -o-transform: rotate(-180deg);
   transform: rotate(-180deg);
 }
 /* ------------------ Other --------------------*/
@@ -851,6 +876,8 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   padding-top: 0;
 }
 * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
   outline: none !important;
 }
@@ -906,7 +933,9 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   left: 0;
   top: 0;
   z-index: 10;
-  background-color: #ffffff;
+  background-color: #fff;
+  -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.15);
   box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.15);
 }
 .page-navbar.header-fixed {
@@ -966,7 +995,10 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   color: #333333;
   padding: 15px 20px;
   height: 50px;
+  -webkit-transition: background;
+  -o-transition: background;
   transition: background;
+  -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
 .page-navbar .navbar-nav > li > a i {
@@ -1115,7 +1147,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   padding: 10px 0 10px 20px;
 }
 .page-sidebar.collapse-sidebar .nav li.hover-li a i {
-  color: #ffffff;
+  color: #fff;
   float: left !important;
   margin-left: 6px;
 }
@@ -1123,7 +1155,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   border-bottom-right-radius: 0;
   border-top-right-radius: 3px;
   background-color: #1c2128;
-  color: #ffffff;
+  color: #fff;
 }
 .page-sidebar.collapse-sidebar .nav li.hover-li a.active:before {
   background-color: transparent !important;
@@ -1221,7 +1253,10 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   position: relative;
   line-height: 20px;
   letter-spacing: 0.3px;
+  -webkit-transition: background;
+  -o-transition: background;
   transition: background;
+  -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
 .page-sidebar .side-nav .nav > li a i {
@@ -1229,14 +1264,20 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   margin-right: 15px;
   color: #8b929a;
   float: left;
+  -webkit-transition: color;
+  -o-transition: color;
   transition: color;
+  -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
 .page-sidebar .side-nav .nav > li a i.sideNav-arrow {
   float: right;
   margin-right: 5px;
   font-size: 14px;
+  -webkit-transition: all;
+  -o-transition: all;
   transition: all;
+  -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
 .page-sidebar .side-nav .nav > li a .txt {
@@ -1244,21 +1285,21 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
 }
 .page-sidebar .side-nav .nav > li a:hover {
   background-color: #1c2128;
-  color: #ffffff;
+  color: #fff;
 }
 .page-sidebar .side-nav .nav > li a:hover i {
-  color: #ffffff;
+  color: #fff;
 }
 .page-sidebar .side-nav .nav > li a.active {
   background-color: #262d37;
-  color: #ffffff;
+  color: #fff;
 }
 .page-sidebar .side-nav .nav > li a.active i {
-  color: #ffffff;
+  color: #fff;
 }
 .page-sidebar .side-nav .nav > li a.active:before {
-  background-color: #ffffff !important;
-  border-color: #ffffff !important;
+  background-color: #fff !important;
+  border-color: #fff !important;
 }
 .page-sidebar .side-nav .nav > li a:focus {
   background-color: #303946;
@@ -1266,10 +1307,10 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
 }
 .page-sidebar .side-nav .nav > li a.expand {
   background-color: #1c2128;
-  color: #ffffff;
+  color: #fff;
 }
 .page-sidebar .side-nav .nav > li a.expand i {
-  color: #ffffff;
+  color: #fff;
 }
 .page-sidebar .side-nav .nav > li a .label {
   float: right;
@@ -1289,13 +1330,19 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   position: relative;
 }
 .page-sidebar .side-nav .nav > li ul.sub > li a {
+  -webkit-transition: color;
+  -o-transition: color;
   transition: color;
+  -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
   padding: 5px 20px 4px 60px;
   position: relative;
 }
 .page-sidebar .side-nav .nav > li ul.sub > li a i {
+  -webkit-transition: color;
+  -o-transition: color;
   transition: color;
+  -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
 .page-sidebar .side-nav .nav > li ul.sub > li a:before {
@@ -1310,7 +1357,10 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   position: absolute;
   z-index: 12;
   background-color: #1c2128;
+  -webkit-transition: border-color;
+  -o-transition: border-color;
   transition: border-color;
+  -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
 .page-sidebar .side-nav .nav > li ul.sub > li a:after {
@@ -1324,7 +1374,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   z-index: 10;
 }
 .page-sidebar .side-nav .nav > li ul.sub > li a:hover:before {
-  border-color: #ffffff;
+  border-color: #fff;
 }
 .page-sidebar .side-nav .nav > li ul.sub > li:first-child a {
   padding-top: 10px;
@@ -1423,7 +1473,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   width: 64px;
 }
 .page-sidebar .user-info .name {
-  color: #ffffff;
+  color: #fff;
   float: left;
   width: 100px;
   font-weight: normal;
@@ -1481,7 +1531,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   right: 0;
   bottom: 0;
   width: 210px;
-  background: #ffffff;
+  background: #fff;
   border-left: 1px solid #e3e3e3;
   z-index: -1;
 }
@@ -1505,7 +1555,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
 }
 #right-sidebar .tabs .nav-tabs li a {
   border-radius: 0;
-  background-color: #ffffff;
+  background-color: #fff;
   padding: 15px 15px 14px;
   box-shadow: none;
   border-bottom: 1px solid #e3e3e3;
@@ -1541,7 +1591,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   position: relative;
   padding: 5px 0;
   text-decoration: none;
-  color: #555555;
+  color: #555;
 }
 #right-sidebar .user-list .list-group-item a .avatar {
   float: left;
@@ -1591,7 +1641,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   top: 51px;
   right: 0;
   bottom: 130px;
-  background: #ffffff;
+  background: #fff;
   width: 210px;
   z-index: 10;
   border-left: 1px solid #e3e3e3;
@@ -1616,7 +1666,10 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   border-radius: 50%;
   margin-right: 5px;
   border: 1px solid transparent;
+  -webkit-transition: border;
+  -o-transition: border;
   transition: border;
+  -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
 #right-sidebar .chat-messages li .chat-name {
@@ -1659,7 +1712,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   margin-left: -7px;
 }
 #right-sidebar .chat-messages li .message.message-success {
-  color: #ffffff;
+  color: #fff;
   background-color: #9edbbc;
 }
 #right-sidebar .chat-messages li .message.message-success:after {
@@ -1669,7 +1722,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   border-bottom-color: #9edbbc;
 }
 #right-sidebar .chat-messages li .message.message-info {
-  color: #ffffff;
+  color: #fff;
   background-color: #6acce4;
 }
 #right-sidebar .chat-messages li .message.message-info:after {
@@ -1679,7 +1732,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   border-bottom-color: #6acce4;
 }
 #right-sidebar .chat-messages li .message.message-danger {
-  color: #ffffff;
+  color: #fff;
   background-color: #eda9b1;
 }
 #right-sidebar .chat-messages li .message.message-danger:after {
@@ -1691,7 +1744,10 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
 #right-sidebar .chat-messages li.chat-back {
   background-color: #eeeeee;
   border-bottom: 1px solid #e3e3e3;
+  -webkit-transition: background;
+  -o-transition: background;
   transition: background;
+  -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
 #right-sidebar .chat-messages li.chat-back:hover {
@@ -1717,7 +1773,7 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   position: fixed;
   bottom: 0;
   right: 0;
-  background: #ffffff;
+  background: #fff;
   width: 210px;
   border-left: 1px solid #e3e3e3;
   z-index: 11;
@@ -1777,6 +1833,8 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   margin-right: -20px;
   margin-left: -20px;
   margin-bottom: 20px;
+  -webkit-box-shadow: 0px 1px 0px 0px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0px 1px 0px 0px rgba(0, 0, 0, 0.1);
   box-shadow: 0px 1px 0px 0px rgba(0, 0, 0, 0.1);
 }
 .page-content #page-header .page-header {
@@ -1848,6 +1906,8 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
   margin-top: 4px;
 }
 .jqstooltip {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
   box-sizing: content-box;
   border-color: #344154 !important;
   opacity: 0.8;
@@ -1869,49 +1929,49 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
    Code styles
 ----------------------------------------- */
 .pln {
-  color: #000000;
+  color: #000;
 }
 @media screen {
   .str {
-    color: #008800;
+    color: #080;
   }
   .kwd {
-    color: #000088;
+    color: #008;
   }
   .com {
-    color: #880000;
+    color: #800;
   }
   .typ {
-    color: #660066;
+    color: #606;
   }
   .lit {
-    color: #006666;
+    color: #066;
   }
   .pun,
   .opn,
   .clo {
-    color: #666600;
+    color: #660;
   }
   .tag {
-    color: #000088;
+    color: #008;
   }
   .atn {
-    color: #660066;
+    color: #606;
   }
   .atv {
-    color: #008800;
+    color: #080;
   }
   .dec,
   .var {
-    color: #660066;
+    color: #606;
   }
   .fun {
-    color: #ff0000;
+    color: red;
   }
 }
 @media print, projection {
   .str {
-    color: #006600;
+    color: #060;
   }
   .kwd {
     color: #006;
@@ -1926,27 +1986,27 @@ body.fixed-right-sidebar:not(.fixed-header) #right-sidebar.rstop {
     font-weight: bold;
   }
   .lit {
-    color: #004444;
+    color: #044;
   }
   .pun,
   .opn,
   .clo {
-    color: #444400;
+    color: #440;
   }
   .tag {
     color: #006;
     font-weight: bold;
   }
   .atn {
-    color: #440044;
+    color: #404;
   }
   .atv {
-    color: #006600;
+    color: #060;
   }
 }
 pre.prettyprint {
   padding: 2px;
-  border: 1px solid #888888;
+  border: 1px solid #888;
 }
 ol.linenums {
   margin-top: 0;
@@ -1967,7 +2027,7 @@ li.L3,
 li.L5,
 li.L7,
 li.L9 {
-  background: #eeeeee;
+  background: #eee;
 }
 /* -----------------------------------------
    Back to top
@@ -1986,7 +2046,10 @@ li.L9 {
   background: rgba(0, 0, 0, 0.4) url(../img/backtop.png) no-repeat center center;
   text-indent: -9999px;
   border-radius: 3px;
+  -webkit-transition: all;
+  -o-transition: all;
   transition: all;
+  -webkit-transition-duration: 0.4;
   transition-duration: 0.4;
 }
 #back-to-top a:hover {
@@ -2045,7 +2108,7 @@ li.L9 {
   padding: 8px 15px 8px 17px;
   margin: 0;
   background-color: #455264;
-  color: #ffffff;
+  color: #fff;
   border-top: 1px solid #2e3743;
   border-bottom: 1px solid #2e3743;
 }
@@ -2090,6 +2153,7 @@ li.L9 {
   cursor: pointer;
   border-radius: 50%;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0);
+  -webkit-transition: box-shadow 0.3s ease;
   transition: box-shadow 0.3s ease;
   border: none;
   background-color: none;
@@ -2108,7 +2172,7 @@ li.L9 {
   cursor: pointer;
   position: absolute;
   background-color: rgba(255, 255, 255, 0.7);
-  transition: background-color 0.3s ease, -webkit-transform 0.3s ease;
+  -webkit-transition: background-color 0.3s ease, -webkit-transform 0.3s ease;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 .dotstyle li a:hover,
@@ -2127,7 +2191,6 @@ li.L9 {
 }
 .dotstyle li.active a {
   -webkit-transform: scale(0.4);
-  -ms-transform: scale(0.4);
   transform: scale(0.4);
   background-color: white;
 }
@@ -2153,7 +2216,7 @@ li.L9 {
 ----------------------------------------- */
 .pricing-table {
   position: relative;
-  background: #ffffff;
+  background: #fff;
   margin-top: 25px;
   margin-bottom: 50px;
 }
@@ -2170,7 +2233,7 @@ li.L9 {
   display: inline-block;
   text-transform: uppercase;
   background-color: #d5d5d5;
-  border: 5px solid #ffffff;
+  border: 5px solid #fff;
   padding: 15px 0;
   margin: 0;
   margin-top: -25px;
@@ -2233,10 +2296,10 @@ li.L9 {
 }
 .pricing-table.blue .pricing-header h3 {
   background-color: #54c5e0;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.blue .pricing-header h3 i {
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.blue ul.list-group li:first-child {
   border-top: none;
@@ -2247,35 +2310,35 @@ li.L9 {
 .pricing-table.blue ul.list-group li {
   background-color: #29b6d8;
   border: 1px solid #24a5c4;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.blue .pricing-bottom {
   border: 1px solid #24a5c4;
 }
 .pricing-table.blue .pricing-bottom .price {
   background-color: #2093ae;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.blue .pricing-bottom .price .btn {
-  color: #ffffff;
+  color: #fff;
   background-color: #145c6e;
   border-color: #145c6e;
 }
 .pricing-table.blue .pricing-bottom .price .btn:focus,
 .pricing-table.blue .pricing-bottom .price .btn.focus {
-  color: #ffffff;
+  color: #fff;
   background-color: #0c3842;
   border-color: #000102;
 }
 .pricing-table.blue .pricing-bottom .price .btn:hover {
-  color: #ffffff;
+  color: #fff;
   background-color: #0c3842;
   border-color: #0b313a;
 }
 .pricing-table.blue .pricing-bottom .price .btn:active,
 .pricing-table.blue .pricing-bottom .price .btn.active,
 .open > .dropdown-toggle.pricing-table.blue .pricing-bottom .price .btn {
-  color: #ffffff;
+  color: #fff;
   background-color: #0c3842;
   border-color: #0b313a;
 }
@@ -2288,7 +2351,7 @@ li.L9 {
 .pricing-table.blue .pricing-bottom .price .btn:active.focus,
 .pricing-table.blue .pricing-bottom .price .btn.active.focus,
 .open > .dropdown-toggle.pricing-table.blue .pricing-bottom .price .btn.focus {
-  color: #ffffff;
+  color: #fff;
   background-color: #071e24;
   border-color: #000102;
 }
@@ -2320,7 +2383,7 @@ fieldset[disabled] .pricing-table.blue .pricing-bottom .price .btn.active {
 }
 .pricing-table.blue .pricing-bottom .price .btn .badge {
   color: #145c6e;
-  background-color: #ffffff;
+  background-color: #fff;
 }
 .pricing-table.red {
   background-color: #df6a78;
@@ -2330,7 +2393,7 @@ fieldset[disabled] .pricing-table.blue .pricing-bottom .price .btn.active {
 }
 .pricing-table.red .pricing-header h3 {
   background-color: #e8949e;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.red ul.list-group li:first-child {
   border-top: none;
@@ -2341,35 +2404,35 @@ fieldset[disabled] .pricing-table.blue .pricing-bottom .price .btn.active {
 .pricing-table.red ul.list-group li {
   background-color: #df6a78;
   border: 1px solid #da5565;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.red .pricing-bottom {
   border: 1px solid #da5565;
 }
 .pricing-table.red .pricing-bottom .price {
   background-color: #d64052;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.red .pricing-bottom .price .btn {
-  color: #ffffff;
+  color: #fff;
   background-color: #a62433;
   border-color: #a62433;
 }
 .pricing-table.red .pricing-bottom .price .btn:focus,
 .pricing-table.red .pricing-bottom .price .btn.focus {
-  color: #ffffff;
+  color: #fff;
   background-color: #7c1b26;
   border-color: #3d0d13;
 }
 .pricing-table.red .pricing-bottom .price .btn:hover {
-  color: #ffffff;
+  color: #fff;
   background-color: #7c1b26;
   border-color: #731924;
 }
 .pricing-table.red .pricing-bottom .price .btn:active,
 .pricing-table.red .pricing-bottom .price .btn.active,
 .open > .dropdown-toggle.pricing-table.red .pricing-bottom .price .btn {
-  color: #ffffff;
+  color: #fff;
   background-color: #7c1b26;
   border-color: #731924;
 }
@@ -2382,7 +2445,7 @@ fieldset[disabled] .pricing-table.blue .pricing-bottom .price .btn.active {
 .pricing-table.red .pricing-bottom .price .btn:active.focus,
 .pricing-table.red .pricing-bottom .price .btn.active.focus,
 .open > .dropdown-toggle.pricing-table.red .pricing-bottom .price .btn.focus {
-  color: #ffffff;
+  color: #fff;
   background-color: #5f141d;
   border-color: #3d0d13;
 }
@@ -2414,7 +2477,7 @@ fieldset[disabled] .pricing-table.red .pricing-bottom .price .btn.active {
 }
 .pricing-table.red .pricing-bottom .price .btn .badge {
   color: #a62433;
-  background-color: #ffffff;
+  background-color: #fff;
 }
 .pricing-table.green {
   background-color: #66c796;
@@ -2424,7 +2487,7 @@ fieldset[disabled] .pricing-table.red .pricing-bottom .price .btn.active {
 }
 .pricing-table.green .pricing-header h3 {
   background-color: #8bd5b0;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.green ul.list-group li:first-child {
   border-top: none;
@@ -2435,35 +2498,35 @@ fieldset[disabled] .pricing-table.red .pricing-bottom .price .btn.active {
 .pricing-table.green ul.list-group li {
   background-color: #66c796;
   border: 1px solid #53c089;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.green .pricing-bottom {
   border: 1px solid #53c089;
 }
 .pricing-table.green .pricing-bottom .price {
   background-color: #43b77c;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.green .pricing-bottom .price .btn {
-  color: #ffffff;
+  color: #fff;
   background-color: #2e7f56;
   border-color: #2e7f56;
 }
 .pricing-table.green .pricing-bottom .price .btn:focus,
 .pricing-table.green .pricing-bottom .price .btn.focus {
-  color: #ffffff;
+  color: #fff;
   background-color: #215a3d;
   border-color: #0c2217;
 }
 .pricing-table.green .pricing-bottom .price .btn:hover {
-  color: #ffffff;
+  color: #fff;
   background-color: #215a3d;
   border-color: #1e5238;
 }
 .pricing-table.green .pricing-bottom .price .btn:active,
 .pricing-table.green .pricing-bottom .price .btn.active,
 .open > .dropdown-toggle.pricing-table.green .pricing-bottom .price .btn {
-  color: #ffffff;
+  color: #fff;
   background-color: #215a3d;
   border-color: #1e5238;
 }
@@ -2476,7 +2539,7 @@ fieldset[disabled] .pricing-table.red .pricing-bottom .price .btn.active {
 .pricing-table.green .pricing-bottom .price .btn:active.focus,
 .pricing-table.green .pricing-bottom .price .btn.active.focus,
 .open > .dropdown-toggle.pricing-table.green .pricing-bottom .price .btn.focus {
-  color: #ffffff;
+  color: #fff;
   background-color: #17402b;
   border-color: #0c2217;
 }
@@ -2508,7 +2571,7 @@ fieldset[disabled] .pricing-table.green .pricing-bottom .price .btn.active {
 }
 .pricing-table.green .pricing-bottom .price .btn .badge {
   color: #2e7f56;
-  background-color: #ffffff;
+  background-color: #fff;
 }
 .pricing-table.yellow {
   background-color: #f5b75f;
@@ -2518,7 +2581,7 @@ fieldset[disabled] .pricing-table.green .pricing-bottom .price .btn.active {
 }
 .pricing-table.yellow .pricing-header h3 {
   background-color: #f8cd8f;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.yellow ul.list-group li:first-child {
   border-top: none;
@@ -2529,35 +2592,35 @@ fieldset[disabled] .pricing-table.green .pricing-bottom .price .btn.active {
 .pricing-table.yellow ul.list-group li {
   background-color: #f5b75f;
   border: 1px solid #f4ac47;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.yellow .pricing-bottom {
   border: 1px solid #f4ac47;
 }
 .pricing-table.yellow .pricing-bottom .price {
   background-color: #f2a12f;
-  color: #ffffff;
+  color: #fff;
 }
 .pricing-table.yellow .pricing-bottom .price .btn {
-  color: #ffffff;
+  color: #fff;
   background-color: #c87b0c;
   border-color: #c87b0c;
 }
 .pricing-table.yellow .pricing-bottom .price .btn:focus,
 .pricing-table.yellow .pricing-bottom .price .btn.focus {
-  color: #ffffff;
+  color: #fff;
   background-color: #985d09;
   border-color: #503105;
 }
 .pricing-table.yellow .pricing-bottom .price .btn:hover {
-  color: #ffffff;
+  color: #fff;
   background-color: #985d09;
   border-color: #8e5709;
 }
 .pricing-table.yellow .pricing-bottom .price .btn:active,
 .pricing-table.yellow .pricing-bottom .price .btn.active,
 .open > .dropdown-toggle.pricing-table.yellow .pricing-bottom .price .btn {
-  color: #ffffff;
+  color: #fff;
   background-color: #985d09;
   border-color: #8e5709;
 }
@@ -2570,7 +2633,7 @@ fieldset[disabled] .pricing-table.green .pricing-bottom .price .btn.active {
 .pricing-table.yellow .pricing-bottom .price .btn:active.focus,
 .pricing-table.yellow .pricing-bottom .price .btn.active.focus,
 .open > .dropdown-toggle.pricing-table.yellow .pricing-bottom .price .btn.focus {
-  color: #ffffff;
+  color: #fff;
   background-color: #764907;
   border-color: #503105;
 }
@@ -2602,7 +2665,7 @@ fieldset[disabled] .pricing-table.yellow .pricing-bottom .price .btn.active {
 }
 .pricing-table.yellow .pricing-bottom .price .btn .badge {
   color: #c87b0c;
-  background-color: #ffffff;
+  background-color: #fff;
 }
 /* -----------------------------------------
    Input sizes
@@ -2687,13 +2750,13 @@ fieldset[disabled] .pricing-table.yellow .pricing-bottom .price .btn.active {
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 .tt-hint {
-  color: #999999;
+  color: #999;
 }
 .tt-dropdown-menu {
   width: 250px;
   margin-top: 5px;
   padding: 5px 0;
-  background-color: #ffffff;
+  background-color: #fff;
   border: 1px solid #efefef;
   border-radius: 3px;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
@@ -2718,7 +2781,7 @@ fieldset[disabled] .pricing-table.yellow .pricing-bottom .price .btn.active {
     display: inline-block; */
   max-width: 150px;
   padding: 3px 8px;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
   text-decoration: none;
   background-color: #344154 !important;
@@ -2807,7 +2870,7 @@ fieldset[disabled] .pricing-table.yellow .pricing-bottom .price .btn.active {
   border: solid 1px #344154;
   border-radius: 3px;
   background: #344154;
-  color: #ffffff;
+  color: #fff;
   font-family: sans-serif, Verdana;
   font-size: smaller;
   padding: 3px 5px;
@@ -3057,7 +3120,7 @@ fieldset[disabled] .pricing-table.yellow .pricing-bottom .price .btn.active {
   margin-top: 13px;
 }
 .progressbar-stats-1 {
-  color: #ffffff;
+  color: #fff;
 }
 .progressbar-stats-1.dark {
   color: #666666;
@@ -3477,8 +3540,9 @@ div.gallery-upload .dropzone .dz-message:after {
   }
   #header .navbar-nav li.open .dropdown-menu {
     position: absolute;
-    background-color: #ffffff;
+    background-color: #fff;
     float: left;
+    -webkit-box-shadow: 0 4px 10px rgba(0, 0, 0, 0.175);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.175);
   }
   #header .navbar-nav li.open .dropdown-menu li {
@@ -3556,7 +3620,7 @@ div.gallery-upload .dropzone .dz-message:after {
     display: none;
   }
   /* ------------------ Weather --------------------*/
-  .panel.mb0 {
+  .weather .panel.mb0 {
     margin-bottom: 20px !important;
   }
   .weather h5 {
