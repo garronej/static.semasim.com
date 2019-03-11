@@ -1,5 +1,5 @@
 /*
- * JsSIP v3.2.4
+ * JsSIP v3.2.4 (hacked by garronej)
  * the Javascript SIP library
  * Copyright: 2012-2018 José Luis Millán <jmillan@aliax.net> (https://github.com/jmillan)
  * Homepage: http://jssip.net
@@ -15978,10 +15978,12 @@ module.exports = function (_EventEmitter) {
 
         var _listener = void 0;
 
+        //garronej: This have been hacked to reflect the documentation.
         connection.addEventListener('icecandidate', _listener = function listener(event) {
           var candidate = event.candidate;
 
-          if (!candidate) {
+          var ready= function(){
+
             connection.removeEventListener('icecandidate', _listener);
             _this15._rtcReady = true;
 
@@ -15994,7 +15996,18 @@ module.exports = function (_EventEmitter) {
               onSuccess(e.sdp);
             }
             onSuccess = null;
+
+          };
+
+          if (!candidate) {
+               ready();
+          }else{
+               _this15.emit('icecandidate', {
+                "candidate": candidate,
+                "ready": ready
+              });
           }
+
         });
 
         connection.setLocalDescription(desc).then(function () {
