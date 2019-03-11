@@ -3195,12 +3195,9 @@ var Ua = /** @class */ (function () {
                                             return playAudioStream(stream);
                                         };
                                 },
-                                "failed": function () {
-                                    console.log("=====>", arguments);
-                                    evtTerminated.post();
-                                },
                                 "confirmed": function () { return evtEstablished.post(); },
                                 "ended": function () { return evtTerminated.post(); },
+                                "failed": function () { return evtTerminated.post(); },
                                 "sending": function (_a) {
                                     var request = _a.request;
                                     return _this.evtRingback.waitFor(function (callId) { return callId === request.call_id; }, 30000)
@@ -3375,9 +3372,9 @@ function newIceCandidateHandler(rtcICEServer) {
     var readyTimer = undefined;
     return function (data) {
         var candidate = data.candidate, ready = data.ready;
-        console.log(candidate);
+        //console.log(candidate);
         var readyState = isReady(candidate.candidate);
-        console.log(readyState);
+        //console.log(readyState);
         switch (readyState) {
             case "NOT READY": return;
             case "AT LEAST ONE RELAY CANDIDATE READY":
@@ -3397,7 +3394,7 @@ function newIceCandidateHandler(rtcICEServer) {
 }
 (function (newIceCandidateHandler) {
     function isReadyFactory(rtcICEServer) {
-        console.log(JSON.stringify(rtcICEServer, null, 2));
+        //console.log(JSON.stringify(rtcICEServer, null, 2));
         var p = (function () {
             var urls = typeof rtcICEServer.urls === "string" ?
                 [rtcICEServer.urls] : rtcICEServer.urls;
@@ -3409,7 +3406,7 @@ function newIceCandidateHandler(rtcICEServer) {
                 "lines": new Array()
             };
         })();
-        console.log(JSON.stringify(p, null, 2));
+        //console.log(JSON.stringify(p, null, 2));
         return function (line) {
             p.lines.push(line);
             var isRtcpExcepted = !!p.lines
@@ -4475,13 +4472,10 @@ var UiVoiceCall = /** @class */ (function () {
         this.btnGreen.addClass("hide");
         this.btnRed.addClass("hide");
         this.showModal();
-        //TODO: Figure out why this throw in webview.
         try {
             ion.sound.stop("semasim_ringtone");
         }
-        catch (error) {
-            console.log("ion.sound.stop thrown Exception", error);
-        }
+        catch (_a) { }
         switch (state) {
             case "RINGING":
                 ion.sound.play("semasim_ringtone", { "loop": true });
@@ -4572,7 +4566,6 @@ var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
 var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
 var phone_number_1 = require("phone-number");
-//import * as DetectRTC from "detectrtc";
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var backToAndroidAppUrl_1 = require("../../../shared/dist/lib/backToAndroidAppUrl");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiWebphoneController.html"), "UiWebphoneController");
@@ -5167,7 +5160,6 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
 var types = require("../../../shared/dist/lib/types");
-//import * as DetectRTC from "detectrtc";
 var phone_number_1 = require("phone-number");
 var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
 var backToAndroidAppUrl_1 = require("../../../shared/dist/lib/backToAndroidAppUrl");
@@ -5226,27 +5218,6 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                     remoteApiCaller
                         .getOrCreateWdInstance(userSim_1)
                         .then(function (wdInstance) { return wdInstance; }),
-                    /*
-                new Promise<void>(resolve => DetectRTC.load(async () => {
-    
-                    if (!DetectRTC.isRtpDataChannelsSupported) {
-    
-                        await new Promise(resolve =>
-                            bootbox_custom.alert(
-                                "Call not supported by this browser sorry. ( Try updating google chrome ) ",
-                                () => resolve()
-                            )
-                        );
-    
-                        window.location.href = backToAppUrl;
-                        return;
-    
-                    }
-    
-                    resolve();
-    
-                })),
-                */
                     Ua_1.Ua.init()
                 ])];
             case 4:
