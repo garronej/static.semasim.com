@@ -2880,6 +2880,7 @@ function hasOwnProperty(obj, prop) {
 },{"./support/isBuffer":7,"_process":6,"inherits":4}],9:[function(require,module,exports){
 (function (Buffer){
 "use strict";
+//NOTE: Require jssip_compat loaded on the page.
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -2942,6 +2943,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var phone_number_1 = require("phone-number");
@@ -2953,11 +2958,6 @@ var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCalle
 var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
-/*
-const pcConfig: RTCConfiguration = {
-    "iceServers": [{ "urls": ["stun:stun1.l.google.com:19302"] }]
-};
-*/
 var Ua = /** @class */ (function () {
     function Ua(userSim) {
         var _this = this;
@@ -3281,6 +3281,7 @@ var JsSipSocket = /** @class */ (function () {
                         if (gateway_1.readImsi(sipPacket) !== imsi) {
                             return;
                         }
+                        sipPacket = _this.sdpHacks(sipPacket);
                         _this.evtSipPacket.post(sipPacket);
                         _this.ondata(sip.toData(sipPacket).toString("utf8"));
                     };
@@ -3296,6 +3297,25 @@ var JsSipSocket = /** @class */ (function () {
             });
         }); })();
     }
+    JsSipSocket.prototype.sdpHacks = function (sipPacket) {
+        if (sipPacket.headers["content-type"] !== "application/sdp") {
+            return sipPacket;
+        }
+        //NOTE: Sdp Hack for Mozilla
+        if (/firefox/i.test(navigator.userAgent)) {
+            console.log("Firefox SDP hack !");
+            var parsedSdp = sip.parseSdp(sip.getPacketContent(sipPacket).toString("utf8"));
+            var a = parsedSdp["m"][0]["a"];
+            if (!!a.find(function (v) { return /^mid:/i.test(v); })) {
+                return sipPacket;
+            }
+            parsedSdp["m"][0]["a"] = __spread(a, ["mid:0"]);
+            var modifiedSipPacket = sip.clonePacket(sipPacket);
+            sip.setPacketContent(modifiedSipPacket, sip.stringifySdp(parsedSdp));
+            return modifiedSipPacket;
+        }
+        return sipPacket;
+    };
     JsSipSocket.prototype.connect = function () {
         this.onconnect();
     };
