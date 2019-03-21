@@ -2878,1092 +2878,584 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./support/isBuffer":7,"_process":6,"inherits":4}],9:[function(require,module,exports){
+(function (Buffer){
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiButtonBar.html"), "UiButtonBar");
-var UiButtonBar = /** @class */ (function () {
-    function UiButtonBar() {
-        var _this = this;
-        this.structure = html.structure.clone();
-        /** true if detail was clicked */
-        this.evtToggleDetailVisibility = new ts_events_extended_1.SyncEvent();
-        this.evtClickDelete = new ts_events_extended_1.VoidSyncEvent();
-        this.evtClickShare = new ts_events_extended_1.VoidSyncEvent();
-        this.evtClickRename = new ts_events_extended_1.VoidSyncEvent();
-        this.evtClickReboot = new ts_events_extended_1.VoidSyncEvent();
-        this.evtClickContacts = new ts_events_extended_1.VoidSyncEvent();
-        this.buttons = this.structure.find("button");
-        this.btnDetail = $(this.buttons.get(0));
-        this.btnBack = $(this.buttons.get(1));
-        this.btnDelete = $(this.buttons.get(2));
-        this.btnContacts = $(this.buttons.get(3));
-        this.btnShare = $(this.buttons.get(4));
-        this.btnRename = $(this.buttons.get(5));
-        this.btnReboot = $(this.buttons.get(6));
-        this.btnDetail.click(function () {
-            _this.setState({ "areDetailsShown": true });
-            _this.evtToggleDetailVisibility.post(true);
-        });
-        this.btnBack.click(function () {
-            _this.setState({ "areDetailsShown": false });
-            _this.evtToggleDetailVisibility.post(false);
-        });
-        this.btnDelete.click(function () { return _this.evtClickDelete.post(); });
-        this.btnContacts.click(function () { return _this.evtClickContacts.post(); });
-        this.btnShare.tooltip();
-        this.btnShare.click(function () { return _this.evtClickShare.post(); });
-        this.btnRename.click(function () { return _this.evtClickRename.post(); });
-        this.btnReboot.tooltip();
-        this.btnReboot.click(function () { return _this.evtClickReboot.post(); });
-        this.state = (function () {
-            var state = {
-                "isSimRowSelected": false,
-                "isSimSharable": false,
-                "isSimOnline": false,
-                "areDetailsShown": false
-            };
-            return state;
-        })();
-        this.setState({});
-    }
-    UiButtonBar.prototype.setState = function (state) {
-        var _this = this;
-        for (var key in state) {
-            this.state[key] = state[key];
-        }
-        this.buttons.prop("disabled", false);
-        this.btnDetail.show();
-        this.btnBack.show();
-        if (!this.state.isSimRowSelected) {
-            this.buttons.each(function (i) {
-                $(_this.buttons[i]).prop("disabled", true);
-            });
-        }
-        if (this.state.areDetailsShown) {
-            this.btnDetail.hide();
-        }
-        else {
-            this.btnBack.hide();
-        }
-        if (!this.state.isSimSharable) {
-            this.btnShare.prop("disabled", true);
-        }
-        if (!this.state.isSimOnline) {
-            this.btnReboot.prop("disabled", true);
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
         }
     };
-    return UiButtonBar;
-}());
-exports.UiButtonBar = UiButtonBar;
-
-},{"../../../shared/dist/lib/loadUiClassHtml":136,"../templates/UiButtonBar.html":128,"ts-events-extended":127}],10:[function(require,module,exports){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
+var phone_number_1 = require("phone-number");
 var ts_events_extended_1 = require("ts-events-extended");
 var types = require("../../../shared/dist/lib/types");
-var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
-var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var backToAndroidAppUrl_1 = require("../../../shared/dist/lib/backToAndroidAppUrl");
-var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
-var UiButtonBar_1 = require("./UiButtonBar");
-var UiPhonebook_1 = require("./UiPhonebook");
-var UiSimRow_1 = require("./UiSimRow");
-var UiShareSim_1 = require("./UiShareSim");
-var phone_number_1 = require("phone-number");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
-var UiController = /** @class */ (function () {
-    function UiController(userSims, action) {
+var wd = types.webphoneData;
+var moment = require("moment");
+//declare const titlenotifier: any;
+var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiConversation.html"), "UiConversation");
+require("../templates/UiConversation.less");
+//const checkMark= "\u221a";
+var checkMark = Buffer.from("e29c93", "hex").toString("utf8");
+var crossMark = Buffer.from("e29d8c", "hex").toString("utf8");
+var UiConversation = /** @class */ (function () {
+    function UiConversation(userSim, wdChat) {
+        var e_1, _a;
         var _this = this;
-        this.userSims = userSims;
-        this.action = action;
+        this.userSim = userSim;
+        this.wdChat = wdChat;
         this.structure = html.structure.clone();
-        this.uiButtonBar = new UiButtonBar_1.UiButtonBar();
-        this.uiShareSim = new UiShareSim_1.UiShareSim((function () {
-            var evt = new ts_events_extended_1.SyncEvent();
-            localApiHandlers.evtSharingRequestResponse.attach(function (_a) {
-                var userSim = _a.userSim, email = _a.email;
-                return evt.post({ userSim: userSim, email: email });
+        this.evtUpdateContact = new ts_events_extended_1.VoidSyncEvent();
+        this.evtVoiceCall = new ts_events_extended_1.VoidSyncEvent();
+        this.evtSendText = new ts_events_extended_1.SyncEvent();
+        this.evtDelete = new ts_events_extended_1.VoidSyncEvent();
+        this.evtChecked = new ts_events_extended_1.VoidSyncEvent();
+        this.textarea = this.structure.find("textarea");
+        this.aSend = this.structure.find("a.id_send");
+        this.ul = this.structure.find("ul");
+        this.btnUpdateContact = this.structure.find("button.id_updateContact");
+        this.btnCall = this.structure.find("button.id_call");
+        this.btnDelete = this.structure.find("button.id_delete");
+        this.evtLoadMore = new ts_events_extended_1.SyncEvent();
+        /** indexed by wd.Message.id_ */
+        this.uiBubbles = new Map();
+        this.notifyContactNameUpdated();
+        this.setReadonly(true);
+        this.btnUpdateContact
+            .on("click", function () { return _this.evtUpdateContact.post(); });
+        this.btnCall
+            .on("click", function () { return _this.evtVoiceCall.post(); });
+        this.btnDelete
+            .on("click", function () { return _this.evtDelete.post(); });
+        this.structure.find("span.id_number")
+            .on("dblclick", function (e) {
+            e.preventDefault();
+            var selection = window.getSelection();
+            var range = document.createRange();
+            range.selectNodeContents(e.currentTarget);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        });
+        this.aSend.on("click", function () {
+            var text = _this.textarea.val();
+            if (!text || text.match(/^\ +$/)) {
+                return;
+            }
+            _this.evtSendText.post(text);
+            _this.textarea.val("");
+            _this.textarea.trigger("autosize.resizeIncludeStyle");
+        });
+        this.textarea
+            .on("keypress", function (event) {
+            _this.evtChecked.post();
+            if (event.key === "Enter" && !event.shiftKey) {
+                _this.aSend.trigger("click");
+                return false;
+            }
+        })
+            .on("focus", function () { return _this.evtChecked.post(); });
+        this.ul.slimScroll({
+            "position": "right",
+            "distance": '0px',
+            "railVisible": true,
+            "height": '400px',
+            "start": "bottom"
+        }).bind("slimscroll", (function (_e, pos) {
+            if (pos !== "top") {
+                return;
+            }
+            _this.evtLoadMore.post({
+                "onLoaded": function (wdMessages) {
+                    var e_2, _a;
+                    if (wdMessages.length === 0) {
+                        return;
+                    }
+                    var li = _this.ul.find("li:first");
+                    try {
+                        for (var wdMessages_1 = __values(wdMessages), wdMessages_1_1 = wdMessages_1.next(); !wdMessages_1_1.done; wdMessages_1_1 = wdMessages_1.next()) {
+                            var wdMessage = wdMessages_1_1.value;
+                            _this.newMessage(wdMessage, "MUTE");
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (wdMessages_1_1 && !wdMessages_1_1.done && (_a = wdMessages_1.return)) _a.call(wdMessages_1);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                    _this.ul.slimScroll({ "scrollTo": li.position().top + "px" });
+                }
             });
-            localApiHandlers.evtSharedSimUnregistered.attach(function (_a) {
-                var userSim = _a.userSim, email = _a.email;
-                return evt.post({ userSim: userSim, email: email });
-            });
-            return evt;
-        })());
-        this.uiSimRows = [];
-        this.uiPhonebooks = [];
-        this.setState("NO SIM");
-        this.initUiButtonBar();
-        this.initUiShareSim();
-        for (var _i = 0, _a = userSims.sort(function (a, b) { return +b.isOnline - +a.isOnline; }); _i < _a.length; _i++) {
-            var userSim = _a[_i];
-            this.addUserSim(userSim);
+        }));
+        try {
+            for (var _b = __values(this.wdChat.messages), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var wdMessage = _c.value;
+                this.newMessage(wdMessage, "MUTE");
+            }
         }
-        remoteApiCaller.evtUsableSim.attach(function (userSim) { return _this.addUserSim(userSim); });
-        localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) { return _this.removeUserSim(userSim); });
-        this.handleAction();
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        this.unselect();
     }
-    UiController.prototype.setState = function (placeholder) {
-        switch (placeholder) {
-            case "MAIN":
-                {
-                    $("#loader-line-mask").removeClass("loader-line-mask");
-                    this.structure.show();
-                }
-                ;
-                break;
-            case "NO SIM":
-                {
-                    $("#loader-line-mask").addClass("loader-line-mask");
-                    this.structure.hide();
-                }
-                ;
-                break;
+    UiConversation.prototype.setReadonly = function (isReadonly) {
+        if (isReadonly) {
+            this.textarea.attr("disabled", true);
+            this.aSend.hide();
+            this.btnUpdateContact.prop("disabled", true);
+            this.btnCall.prop("disabled", true);
+            this.btnDelete.prop("disabled", true);
+        }
+        else {
+            if (!phone_number_1.phoneNumber.isDialable(this.wdChat.contactNumber)) {
+                return;
+            }
+            this.textarea.removeAttr("disabled");
+            this.aSend.show();
+            this.btnUpdateContact.prop("disabled", false);
+            this.btnCall.prop("disabled", false);
+            this.btnDelete.prop("disabled", false);
         }
     };
-    UiController.prototype.addUserSim = function (userSim) {
+    UiConversation.prototype.setSelected = function () {
         var _this = this;
-        this.setState("MAIN");
-        var uiSimRow = new UiSimRow_1.UiSimRow(userSim);
-        this.uiSimRows.push(uiSimRow);
-        this.structure.append(uiSimRow.structure);
-        uiSimRow.evtSelected.attach(function () {
-            if (_this.uiButtonBar.state.isSimRowSelected) {
-                _this.getSelectedUiSimRow(uiSimRow).unselect();
-            }
-            _this.uiButtonBar.setState({
-                "isSimRowSelected": true,
-                "isSimSharable": types.UserSim.Owned.match(userSim),
-                "isSimOnline": userSim.isOnline
-            });
-        });
-        localApiHandlers.evtSimIsOnlineStatusChange.attach(function (userSim_) { return userSim_ === userSim; }, function () {
-            uiSimRow.populate();
-            if (uiSimRow.isSelected) {
-                _this.uiButtonBar.setState({ "isSimOnline": userSim.isOnline });
-            }
-            var uiPhonebook = _this.uiPhonebooks.find(function (ui) { return ui.userSim === userSim; });
-            if (!!uiPhonebook) {
-                uiPhonebook.updateButtons();
+        this.structure.show({
+            "duration": 0,
+            "complete": function () {
+                _this.ul.slimScroll({ "scrollTo": _this.ul.prop("scrollHeight") + "px" });
+                _this.textarea.trigger("focus");
+                _this.textarea["autosize"]();
             }
         });
-        //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
-        for (var _i = 0, _a = [
-            localApiHandlers.evtContactCreatedOrUpdated,
-            localApiHandlers.evtContactDeleted
-        ]; _i < _a.length; _i++) {
-            var evt = _a[_i];
-            evt.attach(function (_a) {
-                var _userSim = _a.userSim, contact = _a.contact;
-                return _userSim === userSim && contact.mem_index !== undefined;
-            }, function () {
-                uiSimRow.populate();
-            });
+    };
+    UiConversation.prototype.unselect = function () {
+        this.structure.hide();
+    };
+    Object.defineProperty(UiConversation.prototype, "isSelected", {
+        get: function () {
+            return this.structure.is(":visible");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    UiConversation.prototype.notifyContactNameUpdated = function () {
+        var prettyNumber = phone_number_1.phoneNumber.prettyPrint(this.wdChat.contactNumber, this.userSim.sim.country ?
+            this.userSim.sim.country.iso : undefined);
+        if (this.wdChat.contactName) {
+            this.structure.find("span.id_name").text(this.wdChat.contactName);
+            this.structure.find("span.id_number").text(prettyNumber);
         }
-        //If no sim is selected in the list select this one by triggering a click on the row element.
-        if (!this.uiButtonBar.state.isSimRowSelected) {
-            uiSimRow.structure.click();
+        else {
+            this.structure.find("span.id_name").text("");
+            this.structure.find("span.id_number").text(prettyNumber);
         }
     };
-    UiController.prototype.removeUserSim = function (userSim) {
-        return __awaiter(this, void 0, void 0, function () {
-            var uiSimRow;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        uiSimRow = this.uiSimRows.find(function (uiSimRow) { return uiSimRow.userSim === userSim; });
-                        if (this.uiButtonBar.state.isSimRowSelected) {
-                            if (uiSimRow === this.getSelectedUiSimRow()) {
-                                this.uiButtonBar.setState({
-                                    "isSimRowSelected": false,
-                                    "isSimSharable": false,
-                                    "isSimOnline": false,
-                                    "areDetailsShown": false
-                                });
-                                uiSimRow.unselect();
-                            }
-                        }
-                        uiSimRow.structure.remove();
-                        return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
-                    case 1:
-                        if ((_a.sent()).length === 0) {
-                            this.setState("NO SIM");
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UiController.prototype.handleAction = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var action, userSim, uiSimRow;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!this.action) {
-                            return [2 /*return*/];
-                        }
-                        action = this.action;
-                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
-                                var _a, userSims_1, prettyNumber_1, index;
-                                return __generator(this, function (_b) {
-                                    switch (_b.label) {
-                                        case 0:
-                                            _a = action.type;
-                                            switch (_a) {
-                                                case "UPDATE_CONTACT_NAME": return [3 /*break*/, 1];
-                                                case "DELETE_CONTACT": return [3 /*break*/, 1];
-                                                case "CREATE_CONTACT": return [3 /*break*/, 9];
-                                            }
-                                            return [3 /*break*/, 10];
-                                        case 1: return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
-                                        case 2:
-                                            _b.sent();
-                                            userSims_1 = this.userSims
-                                                .filter(function (_a) {
-                                                var phonebook = _a.phonebook;
-                                                return !!phonebook.find(function (_a) {
-                                                    var number_raw = _a.number_raw;
-                                                    return phone_number_1.phoneNumber.areSame(action.number, number_raw);
-                                                });
-                                            });
-                                            prettyNumber_1 = phone_number_1.phoneNumber.prettyPrint(action.number);
-                                            if (!(userSims_1.length === 0)) return [3 /*break*/, 4];
-                                            return [4 /*yield*/, new Promise(function (resolve) {
-                                                    return bootbox_custom.alert([
-                                                        prettyNumber_1 + " is not saved in any of your SIM phonebook.",
-                                                        "Use the android contacts native feature to edit contact stored in your phone."
-                                                    ].join("<br>"), function () { return resolve(); });
-                                                })];
-                                        case 3:
-                                            _b.sent();
-                                            return [2 /*return*/, undefined];
-                                        case 4:
-                                            if (userSims_1.length === 1) {
-                                                return [2 /*return*/, userSims_1.pop()];
-                                            }
-                                            _b.label = 5;
-                                        case 5: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                                "title": prettyNumber_1 + " is present in " + userSims_1.length + ", select phonebook to edit.",
-                                                "inputType": "select",
-                                                "inputOptions": userSims_1.map(function (userSim) { return ({
-                                                    "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
-                                                    "value": userSims_1.indexOf(userSim)
-                                                }); }),
-                                                "callback": function (indexAsString) { return resolve(parseInt(indexAsString)); }
-                                            }); })];
-                                        case 6:
-                                            index = _b.sent();
-                                            if (!(index === null)) return [3 /*break*/, 8];
-                                            return [4 /*yield*/, new Promise(function (resolve) {
-                                                    return bootbox_custom.alert("No SIM selected, aborting.", function () { return resolve(); });
-                                                })];
-                                        case 7:
-                                            _b.sent();
-                                            return [2 /*return*/, undefined];
-                                        case 8: return [2 /*return*/, userSims_1[index]];
-                                        case 9: return [2 /*return*/, this.userSims.find(function (_a) {
-                                                var sim = _a.sim;
-                                                return sim.imsi === action.imsi;
-                                            })];
-                                        case 10: return [2 /*return*/];
-                                    }
-                                });
-                            }); })()];
-                    case 1:
-                        userSim = _a.sent();
-                        if (!userSim) {
-                            window.location.href = backToAndroidAppUrl_1.backToAppUrl;
-                            return [2 /*return*/];
-                        }
-                        if (!!userSim.isOnline) return [3 /*break*/, 3];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert(userSim.friendlyName + " is not currently online. Can't edit phonebook", function () { return resolve(); });
-                            })];
-                    case 2:
-                        _a.sent();
-                        window.location.href = backToAndroidAppUrl_1.backToAppUrl;
-                        return [2 /*return*/];
-                    case 3:
-                        uiSimRow = this.uiSimRows.find(function (uiSimRow) { return uiSimRow.userSim === userSim; });
-                        uiSimRow.structure.click();
-                        //NOTE: Spaghetti code continue in evtClickContact handler....
-                        this.uiButtonBar.evtClickContacts.post();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UiController.prototype.getSelectedUiSimRow = function (notUiSimRow) {
-        return this.uiSimRows.find(function (uiSimRow) { return uiSimRow !== notUiSimRow && uiSimRow.isSelected; });
-    };
-    UiController.prototype.initUiPhonebook = function (userSim) {
-        return __awaiter(this, void 0, void 0, function () {
-            var uiPhonebook;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!!UiPhonebook_1.UiPhonebook.isPhoneNumberUtilityScriptLoaded) return [3 /*break*/, 2];
-                        bootbox_custom.loading("Loading");
-                        return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
-                    case 1:
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        _a.label = 2;
-                    case 2:
-                        uiPhonebook = new UiPhonebook_1.UiPhonebook(userSim);
-                        this.uiPhonebooks.push(uiPhonebook);
-                        uiPhonebook.evtClickCreateContact.attach(function (_a) {
-                            var name = _a.name, number = _a.number, onSubmitted = _a.onSubmitted;
-                            return remoteApiCaller.createContact(userSim, name, number).then(function (contact) { return onSubmitted(contact); });
-                        });
-                        uiPhonebook.evtClickDeleteContacts.attach(function (_a) {
-                            var contacts = _a.contacts, onSubmitted = _a.onSubmitted;
-                            return Promise.all(contacts.map(function (contact) { return remoteApiCaller.deleteContact(userSim, contact); })).then(function () { return onSubmitted(); });
-                        });
-                        uiPhonebook.evtClickUpdateContactName.attach(function (_a) {
-                            var contact = _a.contact, newName = _a.newName, onSubmitted = _a.onSubmitted;
-                            return remoteApiCaller.updateContactName(userSim, contact, newName).then(function () { return onSubmitted(); });
-                        });
-                        localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim_) { return userSim_ === userSim; }, function () { return uiPhonebook.hideModal().then(function () {
-                            return uiPhonebook.structure.detach();
-                        }); });
-                        localApiHandlers.evtContactCreatedOrUpdated.attach(function (e) { return e.userSim === userSim; }, function (_a) {
-                            var contact = _a.contact;
-                            return uiPhonebook.notifyContactChanged(contact);
-                        });
-                        localApiHandlers.evtContactDeleted.attach(function (e) { return e.userSim === userSim; }, function (_a) {
-                            var contact = _a.contact;
-                            return uiPhonebook.notifyContactChanged(contact);
-                        });
-                        return [2 /*return*/, uiPhonebook];
-                }
-            });
-        });
-    };
-    UiController.prototype.initUiButtonBar = function () {
+    /**
+     * Place uiBubble in the structure, assume all bubbles already sorted
+     * return true if the bubble is the last <li> of the <ul>
+     * */
+    UiConversation.prototype.placeUiBubble = function (uiBubble) {
         var _this = this;
-        this.structure.append(this.uiButtonBar.structure);
-        this.uiButtonBar.evtToggleDetailVisibility.attach(function (isShown) {
-            for (var _i = 0, _a = _this.uiSimRows; _i < _a.length; _i++) {
-                var uiSimRow = _a[_i];
-                if (isShown) {
-                    if (uiSimRow.isSelected) {
-                        uiSimRow.setDetailsVisibility("SHOWN");
+        var getUiBubbleFromStructure = function (li_elem) {
+            var e_3, _a;
+            try {
+                for (var _b = __values(_this.uiBubbles.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var uiBubble_1 = _c.value;
+                    if (uiBubble_1.structure.get(0) === li_elem) {
+                        return uiBubble_1;
                     }
-                    else {
-                        uiSimRow.setVisibility("HIDDEN");
-                    }
+                }
+            }
+            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_3) throw e_3.error; }
+            }
+            throw new Error("uiBubble not found");
+        };
+        var lis = this.ul.find("li");
+        for (var i = lis.length - 1; i >= 0; i--) {
+            var uiBubble_i = getUiBubbleFromStructure(lis.get(i));
+            if (wd.compareMessage(uiBubble.wdMessage, uiBubble_i.wdMessage) >= 0) {
+                //Message is more recent than current
+                uiBubble.structure.insertAfter(uiBubble_i.structure);
+                return i === lis.length - 1;
+            }
+        }
+        this.ul.prepend(uiBubble.structure);
+        return false;
+    };
+    /** new Message or update existing one */
+    UiConversation.prototype.newMessage = function (wdMessage, mute) {
+        if (mute === void 0) { mute = undefined; }
+        if (this.uiBubbles.has(wdMessage.id_)) {
+            this.uiBubbles.get(wdMessage.id_).structure.remove();
+            this.uiBubbles.delete(wdMessage.id_);
+        }
+        var uiBubble;
+        if (wdMessage.direction === "INCOMING") {
+            if (wdMessage.isNotification) {
+                var uiBubbleIncomingNotification = new UiBubble.IncomingNotification(wdMessage, this.wdChat, this.userSim);
+                uiBubble = uiBubbleIncomingNotification;
+            }
+            else {
+                if (!mute) {
+                    ion.sound.play(this.isSelected ? "water_droplet" : "button_tiny");
+                }
+                var uiBubbleIncomingText = new UiBubble.IncomingText(wdMessage, this.wdChat, this.userSim);
+                uiBubble = uiBubbleIncomingText;
+            }
+        }
+        else {
+            var uiBubbleOutgoing = new UiBubble.Outgoing(wdMessage);
+            uiBubble = uiBubbleOutgoing;
+        }
+        this.uiBubbles.set(wdMessage.id_, uiBubble);
+        var isAtBottom = this.placeUiBubble(uiBubble);
+        if (this.isSelected && isAtBottom) {
+            this.ul.slimScroll({ "scrollTo": this.ul.prop("scrollHeight") });
+        }
+    };
+    return UiConversation;
+}());
+exports.UiConversation = UiConversation;
+var UiBubble = /** @class */ (function () {
+    function UiBubble(wdMessage) {
+        this.wdMessage = wdMessage;
+        this.structure = html.templates.find("li").clone();
+        this.structure.find("p.id_content")
+            .html(wdMessage.text.split("\n").join("<br>"));
+        this.structure.find("span.id_date")
+            .html(moment.unix(~~(wdMessage.time / 1000)).format("Do MMMM H:mm"));
+    }
+    return UiBubble;
+}());
+(function (UiBubble) {
+    var IncomingText = /** @class */ (function (_super) {
+        __extends(IncomingText, _super);
+        function IncomingText(wdMessage, wdChat, userSim) {
+            var _this = _super.call(this, wdMessage) || this;
+            _this.wdMessage = wdMessage;
+            _this.wdChat = wdChat;
+            _this.userSim = userSim;
+            _this.structure.find("div.message").addClass("in");
+            _this.structure.find("p.id_emitter").html((function () {
+                if (_this.wdChat.contactName) {
+                    return _this.wdChat.contactName;
                 }
                 else {
-                    if (uiSimRow.isSelected) {
-                        uiSimRow.setDetailsVisibility("HIDDEN");
-                    }
-                    else {
-                        uiSimRow.setVisibility("SHOWN");
-                    }
+                    return phone_number_1.phoneNumber.prettyPrint(_this.wdChat.contactNumber, _this.userSim.sim.country ?
+                        _this.userSim.sim.country.iso : undefined);
                 }
-            }
-        });
-        this.uiButtonBar.evtClickContacts.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim, uiPhonebook, pr;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        userSim = this.getSelectedUiSimRow().userSim;
-                        uiPhonebook = this.uiPhonebooks.find(function (uiPhonebook) { return uiPhonebook.userSim === userSim; });
-                        if (!!uiPhonebook) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.initUiPhonebook(userSim)];
-                    case 1:
-                        uiPhonebook = _a.sent();
-                        _a.label = 2;
-                    case 2:
-                        if (!!this.action) return [3 /*break*/, 3];
-                        uiPhonebook.showModal();
-                        return [3 /*break*/, 6];
-                    case 3:
-                        pr = void 0;
-                        switch (this.action.type) {
-                            case "CREATE_CONTACT":
-                                pr = uiPhonebook.interact_createContact(this.action.number);
-                                break;
-                            case "UPDATE_CONTACT_NAME":
-                                pr = uiPhonebook.interact_updateContact(this.action.number);
-                                break;
-                            case "DELETE_CONTACT":
-                                pr = uiPhonebook.interact_deleteContacts(this.action.number);
-                                break;
-                        }
-                        this.action = undefined;
-                        return [4 /*yield*/, pr];
-                    case 4:
-                        _a.sent();
-                        //NOTE: Do not remove this feedback as it leave the time 
-                        //to the push notification to land before we go back to app.
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("Success", function () { return resolve(); });
-                            })];
-                    case 5:
-                        //NOTE: Do not remove this feedback as it leave the time 
-                        //to the push notification to land before we go back to app.
-                        _a.sent();
-                        window.location.href = backToAndroidAppUrl_1.backToAppUrl;
-                        _a.label = 6;
-                    case 6: return [2 /*return*/];
+            })());
+            return _this;
+        }
+        return IncomingText;
+    }(UiBubble));
+    UiBubble.IncomingText = IncomingText;
+    var IncomingNotification = /** @class */ (function (_super) {
+        __extends(IncomingNotification, _super);
+        function IncomingNotification(wdMessage, wdChat, userSim) {
+            var _this = _super.call(this, wdMessage) || this;
+            _this.wdMessage = wdMessage;
+            _this.wdChat = wdChat;
+            _this.userSim = userSim;
+            _this.structure.find("div.message").addClass("notification");
+            return _this;
+        }
+        return IncomingNotification;
+    }(UiBubble));
+    UiBubble.IncomingNotification = IncomingNotification;
+    var Outgoing = /** @class */ (function (_super) {
+        __extends(Outgoing, _super);
+        function Outgoing(wdMessage) {
+            var _this = _super.call(this, wdMessage) || this;
+            _this.wdMessage = wdMessage;
+            _this.structure.find("div.message")
+                .addClass("out")
+                .find("p.id_emitter")
+                .html((wdMessage.status === "STATUS REPORT RECEIVED" &&
+                wdMessage.sentBy.who === "OTHER") ? wdMessage.sentBy.email : "You");
+            _this.structure.find("span.id_check").text((function () {
+                switch (wdMessage.status) {
+                    case "SEND REPORT RECEIVED": return !!wdMessage.isSentSuccessfully ? checkMark : crossMark;
+                    case "STATUS REPORT RECEIVED": return "" + checkMark + checkMark;
+                    case "PENDING": return "";
                 }
-            });
-        }); });
-        this.uiButtonBar.evtClickDelete.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim, shouldProceed;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        userSim = this.getSelectedUiSimRow().userSim;
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
-                                "title": "Unregister SIM",
-                                "message": "Do you really want to unregister " + userSim.friendlyName + "?",
-                                callback: function (result) { return resolve(result); }
-                            }); })];
-                    case 1:
-                        shouldProceed = _a.sent();
-                        if (!shouldProceed) return [3 /*break*/, 3];
-                        return [4 /*yield*/, remoteApiCaller.unregisterSim(userSim)];
-                    case 2:
-                        _a.sent();
-                        this.removeUserSim(userSim);
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
-                }
-            });
-        }); });
-        this.uiButtonBar.evtClickShare.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim;
-            return __generator(this, function (_a) {
-                userSim = this.getSelectedUiSimRow().userSim;
-                /*
-                NOTE: If the user was able to click on share the
-                selected SIM is owned.
-                */
-                this.uiShareSim.open(userSim);
-                return [2 /*return*/];
-            });
-        }); });
-        this.uiButtonBar.evtClickRename.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var uiSimRow, friendlyNameSubmitted;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        uiSimRow = this.getSelectedUiSimRow();
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                "title": "Friendly name for this sim?",
-                                "value": uiSimRow.userSim.friendlyName,
-                                "callback": function (result) { return resolve(result); },
-                            }); })];
-                    case 1:
-                        friendlyNameSubmitted = _a.sent();
-                        if (!!!friendlyNameSubmitted) return [3 /*break*/, 3];
-                        return [4 /*yield*/, remoteApiCaller.changeSimFriendlyName(uiSimRow.userSim, friendlyNameSubmitted)];
-                    case 2:
-                        _a.sent();
-                        uiSimRow.populate();
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
-                }
-            });
-        }); });
-        this.uiButtonBar.evtClickReboot.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim, shouldProceed;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        userSim = this.getSelectedUiSimRow().userSim;
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
-                                "title": "Reboot GSM Dongle",
-                                "message": "Do you really want to reboot Dongle " + userSim.dongle.manufacturer + " " + userSim.dongle.model + "?",
-                                callback: function (result) { return resolve(result); }
-                            }); })];
-                    case 1:
-                        shouldProceed = _a.sent();
-                        if (!shouldProceed) {
-                            return [2 /*return*/];
-                        }
-                        bootbox_custom.loading("Sending reboot command to dongle");
-                        /*
-                        NOTE: If the user was able to click on the reboot button
-                        the sim is necessary online.
-                        */
-                        return [4 /*yield*/, remoteApiCaller.rebootDongle(userSim)];
-                    case 2:
-                        /*
-                        NOTE: If the user was able to click on the reboot button
-                        the sim is necessary online.
-                        */
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert("Restart command issued successfully, the SIM should be back online within 30 seconds", function () { return resolve(); }); })];
-                    case 3:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-    };
-    UiController.prototype.initUiShareSim = function () {
-        var _this = this;
-        this.uiShareSim.evtShare.attach(function (_a) {
-            var userSim = _a.userSim, emails = _a.emails, message = _a.message, onSubmitted = _a.onSubmitted;
-            return __awaiter(_this, void 0, void 0, function () {
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0: return [4 /*yield*/, remoteApiCaller.shareSim(userSim, emails, message)];
-                        case 1:
-                            _b.sent();
-                            onSubmitted();
-                            return [2 /*return*/];
-                    }
-                });
-            });
-        });
-        this.uiShareSim.evtStopSharing.attach(function (_a) {
-            var userSim = _a.userSim, emails = _a.emails, onSubmitted = _a.onSubmitted;
-            return __awaiter(_this, void 0, void 0, function () {
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0: return [4 /*yield*/, remoteApiCaller.stopSharingSim(userSim, emails)];
-                        case 1:
-                            _b.sent();
-                            onSubmitted();
-                            return [2 /*return*/];
-                    }
-                });
-            });
-        });
-    };
-    return UiController;
-}());
-exports.UiController = UiController;
+            })());
+            return _this;
+        }
+        return Outgoing;
+    }(UiBubble));
+    UiBubble.Outgoing = Outgoing;
+})(UiBubble || (UiBubble = {}));
 
-},{"../../../shared/dist/lib/backToAndroidAppUrl":135,"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/toBackend/localApiHandlers":138,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/types":144,"../templates/UiController.html":129,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":120,"ts-events-extended":127}],11:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../../../shared/dist/lib/loadUiClassHtml":137,"../../../shared/dist/lib/types":144,"../templates/UiConversation.html":128,"../templates/UiConversation.less":129,"buffer":2,"moment":116,"phone-number":120,"ts-events-extended":127}],10:[function(require,module,exports){
 "use strict";
-//NOTE: Slimscroll must be loaded on the page.
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var connection_1 = require("../../../shared/dist/lib/toBackend/connection");
-var ts_events_extended_1 = require("ts-events-extended");
-var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
-var modal_stack = require("../../../shared/dist/lib/tools/modal_stack");
-var isAscendingAlphabeticalOrder_1 = require("../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var phone_number_1 = require("phone-number");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiPhonebook.html"), "UiPhonebook");
-var UiPhonebook = /** @class */ (function () {
-    function UiPhonebook(userSim) {
+var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiHeader.html"), "UiHeader");
+var UiHeader = /** @class */ (function () {
+    function UiHeader(userSim) {
         var _this = this;
         this.userSim = userSim;
         this.structure = html.structure.clone();
-        this.buttonClose = this.structure.find(".id_close");
-        this.buttonEdit = this.structure.find(".id_edit");
-        this.buttonDelete = this.structure.find(".id_delete");
-        this.buttonCreateContact = this.structure.find(".id_createContact");
-        //private readonly divsToHideIfNoContacts = this.structure.find("._toHideIfNoContacts");
-        this.evtClickCreateContact = new ts_events_extended_1.SyncEvent();
-        this.evtClickDeleteContacts = new ts_events_extended_1.SyncEvent();
-        this.evtClickUpdateContactName = new ts_events_extended_1.SyncEvent();
-        //TODO: Make sure contact ref is kept.
-        /** mapped by types.UserSim.Contact */
+        this.templates = html.templates.clone();
+        this.setIsOnline(userSim.isOnline);
+        this.structure.find("a.id_friendly_name").popover({
+            "html": true,
+            "trigger": "hover",
+            "placement": "right",
+            "container": "body",
+            "title": "SIM card infos",
+            "content": function () { return _this.templates.find("div.id_popover").html(); }
+        }).find("span").text(this.userSim.friendlyName);
+        this.structure.find("span.id_number").text(function () {
+            if (!!_this.userSim.sim.storage.number) {
+                var iso = _this.userSim.sim.country ?
+                    _this.userSim.sim.country.iso : undefined;
+                return phone_number_1.phoneNumber.prettyPrint(phone_number_1.phoneNumber.build(_this.userSim.sim.storage.number, iso), iso);
+            }
+            else {
+                return "";
+            }
+        })
+            .on("dblclick", function (e) {
+            e.preventDefault();
+            var selection = window.getSelection();
+            var range = document.createRange();
+            range.selectNodeContents(e.currentTarget);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        });
+        this.templates.find("div.id_popover div.id_flag").addClass(this.userSim.sim.country ? this.userSim.sim.country.iso : "");
+        this.templates.find("div.id_popover span.id_network").html(this.userSim.sim.serviceProvider.fromImsi ||
+            this.userSim.sim.serviceProvider.fromNetwork ||
+            "Unknown");
+        this.templates.find("span.id_geoInfo").html((function () {
+            var loc = _this.userSim.gatewayLocation;
+            return loc.city || loc.subdivisions || loc.countryIso || "?";
+        })());
+        /*
+        this.structure.find("div.id_flag").addClass(
+            this.userSim.gatewayLocation.countryIso || ""
+        );
+        */
+    }
+    UiHeader.prototype.setIsOnline = function (isOnline) {
+        var e_1, _a;
+        this.structure.find(".id_icon_sim_up")[isOnline ? "show" : "hide"]();
+        try {
+            for (var _b = __values([".id_offline", ".id_icon_sim_down"]), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var selector = _c.value;
+                this.structure.find(selector)[isOnline ? "hide" : "show"]();
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+    };
+    return UiHeader;
+}());
+exports.UiHeader = UiHeader;
+
+},{"../../../shared/dist/lib/loadUiClassHtml":137,"../templates/UiHeader.html":130,"phone-number":120}],11:[function(require,module,exports){
+"use strict";
+//NOTE: Slimscroll must be loaded on the page.
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var ts_events_extended_1 = require("ts-events-extended");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
+var types = require("../../../shared/dist/lib/types");
+var phone_number_1 = require("phone-number");
+var wd = types.webphoneData;
+var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiPhonebook.html"), "UiPhonebook");
+var UiPhonebook = /** @class */ (function () {
+    function UiPhonebook(userSim, wdInstance) {
+        var e_1, _a;
+        this.userSim = userSim;
+        this.wdInstance = wdInstance;
+        this.structure = html.structure.clone();
+        this.evtContactSelected = new ts_events_extended_1.SyncEvent();
+        /** mapped by wdChat.id_ */
         this.uiContacts = new Map();
-        {
-            var _a = modal_stack.add(this.structure, {
-                "keyboard": false,
-                "backdrop": true
-            }), hide = _a.hide, show = _a.show;
-            this.hideModal = hide;
-            this.showModal = show;
-        }
-        for (var _i = 0, _b = userSim.phonebook; _i < _b.length; _i++) {
-            var contact = _b[_i];
-            this.createUiContact(contact);
-        }
         this.structure.find("ul").slimScroll({
             "position": "right",
             "distance": '0px',
             "railVisible": true,
-            "alwaysVisible": true,
             "height": '290px',
             "size": "5px"
         });
+        try {
+            for (var _b = __values(this.wdInstance.chats), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var wdChat = _c.value;
+                this.createUiContact(wdChat);
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
         this.updateSearch();
-        this.updateButtons();
-        this.buttonClose.on("click", function () { return _this.hideModal(); });
-        this.buttonDelete.on("click", function () { return _this.interact_deleteContacts(); });
-        this.buttonEdit.on("click", function () { return _this.interact_updateContact(); });
-        this.buttonCreateContact.on("click", function () { return _this.interact_createContact(); });
     }
-    /** Fetch phone number utils, need to be called before instantiating objects */
-    UiPhonebook.fetchPhoneNumberUtilityScript = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        console.assert(!this.isPhoneNumberUtilityScriptLoaded);
-                        return [4 /*yield*/, phone_number_1.phoneNumber.remoteLoadUtil("//web." + connection_1.baseDomain + "/plugins/ui/intl-tel-input/js/utils.js")];
-                    case 1:
-                        _a.sent();
-                        this.isPhoneNumberUtilityScriptLoaded = true;
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    /** to call (outside of the class) when sim online status change */
-    UiPhonebook.prototype.updateButtons = function () {
-        var _this = this;
-        [
-            this.buttonClose,
-            this.buttonCreateContact,
-            this.buttonDelete,
-            this.buttonEdit
-        ].forEach(function (button) { return button.prop("disabled", !_this.userSim.isOnline); });
-        var selectedCount = Array.from(this.uiContacts.values())
-            .filter(function (uiContact) { return uiContact.isSelected; }).length;
-        if (selectedCount === 0) {
-            this.buttonCreateContact.show();
-            this.buttonDelete.hide();
-            this.buttonEdit.hide();
+    UiPhonebook.prototype.triggerClickOnLastSeenChat = function () {
+        var wdChat = wd.getChatWithLatestActivity(this.wdInstance);
+        if (!wdChat) {
+            return;
         }
-        else {
-            this.buttonCreateContact.hide();
-            if (selectedCount === 1) {
-                this.buttonEdit.show();
-            }
-            else {
-                this.buttonEdit.hide();
-            }
-            this.buttonDelete.show();
-            this.buttonDelete.find("span").html("(" + selectedCount + ")");
-        }
+        this.uiContacts.get(wdChat.id_).evtClick.post();
     };
-    UiPhonebook.prototype.createUiContact = function (contact) {
+    UiPhonebook.prototype.createUiContact = function (wdChat) {
         var _this = this;
-        var uiContact = new UiContact(this.userSim, contact);
+        var uiContact = new UiContact(this.userSim, wdChat);
         uiContact.evtClick.attach(function () {
-            if (uiContact.isSelected) {
-                uiContact.unselect();
+            var uiContactPrev = Array.from(_this.uiContacts.values())
+                .find(function (_a) {
+                var isSelected = _a.isSelected;
+                return isSelected;
+            });
+            var wdChatPrev;
+            if (uiContactPrev) {
+                uiContactPrev.unselect();
+                wdChatPrev = uiContactPrev.wdChat;
             }
             else {
-                uiContact.setSelected();
+                wdChatPrev = undefined;
             }
-            _this.updateButtons();
+            uiContact.setSelected();
+            //this.uiContacts.get(wdChat.id_)!.setSelected();
+            _this.evtContactSelected.post({ wdChatPrev: wdChatPrev, wdChat: wdChat });
         });
-        this.uiContacts.set(contact, uiContact);
+        this.uiContacts.set(wdChat.id_, uiContact);
         this.placeUiContact(uiContact);
-    };
-    UiPhonebook.prototype.placeUiContact = function (uiContact) {
-        var _this = this;
-        var getUiContactFromStructure = function (li_elem) {
-            //for (const uiContact of this.uiContacts.values()) { with downlevel iteration...
-            for (var _i = 0, _a = Array.from(_this.uiContacts).map(function (_a) {
-                var _ = _a[0], v = _a[1];
-                return v;
-            }); _i < _a.length; _i++) {
-                var uiContact_1 = _a[_i];
-                if (uiContact_1.structure.get(0) === li_elem) {
-                    return uiContact_1;
-                }
-            }
-            throw new Error("UiContact not found");
-        };
-        var lis = this.structure.find("ul li");
-        for (var i = 0; i < lis.length; i++) {
-            var uiContact_i = getUiContactFromStructure(lis.get(i));
-            if (this.compareContact(uiContact.contact, uiContact_i.contact) >= 0) {
-                uiContact.structure.insertBefore(uiContact_i.structure);
-                return;
-            }
-        }
-        this.structure.find("ul").append(uiContact.structure);
-    };
-    UiPhonebook.prototype.compareContact = function (contact1, contact2) {
-        var hasContactName = function (contact) { return contact.name !== ""; };
-        if (hasContactName(contact1) || hasContactName(contact1)) {
-            if (!hasContactName(contact1)) {
-                return -1;
-            }
-            if (!hasContactName(contact2)) {
-                return 1;
-            }
-            return isAscendingAlphabeticalOrder_1.isAscendingAlphabeticalOrder(contact1.name, contact2.name) ? 1 : -1;
-        }
-        else {
-            return contact1.number_raw < contact2.number_raw ? -1 : 1;
-        }
     };
     UiPhonebook.prototype.updateSearch = function () {
         this.structure.find("input")
             .quicksearch(this.structure.find("ul li"));
         this.structure.find("ul").slimScroll({ "scrollTo": "0" });
     };
+    UiPhonebook.prototype.placeUiContact = function (uiContact) {
+        var _this = this;
+        var getUiContactFromStructure = function (li_elem) {
+            var e_2, _a;
+            try {
+                for (var _b = __values(_this.uiContacts.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var uiContact_1 = _c.value;
+                    if (uiContact_1.structure.get(0) === li_elem) {
+                        return uiContact_1;
+                    }
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+            throw new Error("UiContact not found");
+        };
+        var lis = this.structure.find("ul li");
+        for (var i = 0; i < lis.length; i++) {
+            var uiContact_i = getUiContactFromStructure(lis.get(i));
+            if (wd.compareChat(uiContact.wdChat, uiContact_i.wdChat) >= 0) {
+                uiContact.structure.insertBefore(uiContact_i.structure);
+                return;
+            }
+        }
+        this.structure.find("ul").append(uiContact.structure);
+    };
     /** To create ui contact after init */
-    UiPhonebook.prototype.insertContact = function (contact) {
+    UiPhonebook.prototype.insertContact = function (wdChat) {
         this.structure.find("input").val("");
-        this.createUiContact(contact);
+        this.createUiContact(wdChat);
         this.updateSearch();
     };
     /**
-     *
-     * Only call outside of the class when other user updated the contact.
-     *
+     * triggered by: evt on text input => update last seen => call
+     * OR
+     * new message arrive => update wdMessage => call
+     * OR
      * contact name changed
      * OR
      * contact deleted
      * */
-    UiPhonebook.prototype.notifyContactChanged = function (contact) {
-        var uiContact = this.uiContacts.get(contact);
-        if (this.userSim.phonebook.indexOf(contact) < 0) {
+    UiPhonebook.prototype.notifyContactChanged = function (wdChat) {
+        var uiContact = this.uiContacts.get(wdChat.id_);
+        if (this.wdInstance.chats.indexOf(wdChat) < 0) {
             uiContact.structure.detach();
-            this.uiContacts.delete(contact);
+            this.uiContacts.delete(wdChat.id_);
         }
         else {
+            uiContact.refreshNotificationLabel();
             uiContact.updateContactName();
             this.placeUiContact(uiContact);
         }
     };
-    /**
-     * Trigger ui process to create a contact.
-     * External call when create contact from
-     * android app, provide number.
-     * Internally when button is clicked no number provided.
-     */
-    UiPhonebook.prototype.interact_createContact = function (provided_number) {
-        return __awaiter(this, void 0, void 0, function () {
-            var userSim, number, _a, contact, name, contact_1;
-            var _this = this;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        userSim = this.userSim;
-                        _a = provided_number;
-                        if (_a) return [3 /*break*/, 2];
-                        return [4 /*yield*/, new Promise(function callee(resolve) {
-                                var _this = this;
-                                var modal = bootbox_custom.prompt({
-                                    "title": "Phone number",
-                                    "size": "small",
-                                    "callback": function (result) { return __awaiter(_this, void 0, void 0, function () {
-                                        var number;
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0:
-                                                    if (result === null) {
-                                                        resolve(undefined);
-                                                        return [2 /*return*/];
-                                                    }
-                                                    number = phone_number_1.phoneNumber.build(input.val(), input.intlTelInput("getSelectedCountryData").iso2);
-                                                    if (!!phone_number_1.phoneNumber.isDialable(number)) return [3 /*break*/, 2];
-                                                    return [4 /*yield*/, new Promise(function (resolve_) { return bootbox_custom.alert(number + " is not a valid phone number", function () { return resolve_(); }); })];
-                                                case 1:
-                                                    _a.sent();
-                                                    callee(resolve);
-                                                    return [2 /*return*/];
-                                                case 2:
-                                                    resolve(number);
-                                                    return [2 /*return*/];
-                                            }
-                                        });
-                                    }); },
-                                });
-                                modal.find(".bootbox-body").css("text-align", "center");
-                                var input = modal.find("input");
-                                input.intlTelInput((function () {
-                                    var simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
-                                    var gwIso = userSim.gatewayLocation.countryIso;
-                                    var intlTelInputOptions = {
-                                        "dropdownContainer": "body"
-                                    };
-                                    var preferredCountries = [];
-                                    if (simIso) {
-                                        preferredCountries.push(simIso);
-                                    }
-                                    if (gwIso && simIso !== gwIso) {
-                                        preferredCountries.push(gwIso);
-                                    }
-                                    if (preferredCountries.length) {
-                                        intlTelInputOptions.preferredCountries = preferredCountries;
-                                    }
-                                    if (simIso || gwIso) {
-                                        intlTelInputOptions.initialCountry = simIso || gwIso;
-                                    }
-                                    return intlTelInputOptions;
-                                })());
-                            })];
-                    case 1:
-                        _a = (_b.sent());
-                        _b.label = 2;
-                    case 2:
-                        number = _a;
-                        if (!number) {
-                            return [2 /*return*/];
-                        }
-                        contact = userSim.phonebook.find(function (_a) {
-                            var number_raw = _a.number_raw;
-                            return phone_number_1.phoneNumber.areSame(number, number_raw);
-                        });
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                "title": "Create contact " + phone_number_1.phoneNumber.prettyPrint(number) + " in " + _this.userSim.friendlyName + " internal memory",
-                                "value": !!contact ? contact.name : "New contact",
-                                "callback": function (result) { return resolve(result); },
-                            }); })];
-                    case 3:
-                        name = _b.sent();
-                        if (!name) {
-                            return [2 /*return*/];
-                        }
-                        if (!!this.userSim.isOnline) return [3 /*break*/, 5];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("Can't proceed, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
-                            })];
-                    case 4:
-                        _b.sent();
-                        return [2 /*return*/];
-                    case 5:
-                        if (!!contact) return [3 /*break*/, 7];
-                        bootbox_custom.loading("Creating contact...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickCreateContact.post({
-                                    name: name,
-                                    number: number,
-                                    "onSubmitted": function (contact) { return resolve(contact); }
-                                });
-                            })];
-                    case 6:
-                        contact_1 = _b.sent();
-                        this.createUiContact(contact_1);
-                        return [3 /*break*/, 9];
-                    case 7:
-                        if (contact.name === name) {
-                            return [2 /*return*/];
-                        }
-                        bootbox_custom.loading("Updating contact name...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickUpdateContactName.post({
-                                    contact: contact,
-                                    "newName": name,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 8:
-                        _b.sent();
-                        this.notifyContactChanged(contact);
-                        _b.label = 9;
-                    case 9:
-                        bootbox_custom.dismissLoading();
-                        return [2 /*return*/];
-                }
-            });
-        });
+    UiPhonebook.prototype.triggerContactClick = function (wdChat) {
+        this.uiContacts.get(wdChat.id_).evtClick.post();
     };
-    UiPhonebook.prototype.interact_deleteContacts = function (provided_number) {
-        return __awaiter(this, void 0, void 0, function () {
-            var contacts, isConfirmed, _i, contacts_1, contact;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        contacts = (function () {
-                            if (provided_number !== undefined) {
-                                var contact = _this.userSim.phonebook.find(function (_a) {
-                                    var number_raw = _a.number_raw;
-                                    return phone_number_1.phoneNumber.areSame(provided_number, number_raw);
-                                });
-                                return [contact];
-                            }
-                            else {
-                                return Array.from(_this.uiContacts.values())
-                                    .filter(function (uiContact) { return uiContact.isSelected; })
-                                    .map(function (uiContact) { return uiContact.contact; });
-                            }
-                        })();
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.confirm({
-                                    "size": "small",
-                                    "message": [
-                                        "Are you sure you want to delete",
-                                        contacts.map(function (_a) {
-                                            var name = _a.name;
-                                            return name;
-                                        }).join(" "),
-                                        "from " + _this.userSim.friendlyName + " internal storage ?"
-                                    ].join(" "),
-                                    "callback": function (result) { return resolve(result); }
-                                });
-                            })];
-                    case 1:
-                        isConfirmed = _a.sent();
-                        if (!isConfirmed) {
-                            return [2 /*return*/];
-                        }
-                        if (!!this.userSim.isOnline) return [3 /*break*/, 3];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("Can't delete, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
-                            })];
-                    case 2:
-                        _a.sent();
-                        return [2 /*return*/];
-                    case 3:
-                        bootbox_custom.loading("Deleting contacts...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickDeleteContacts.post({
-                                    contacts: contacts,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 4:
-                        _a.sent();
-                        for (_i = 0, contacts_1 = contacts; _i < contacts_1.length; _i++) {
-                            contact = contacts_1[_i];
-                            this.notifyContactChanged(contact);
-                        }
-                        this.updateButtons();
-                        bootbox_custom.dismissLoading();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UiPhonebook.prototype.interact_updateContact = function (provided_number) {
-        return __awaiter(this, void 0, void 0, function () {
-            var contact, prettyNumber, newName;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        contact = provided_number !== undefined ?
-                            this.userSim.phonebook.find(function (_a) {
-                                var number_raw = _a.number_raw;
-                                return phone_number_1.phoneNumber.areSame(provided_number, number_raw);
-                            }) :
-                            Array.from(this.uiContacts.values())
-                                .find(function (uiContact) { return uiContact.isSelected; }).contact;
-                        prettyNumber = phone_number_1.phoneNumber.prettyPrint(phone_number_1.phoneNumber.build(contact.number_raw, !!this.userSim.sim.country ?
-                            this.userSim.sim.country.iso :
-                            undefined));
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                "title": "New contact name for " + prettyNumber + " stored in " + _this.userSim.friendlyName,
-                                "value": contact.name,
-                                "callback": function (result) { return resolve(result); },
-                            }); })];
-                    case 1:
-                        newName = _a.sent();
-                        if (!newName || contact.name === newName) {
-                            return [2 /*return*/];
-                        }
-                        if (!!this.userSim.isOnline) return [3 /*break*/, 3];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("Can't update, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
-                            })];
-                    case 2:
-                        _a.sent();
-                        return [2 /*return*/];
-                    case 3:
-                        bootbox_custom.loading("Updating contact name ...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickUpdateContactName.post({
-                                    contact: contact,
-                                    newName: newName,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 4:
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        this.notifyContactChanged(contact);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UiPhonebook.isPhoneNumberUtilityScriptLoaded = false;
     return UiPhonebook;
 }());
 exports.UiPhonebook = UiPhonebook;
 var UiContact = /** @class */ (function () {
-    function UiContact(userSim, contact) {
+    function UiContact(userSim, wdChat) {
         var _this = this;
         this.userSim = userSim;
-        this.contact = contact;
+        this.wdChat = wdChat;
         this.structure = html.templates.find("li").clone();
         /** only forward click event, need to be selected manually from outside */
         this.evtClick = new ts_events_extended_1.VoidSyncEvent();
@@ -3987,19 +3479,43 @@ var UiContact = /** @class */ (function () {
         });
         this.updateContactName();
         this.structure.find("span.id_notifications").hide();
+        this.refreshNotificationLabel();
     }
+    //TODO: optimization
+    UiContact.prototype.refreshNotificationLabel = function () {
+        if (this.wdChat.messages.length) {
+            this.structure.addClass("has-messages");
+        }
+        else {
+            this.structure.removeClass("has-messages");
+        }
+        var count = wd.getUnreadMessagesCount(this.wdChat);
+        var span = this.structure.find("span.id_notifications");
+        span.html("" + count);
+        if (count !== 0) {
+            span.stop().fadeIn(0);
+        }
+        else {
+            span.fadeOut(2000);
+        }
+    };
     //TODO: optimization
     /** updateName if different */
     UiContact.prototype.updateContactName = function () {
-        var _this = this;
-        this.structure.find("span.id_name").html(this.contact.name);
-        this.structure
-            .find("span.id_number")
-            .html(function () {
-            var iso = _this.userSim.sim.country ?
-                _this.userSim.sim.country.iso : undefined;
-            return phone_number_1.phoneNumber.prettyPrint(phone_number_1.phoneNumber.build(_this.contact.number_raw, iso), iso);
-        });
+        this.structure.find("span.id_name").html(this.wdChat.contactName);
+        var spanNumber = this.structure.find("span.id_number");
+        var prettyNumber = phone_number_1.phoneNumber.prettyPrint(this.wdChat.contactNumber, this.userSim.sim.country ?
+            this.userSim.sim.country.iso : undefined);
+        if (this.wdChat.contactName) {
+            spanNumber
+                .addClass("visible-lg-inline")
+                .html(prettyNumber);
+        }
+        else {
+            spanNumber
+                .removeClass("visible-lg-inline")
+                .html(prettyNumber);
+        }
     };
     /** update wsChat */
     UiContact.prototype.setSelected = function () {
@@ -4019,7 +3535,317 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/toBackend/connection":137,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder":142,"../../../shared/dist/lib/tools/modal_stack":143,"../templates/UiPhonebook.html":130,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":137,"../../../shared/dist/lib/types":144,"../templates/UiPhonebook.html":131,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var ts_events_extended_1 = require("ts-events-extended");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
+var phone_number_1 = require("phone-number");
+var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
+$.validator.addMethod("validateTelInput", function (value, element) {
+    try {
+        phone_number_1.phoneNumber.build(value, $(element).intlTelInput("getSelectedCountryData").iso2, "MUST BE DIALABLE");
+    }
+    catch (_a) {
+        return false;
+    }
+    return true;
+}, "Malformed phone number");
+var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiQuickAction.html"), "UiQuickAction");
+var UiQuickAction = /** @class */ (function () {
+    function UiQuickAction(userSim) {
+        var _this = this;
+        this.userSim = userSim;
+        this.structure = html.structure.clone();
+        this.templates = html.templates.clone();
+        this.evtVoiceCall = new ts_events_extended_1.SyncEvent();
+        this.evtSms = new ts_events_extended_1.SyncEvent();
+        this.evtNewContact = new ts_events_extended_1.SyncEvent();
+        var input = this.structure.find("input.id_tel-input");
+        //TODO add if bug "utilsScript": "/intl-tel-input/build/js/utils.js",
+        var simIso = this.userSim.sim.country ? this.userSim.sim.country.iso : undefined;
+        var gwIso = this.userSim.gatewayLocation.countryIso;
+        (function () {
+            var intlTelInputOptions = {
+                "dropdownContainer": "body"
+            };
+            var preferredCountries = [];
+            if (simIso) {
+                preferredCountries.push(simIso);
+            }
+            if (gwIso && simIso !== gwIso) {
+                preferredCountries.push(gwIso);
+            }
+            if (preferredCountries.length) {
+                intlTelInputOptions.preferredCountries = preferredCountries;
+            }
+            if (simIso || gwIso) {
+                intlTelInputOptions.initialCountry = simIso || gwIso;
+            }
+            input.intlTelInput(intlTelInputOptions);
+        })();
+        (function () {
+            var self = _this;
+            input.on("countrychange", function calleeA(_, countryData) {
+                if (countryData.iso2 === simIso)
+                    return;
+                input.off("countrychange", undefined, calleeA);
+                bootbox_custom.alert([
+                    "Warning: Consult ",
+                    self.userSim.sim.serviceProvider.fromImsi || "Your operator",
+                    "'s pricing for Calls/SMS toward " + countryData.name
+                ].join(""));
+                input.on("countrychange", function calleeB(_, countryData) {
+                    if (countryData.iso2 !== simIso)
+                        return;
+                    //staticNotification.close();
+                    input.off("countrychange", undefined, calleeB);
+                    input.on("countrychange", calleeA);
+                });
+            });
+        })();
+        input.popover({
+            "html": true,
+            "trigger": "manual",
+            "placement": "right",
+            "container": "body",
+            "content": function () { return _this.templates.find("div.id_popover").html(); }
+        });
+        var validator = this.structure.find("form.id_form").validate({
+            "debug": true,
+            "onsubmit": false,
+            "rules": {
+                "tel-input": {
+                    "validateTelInput": true
+                }
+            },
+            "errorPlacement": function (error) {
+                var message = input.val() === "" ? "First enter the number" : $(error).text();
+                _this.templates.find("div.id_popover span.id_error-message").html(message);
+                input.popover("show");
+            },
+            "success": function () { return input.popover("hide"); }
+        });
+        this.structure.on("mouseleave", function () { return input.popover("hide"); });
+        this.structure.find("button").on("click", function (event) {
+            if (!validator.form()) {
+                return;
+            }
+            var evt;
+            if ($(event.currentTarget).hasClass("id_call")) {
+                evt = _this.evtVoiceCall;
+            }
+            else if ($(event.currentTarget).hasClass("id_sms")) {
+                evt = _this.evtSms;
+            }
+            else if ($(event.currentTarget).hasClass("id_contact")) {
+                evt = _this.evtNewContact;
+            }
+            evt.post(phone_number_1.phoneNumber.build(input.val(), input.intlTelInput("getSelectedCountryData").iso2));
+            if (simIso) {
+                input.intlTelInput("setCountry", simIso);
+            }
+            input.intlTelInput("setNumber", "");
+        });
+        this.notifySimOnlineStatusChanged();
+    }
+    UiQuickAction.prototype.notifySimOnlineStatusChanged = function () {
+        this.structure.find("button").prop("disabled", !this.userSim.isOnline);
+    };
+    return UiQuickAction;
+}());
+exports.UiQuickAction = UiQuickAction;
+
+},{"../../../shared/dist/lib/loadUiClassHtml":137,"../../../shared/dist/lib/tools/bootbox_custom":141,"../templates/UiQuickAction.html":132,"phone-number":120,"ts-events-extended":127}],13:[function(require,module,exports){
+"use strict";
+//NOTE: Require ion sound loaded on the page.
+Object.defineProperty(exports, "__esModule", { value: true });
+var ts_events_extended_1 = require("ts-events-extended");
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
+var phone_number_1 = require("phone-number");
+var modal_stack = require("../../../shared/dist/lib/tools/modal_stack");
+var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiVoiceCall.html"), "UiVoiceCall");
+var UiVoiceCall = /** @class */ (function () {
+    function UiVoiceCall(userSim) {
+        var _this = this;
+        this.userSim = userSim;
+        this.structure = html.structure.clone();
+        this.btnGreen = this.structure.find(".id_btn-green");
+        this.btnRed = this.structure.find(".id_btn-red");
+        this.evtBtnClick = new ts_events_extended_1.SyncEvent();
+        this.evtNumpadDtmf = new ts_events_extended_1.SyncEvent();
+        this.state = "TERMINATED";
+        //Debug only
+        window["uiVoiceCall"] = this;
+        this.countryIso = userSim.sim.country ?
+            userSim.sim.country.iso : undefined;
+        {
+            var _a = modal_stack.add(this.structure, {
+                "keyboard": false,
+                "backdrop": "static"
+            }), hide = _a.hide, show = _a.show;
+            this.hideModal = hide;
+            this.showModal = show;
+        }
+        this.structure.find("span.id_me").html(userSim.friendlyName);
+        this.structure.find("span.id_me_under").html(!!this.userSim.sim.storage.number ?
+            (function () {
+                var iso = _this.userSim.sim.country ?
+                    _this.userSim.sim.country.iso : undefined;
+                return phone_number_1.phoneNumber.prettyPrint(phone_number_1.phoneNumber.build(_this.userSim.sim.storage.number, iso), iso);
+            })() : "");
+        this.btnGreen.on("click", function () { return _this.evtBtnClick.post("GREEN"); });
+        this.btnRed.on("click", function () { return _this.evtBtnClick.post("RED"); });
+        var mouseDownStart = {};
+        var _loop_1 = function (i) {
+            var signal = (i <= 9) ? "" + i : (i === 10) ? "*" : "#";
+            this_1.structure
+                .find("button.id_key" + (signal === "*" ? "Ast" : (signal === "#" ? "Sharp" : signal)))
+                .on("mousedown", function () { return mouseDownStart[signal] = Date.now(); })
+                .on("click", function () {
+                var duration = Date.now() - mouseDownStart[signal];
+                if (duration < 250) {
+                    duration = 250;
+                }
+                _this.evtNumpadDtmf.post({
+                    signal: signal,
+                    duration: duration
+                });
+            });
+        };
+        var this_1 = this;
+        for (var i = 0; i <= 11; i++) {
+            _loop_1(i);
+        }
+    }
+    UiVoiceCall.prototype.setContact = function (wdChat) {
+        var prettyNumber = phone_number_1.phoneNumber.prettyPrint(wdChat.contactNumber, this.countryIso);
+        this.structure.find("span.id_contact")
+            .html(wdChat.contactName ? wdChat.contactName : "");
+        this.structure.find("span.id_contact_under")
+            .html(prettyNumber);
+    };
+    UiVoiceCall.prototype.setArrows = function (direction) {
+        this.structure.find("[class^='sel_arrow-']").addClass("hide");
+        this.structure
+            .find(".sel_arrow-" + ((direction === "INCOMING") ? "left" : "right"))
+            .removeClass("hide");
+    };
+    UiVoiceCall.prototype.onEstablished = function () {
+        var _this = this;
+        this.setState("ESTABLISHED", "In call");
+        var evtUserInput = new ts_events_extended_1.SyncEvent();
+        this.evtNumpadDtmf.attach(function (_a) {
+            var signal = _a.signal, duration = _a.duration;
+            return evtUserInput.post({ "userAction": "DTMF", signal: signal, duration: duration });
+        });
+        this.evtBtnClick.attachOnce(function () {
+            _this.setState("TERMINATED", "You hanged up");
+            evtUserInput.post({ "userAction": "HANGUP" });
+        });
+        return { evtUserInput: evtUserInput };
+    };
+    UiVoiceCall.prototype.onIncoming = function (wdChat) {
+        var _this = this;
+        this.setContact(wdChat);
+        this.setArrows("INCOMING");
+        this.setState("RINGING", "Incoming call");
+        return {
+            "onTerminated": function (message) { return _this.setState("TERMINATED", message); },
+            "prUserInput": new Promise(function (resolve) { return _this.evtBtnClick.attachOnce(function (btnId) {
+                if (btnId === "RED") {
+                    _this.setState("TERMINATED", "You rejected the call");
+                    resolve({ "userAction": "REJECT" });
+                }
+                else {
+                    _this.setState("LOADING", "Connecting...");
+                    resolve({
+                        "userAction": "ANSWER",
+                        "onEstablished": function () { return _this.onEstablished(); }
+                    });
+                }
+            }); })
+        };
+    };
+    UiVoiceCall.prototype.onOutgoing = function (wdChat) {
+        var _this = this;
+        this.setContact(wdChat);
+        this.setArrows("OUTGOING");
+        this.setState("LOADING", "Loading...");
+        return {
+            "onTerminated": function (message) { return _this.setState("TERMINATED", message); },
+            "onRingback": function () {
+                _this.setState("RINGBACK", "Remote is ringing");
+                return {
+                    "onEstablished": function () { return _this.onEstablished(); },
+                    "prUserInput": new Promise(function (resolve) { return _this.evtBtnClick.attachOnce(function () {
+                        _this.setState("TERMINATED", "You hanged up before remote answered");
+                        resolve({ "userAction": "HANGUP" });
+                    }); })
+                };
+            },
+            "prUserInput": new Promise(function (resolve) { return _this.evtBtnClick.attachOnce(function () {
+                _this.setState("TERMINATED", "You canceled the call before remote was ringing");
+                resolve({ "userAction": "CANCEL" });
+            }); })
+        };
+    };
+    UiVoiceCall.prototype.setState = function (state, message) {
+        var _this = this;
+        if (state === this.state) {
+            return;
+        }
+        this.state = state;
+        this.evtBtnClick.detach();
+        var keyPad = this.structure.find(".id_numpad");
+        keyPad.hide();
+        this.structure.find("[class^='id_icon-']").addClass("hide");
+        var spanTimer = this.structure.find("span.id_timer");
+        if (spanTimer["timer"] instanceof Function) {
+            spanTimer["timer"]("remove");
+            spanTimer.text("");
+        }
+        this.evtNumpadDtmf.detach();
+        this.btnGreen.addClass("hide");
+        this.btnRed.addClass("hide");
+        this.showModal();
+        try {
+            ion.sound.stop("semasim_ringtone");
+        }
+        catch (_a) { }
+        switch (state) {
+            case "RINGING":
+                ion.sound.play("semasim_ringtone", { "loop": true });
+                this.btnGreen.removeClass("hide").html("Answer");
+                this.btnRed.removeClass("hide").html("Reject");
+                this.structure.find(".id_icon-ring").removeClass("hide");
+                break;
+            case "RINGBACK":
+                this.structure.find(".id_icon-ring").removeClass("hide");
+                this.btnRed.removeClass("hide").html("Hangup");
+                break;
+            case "ESTABLISHED":
+                keyPad.show();
+                this.btnRed.removeClass("hide").html("Hangup");
+                spanTimer["timer"]("start");
+                break;
+            case "LOADING":
+                this.btnRed.removeClass("hide").html("Cancel");
+                this.structure.find(".id_icon-spin").removeClass("hide");
+                break;
+            case "TERMINATED":
+                this.structure.find(".id_icon-hangup").removeClass("hide");
+                setTimeout(function () { return _this.hideModal(); }, 1500);
+                break;
+            default: break;
+        }
+        this.structure.find(".id_status").html(message);
+    };
+    return UiVoiceCall;
+}());
+exports.UiVoiceCall = UiVoiceCall;
+
+},{"../../../shared/dist/lib/loadUiClassHtml":137,"../../../shared/dist/lib/tools/modal_stack":143,"../templates/UiVoiceCall.html":133,"phone-number":120,"ts-events-extended":127}],14:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4056,358 +3882,540 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
+var UiQuickAction_1 = require("./UiQuickAction");
+var UiHeader_1 = require("./UiHeader");
+var UiPhonebook_1 = require("./UiPhonebook");
+var UiConversation_1 = require("./UiConversation");
+var UiVoiceCall_1 = require("./UiVoiceCall");
+var Ua_1 = require("../../../shared/dist/lib/Ua");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var modal_stack = require("../../../shared/dist/lib/tools/modal_stack");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiShareSim.html"), "UiShareSim");
-require("../templates/UiShareSim.less");
-var UiShareSim = /** @class */ (function () {
-    /**
-     * The evt argument should post be posted whenever.
-     * -An user accept a sharing request.
-     * -An user reject a sharing request.
-     * -An user unregistered a shared sim.
-     */
-    function UiShareSim(evt) {
+var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
+var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
+var phone_number_1 = require("phone-number");
+var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
+var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiWebphoneController.html"), "UiWebphoneController");
+var UiWebphoneController = /** @class */ (function () {
+    function UiWebphoneController(userSim, wdInstance) {
         var _this = this;
-        this.evt = evt;
+        this.userSim = userSim;
+        this.wdInstance = wdInstance;
         this.structure = html.structure.clone();
-        this.buttonClose = this.structure.find(".id_close");
-        this.buttonStopSharing = this.structure.find(".id_stopSharing");
-        this.divListContainer = this.structure.find(".id_list");
-        this.inputEmails = this.structure.find(".id_emails");
-        this.textareaMessage = this.structure.find(".id_message textarea");
-        this.buttonSubmit = this.structure.find(".id_submit");
-        this.divsToHideIfNotShared = this.structure.find("._toHideIfNotShared");
-        this.evtShare = new ts_events_extended_1.SyncEvent();
-        this.evtStopSharing = new ts_events_extended_1.SyncEvent();
-        this.currentUserSim = undefined;
-        var _a = modal_stack.add(this.structure, {
-            "keyboard": false,
-            "backdrop": true
-        }), hide = _a.hide, show = _a.show;
-        this.hideModal = hide;
-        this.showModal = show;
-        this.buttonClose.on("click", function () { return _this.hideModal(); });
-        this.inputEmails.multiple_emails({
-            "placeholder": "Enter email addresses",
-            "checkDupEmail": true
+        this._uiConversations = new Map();
+        this.ua = new Ua_1.Ua(userSim.sim.imsi, userSim.password);
+        this.uiVoiceCall = new UiVoiceCall_1.UiVoiceCall(userSim);
+        this.uiHeader = new UiHeader_1.UiHeader(userSim);
+        this.uiQuickAction = new UiQuickAction_1.UiQuickAction(userSim);
+        this.uiPhonebook = new UiPhonebook_1.UiPhonebook(userSim, wdInstance);
+        this.registerRemoteNotifyHandlers();
+        this.initUa();
+        this.initUiHeader();
+        this.initUiQuickAction();
+        this.initUiPhonebook();
+        $("body").data("dynamic").panels();
+        setTimeout(function () { return _this.uiPhonebook.triggerClickOnLastSeenChat(); }, 0);
+    }
+    UiWebphoneController.prototype.registerRemoteNotifyHandlers = function () {
+        var _this = this;
+        localApiHandlers.evtSharedSimUnregistered.attachOnce(function (_a) {
+            var userSim = _a.userSim;
+            return userSim === _this.userSim;
+        }, function () {
+            //TODO: Terminate UA.
+            _this.structure.detach();
         });
-        this.buttonStopSharing.on("click", function () { return __awaiter(_this, void 0, void 0, function () {
-            var emails;
-            var _this = this;
+        localApiHandlers.evtContactCreatedOrUpdated.attach(function (_a) {
+            var userSim = _a.userSim;
+            return userSim === _this.userSim;
+        }, function (_a) {
+            var contact = _a.contact;
+            return __awaiter(_this, void 0, void 0, function () {
+                var wdChat, isUpdated;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            wdChat = this.wdInstance.chats.find(function (_a) {
+                                var contactNumber = _a.contactNumber;
+                                return phone_number_1.phoneNumber.areSame(contactNumber, contact.number_raw);
+                            });
+                            if (!!wdChat) return [3 /*break*/, 2];
+                            return [4 /*yield*/, remoteApiCaller.newWdChat(this.wdInstance, phone_number_1.phoneNumber.build(contact.number_raw, this.userSim.sim.country ? this.userSim.sim.country.iso : undefined), contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
+                        case 1:
+                            wdChat = _b.sent();
+                            this.getOrCreateUiConversation(wdChat);
+                            return [3 /*break*/, 4];
+                        case 2: return [4 /*yield*/, remoteApiCaller.updateWdChatContactInfos(wdChat, contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
+                        case 3:
+                            isUpdated = _b.sent();
+                            if (!isUpdated) {
+                                return [2 /*return*/];
+                            }
+                            this.uiPhonebook.notifyContactChanged(wdChat);
+                            this.getOrCreateUiConversation(wdChat)
+                                .notifyContactNameUpdated();
+                            _b.label = 4;
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            });
+        });
+        localApiHandlers.evtContactDeleted.attach(function (_a) {
+            var userSim = _a.userSim;
+            return userSim === _this.userSim;
+        }, function (_a) {
+            var contact = _a.contact;
+            return __awaiter(_this, void 0, void 0, function () {
+                var wdChat, isUpdated;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            wdChat = this.wdInstance.chats.find(function (_a) {
+                                var contactNumber = _a.contactNumber;
+                                return phone_number_1.phoneNumber.areSame(contactNumber, contact.number_raw);
+                            });
+                            return [4 /*yield*/, remoteApiCaller.updateWdChatContactInfos(wdChat, "", null)];
+                        case 1:
+                            isUpdated = _b.sent();
+                            if (!isUpdated) {
+                                return [2 /*return*/];
+                            }
+                            this.uiPhonebook.notifyContactChanged(wdChat);
+                            this.getOrCreateUiConversation(wdChat)
+                                .notifyContactNameUpdated();
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        });
+        localApiHandlers.evtSimIsOnlineStatusChange.attach(function (userSim) { return userSim === _this.userSim; }, function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (!this.userSim.isOnline) {
+                    if (this.ua.isRegistered) {
+                        this.ua.unregister();
+                    }
+                }
+                else {
+                    this.ua.register();
+                }
+                this.uiQuickAction.notifySimOnlineStatusChanged();
+                return [2 /*return*/];
+            });
+        }); });
+    };
+    UiWebphoneController.prototype.initUa = function () {
+        var _this = this;
+        this.ua.evtRegistrationStateChanged.attach(function (isRegistered) {
+            var e_1, _a;
+            _this.uiHeader.setIsOnline(isRegistered);
+            try {
+                for (var _b = __values(_this._uiConversations.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var uiConversation = _c.value;
+                    uiConversation.setReadonly(!isRegistered);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+        });
+        this.ua.evtIncomingMessage.attach(function (_a) {
+            var fromNumber = _a.fromNumber, bundledData = _a.bundledData, text = _a.text, onProcessed = _a.onProcessed;
+            return __awaiter(_this, void 0, void 0, function () {
+                var wdChat, prWdMessage, wdMessage;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, this.getOrCreateChatByPhoneNumber(fromNumber)];
+                        case 1:
+                            wdChat = _b.sent();
+                            prWdMessage = (function () {
+                                switch (bundledData.type) {
+                                    case "MESSAGE": {
+                                        var message = {
+                                            "direction": "INCOMING",
+                                            "isNotification": false,
+                                            "time": bundledData.pduDate.getTime(),
+                                            text: text
+                                        };
+                                        return remoteApiCaller.newWdMessage(wdChat, message);
+                                    }
+                                    case "SEND REPORT": {
+                                        return remoteApiCaller.notifySendReportReceived(wdChat, bundledData);
+                                    }
+                                    case "STATUS REPORT": {
+                                        if (bundledData.messageTowardGsm.uaSim.ua.instance === Ua_1.Ua.instanceId) {
+                                            return remoteApiCaller.notifyStatusReportReceived(wdChat, bundledData);
+                                        }
+                                        else {
+                                            var message = {
+                                                "time": bundledData.messageTowardGsm.date.getTime(),
+                                                "direction": "OUTGOING",
+                                                "text": bundledData.messageTowardGsm.text,
+                                                "sentBy": (function () {
+                                                    return (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua_1.Ua.email) ?
+                                                        ({ "who": "USER" }) :
+                                                        ({ "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail });
+                                                })(),
+                                                "status": "STATUS REPORT RECEIVED",
+                                                "deliveredTime": bundledData.statusReport.isDelivered ?
+                                                    bundledData.statusReport.dischargeDate.getTime() : null
+                                            };
+                                            return remoteApiCaller.newWdMessage(wdChat, message);
+                                        }
+                                    }
+                                    case "MMS NOTIFICATION": console.log("WPA PUSH: " + bundledData.wapPushMessage);
+                                    case "CALL ANSWERED BY":
+                                    case "MISSED CALL": {
+                                        var message = {
+                                            "direction": "INCOMING",
+                                            "isNotification": true,
+                                            "time": (bundledData.type === "MMS NOTIFICATION" ?
+                                                bundledData.pduDate : bundledData.date).getTime(),
+                                            text: text
+                                        };
+                                        return remoteApiCaller.newWdMessage(wdChat, message);
+                                    }
+                                }
+                            })();
+                            return [4 /*yield*/, prWdMessage];
+                        case 2:
+                            wdMessage = _b.sent();
+                            onProcessed();
+                            if (!!wdMessage) {
+                                this.getOrCreateUiConversation(wdChat).newMessage(wdMessage);
+                                this.uiPhonebook.notifyContactChanged(wdChat);
+                            }
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        });
+        this.ua.evtIncomingCall.attach(function (_a) {
+            var fromNumber = _a.fromNumber, terminate = _a.terminate, prTerminated = _a.prTerminated, onAccepted = _a.onAccepted;
+            return __awaiter(_this, void 0, void 0, function () {
+                var wdChat, _b, onTerminated, prUserInput;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0: return [4 /*yield*/, this.getOrCreateChatByPhoneNumber(fromNumber)];
+                        case 1:
+                            wdChat = _c.sent();
+                            this.uiPhonebook.triggerContactClick(wdChat);
+                            _b = this.uiVoiceCall.onIncoming(wdChat), onTerminated = _b.onTerminated, prUserInput = _b.prUserInput;
+                            prTerminated.then(function () { return onTerminated("Call ended"); });
+                            prUserInput.then(function (ua) {
+                                if (ua.userAction === "REJECT") {
+                                    terminate();
+                                }
+                            });
+                            prUserInput.then(function (ua) {
+                                if (ua.userAction === "ANSWER") {
+                                    var onEstablished_1 = ua.onEstablished;
+                                    onAccepted().then(function (_a) {
+                                        var sendDtmf = _a.sendDtmf;
+                                        var evtUserInput = onEstablished_1().evtUserInput;
+                                        evtUserInput.attach(function (eventData) {
+                                            return eventData.userAction === "DTMF";
+                                        }, function (_a) {
+                                            var signal = _a.signal, duration = _a.duration;
+                                            return sendDtmf(signal, duration);
+                                        });
+                                        evtUserInput.attachOnce(function (_a) {
+                                            var userAction = _a.userAction;
+                                            return userAction === "HANGUP";
+                                        }, function () { return terminate(); });
+                                    });
+                                }
+                            });
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        });
+        if (this.userSim.isOnline) {
+            this.ua.register();
+        }
+    };
+    UiWebphoneController.prototype.initUiHeader = function () {
+        this.structure
+            .find("div.id_header")
+            .append(this.uiHeader.structure);
+    };
+    UiWebphoneController.prototype.initUiQuickAction = function () {
+        var _this = this;
+        this.structure
+            .find("div.id_colLeft")
+            .append(this.uiQuickAction.structure);
+        var onEvt = function (action, number) { return __awaiter(_this, void 0, void 0, function () {
+            var wdChat, uiConversation;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        emails = [];
-                        this.divListContainer.find(".id_row.selected").each(function (_, element) {
-                            emails.push($(element).find(".id_email").html());
-                        });
-                        return [4 /*yield*/, this.hideModal()];
+                    case 0: return [4 /*yield*/, this.getOrCreateChatByPhoneNumber(number)];
                     case 1:
-                        _a.sent();
-                        bootbox_custom.loading("Revoking some user's SIM access");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtStopSharing.post({
-                                    "userSim": _this.currentUserSim,
-                                    emails: emails,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 2:
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        this.open(this.currentUserSim);
+                        wdChat = _a.sent();
+                        this.uiPhonebook.triggerContactClick(wdChat);
+                        if (action === "SMS") {
+                            return [2 /*return*/];
+                        }
+                        uiConversation = this.getOrCreateUiConversation(wdChat);
+                        switch (action) {
+                            case "CALL":
+                                uiConversation.evtVoiceCall.post();
+                                break;
+                            case "CONTACT":
+                                uiConversation.evtUpdateContact.post();
+                                break;
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        this.uiQuickAction.evtSms.attach(function (number) { return onEvt("SMS", number); });
+        this.uiQuickAction.evtVoiceCall.attach(function (number) { return onEvt("CALL", number); });
+        this.uiQuickAction.evtNewContact.attach(function (number) { return onEvt("CONTACT", number); });
+    };
+    UiWebphoneController.prototype.initUiPhonebook = function () {
+        var _this = this;
+        this.structure
+            .find("div.id_colLeft")
+            .append(this.uiPhonebook.structure);
+        this.uiPhonebook.evtContactSelected.attach(function (_a) {
+            var wdChatPrev = _a.wdChatPrev, wdChat = _a.wdChat;
+            if (wdChatPrev) {
+                _this.getOrCreateUiConversation(wdChatPrev).unselect();
+            }
+            _this.getOrCreateUiConversation(wdChat).setSelected();
+        });
+    };
+    UiWebphoneController.prototype.getOrCreateUiConversation = function (wdChat) {
+        var _this = this;
+        if (this._uiConversations.has(wdChat)) {
+            return this._uiConversations.get(wdChat);
+        }
+        var uiConversation = new UiConversation_1.UiConversation(this.userSim, wdChat);
+        if (this.ua.isRegistered) {
+            uiConversation.setReadonly(false);
+        }
+        this._uiConversations.set(wdChat, uiConversation);
+        this.structure.find("div.id_colRight").append(uiConversation.structure);
+        uiConversation.evtChecked.attach(function () { return __awaiter(_this, void 0, void 0, function () {
+            var isUpdated;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, remoteApiCaller.updateWdChatIdOfLastMessageSeen(wdChat)];
+                    case 1:
+                        isUpdated = _a.sent();
+                        if (!isUpdated) {
+                            return [2 /*return*/];
+                        }
+                        this.uiPhonebook.notifyContactChanged(wdChat);
                         return [2 /*return*/];
                 }
             });
         }); });
-        this.buttonSubmit.on("click", function () { return __awaiter(_this, void 0, void 0, function () {
-            var emails_1;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+        uiConversation.evtSendText.attach(function (text) { return __awaiter(_this, void 0, void 0, function () {
+            var exactSendDate, wdMessage, _a, _b, _c, error_1, wdMessageUpdated;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        if (!(this.getInputEmails().length === 0)) return [3 /*break*/, 1];
-                        this.structure.find(".id_emails")
-                            .trigger(jQuery.Event("keypress", { "keycode": 13 }));
-                        return [3 /*break*/, 4];
+                        exactSendDate = new Date();
+                        return [4 /*yield*/, remoteApiCaller.newWdMessage(uiConversation.wdChat, (function () {
+                                var message = {
+                                    "time": exactSendDate.getTime(),
+                                    "direction": "OUTGOING",
+                                    "status": "PENDING",
+                                    text: text,
+                                };
+                                return message;
+                            })())];
                     case 1:
-                        emails_1 = this.getInputEmails();
-                        return [4 /*yield*/, this.hideModal()];
+                        wdMessage = _d.sent();
+                        uiConversation.newMessage(wdMessage);
+                        _d.label = 2;
                     case 2:
-                        _a.sent();
-                        bootbox_custom.loading("Granting sim access to some users");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtShare.post({
-                                    "userSim": _this.currentUserSim,
-                                    emails: emails_1,
-                                    "message": _this.textareaMessage.html(),
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 3:
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        this.open(this.currentUserSim);
-                        _a.label = 4;
-                    case 4: return [2 /*return*/];
+                        _d.trys.push([2, 5, , 7]);
+                        _b = (_a = this.ua).sendMessage;
+                        _c = [uiConversation.wdChat.contactNumber,
+                            text,
+                            exactSendDate];
+                        return [4 /*yield*/, remoteApiCaller.shouldAppendPromotionalMessage()];
+                    case 3: return [4 /*yield*/, _b.apply(_a, _c.concat([_d.sent()]))];
+                    case 4:
+                        _d.sent();
+                        return [3 /*break*/, 7];
+                    case 5:
+                        error_1 = _d.sent();
+                        console.log("ua send message error", error_1);
+                        return [4 /*yield*/, remoteApiCaller.notifyUaFailedToSendMessage(uiConversation.wdChat, wdMessage)];
+                    case 6:
+                        wdMessageUpdated = _d.sent();
+                        uiConversation.newMessage(wdMessageUpdated);
+                        return [3 /*break*/, 7];
+                    case 7: return [2 /*return*/];
                 }
             });
         }); });
-        this.inputEmails.change(function () {
-            if (_this.getInputEmails().length === 0) {
-                _this.buttonSubmit.text("Validate email");
-                _this.textareaMessage.parent().hide();
-            }
-            else {
-                _this.buttonSubmit.text("Share");
-                _this.textareaMessage.parent().show({
-                    "done": function () { return _this.textareaMessage.focus(); }
-                });
-            }
-        });
-    }
-    UiShareSim.prototype.getInputEmails = function () {
-        var raw = this.inputEmails.val();
-        return !!raw ? JSON.parse(raw) : [];
-    };
-    UiShareSim.prototype.open = function (userSim) {
-        var _this = this;
-        this.evt.detach(this);
-        this.currentUserSim = userSim;
-        this.textareaMessage.html([
-            "I would like to share the SIM card",
-            userSim.friendlyName,
-            userSim.sim.storage.number || "",
-            "with you."
-        ].join(" "));
-        this.inputEmails.parent().find("li").detach();
-        this.inputEmails.val("");
-        this.inputEmails.trigger("change");
-        if (userSim.ownership.sharedWith.confirmed.length === 0 &&
-            userSim.ownership.sharedWith.notConfirmed.length === 0) {
-            this.divsToHideIfNotShared.hide();
-        }
-        else {
-            this.divListContainer.find(".id_row").detach();
-            this.divsToHideIfNotShared.show();
-            var onRowClick_1 = function (divRow) {
-                if (!!divRow) {
-                    divRow.toggleClass("selected");
+        uiConversation.evtVoiceCall.attach(function () { return __awaiter(_this, void 0, void 0, function () {
+            var _a, terminate, prTerminated, prNextState, _b, onTerminated, onRingback, prUserInput;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0: return [4 /*yield*/, this.ua.placeOutgoingCall(wdChat.contactNumber)];
+                    case 1:
+                        _a = _c.sent(), terminate = _a.terminate, prTerminated = _a.prTerminated, prNextState = _a.prNextState;
+                        _b = this.uiVoiceCall.onOutgoing(wdChat), onTerminated = _b.onTerminated, onRingback = _b.onRingback, prUserInput = _b.prUserInput;
+                        prTerminated.then(function () { return onTerminated("Call terminated"); });
+                        prUserInput.then(function () { return terminate(); });
+                        prNextState.then(function (_a) {
+                            var prNextState = _a.prNextState;
+                            var _b = onRingback(), onEstablished = _b.onEstablished, prUserInput = _b.prUserInput;
+                            prUserInput.then(function () { return terminate(); });
+                            prNextState.then(function (_a) {
+                                var sendDtmf = _a.sendDtmf;
+                                var evtUserInput = onEstablished().evtUserInput;
+                                evtUserInput.attach(function (eventData) {
+                                    return eventData.userAction === "DTMF";
+                                }, function (_a) {
+                                    var signal = _a.signal, duration = _a.duration;
+                                    return sendDtmf(signal, duration);
+                                });
+                                evtUserInput.attachOnce(function (_a) {
+                                    var userAction = _a.userAction;
+                                    return userAction === "HANGUP";
+                                }, function () { return terminate(); });
+                            });
+                        });
+                        return [2 /*return*/];
                 }
-                var selectedCount = _this.divListContainer.find(".id_row.selected").length;
-                if (selectedCount === 0) {
-                    _this.buttonStopSharing.hide();
-                }
-                else {
-                    _this.buttonStopSharing.show();
-                    _this.buttonStopSharing.find("span").html("Revoke access (" + selectedCount + ")");
-                }
-            };
-            var appendRow = function (email, isConfirmed) {
-                var divRow = html.templates.find(".id_row").clone();
-                divRow.find(".id_email").text(email);
-                divRow.find(".id_isConfirmed")
-                    .text(isConfirmed ? "confirmed" : "Not yet confirmed")
-                    .addClass(isConfirmed ? "color-green" : "color-yellow");
-                divRow.on("click", function () { return onRowClick_1(divRow); });
-                _this.evt.attach(function (_a) {
-                    var userSim = _a.userSim, email_ = _a.email;
-                    return (userSim === _this.currentUserSim &&
-                        email_ === email);
-                }, _this, function () {
-                    if (userSim.ownership.sharedWith.confirmed.indexOf(email) >= 0) {
-                        divRow.find(".id_isConfirmed")
-                            .removeClass("color-yellow")
-                            .text("confirmed")
-                            .addClass("color-green");
-                    }
-                    else {
-                        divRow.remove();
-                        if (userSim.ownership.sharedWith.confirmed.length === 0 &&
-                            userSim.ownership.sharedWith.notConfirmed.length === 0) {
-                            _this.divsToHideIfNotShared.hide();
+            });
+        }); });
+        uiConversation.evtUpdateContact.attach(function () { return __awaiter(_this, void 0, void 0, function () {
+            var name, contact, isUpdated;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
+                            "title": "Contact name for " + wdChat.contactNumber,
+                            "value": wdChat.contactName || "",
+                            "callback": function (result) { return resolve(result); },
+                        }); })];
+                    case 1:
+                        name = _a.sent();
+                        if (!name) {
+                            return [2 /*return*/, undefined];
                         }
-                    }
-                });
-                _this.divListContainer.append(divRow);
-            };
-            for (var _i = 0, _a = userSim.ownership.sharedWith.confirmed; _i < _a.length; _i++) {
-                var email = _a[_i];
-                appendRow(email, true);
-            }
-            for (var _b = 0, _c = userSim.ownership.sharedWith.notConfirmed; _b < _c.length; _b++) {
-                var email = _c[_b];
-                appendRow(email, false);
-            }
-            onRowClick_1();
-        }
-        this.showModal();
-    };
-    return UiShareSim;
-}());
-exports.UiShareSim = UiShareSim;
-
-},{"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/modal_stack":143,"../templates/UiShareSim.html":131,"../templates/UiShareSim.less":132,"ts-events-extended":127}],13:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiSimRow.html"), "UiSimRow");
-require("../templates/UiSimRow.less");
-var UiSimRow = /** @class */ (function () {
-    function UiSimRow(userSim) {
-        var _this = this;
-        this.userSim = userSim;
-        this.structure = html.structure.clone();
-        this.evtSelected = new ts_events_extended_1.VoidSyncEvent();
-        this.isSelected = false;
-        this.structure.click(function () {
-            if (!_this.isSelected) {
-                _this.isSelected = true;
-                _this.structure.find(".id_row").addClass("selected");
-                _this.evtSelected.post();
-            }
+                        bootbox_custom.loading("Create or update contact");
+                        contact = this.userSim.phonebook.find(function (_a) {
+                            var mem_index = _a.mem_index, number_raw = _a.number_raw;
+                            if (wdChat.contactIndexInSim !== null) {
+                                return mem_index === wdChat.contactIndexInSim;
+                            }
+                            return phone_number_1.phoneNumber.areSame(wdChat.contactNumber, number_raw);
+                        });
+                        if (!!!contact) return [3 /*break*/, 3];
+                        return [4 /*yield*/, remoteApiCaller.updateContactName(this.userSim, contact, name)];
+                    case 2:
+                        _a.sent();
+                        return [3 /*break*/, 5];
+                    case 3: return [4 /*yield*/, remoteApiCaller.createContact(this.userSim, name, wdChat.contactNumber)];
+                    case 4:
+                        contact = _a.sent();
+                        _a.label = 5;
+                    case 5: return [4 /*yield*/, remoteApiCaller.updateWdChatContactInfos(wdChat, name, contact.mem_index !== undefined ? contact.mem_index : null)];
+                    case 6:
+                        isUpdated = _a.sent();
+                        bootbox_custom.dismissLoading();
+                        if (!isUpdated) {
+                            return [2 /*return*/];
+                        }
+                        this.uiPhonebook.notifyContactChanged(wdChat);
+                        uiConversation.notifyContactNameUpdated();
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        uiConversation.evtDelete.attach(function () { return __awaiter(_this, void 0, void 0, function () {
+            var shouldProceed, contact;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
+                            "title": "Delete chat",
+                            "message": "Delete contact and conversation ?",
+                            callback: function (result) { return resolve(result); }
+                        }); })];
+                    case 1:
+                        shouldProceed = _a.sent();
+                        if (!shouldProceed) {
+                            return [2 /*return*/];
+                        }
+                        bootbox_custom.loading("Deleting contact and conversation");
+                        contact = this.userSim.phonebook.find(function (_a) {
+                            var mem_index = _a.mem_index, number_raw = _a.number_raw;
+                            if (wdChat.contactIndexInSim !== null) {
+                                return mem_index === wdChat.contactIndexInSim;
+                            }
+                            return phone_number_1.phoneNumber.areSame(wdChat.contactNumber, number_raw);
+                        });
+                        if (!!!contact) return [3 /*break*/, 3];
+                        return [4 /*yield*/, remoteApiCaller.deleteContact(this.userSim, contact)];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, remoteApiCaller.destroyWdChat(this.wdInstance, wdChat)];
+                    case 4:
+                        _a.sent();
+                        bootbox_custom.dismissLoading();
+                        this.uiPhonebook.notifyContactChanged(wdChat);
+                        uiConversation.structure.detach();
+                        this._uiConversations.delete(wdChat);
+                        this.uiPhonebook.triggerClickOnLastSeenChat();
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        uiConversation.evtLoadMore.attach(function (_a) {
+            var onLoaded = _a.onLoaded;
+            return remoteApiCaller.fetchOlderWdMessages(wdChat)
+                .then(function (wdMessages) { return onLoaded(wdMessages); });
         });
-        this.setDetailsVisibility("HIDDEN");
-        this.populate();
-    }
-    UiSimRow.prototype.unselect = function () {
-        this.structure.find(".id_row").removeClass("selected");
-        this.isSelected = false;
+        return uiConversation;
     };
-    UiSimRow.prototype.setDetailsVisibility = function (visibility) {
-        var details = this.structure.find(".id_details");
-        switch (visibility) {
-            case "SHOWN":
-                details.show();
-                break;
-            case "HIDDEN":
-                details.hide();
-                break;
-        }
-    };
-    UiSimRow.prototype.setVisibility = function (visibility) {
-        switch (visibility) {
-            case "SHOWN":
-                this.structure.show();
-                break;
-            case "HIDDEN":
-                this.structure.hide();
-                break;
-        }
-    };
-    /** To call when userSim has changed */
-    UiSimRow.prototype.populate = function () {
-        /*
-        this.structure.find(".id_simId").text(
-            (() => {
-
-                let out = this.userSim.friendlyName;
-
-                const number = this.userSim.sim.storage.number
-
-                if (!!number) {
-                    out += " " + phoneNumber.prettyPrint(
-                        phoneNumber.build(
-                            number,
-                            !!this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
-                        )
-                    ) + " ";
+    UiWebphoneController.prototype.getOrCreateChatByPhoneNumber = function (number) {
+        return __awaiter(this, void 0, void 0, function () {
+            var wdChat;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        wdChat = this.wdInstance.chats.find(function (_a) {
+                            var contactNumber = _a.contactNumber;
+                            return contactNumber === number;
+                        });
+                        if (!!wdChat) return [3 /*break*/, 2];
+                        return [4 /*yield*/, remoteApiCaller.newWdChat(this.wdInstance, number, "", null)];
+                    case 1:
+                        wdChat = _a.sent();
+                        this.uiPhonebook.insertContact(wdChat);
+                        $('body').data('dynamic').panels();
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, wdChat];
                 }
-
-                return out;
-
-            })()
-        );
-        */
-        var _this = this;
-        this.structure.find(".id_simId").text((function () {
-            var out = _this.userSim.friendlyName;
-            var number = _this.userSim.sim.storage.number;
-            if (!!number) {
-                out += " " + number + " ";
-            }
-            return out;
-        })());
-        this.structure.find(".id_connectivity").text(this.userSim.isOnline ? "online" : "offline");
-        if (!this.userSim.isOnline) {
-            this.structure.find(".id_row").addClass("offline");
-        }
-        else {
-            this.structure.find(".id_row").removeClass("offline");
-        }
-        this.structure.find(".id_ownership").text(this.userSim.ownership.status === "OWNED" ?
-            "" :
-            "owned by: " + this.userSim.ownership.ownerEmail);
-        this.structure.find(".id_gw_location").text([
-            this.userSim.gatewayLocation.city || "",
-            this.userSim.gatewayLocation.countryIso || "",
-            "( " + this.userSim.gatewayLocation.ip + " )"
-        ].join(" "));
-        {
-            var span = this.structure.find(".id_owner");
-            if (this.userSim.ownership.status === "OWNED") {
-                span.parent().hide();
-            }
-            else {
-                span.text(this.userSim.ownership.ownerEmail);
-            }
-        }
-        this.structure.find(".id_number").text((function () {
-            var n = _this.userSim.sim.storage.number;
-            return n || "Unknown";
-        })());
-        this.structure.find(".id_serviceProvider").text((function () {
-            var out;
-            if (_this.userSim.sim.serviceProvider.fromImsi) {
-                out = _this.userSim.sim.serviceProvider.fromImsi;
-            }
-            else if (_this.userSim.sim.serviceProvider.fromNetwork) {
-                out = _this.userSim.sim.serviceProvider.fromNetwork;
-            }
-            else {
-                out = "Unknown";
-            }
-            if (_this.userSim.sim.country) {
-                out += ", " + _this.userSim.sim.country.name;
-            }
-            return out;
-        })());
-        {
-            var d = this.userSim.dongle;
-            this.structure.find(".id_dongle_model").text(d.manufacturer + " " + d.model);
-            this.structure.find(".id_dongle_firm").text(d.firmwareVersion);
-            this.structure.find(".id_dongle_imei").text(d.imei);
-            {
-                var span = this.structure.find(".id_voice_support");
-                if (d.isVoiceEnabled === undefined) {
-                    span.parent().hide();
-                }
-                else {
-                    span.text(d.isVoiceEnabled ?
-                        "yes" :
-                        "<a href='https://www.semasim.com/enable-voice'>Not enabled</a>");
-                }
-            }
-        }
-        this.structure.find(".id_imsi").text(this.userSim.sim.imsi);
-        this.structure.find(".id_iccid").text(this.userSim.sim.iccid);
-        this.structure.find(".id_phonebook").text((function () {
-            var n = _this.userSim.sim.storage.contacts.length;
-            var tot = n + _this.userSim.sim.storage.infos.storageLeft;
-            return n + "/" + tot;
-        })());
+            });
+        });
     };
-    return UiSimRow;
+    return UiWebphoneController;
 }());
-exports.UiSimRow = UiSimRow;
+exports.UiWebphoneController = UiWebphoneController;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":136,"../templates/UiSimRow.html":133,"../templates/UiSimRow.less":134,"ts-events-extended":127}],14:[function(require,module,exports){
-(function (Buffer){
+},{"../../../shared/dist/lib/Ua":136,"../../../shared/dist/lib/loadUiClassHtml":137,"../../../shared/dist/lib/toBackend/localApiHandlers":139,"../../../shared/dist/lib/toBackend/remoteApiCaller":140,"../../../shared/dist/lib/tools/bootbox_custom":141,"../templates/UiWebphoneController.html":134,"./UiConversation":9,"./UiHeader":10,"./UiPhonebook":11,"./UiQuickAction":12,"./UiVoiceCall":13,"phone-number":120}],15:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4444,290 +4452,124 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
-//Polyfill
 require("es6-map/implement");
 require("es6-weak-map/implement");
 require("array.prototype.find").shim();
-if (!Array.from)
-    Array.from = require('array-from');
-if (!ArrayBuffer.isView) {
-    Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
-}
+var Ua_1 = require("../../../shared/dist/lib/Ua");
+var UiWebphoneController_1 = require("./UiWebphoneController");
 var connection = require("../../../shared/dist/lib/toBackend/connection");
-var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
-var UiController_1 = require("./UiController");
-var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
-var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
+var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
+var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
+var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
+var types = require("../../../shared/dist/lib/types");
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var action, uiController, _a;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
+    var sessionType, userSims, wdInstances;
+    var _this = this;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
             case 0:
-                $("#logout").click(function () {
-                    webApiCaller.logoutUser();
-                    window.location.href = "/login";
+                $("#logout").click(function () { return __awaiter(_this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, webApiCaller.logoutUser()];
+                            case 1:
+                                _a.sent();
+                                window.location.href = "/login";
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                sessionType = "MAIN";
+                connection.connect({
+                    sessionType: sessionType,
+                    "requestTurnCred": true
                 });
-                connection.connect();
-                action = (function () {
-                    var type = getURLParameter_1.getURLParameter("action");
-                    if (!type) {
-                        return undefined;
-                    }
-                    var getNumber = function () { return Buffer.from(getURLParameter_1.getURLParameter("number_as_hex"), "hex").toString("utf8"); };
-                    switch (type) {
-                        case "UPDATE_CONTACT_NAME":
-                        case "DELETE_CONTACT":
-                            return {
-                                type: type,
-                                "number": getNumber()
-                            };
-                        case "CREATE_CONTACT": return {
-                            type: type,
-                            "number": getNumber(),
-                            "imsi": getURLParameter_1.getURLParameter("imsi")
-                        };
-                    }
-                })();
-                _a = UiController_1.UiController.bind;
+                $("#page-payload").html("");
+                bootbox_custom.loading("Fetching contacts and SMS history", 0);
                 return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
             case 1:
-                uiController = new (_a.apply(UiController_1.UiController, [void 0, _b.sent(),
-                    action]))();
-                $("#page-payload").html("").append(uiController.structure);
-                $("#register-new-sim")
-                    .removeClass("hidden")
-                    .click(function () { return bootbox_custom.alert("Any new SIM should be automatically detected, you dont even need to refresh the page.\nNo SIM found ? Make sure that:\n-This device and the Semasim gateway ( the Raspberry Pi ) are connected to the same local network. ( required only for pairing the SIM with the account ).\n-The SIM you are trying to register have not already been registered with an other account.\n-Your Semasim gateway is able to power all the GSM dongles connected to it.\n-The problem does not come from the USB hub you might be using."
-                    .replace(/\n/g, "<br>")); });
+                userSims = _a.sent();
+                if (userSims.length === 0) {
+                    window.location.href = "/manager";
+                }
+                wdInstances = new Map();
+                return [4 /*yield*/, Promise.all(__spread([
+                        remoteApiCaller.getUaInstanceId()
+                            .then(function (_a) {
+                            var uaInstanceId = _a.uaInstanceId, email = _a.email;
+                            return Ua_1.Ua.setUaInstanceId(uaInstanceId, email);
+                        })
+                    ], userSims.map(function (userSim) { return remoteApiCaller.getOrCreateWdInstance(userSim)
+                        .then(function (wdInstance) { wdInstances.set(userSim, wdInstance); }); })))];
+            case 2:
+                _a.sent();
+                //NOTE: Sort user sims so we always have the most relevant at the top of the page.
+                userSims
+                    .sort(function (s1, s2) {
+                    if (s1.isOnline !== s2.isOnline) {
+                        return s1.isOnline ? 1 : -1;
+                    }
+                    var _a = __read([s1, s2].map(function (userSim) {
+                        return types.webphoneData.getChatWithLatestActivity(wdInstances.get(userSim));
+                    }), 2), c1 = _a[0], c2 = _a[1];
+                    if (!c1 !== !c2) {
+                        return !!c1 ? 1 : -1;
+                    }
+                    if (!c1) {
+                        return 0;
+                    }
+                    return types.webphoneData.compareChat(c1, c2);
+                })
+                    .reverse()
+                    .forEach(function (userSim) { return $("#page-payload").append((new UiWebphoneController_1.UiWebphoneController(userSim, wdInstances.get(userSim))).structure); });
+                bootbox_custom.dismissLoading();
+                localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) {
+                    bootbox_custom.alert(userSim.ownership.ownerEmail + " revoked your access to " + userSim.friendlyName);
+                    //TODO: Improve
+                    location.reload();
+                });
+                remoteApiCaller.evtUsableSim.attach(function (userSim) { return __awaiter(_this, void 0, void 0, function () {
+                    var _a, _b, _c, _d;
+                    return __generator(this, function (_e) {
+                        switch (_e.label) {
+                            case 0:
+                                _b = (_a = $("#page-payload")).append;
+                                _c = UiWebphoneController_1.UiWebphoneController.bind;
+                                _d = [void 0, userSim];
+                                return [4 /*yield*/, remoteApiCaller.getOrCreateWdInstance(userSim)];
+                            case 1: return [2 /*return*/, _b.apply(_a, [(new (_c.apply(UiWebphoneController_1.UiWebphoneController, _d.concat([_e.sent()])))()).structure])];
+                        }
+                    });
+                }); });
                 return [2 /*return*/];
         }
     });
 }); });
 
-}).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/toBackend/connection":137,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/getURLParameter":141,"../../../shared/dist/lib/webApiCaller":145,"./UiController":10,"array-from":15,"array.prototype.find":18,"buffer":2,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
-module.exports = (typeof Array.from === 'function' ?
-  Array.from :
-  require('./polyfill')
-);
-
-},{"./polyfill":16}],16:[function(require,module,exports){
-// Production steps of ECMA-262, Edition 6, 22.1.2.1
-// Reference: http://www.ecma-international.org/ecma-262/6.0/#sec-array.from
-module.exports = (function() {
-  var isCallable = function(fn) {
-    return typeof fn === 'function';
-  };
-  var toInteger = function (value) {
-    var number = Number(value);
-    if (isNaN(number)) { return 0; }
-    if (number === 0 || !isFinite(number)) { return number; }
-    return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number));
-  };
-  var maxSafeInteger = Math.pow(2, 53) - 1;
-  var toLength = function (value) {
-    var len = toInteger(value);
-    return Math.min(Math.max(len, 0), maxSafeInteger);
-  };
-  var iteratorProp = function(value) {
-    if(value != null) {
-      if(['string','number','boolean','symbol'].indexOf(typeof value) > -1){
-        return Symbol.iterator;
-      } else if (
-        (typeof Symbol !== 'undefined') &&
-        ('iterator' in Symbol) &&
-        (Symbol.iterator in value)
-      ) {
-        return Symbol.iterator;
-      }
-      // Support "@@iterator" placeholder, Gecko 27 to Gecko 35
-      else if ('@@iterator' in value) {
-        return '@@iterator';
-      }
-    }
-  };
-  var getMethod = function(O, P) {
-    // Assert: IsPropertyKey(P) is true.
-    if (O != null && P != null) {
-      // Let func be GetV(O, P).
-      var func = O[P];
-      // ReturnIfAbrupt(func).
-      // If func is either undefined or null, return undefined.
-      if(func == null) {
-        return void 0;
-      }
-      // If IsCallable(func) is false, throw a TypeError exception.
-      if (!isCallable(func)) {
-        throw new TypeError(func + ' is not a function');
-      }
-      return func;
-    }
-  };
-  var iteratorStep = function(iterator) {
-    // Let result be IteratorNext(iterator).
-    // ReturnIfAbrupt(result).
-    var result = iterator.next();
-    // Let done be IteratorComplete(result).
-    // ReturnIfAbrupt(done).
-    var done = Boolean(result.done);
-    // If done is true, return false.
-    if(done) {
-      return false;
-    }
-    // Return result.
-    return result;
-  };
-
-  // The length property of the from method is 1.
-  return function from(items /*, mapFn, thisArg */ ) {
-    'use strict';
-
-    // 1. Let C be the this value.
-    var C = this;
-
-    // 2. If mapfn is undefined, let mapping be false.
-    var mapFn = arguments.length > 1 ? arguments[1] : void 0;
-
-    var T;
-    if (typeof mapFn !== 'undefined') {
-      // 3. else
-      //   a. If IsCallable(mapfn) is false, throw a TypeError exception.
-      if (!isCallable(mapFn)) {
-        throw new TypeError(
-          'Array.from: when provided, the second argument must be a function'
-        );
-      }
-
-      //   b. If thisArg was supplied, let T be thisArg; else let T
-      //      be undefined.
-      if (arguments.length > 2) {
-        T = arguments[2];
-      }
-      //   c. Let mapping be true (implied by mapFn)
-    }
-
-    var A, k;
-
-    // 4. Let usingIterator be GetMethod(items, @@iterator).
-    // 5. ReturnIfAbrupt(usingIterator).
-    var usingIterator = getMethod(items, iteratorProp(items));
-
-    // 6. If usingIterator is not undefined, then
-    if (usingIterator !== void 0) {
-      // a. If IsConstructor(C) is true, then
-      //   i. Let A be the result of calling the [[Construct]]
-      //      internal method of C with an empty argument list.
-      // b. Else,
-      //   i. Let A be the result of the abstract operation ArrayCreate
-      //      with argument 0.
-      // c. ReturnIfAbrupt(A).
-      A = isCallable(C) ? Object(new C()) : [];
-
-      // d. Let iterator be GetIterator(items, usingIterator).
-      var iterator = usingIterator.call(items);
-
-      // e. ReturnIfAbrupt(iterator).
-      if (iterator == null) {
-        throw new TypeError(
-          'Array.from requires an array-like or iterable object'
-        );
-      }
-
-      // f. Let k be 0.
-      k = 0;
-
-      // g. Repeat
-      var next, nextValue;
-      while (true) {
-        // i. Let Pk be ToString(k).
-        // ii. Let next be IteratorStep(iterator).
-        // iii. ReturnIfAbrupt(next).
-        next = iteratorStep(iterator);
-
-        // iv. If next is false, then
-        if (!next) {
-
-          // 1. Let setStatus be Set(A, "length", k, true).
-          // 2. ReturnIfAbrupt(setStatus).
-          A.length = k;
-
-          // 3. Return A.
-          return A;
-        }
-        // v. Let nextValue be IteratorValue(next).
-        // vi. ReturnIfAbrupt(nextValue)
-        nextValue = next.value;
-
-        // vii. If mapping is true, then
-        //   1. Let mappedValue be Call(mapfn, T, «nextValue, k»).
-        //   2. If mappedValue is an abrupt completion, return
-        //      IteratorClose(iterator, mappedValue).
-        //   3. Let mappedValue be mappedValue.[[value]].
-        // viii. Else, let mappedValue be nextValue.
-        // ix.  Let defineStatus be the result of
-        //      CreateDataPropertyOrThrow(A, Pk, mappedValue).
-        // x. [TODO] If defineStatus is an abrupt completion, return
-        //    IteratorClose(iterator, defineStatus).
-        if (mapFn) {
-          A[k] = mapFn.call(T, nextValue, k);
-        }
-        else {
-          A[k] = nextValue;
-        }
-        // xi. Increase k by 1.
-        k++;
-      }
-      // 7. Assert: items is not an Iterable so assume it is
-      //    an array-like object.
-    } else {
-
-      // 8. Let arrayLike be ToObject(items).
-      var arrayLike = Object(items);
-
-      // 9. ReturnIfAbrupt(items).
-      if (items == null) {
-        throw new TypeError(
-          'Array.from requires an array-like object - not null or undefined'
-        );
-      }
-
-      // 10. Let len be ToLength(Get(arrayLike, "length")).
-      // 11. ReturnIfAbrupt(len).
-      var len = toLength(arrayLike.length);
-
-      // 12. If IsConstructor(C) is true, then
-      //     a. Let A be Construct(C, «len»).
-      // 13. Else
-      //     a. Let A be ArrayCreate(len).
-      // 14. ReturnIfAbrupt(A).
-      A = isCallable(C) ? Object(new C(len)) : new Array(len);
-
-      // 15. Let k be 0.
-      k = 0;
-      // 16. Repeat, while k < len… (also steps a - h)
-      var kValue;
-      while (k < len) {
-        kValue = arrayLike[k];
-        if (mapFn) {
-          A[k] = mapFn.call(T, kValue, k);
-        }
-        else {
-          A[k] = kValue;
-        }
-        k++;
-      }
-      // 17. Let setStatus be Set(A, "length", len, true).
-      // 18. ReturnIfAbrupt(setStatus).
-      A.length = len;
-      // 19. Return A.
-    }
-    return A;
-  };
-})();
-
-},{}],17:[function(require,module,exports){
+},{"../../../shared/dist/lib/Ua":136,"../../../shared/dist/lib/toBackend/connection":138,"../../../shared/dist/lib/toBackend/localApiHandlers":139,"../../../shared/dist/lib/toBackend/remoteApiCaller":140,"../../../shared/dist/lib/tools/bootbox_custom":141,"../../../shared/dist/lib/types":144,"../../../shared/dist/lib/webApiCaller":145,"./UiWebphoneController":14,"array.prototype.find":17,"es6-map/implement":90,"es6-weak-map/implement":101}],16:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -4751,7 +4593,7 @@ module.exports = function find(predicate) {
 	return undefined;
 };
 
-},{"es-abstract/es6":28}],18:[function(require,module,exports){
+},{"es-abstract/es6":27}],17:[function(require,module,exports){
 'use strict';
 
 var define = require('define-properties');
@@ -4779,7 +4621,7 @@ define(boundFindShim, {
 
 module.exports = boundFindShim;
 
-},{"./implementation":17,"./polyfill":19,"./shim":20,"define-properties":24,"es-abstract/es6":28}],19:[function(require,module,exports){
+},{"./implementation":16,"./polyfill":18,"./shim":19,"define-properties":23,"es-abstract/es6":27}],18:[function(require,module,exports){
 'use strict';
 
 module.exports = function getPolyfill() {
@@ -4794,7 +4636,7 @@ module.exports = function getPolyfill() {
 	return implemented ? Array.prototype.find : require('./implementation');
 };
 
-},{"./implementation":17}],20:[function(require,module,exports){
+},{"./implementation":16}],19:[function(require,module,exports){
 'use strict';
 
 var define = require('define-properties');
@@ -4812,7 +4654,7 @@ module.exports = function shimArrayPrototypeFind() {
 	return polyfill;
 };
 
-},{"./polyfill":19,"define-properties":24}],21:[function(require,module,exports){
+},{"./polyfill":18,"define-properties":23}],20:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -4851,7 +4693,7 @@ module.exports.byUrl = function(url) {
   }
 };
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 var copy             = require('es5-ext/object/copy')
@@ -4885,7 +4727,7 @@ module.exports = function (props/*, options*/) {
 	return map(props, function (desc, name) { return define(name, desc, options); });
 };
 
-},{"es5-ext/object/copy":61,"es5-ext/object/map":70,"es5-ext/object/normalize-options":71,"es5-ext/object/valid-callable":76,"es5-ext/object/valid-value":78}],23:[function(require,module,exports){
+},{"es5-ext/object/copy":60,"es5-ext/object/map":69,"es5-ext/object/normalize-options":70,"es5-ext/object/valid-callable":75,"es5-ext/object/valid-value":77}],22:[function(require,module,exports){
 'use strict';
 
 var assign        = require('es5-ext/object/assign')
@@ -4950,7 +4792,7 @@ d.gs = function (dscr, get, set/*, options*/) {
 	return !options ? desc : assign(normalizeOpts(options), desc);
 };
 
-},{"es5-ext/object/assign":58,"es5-ext/object/is-callable":64,"es5-ext/object/normalize-options":71,"es5-ext/string/#/contains":79}],24:[function(require,module,exports){
+},{"es5-ext/object/assign":57,"es5-ext/object/is-callable":63,"es5-ext/object/normalize-options":70,"es5-ext/string/#/contains":78}],23:[function(require,module,exports){
 'use strict';
 
 var keys = require('object-keys');
@@ -5010,7 +4852,7 @@ defineProperties.supportsDescriptors = !!supportsDescriptors;
 
 module.exports = defineProperties;
 
-},{"object-keys":118}],25:[function(require,module,exports){
+},{"object-keys":118}],24:[function(require,module,exports){
 'use strict';
 
 /* globals
@@ -5189,7 +5031,7 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 	return INTRINSICS[key];
 };
 
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 var has = require('has');
@@ -5981,7 +5823,7 @@ delete ES6.CheckObjectCoercible; // renamed in ES6 to RequireObjectCoercible
 
 module.exports = ES6;
 
-},{"./GetIntrinsic":25,"./es5":27,"./helpers/assertRecord":29,"./helpers/assign":30,"./helpers/isFinite":31,"./helpers/isNaN":32,"./helpers/isPrimitive":33,"./helpers/mod":34,"./helpers/sign":35,"es-to-primitive/es6":38,"function-bind":108,"has":111,"is-regex":114,"object-keys":118}],27:[function(require,module,exports){
+},{"./GetIntrinsic":24,"./es5":26,"./helpers/assertRecord":28,"./helpers/assign":29,"./helpers/isFinite":30,"./helpers/isNaN":31,"./helpers/isPrimitive":32,"./helpers/mod":33,"./helpers/sign":34,"es-to-primitive/es6":37,"function-bind":107,"has":110,"is-regex":113,"object-keys":118}],26:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('./GetIntrinsic');
@@ -6218,12 +6060,12 @@ var ES5 = {
 
 module.exports = ES5;
 
-},{"./GetIntrinsic":25,"./helpers/assertRecord":29,"./helpers/isFinite":31,"./helpers/isNaN":32,"./helpers/mod":34,"./helpers/sign":35,"es-to-primitive/es5":37,"has":111,"is-callable":112}],28:[function(require,module,exports){
+},{"./GetIntrinsic":24,"./helpers/assertRecord":28,"./helpers/isFinite":30,"./helpers/isNaN":31,"./helpers/mod":33,"./helpers/sign":34,"es-to-primitive/es5":36,"has":110,"is-callable":111}],27:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./es2015');
 
-},{"./es2015":26}],29:[function(require,module,exports){
+},{"./es2015":25}],28:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('../GetIntrinsic');
@@ -6274,7 +6116,7 @@ module.exports = function assertRecord(ES, recordType, argumentName, value) {
   console.log(predicate(ES, value), value);
 };
 
-},{"../GetIntrinsic":25,"has":111}],30:[function(require,module,exports){
+},{"../GetIntrinsic":24,"has":110}],29:[function(require,module,exports){
 var bind = require('function-bind');
 var has = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
@@ -6293,33 +6135,33 @@ module.exports = function assign(target, source) {
 	return target;
 };
 
-},{"function-bind":108}],31:[function(require,module,exports){
+},{"function-bind":107}],30:[function(require,module,exports){
 var $isNaN = Number.isNaN || function (a) { return a !== a; };
 
 module.exports = Number.isFinite || function (x) { return typeof x === 'number' && !$isNaN(x) && x !== Infinity && x !== -Infinity; };
 
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports = Number.isNaN || function isNaN(a) {
 	return a !== a;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports = function isPrimitive(value) {
 	return value === null || (typeof value !== 'function' && typeof value !== 'object');
 };
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 module.exports = function mod(number, modulo) {
 	var remain = number % modulo;
 	return Math.floor(remain >= 0 ? remain : remain + modulo);
 };
 
-},{}],35:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 module.exports = function sign(number) {
 	return number >= 0 ? 1 : -1;
 };
 
-},{}],36:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 var hasSymbols = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol';
@@ -6396,7 +6238,7 @@ module.exports = function ToPrimitive(input) {
 	return ordinaryToPrimitive(input, hint === 'default' ? 'number' : hint);
 };
 
-},{"./helpers/isPrimitive":39,"is-callable":112,"is-date-object":113,"is-symbol":115}],37:[function(require,module,exports){
+},{"./helpers/isPrimitive":38,"is-callable":111,"is-date-object":112,"is-symbol":114}],36:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -6443,11 +6285,11 @@ module.exports = function ToPrimitive(input) {
 	return ES5internalSlots['[[DefaultValue]]'](input);
 };
 
-},{"./helpers/isPrimitive":39,"is-callable":112}],38:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"./es2015":36,"dup":28}],39:[function(require,module,exports){
-arguments[4][33][0].apply(exports,arguments)
-},{"dup":33}],40:[function(require,module,exports){
+},{"./helpers/isPrimitive":38,"is-callable":111}],37:[function(require,module,exports){
+arguments[4][27][0].apply(exports,arguments)
+},{"./es2015":35,"dup":27}],38:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"dup":32}],39:[function(require,module,exports){
 // Inspired by Google Closure:
 // http://closure-library.googlecode.com/svn/docs/
 // closure_goog_array_array.js.html#goog.array.clear
@@ -6461,7 +6303,7 @@ module.exports = function () {
 	return this;
 };
 
-},{"../../object/valid-value":78}],41:[function(require,module,exports){
+},{"../../object/valid-value":77}],40:[function(require,module,exports){
 "use strict";
 
 var numberIsNaN       = require("../../number/is-nan")
@@ -6491,14 +6333,14 @@ module.exports = function (searchElement /*, fromIndex*/) {
 	return -1;
 };
 
-},{"../../number/is-nan":52,"../../number/to-pos-integer":56,"../../object/valid-value":78}],42:[function(require,module,exports){
+},{"../../number/is-nan":51,"../../number/to-pos-integer":55,"../../object/valid-value":77}],41:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Array.from
 	: require("./shim");
 
-},{"./is-implemented":43,"./shim":44}],43:[function(require,module,exports){
+},{"./is-implemented":42,"./shim":43}],42:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -6509,7 +6351,7 @@ module.exports = function () {
 	return Boolean(result && (result !== arr) && (result[1] === "dwa"));
 };
 
-},{}],44:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 "use strict";
 
 var iteratorSymbol = require("es6-symbol").iterator
@@ -6630,7 +6472,7 @@ module.exports = function (arrayLike /*, mapFn, thisArg*/) {
 	return arr;
 };
 
-},{"../../function/is-arguments":45,"../../function/is-function":46,"../../number/to-pos-integer":56,"../../object/is-value":66,"../../object/valid-callable":76,"../../object/valid-value":78,"../../string/is-string":82,"es6-symbol":97}],45:[function(require,module,exports){
+},{"../../function/is-arguments":44,"../../function/is-function":45,"../../number/to-pos-integer":55,"../../object/is-value":65,"../../object/valid-callable":75,"../../object/valid-value":77,"../../string/is-string":81,"es6-symbol":96}],44:[function(require,module,exports){
 "use strict";
 
 var objToString = Object.prototype.toString
@@ -6644,7 +6486,7 @@ module.exports = function (value) {
 	return objToString.call(value) === id;
 };
 
-},{}],46:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 "use strict";
 
 var objToString = Object.prototype.toString, id = objToString.call(require("./noop"));
@@ -6653,27 +6495,27 @@ module.exports = function (value) {
 	return typeof value === "function" && objToString.call(value) === id;
 };
 
-},{"./noop":47}],47:[function(require,module,exports){
+},{"./noop":46}],46:[function(require,module,exports){
 "use strict";
 
 // eslint-disable-next-line no-empty-function
 module.exports = function () {};
 
-},{}],48:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 /* eslint strict: "off" */
 
 module.exports = (function () {
 	return this;
 }());
 
-},{}],49:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Math.sign
 	: require("./shim");
 
-},{"./is-implemented":50,"./shim":51}],50:[function(require,module,exports){
+},{"./is-implemented":49,"./shim":50}],49:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -6682,7 +6524,7 @@ module.exports = function () {
 	return (sign(10) === 1) && (sign(-20) === -1);
 };
 
-},{}],51:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 "use strict";
 
 module.exports = function (value) {
@@ -6691,14 +6533,14 @@ module.exports = function (value) {
 	return value > 0 ? 1 : -1;
 };
 
-},{}],52:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Number.isNaN
 	: require("./shim");
 
-},{"./is-implemented":53,"./shim":54}],53:[function(require,module,exports){
+},{"./is-implemented":52,"./shim":53}],52:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -6707,7 +6549,7 @@ module.exports = function () {
 	return !numberIsNaN({}) && numberIsNaN(NaN) && !numberIsNaN(34);
 };
 
-},{}],54:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 "use strict";
 
 module.exports = function (value) {
@@ -6715,7 +6557,7 @@ module.exports = function (value) {
 	return value !== value;
 };
 
-},{}],55:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 "use strict";
 
 var sign = require("../math/sign")
@@ -6729,7 +6571,7 @@ module.exports = function (value) {
 	return sign(value) * floor(abs(value));
 };
 
-},{"../math/sign":49}],56:[function(require,module,exports){
+},{"../math/sign":48}],55:[function(require,module,exports){
 "use strict";
 
 var toInteger = require("./to-integer")
@@ -6740,7 +6582,7 @@ module.exports = function (value) {
  return max(0, toInteger(value));
 };
 
-},{"./to-integer":55}],57:[function(require,module,exports){
+},{"./to-integer":54}],56:[function(require,module,exports){
 // Internal method, used by iteration functions.
 // Calls a function for each key-value pair found in object
 // Optionally takes compareFn to iterate object in specific order
@@ -6772,14 +6614,14 @@ module.exports = function (method, defVal) {
 	};
 };
 
-},{"./valid-callable":76,"./valid-value":78}],58:[function(require,module,exports){
+},{"./valid-callable":75,"./valid-value":77}],57:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Object.assign
 	: require("./shim");
 
-},{"./is-implemented":59,"./shim":60}],59:[function(require,module,exports){
+},{"./is-implemented":58,"./shim":59}],58:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -6790,7 +6632,7 @@ module.exports = function () {
 	return (obj.foo + obj.bar + obj.trzy) === "razdwatrzy";
 };
 
-},{}],60:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 "use strict";
 
 var keys  = require("../keys")
@@ -6815,7 +6657,7 @@ module.exports = function (dest, src /*, …srcn*/) {
 	return dest;
 };
 
-},{"../keys":67,"../valid-value":78}],61:[function(require,module,exports){
+},{"../keys":66,"../valid-value":77}],60:[function(require,module,exports){
 "use strict";
 
 var aFrom  = require("../array/from")
@@ -6836,7 +6678,7 @@ module.exports = function (obj/*, propertyNames, options*/) {
 	return result;
 };
 
-},{"../array/from":42,"./assign":58,"./valid-value":78}],62:[function(require,module,exports){
+},{"../array/from":41,"./assign":57,"./valid-value":77}],61:[function(require,module,exports){
 // Workaround for http://code.google.com/p/v8/issues/detail?id=2804
 
 "use strict";
@@ -6886,12 +6728,12 @@ module.exports = (function () {
 	};
 }());
 
-},{"./set-prototype-of/is-implemented":74,"./set-prototype-of/shim":75}],63:[function(require,module,exports){
+},{"./set-prototype-of/is-implemented":73,"./set-prototype-of/shim":74}],62:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./_iterate")("forEach");
 
-},{"./_iterate":57}],64:[function(require,module,exports){
+},{"./_iterate":56}],63:[function(require,module,exports){
 // Deprecated
 
 "use strict";
@@ -6900,7 +6742,7 @@ module.exports = function (obj) {
  return typeof obj === "function";
 };
 
-},{}],65:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 "use strict";
 
 var isValue = require("./is-value");
@@ -6911,7 +6753,7 @@ module.exports = function (value) {
 	return (isValue(value) && map[typeof value]) || false;
 };
 
-},{"./is-value":66}],66:[function(require,module,exports){
+},{"./is-value":65}],65:[function(require,module,exports){
 "use strict";
 
 var _undefined = require("../function/noop")(); // Support ES3 engines
@@ -6920,12 +6762,12 @@ module.exports = function (val) {
  return (val !== _undefined) && (val !== null);
 };
 
-},{"../function/noop":47}],67:[function(require,module,exports){
+},{"../function/noop":46}],66:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")() ? Object.keys : require("./shim");
 
-},{"./is-implemented":68,"./shim":69}],68:[function(require,module,exports){
+},{"./is-implemented":67,"./shim":68}],67:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -6937,7 +6779,7 @@ module.exports = function () {
 	}
 };
 
-},{}],69:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 "use strict";
 
 var isValue = require("../is-value");
@@ -6946,7 +6788,7 @@ var keys = Object.keys;
 
 module.exports = function (object) { return keys(isValue(object) ? Object(object) : object); };
 
-},{"../is-value":66}],70:[function(require,module,exports){
+},{"../is-value":65}],69:[function(require,module,exports){
 "use strict";
 
 var callable = require("./valid-callable")
@@ -6962,7 +6804,7 @@ module.exports = function (obj, cb /*, thisArg*/) {
 	return result;
 };
 
-},{"./for-each":63,"./valid-callable":76}],71:[function(require,module,exports){
+},{"./for-each":62,"./valid-callable":75}],70:[function(require,module,exports){
 "use strict";
 
 var isValue = require("./is-value");
@@ -6984,7 +6826,7 @@ module.exports = function (opts1 /*, …options*/) {
 	return result;
 };
 
-},{"./is-value":66}],72:[function(require,module,exports){
+},{"./is-value":65}],71:[function(require,module,exports){
 "use strict";
 
 var forEach = Array.prototype.forEach, create = Object.create;
@@ -6998,14 +6840,14 @@ module.exports = function (arg /*, …args*/) {
 	return set;
 };
 
-},{}],73:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Object.setPrototypeOf
 	: require("./shim");
 
-},{"./is-implemented":74,"./shim":75}],74:[function(require,module,exports){
+},{"./is-implemented":73,"./shim":74}],73:[function(require,module,exports){
 "use strict";
 
 var create = Object.create, getPrototypeOf = Object.getPrototypeOf, plainObject = {};
@@ -7016,7 +6858,7 @@ module.exports = function (/* CustomCreate*/) {
 	return getPrototypeOf(setPrototypeOf(customCreate(null), plainObject)) === plainObject;
 };
 
-},{}],75:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 /* eslint no-proto: "off" */
 
 // Big thanks to @WebReflection for sorting this out
@@ -7104,7 +6946,7 @@ module.exports = (function (status) {
 
 require("../create");
 
-},{"../create":62,"../is-object":65,"../valid-value":78}],76:[function(require,module,exports){
+},{"../create":61,"../is-object":64,"../valid-value":77}],75:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -7112,7 +6954,7 @@ module.exports = function (fn) {
 	return fn;
 };
 
-},{}],77:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 "use strict";
 
 var isObject = require("./is-object");
@@ -7122,7 +6964,7 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-object":65}],78:[function(require,module,exports){
+},{"./is-object":64}],77:[function(require,module,exports){
 "use strict";
 
 var isValue = require("./is-value");
@@ -7132,14 +6974,14 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-value":66}],79:[function(require,module,exports){
+},{"./is-value":65}],78:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? String.prototype.contains
 	: require("./shim");
 
-},{"./is-implemented":80,"./shim":81}],80:[function(require,module,exports){
+},{"./is-implemented":79,"./shim":80}],79:[function(require,module,exports){
 "use strict";
 
 var str = "razdwatrzy";
@@ -7149,7 +6991,7 @@ module.exports = function () {
 	return (str.contains("dwa") === true) && (str.contains("foo") === false);
 };
 
-},{}],81:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 "use strict";
 
 var indexOf = String.prototype.indexOf;
@@ -7158,7 +7000,7 @@ module.exports = function (searchString/*, position*/) {
 	return indexOf.call(this, searchString, arguments[1]) > -1;
 };
 
-},{}],82:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 "use strict";
 
 var objToString = Object.prototype.toString, id = objToString.call("");
@@ -7173,7 +7015,7 @@ module.exports = function (value) {
 	);
 };
 
-},{}],83:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 "use strict";
 
 var generated = Object.create(null), random = Math.random;
@@ -7188,7 +7030,7 @@ module.exports = function () {
 	return str;
 };
 
-},{}],84:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 "use strict";
 
 var setPrototypeOf = require("es5-ext/object/set-prototype-of")
@@ -7222,7 +7064,7 @@ ArrayIterator.prototype = Object.create(Iterator.prototype, {
 });
 defineProperty(ArrayIterator.prototype, Symbol.toStringTag, d("c", "Array Iterator"));
 
-},{"./":87,"d":23,"es5-ext/object/set-prototype-of":73,"es5-ext/string/#/contains":79,"es6-symbol":97}],85:[function(require,module,exports){
+},{"./":86,"d":22,"es5-ext/object/set-prototype-of":72,"es5-ext/string/#/contains":78,"es6-symbol":96}],84:[function(require,module,exports){
 "use strict";
 
 var isArguments = require("es5-ext/function/is-arguments")
@@ -7271,7 +7113,7 @@ module.exports = function (iterable, cb /*, thisArg*/) {
 	}
 };
 
-},{"./get":86,"es5-ext/function/is-arguments":45,"es5-ext/object/valid-callable":76,"es5-ext/string/is-string":82}],86:[function(require,module,exports){
+},{"./get":85,"es5-ext/function/is-arguments":44,"es5-ext/object/valid-callable":75,"es5-ext/string/is-string":81}],85:[function(require,module,exports){
 "use strict";
 
 var isArguments    = require("es5-ext/function/is-arguments")
@@ -7288,7 +7130,7 @@ module.exports = function (obj) {
 	return new ArrayIterator(obj);
 };
 
-},{"./array":84,"./string":89,"./valid-iterable":90,"es5-ext/function/is-arguments":45,"es5-ext/string/is-string":82,"es6-symbol":97}],87:[function(require,module,exports){
+},{"./array":83,"./string":88,"./valid-iterable":89,"es5-ext/function/is-arguments":44,"es5-ext/string/is-string":81,"es6-symbol":96}],86:[function(require,module,exports){
 "use strict";
 
 var clear    = require("es5-ext/array/#/clear")
@@ -7396,7 +7238,7 @@ defineProperty(
 	})
 );
 
-},{"d":23,"d/auto-bind":22,"es5-ext/array/#/clear":40,"es5-ext/object/assign":58,"es5-ext/object/valid-callable":76,"es5-ext/object/valid-value":78,"es6-symbol":97}],88:[function(require,module,exports){
+},{"d":22,"d/auto-bind":21,"es5-ext/array/#/clear":39,"es5-ext/object/assign":57,"es5-ext/object/valid-callable":75,"es5-ext/object/valid-value":77,"es6-symbol":96}],87:[function(require,module,exports){
 "use strict";
 
 var isArguments = require("es5-ext/function/is-arguments")
@@ -7414,7 +7256,7 @@ module.exports = function (value) {
 	return typeof value[iteratorSymbol] === "function";
 };
 
-},{"es5-ext/function/is-arguments":45,"es5-ext/object/is-value":66,"es5-ext/string/is-string":82,"es6-symbol":97}],89:[function(require,module,exports){
+},{"es5-ext/function/is-arguments":44,"es5-ext/object/is-value":65,"es5-ext/string/is-string":81,"es6-symbol":96}],88:[function(require,module,exports){
 // Thanks @mathiasbynens
 // http://mathiasbynens.be/notes/javascript-unicode#iterating-over-symbols
 
@@ -7455,7 +7297,7 @@ StringIterator.prototype = Object.create(Iterator.prototype, {
 });
 defineProperty(StringIterator.prototype, Symbol.toStringTag, d("c", "String Iterator"));
 
-},{"./":87,"d":23,"es5-ext/object/set-prototype-of":73,"es6-symbol":97}],90:[function(require,module,exports){
+},{"./":86,"d":22,"es5-ext/object/set-prototype-of":72,"es6-symbol":96}],89:[function(require,module,exports){
 "use strict";
 
 var isIterable = require("./is-iterable");
@@ -7465,7 +7307,7 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-iterable":88}],91:[function(require,module,exports){
+},{"./is-iterable":87}],90:[function(require,module,exports){
 'use strict';
 
 if (!require('./is-implemented')()) {
@@ -7474,7 +7316,7 @@ if (!require('./is-implemented')()) {
 			writable: true });
 }
 
-},{"./is-implemented":92,"./polyfill":96,"es5-ext/global":48}],92:[function(require,module,exports){
+},{"./is-implemented":91,"./polyfill":95,"es5-ext/global":47}],91:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -7508,7 +7350,7 @@ module.exports = function () {
 	return true;
 };
 
-},{}],93:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 // Exports true if environment provides native `Map` implementation,
 // whatever that is.
 
@@ -7519,13 +7361,13 @@ module.exports = (function () {
 	return (Object.prototype.toString.call(new Map()) === '[object Map]');
 }());
 
-},{}],94:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 'use strict';
 
 module.exports = require('es5-ext/object/primitive-set')('key',
 	'value', 'key+value');
 
-},{"es5-ext/object/primitive-set":72}],95:[function(require,module,exports){
+},{"es5-ext/object/primitive-set":71}],94:[function(require,module,exports){
 'use strict';
 
 var setPrototypeOf    = require('es5-ext/object/set-prototype-of')
@@ -7565,7 +7407,7 @@ MapIterator.prototype = Object.create(Iterator.prototype, {
 Object.defineProperty(MapIterator.prototype, toStringTagSymbol,
 	d('c', 'Map Iterator'));
 
-},{"./iterator-kinds":94,"d":23,"es5-ext/object/set-prototype-of":73,"es6-iterator":87,"es6-symbol":97}],96:[function(require,module,exports){
+},{"./iterator-kinds":93,"d":22,"es5-ext/object/set-prototype-of":72,"es6-iterator":86,"es6-symbol":96}],95:[function(require,module,exports){
 'use strict';
 
 var clear          = require('es5-ext/array/#/clear')
@@ -7671,12 +7513,12 @@ Object.defineProperty(MapPoly.prototype, Symbol.iterator, d(function () {
 }));
 Object.defineProperty(MapPoly.prototype, Symbol.toStringTag, d('c', 'Map'));
 
-},{"./is-native-implemented":93,"./lib/iterator":95,"d":23,"es5-ext/array/#/clear":40,"es5-ext/array/#/e-index-of":41,"es5-ext/object/set-prototype-of":73,"es5-ext/object/valid-callable":76,"es5-ext/object/valid-value":78,"es6-iterator/for-of":85,"es6-iterator/valid-iterable":90,"es6-symbol":97,"event-emitter":106}],97:[function(require,module,exports){
+},{"./is-native-implemented":92,"./lib/iterator":94,"d":22,"es5-ext/array/#/clear":39,"es5-ext/array/#/e-index-of":40,"es5-ext/object/set-prototype-of":72,"es5-ext/object/valid-callable":75,"es5-ext/object/valid-value":77,"es6-iterator/for-of":84,"es6-iterator/valid-iterable":89,"es6-symbol":96,"event-emitter":105}],96:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./is-implemented')() ? Symbol : require('./polyfill');
 
-},{"./is-implemented":98,"./polyfill":100}],98:[function(require,module,exports){
+},{"./is-implemented":97,"./polyfill":99}],97:[function(require,module,exports){
 'use strict';
 
 var validTypes = { object: true, symbol: true };
@@ -7695,7 +7537,7 @@ module.exports = function () {
 	return true;
 };
 
-},{}],99:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 'use strict';
 
 module.exports = function (x) {
@@ -7706,7 +7548,7 @@ module.exports = function (x) {
 	return (x[x.constructor.toStringTag] === 'Symbol');
 };
 
-},{}],100:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 // ES2015 Symbol polyfill for environments that do not (or partially) support it
 
 'use strict';
@@ -7826,7 +7668,7 @@ defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toStringTag,
 defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toPrimitive,
 	d('c', SymbolPolyfill.prototype[SymbolPolyfill.toPrimitive]));
 
-},{"./validate-symbol":101,"d":23}],101:[function(require,module,exports){
+},{"./validate-symbol":100,"d":22}],100:[function(require,module,exports){
 'use strict';
 
 var isSymbol = require('./is-symbol');
@@ -7836,7 +7678,7 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-symbol":99}],102:[function(require,module,exports){
+},{"./is-symbol":98}],101:[function(require,module,exports){
 'use strict';
 
 if (!require('./is-implemented')()) {
@@ -7845,7 +7687,7 @@ if (!require('./is-implemented')()) {
 			writable: true });
 }
 
-},{"./is-implemented":103,"./polyfill":105,"es5-ext/global":48}],103:[function(require,module,exports){
+},{"./is-implemented":102,"./polyfill":104,"es5-ext/global":47}],102:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -7867,7 +7709,7 @@ module.exports = function () {
 	return true;
 };
 
-},{}],104:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 // Exports true if environment provides native `WeakMap` implementation, whatever that is.
 
 'use strict';
@@ -7877,7 +7719,7 @@ module.exports = (function () {
 	return (Object.prototype.toString.call(new WeakMap()) === '[object WeakMap]');
 }());
 
-},{}],105:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 'use strict';
 
 var setPrototypeOf    = require('es5-ext/object/set-prototype-of')
@@ -7945,7 +7787,7 @@ Object.defineProperties(WeakMapPoly.prototype, {
 });
 defineProperty(WeakMapPoly.prototype, toStringTagSymbol, d('c', 'WeakMap'));
 
-},{"./is-native-implemented":104,"d":23,"es5-ext/object/set-prototype-of":73,"es5-ext/object/valid-object":77,"es5-ext/object/valid-value":78,"es5-ext/string/random-uniq":83,"es6-iterator/for-of":85,"es6-iterator/get":86,"es6-symbol":97}],106:[function(require,module,exports){
+},{"./is-native-implemented":103,"d":22,"es5-ext/object/set-prototype-of":72,"es5-ext/object/valid-object":76,"es5-ext/object/valid-value":77,"es5-ext/string/random-uniq":82,"es6-iterator/for-of":84,"es6-iterator/get":85,"es6-symbol":96}],105:[function(require,module,exports){
 'use strict';
 
 var d        = require('d')
@@ -8079,7 +7921,7 @@ module.exports = exports = function (o) {
 };
 exports.methods = methods;
 
-},{"d":23,"es5-ext/object/valid-callable":76}],107:[function(require,module,exports){
+},{"d":22,"es5-ext/object/valid-callable":75}],106:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -8133,14 +7975,14 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],108:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":107}],109:[function(require,module,exports){
+},{"./implementation":106}],108:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -8157,7 +7999,7 @@ module.exports = function hasNativeSymbols() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./shams":110}],110:[function(require,module,exports){
+},{"./shams":109}],109:[function(require,module,exports){
 'use strict';
 
 /* eslint complexity: [2, 17], max-statements: [2, 33] */
@@ -8201,14 +8043,14 @@ module.exports = function hasSymbols() {
 	return true;
 };
 
-},{}],111:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":108}],112:[function(require,module,exports){
+},{"function-bind":107}],111:[function(require,module,exports){
 'use strict';
 
 var fnToStr = Function.prototype.toString;
@@ -8247,7 +8089,7 @@ module.exports = function isCallable(value) {
 	return strClass === fnClass || strClass === genClass;
 };
 
-},{}],113:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 'use strict';
 
 var getDay = Date.prototype.getDay;
@@ -8269,7 +8111,7 @@ module.exports = function isDateObject(value) {
 	return hasToStringTag ? tryDateObject(value) : toStr.call(value) === dateClass;
 };
 
-},{}],114:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 'use strict';
 
 var has = require('has');
@@ -8310,7 +8152,7 @@ module.exports = function isRegex(value) {
 	return tryRegexExecCall(value);
 };
 
-},{"has":111}],115:[function(require,module,exports){
+},{"has":110}],114:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -8347,10 +8189,4614 @@ if (hasSymbols) {
 	};
 }
 
-},{"has-symbols":109}],116:[function(require,module,exports){
+},{"has-symbols":108}],115:[function(require,module,exports){
 module.exports = require('cssify');
 
-},{"cssify":21}],117:[function(require,module,exports){
+},{"cssify":20}],116:[function(require,module,exports){
+//! moment.js
+
+;(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    global.moment = factory()
+}(this, (function () { 'use strict';
+
+    var hookCallback;
+
+    function hooks () {
+        return hookCallback.apply(null, arguments);
+    }
+
+    // This is done to register the method called with moment()
+    // without creating circular dependencies.
+    function setHookCallback (callback) {
+        hookCallback = callback;
+    }
+
+    function isArray(input) {
+        return input instanceof Array || Object.prototype.toString.call(input) === '[object Array]';
+    }
+
+    function isObject(input) {
+        // IE8 will treat undefined and null as object if it wasn't for
+        // input != null
+        return input != null && Object.prototype.toString.call(input) === '[object Object]';
+    }
+
+    function isObjectEmpty(obj) {
+        if (Object.getOwnPropertyNames) {
+            return (Object.getOwnPropertyNames(obj).length === 0);
+        } else {
+            var k;
+            for (k in obj) {
+                if (obj.hasOwnProperty(k)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    function isUndefined(input) {
+        return input === void 0;
+    }
+
+    function isNumber(input) {
+        return typeof input === 'number' || Object.prototype.toString.call(input) === '[object Number]';
+    }
+
+    function isDate(input) {
+        return input instanceof Date || Object.prototype.toString.call(input) === '[object Date]';
+    }
+
+    function map(arr, fn) {
+        var res = [], i;
+        for (i = 0; i < arr.length; ++i) {
+            res.push(fn(arr[i], i));
+        }
+        return res;
+    }
+
+    function hasOwnProp(a, b) {
+        return Object.prototype.hasOwnProperty.call(a, b);
+    }
+
+    function extend(a, b) {
+        for (var i in b) {
+            if (hasOwnProp(b, i)) {
+                a[i] = b[i];
+            }
+        }
+
+        if (hasOwnProp(b, 'toString')) {
+            a.toString = b.toString;
+        }
+
+        if (hasOwnProp(b, 'valueOf')) {
+            a.valueOf = b.valueOf;
+        }
+
+        return a;
+    }
+
+    function createUTC (input, format, locale, strict) {
+        return createLocalOrUTC(input, format, locale, strict, true).utc();
+    }
+
+    function defaultParsingFlags() {
+        // We need to deep clone this object.
+        return {
+            empty           : false,
+            unusedTokens    : [],
+            unusedInput     : [],
+            overflow        : -2,
+            charsLeftOver   : 0,
+            nullInput       : false,
+            invalidMonth    : null,
+            invalidFormat   : false,
+            userInvalidated : false,
+            iso             : false,
+            parsedDateParts : [],
+            meridiem        : null,
+            rfc2822         : false,
+            weekdayMismatch : false
+        };
+    }
+
+    function getParsingFlags(m) {
+        if (m._pf == null) {
+            m._pf = defaultParsingFlags();
+        }
+        return m._pf;
+    }
+
+    var some;
+    if (Array.prototype.some) {
+        some = Array.prototype.some;
+    } else {
+        some = function (fun) {
+            var t = Object(this);
+            var len = t.length >>> 0;
+
+            for (var i = 0; i < len; i++) {
+                if (i in t && fun.call(this, t[i], i, t)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+    }
+
+    function isValid(m) {
+        if (m._isValid == null) {
+            var flags = getParsingFlags(m);
+            var parsedParts = some.call(flags.parsedDateParts, function (i) {
+                return i != null;
+            });
+            var isNowValid = !isNaN(m._d.getTime()) &&
+                flags.overflow < 0 &&
+                !flags.empty &&
+                !flags.invalidMonth &&
+                !flags.invalidWeekday &&
+                !flags.weekdayMismatch &&
+                !flags.nullInput &&
+                !flags.invalidFormat &&
+                !flags.userInvalidated &&
+                (!flags.meridiem || (flags.meridiem && parsedParts));
+
+            if (m._strict) {
+                isNowValid = isNowValid &&
+                    flags.charsLeftOver === 0 &&
+                    flags.unusedTokens.length === 0 &&
+                    flags.bigHour === undefined;
+            }
+
+            if (Object.isFrozen == null || !Object.isFrozen(m)) {
+                m._isValid = isNowValid;
+            }
+            else {
+                return isNowValid;
+            }
+        }
+        return m._isValid;
+    }
+
+    function createInvalid (flags) {
+        var m = createUTC(NaN);
+        if (flags != null) {
+            extend(getParsingFlags(m), flags);
+        }
+        else {
+            getParsingFlags(m).userInvalidated = true;
+        }
+
+        return m;
+    }
+
+    // Plugins that add properties should also add the key here (null value),
+    // so we can properly clone ourselves.
+    var momentProperties = hooks.momentProperties = [];
+
+    function copyConfig(to, from) {
+        var i, prop, val;
+
+        if (!isUndefined(from._isAMomentObject)) {
+            to._isAMomentObject = from._isAMomentObject;
+        }
+        if (!isUndefined(from._i)) {
+            to._i = from._i;
+        }
+        if (!isUndefined(from._f)) {
+            to._f = from._f;
+        }
+        if (!isUndefined(from._l)) {
+            to._l = from._l;
+        }
+        if (!isUndefined(from._strict)) {
+            to._strict = from._strict;
+        }
+        if (!isUndefined(from._tzm)) {
+            to._tzm = from._tzm;
+        }
+        if (!isUndefined(from._isUTC)) {
+            to._isUTC = from._isUTC;
+        }
+        if (!isUndefined(from._offset)) {
+            to._offset = from._offset;
+        }
+        if (!isUndefined(from._pf)) {
+            to._pf = getParsingFlags(from);
+        }
+        if (!isUndefined(from._locale)) {
+            to._locale = from._locale;
+        }
+
+        if (momentProperties.length > 0) {
+            for (i = 0; i < momentProperties.length; i++) {
+                prop = momentProperties[i];
+                val = from[prop];
+                if (!isUndefined(val)) {
+                    to[prop] = val;
+                }
+            }
+        }
+
+        return to;
+    }
+
+    var updateInProgress = false;
+
+    // Moment prototype object
+    function Moment(config) {
+        copyConfig(this, config);
+        this._d = new Date(config._d != null ? config._d.getTime() : NaN);
+        if (!this.isValid()) {
+            this._d = new Date(NaN);
+        }
+        // Prevent infinite loop in case updateOffset creates new moment
+        // objects.
+        if (updateInProgress === false) {
+            updateInProgress = true;
+            hooks.updateOffset(this);
+            updateInProgress = false;
+        }
+    }
+
+    function isMoment (obj) {
+        return obj instanceof Moment || (obj != null && obj._isAMomentObject != null);
+    }
+
+    function absFloor (number) {
+        if (number < 0) {
+            // -0 -> 0
+            return Math.ceil(number) || 0;
+        } else {
+            return Math.floor(number);
+        }
+    }
+
+    function toInt(argumentForCoercion) {
+        var coercedNumber = +argumentForCoercion,
+            value = 0;
+
+        if (coercedNumber !== 0 && isFinite(coercedNumber)) {
+            value = absFloor(coercedNumber);
+        }
+
+        return value;
+    }
+
+    // compare two arrays, return the number of differences
+    function compareArrays(array1, array2, dontConvert) {
+        var len = Math.min(array1.length, array2.length),
+            lengthDiff = Math.abs(array1.length - array2.length),
+            diffs = 0,
+            i;
+        for (i = 0; i < len; i++) {
+            if ((dontConvert && array1[i] !== array2[i]) ||
+                (!dontConvert && toInt(array1[i]) !== toInt(array2[i]))) {
+                diffs++;
+            }
+        }
+        return diffs + lengthDiff;
+    }
+
+    function warn(msg) {
+        if (hooks.suppressDeprecationWarnings === false &&
+                (typeof console !==  'undefined') && console.warn) {
+            console.warn('Deprecation warning: ' + msg);
+        }
+    }
+
+    function deprecate(msg, fn) {
+        var firstTime = true;
+
+        return extend(function () {
+            if (hooks.deprecationHandler != null) {
+                hooks.deprecationHandler(null, msg);
+            }
+            if (firstTime) {
+                var args = [];
+                var arg;
+                for (var i = 0; i < arguments.length; i++) {
+                    arg = '';
+                    if (typeof arguments[i] === 'object') {
+                        arg += '\n[' + i + '] ';
+                        for (var key in arguments[0]) {
+                            arg += key + ': ' + arguments[0][key] + ', ';
+                        }
+                        arg = arg.slice(0, -2); // Remove trailing comma and space
+                    } else {
+                        arg = arguments[i];
+                    }
+                    args.push(arg);
+                }
+                warn(msg + '\nArguments: ' + Array.prototype.slice.call(args).join('') + '\n' + (new Error()).stack);
+                firstTime = false;
+            }
+            return fn.apply(this, arguments);
+        }, fn);
+    }
+
+    var deprecations = {};
+
+    function deprecateSimple(name, msg) {
+        if (hooks.deprecationHandler != null) {
+            hooks.deprecationHandler(name, msg);
+        }
+        if (!deprecations[name]) {
+            warn(msg);
+            deprecations[name] = true;
+        }
+    }
+
+    hooks.suppressDeprecationWarnings = false;
+    hooks.deprecationHandler = null;
+
+    function isFunction(input) {
+        return input instanceof Function || Object.prototype.toString.call(input) === '[object Function]';
+    }
+
+    function set (config) {
+        var prop, i;
+        for (i in config) {
+            prop = config[i];
+            if (isFunction(prop)) {
+                this[i] = prop;
+            } else {
+                this['_' + i] = prop;
+            }
+        }
+        this._config = config;
+        // Lenient ordinal parsing accepts just a number in addition to
+        // number + (possibly) stuff coming from _dayOfMonthOrdinalParse.
+        // TODO: Remove "ordinalParse" fallback in next major release.
+        this._dayOfMonthOrdinalParseLenient = new RegExp(
+            (this._dayOfMonthOrdinalParse.source || this._ordinalParse.source) +
+                '|' + (/\d{1,2}/).source);
+    }
+
+    function mergeConfigs(parentConfig, childConfig) {
+        var res = extend({}, parentConfig), prop;
+        for (prop in childConfig) {
+            if (hasOwnProp(childConfig, prop)) {
+                if (isObject(parentConfig[prop]) && isObject(childConfig[prop])) {
+                    res[prop] = {};
+                    extend(res[prop], parentConfig[prop]);
+                    extend(res[prop], childConfig[prop]);
+                } else if (childConfig[prop] != null) {
+                    res[prop] = childConfig[prop];
+                } else {
+                    delete res[prop];
+                }
+            }
+        }
+        for (prop in parentConfig) {
+            if (hasOwnProp(parentConfig, prop) &&
+                    !hasOwnProp(childConfig, prop) &&
+                    isObject(parentConfig[prop])) {
+                // make sure changes to properties don't modify parent config
+                res[prop] = extend({}, res[prop]);
+            }
+        }
+        return res;
+    }
+
+    function Locale(config) {
+        if (config != null) {
+            this.set(config);
+        }
+    }
+
+    var keys;
+
+    if (Object.keys) {
+        keys = Object.keys;
+    } else {
+        keys = function (obj) {
+            var i, res = [];
+            for (i in obj) {
+                if (hasOwnProp(obj, i)) {
+                    res.push(i);
+                }
+            }
+            return res;
+        };
+    }
+
+    var defaultCalendar = {
+        sameDay : '[Today at] LT',
+        nextDay : '[Tomorrow at] LT',
+        nextWeek : 'dddd [at] LT',
+        lastDay : '[Yesterday at] LT',
+        lastWeek : '[Last] dddd [at] LT',
+        sameElse : 'L'
+    };
+
+    function calendar (key, mom, now) {
+        var output = this._calendar[key] || this._calendar['sameElse'];
+        return isFunction(output) ? output.call(mom, now) : output;
+    }
+
+    var defaultLongDateFormat = {
+        LTS  : 'h:mm:ss A',
+        LT   : 'h:mm A',
+        L    : 'MM/DD/YYYY',
+        LL   : 'MMMM D, YYYY',
+        LLL  : 'MMMM D, YYYY h:mm A',
+        LLLL : 'dddd, MMMM D, YYYY h:mm A'
+    };
+
+    function longDateFormat (key) {
+        var format = this._longDateFormat[key],
+            formatUpper = this._longDateFormat[key.toUpperCase()];
+
+        if (format || !formatUpper) {
+            return format;
+        }
+
+        this._longDateFormat[key] = formatUpper.replace(/MMMM|MM|DD|dddd/g, function (val) {
+            return val.slice(1);
+        });
+
+        return this._longDateFormat[key];
+    }
+
+    var defaultInvalidDate = 'Invalid date';
+
+    function invalidDate () {
+        return this._invalidDate;
+    }
+
+    var defaultOrdinal = '%d';
+    var defaultDayOfMonthOrdinalParse = /\d{1,2}/;
+
+    function ordinal (number) {
+        return this._ordinal.replace('%d', number);
+    }
+
+    var defaultRelativeTime = {
+        future : 'in %s',
+        past   : '%s ago',
+        s  : 'a few seconds',
+        ss : '%d seconds',
+        m  : 'a minute',
+        mm : '%d minutes',
+        h  : 'an hour',
+        hh : '%d hours',
+        d  : 'a day',
+        dd : '%d days',
+        M  : 'a month',
+        MM : '%d months',
+        y  : 'a year',
+        yy : '%d years'
+    };
+
+    function relativeTime (number, withoutSuffix, string, isFuture) {
+        var output = this._relativeTime[string];
+        return (isFunction(output)) ?
+            output(number, withoutSuffix, string, isFuture) :
+            output.replace(/%d/i, number);
+    }
+
+    function pastFuture (diff, output) {
+        var format = this._relativeTime[diff > 0 ? 'future' : 'past'];
+        return isFunction(format) ? format(output) : format.replace(/%s/i, output);
+    }
+
+    var aliases = {};
+
+    function addUnitAlias (unit, shorthand) {
+        var lowerCase = unit.toLowerCase();
+        aliases[lowerCase] = aliases[lowerCase + 's'] = aliases[shorthand] = unit;
+    }
+
+    function normalizeUnits(units) {
+        return typeof units === 'string' ? aliases[units] || aliases[units.toLowerCase()] : undefined;
+    }
+
+    function normalizeObjectUnits(inputObject) {
+        var normalizedInput = {},
+            normalizedProp,
+            prop;
+
+        for (prop in inputObject) {
+            if (hasOwnProp(inputObject, prop)) {
+                normalizedProp = normalizeUnits(prop);
+                if (normalizedProp) {
+                    normalizedInput[normalizedProp] = inputObject[prop];
+                }
+            }
+        }
+
+        return normalizedInput;
+    }
+
+    var priorities = {};
+
+    function addUnitPriority(unit, priority) {
+        priorities[unit] = priority;
+    }
+
+    function getPrioritizedUnits(unitsObj) {
+        var units = [];
+        for (var u in unitsObj) {
+            units.push({unit: u, priority: priorities[u]});
+        }
+        units.sort(function (a, b) {
+            return a.priority - b.priority;
+        });
+        return units;
+    }
+
+    function zeroFill(number, targetLength, forceSign) {
+        var absNumber = '' + Math.abs(number),
+            zerosToFill = targetLength - absNumber.length,
+            sign = number >= 0;
+        return (sign ? (forceSign ? '+' : '') : '-') +
+            Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) + absNumber;
+    }
+
+    var formattingTokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g;
+
+    var localFormattingTokens = /(\[[^\[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g;
+
+    var formatFunctions = {};
+
+    var formatTokenFunctions = {};
+
+    // token:    'M'
+    // padded:   ['MM', 2]
+    // ordinal:  'Mo'
+    // callback: function () { this.month() + 1 }
+    function addFormatToken (token, padded, ordinal, callback) {
+        var func = callback;
+        if (typeof callback === 'string') {
+            func = function () {
+                return this[callback]();
+            };
+        }
+        if (token) {
+            formatTokenFunctions[token] = func;
+        }
+        if (padded) {
+            formatTokenFunctions[padded[0]] = function () {
+                return zeroFill(func.apply(this, arguments), padded[1], padded[2]);
+            };
+        }
+        if (ordinal) {
+            formatTokenFunctions[ordinal] = function () {
+                return this.localeData().ordinal(func.apply(this, arguments), token);
+            };
+        }
+    }
+
+    function removeFormattingTokens(input) {
+        if (input.match(/\[[\s\S]/)) {
+            return input.replace(/^\[|\]$/g, '');
+        }
+        return input.replace(/\\/g, '');
+    }
+
+    function makeFormatFunction(format) {
+        var array = format.match(formattingTokens), i, length;
+
+        for (i = 0, length = array.length; i < length; i++) {
+            if (formatTokenFunctions[array[i]]) {
+                array[i] = formatTokenFunctions[array[i]];
+            } else {
+                array[i] = removeFormattingTokens(array[i]);
+            }
+        }
+
+        return function (mom) {
+            var output = '', i;
+            for (i = 0; i < length; i++) {
+                output += isFunction(array[i]) ? array[i].call(mom, format) : array[i];
+            }
+            return output;
+        };
+    }
+
+    // format date using native date object
+    function formatMoment(m, format) {
+        if (!m.isValid()) {
+            return m.localeData().invalidDate();
+        }
+
+        format = expandFormat(format, m.localeData());
+        formatFunctions[format] = formatFunctions[format] || makeFormatFunction(format);
+
+        return formatFunctions[format](m);
+    }
+
+    function expandFormat(format, locale) {
+        var i = 5;
+
+        function replaceLongDateFormatTokens(input) {
+            return locale.longDateFormat(input) || input;
+        }
+
+        localFormattingTokens.lastIndex = 0;
+        while (i >= 0 && localFormattingTokens.test(format)) {
+            format = format.replace(localFormattingTokens, replaceLongDateFormatTokens);
+            localFormattingTokens.lastIndex = 0;
+            i -= 1;
+        }
+
+        return format;
+    }
+
+    var match1         = /\d/;            //       0 - 9
+    var match2         = /\d\d/;          //      00 - 99
+    var match3         = /\d{3}/;         //     000 - 999
+    var match4         = /\d{4}/;         //    0000 - 9999
+    var match6         = /[+-]?\d{6}/;    // -999999 - 999999
+    var match1to2      = /\d\d?/;         //       0 - 99
+    var match3to4      = /\d\d\d\d?/;     //     999 - 9999
+    var match5to6      = /\d\d\d\d\d\d?/; //   99999 - 999999
+    var match1to3      = /\d{1,3}/;       //       0 - 999
+    var match1to4      = /\d{1,4}/;       //       0 - 9999
+    var match1to6      = /[+-]?\d{1,6}/;  // -999999 - 999999
+
+    var matchUnsigned  = /\d+/;           //       0 - inf
+    var matchSigned    = /[+-]?\d+/;      //    -inf - inf
+
+    var matchOffset    = /Z|[+-]\d\d:?\d\d/gi; // +00:00 -00:00 +0000 -0000 or Z
+    var matchShortOffset = /Z|[+-]\d\d(?::?\d\d)?/gi; // +00 -00 +00:00 -00:00 +0000 -0000 or Z
+
+    var matchTimestamp = /[+-]?\d+(\.\d{1,3})?/; // 123456789 123456789.123
+
+    // any word (or two) characters or numbers including two/three word month in arabic.
+    // includes scottish gaelic two word and hyphenated months
+    var matchWord = /[0-9]{0,256}['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFF07\uFF10-\uFFEF]{1,256}|[\u0600-\u06FF\/]{1,256}(\s*?[\u0600-\u06FF]{1,256}){1,2}/i;
+
+    var regexes = {};
+
+    function addRegexToken (token, regex, strictRegex) {
+        regexes[token] = isFunction(regex) ? regex : function (isStrict, localeData) {
+            return (isStrict && strictRegex) ? strictRegex : regex;
+        };
+    }
+
+    function getParseRegexForToken (token, config) {
+        if (!hasOwnProp(regexes, token)) {
+            return new RegExp(unescapeFormat(token));
+        }
+
+        return regexes[token](config._strict, config._locale);
+    }
+
+    // Code from http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
+    function unescapeFormat(s) {
+        return regexEscape(s.replace('\\', '').replace(/\\(\[)|\\(\])|\[([^\]\[]*)\]|\\(.)/g, function (matched, p1, p2, p3, p4) {
+            return p1 || p2 || p3 || p4;
+        }));
+    }
+
+    function regexEscape(s) {
+        return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+
+    var tokens = {};
+
+    function addParseToken (token, callback) {
+        var i, func = callback;
+        if (typeof token === 'string') {
+            token = [token];
+        }
+        if (isNumber(callback)) {
+            func = function (input, array) {
+                array[callback] = toInt(input);
+            };
+        }
+        for (i = 0; i < token.length; i++) {
+            tokens[token[i]] = func;
+        }
+    }
+
+    function addWeekParseToken (token, callback) {
+        addParseToken(token, function (input, array, config, token) {
+            config._w = config._w || {};
+            callback(input, config._w, config, token);
+        });
+    }
+
+    function addTimeToArrayFromToken(token, input, config) {
+        if (input != null && hasOwnProp(tokens, token)) {
+            tokens[token](input, config._a, config, token);
+        }
+    }
+
+    var YEAR = 0;
+    var MONTH = 1;
+    var DATE = 2;
+    var HOUR = 3;
+    var MINUTE = 4;
+    var SECOND = 5;
+    var MILLISECOND = 6;
+    var WEEK = 7;
+    var WEEKDAY = 8;
+
+    // FORMATTING
+
+    addFormatToken('Y', 0, 0, function () {
+        var y = this.year();
+        return y <= 9999 ? '' + y : '+' + y;
+    });
+
+    addFormatToken(0, ['YY', 2], 0, function () {
+        return this.year() % 100;
+    });
+
+    addFormatToken(0, ['YYYY',   4],       0, 'year');
+    addFormatToken(0, ['YYYYY',  5],       0, 'year');
+    addFormatToken(0, ['YYYYYY', 6, true], 0, 'year');
+
+    // ALIASES
+
+    addUnitAlias('year', 'y');
+
+    // PRIORITIES
+
+    addUnitPriority('year', 1);
+
+    // PARSING
+
+    addRegexToken('Y',      matchSigned);
+    addRegexToken('YY',     match1to2, match2);
+    addRegexToken('YYYY',   match1to4, match4);
+    addRegexToken('YYYYY',  match1to6, match6);
+    addRegexToken('YYYYYY', match1to6, match6);
+
+    addParseToken(['YYYYY', 'YYYYYY'], YEAR);
+    addParseToken('YYYY', function (input, array) {
+        array[YEAR] = input.length === 2 ? hooks.parseTwoDigitYear(input) : toInt(input);
+    });
+    addParseToken('YY', function (input, array) {
+        array[YEAR] = hooks.parseTwoDigitYear(input);
+    });
+    addParseToken('Y', function (input, array) {
+        array[YEAR] = parseInt(input, 10);
+    });
+
+    // HELPERS
+
+    function daysInYear(year) {
+        return isLeapYear(year) ? 366 : 365;
+    }
+
+    function isLeapYear(year) {
+        return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    }
+
+    // HOOKS
+
+    hooks.parseTwoDigitYear = function (input) {
+        return toInt(input) + (toInt(input) > 68 ? 1900 : 2000);
+    };
+
+    // MOMENTS
+
+    var getSetYear = makeGetSet('FullYear', true);
+
+    function getIsLeapYear () {
+        return isLeapYear(this.year());
+    }
+
+    function makeGetSet (unit, keepTime) {
+        return function (value) {
+            if (value != null) {
+                set$1(this, unit, value);
+                hooks.updateOffset(this, keepTime);
+                return this;
+            } else {
+                return get(this, unit);
+            }
+        };
+    }
+
+    function get (mom, unit) {
+        return mom.isValid() ?
+            mom._d['get' + (mom._isUTC ? 'UTC' : '') + unit]() : NaN;
+    }
+
+    function set$1 (mom, unit, value) {
+        if (mom.isValid() && !isNaN(value)) {
+            if (unit === 'FullYear' && isLeapYear(mom.year()) && mom.month() === 1 && mom.date() === 29) {
+                mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value, mom.month(), daysInMonth(value, mom.month()));
+            }
+            else {
+                mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value);
+            }
+        }
+    }
+
+    // MOMENTS
+
+    function stringGet (units) {
+        units = normalizeUnits(units);
+        if (isFunction(this[units])) {
+            return this[units]();
+        }
+        return this;
+    }
+
+
+    function stringSet (units, value) {
+        if (typeof units === 'object') {
+            units = normalizeObjectUnits(units);
+            var prioritized = getPrioritizedUnits(units);
+            for (var i = 0; i < prioritized.length; i++) {
+                this[prioritized[i].unit](units[prioritized[i].unit]);
+            }
+        } else {
+            units = normalizeUnits(units);
+            if (isFunction(this[units])) {
+                return this[units](value);
+            }
+        }
+        return this;
+    }
+
+    function mod(n, x) {
+        return ((n % x) + x) % x;
+    }
+
+    var indexOf;
+
+    if (Array.prototype.indexOf) {
+        indexOf = Array.prototype.indexOf;
+    } else {
+        indexOf = function (o) {
+            // I know
+            var i;
+            for (i = 0; i < this.length; ++i) {
+                if (this[i] === o) {
+                    return i;
+                }
+            }
+            return -1;
+        };
+    }
+
+    function daysInMonth(year, month) {
+        if (isNaN(year) || isNaN(month)) {
+            return NaN;
+        }
+        var modMonth = mod(month, 12);
+        year += (month - modMonth) / 12;
+        return modMonth === 1 ? (isLeapYear(year) ? 29 : 28) : (31 - modMonth % 7 % 2);
+    }
+
+    // FORMATTING
+
+    addFormatToken('M', ['MM', 2], 'Mo', function () {
+        return this.month() + 1;
+    });
+
+    addFormatToken('MMM', 0, 0, function (format) {
+        return this.localeData().monthsShort(this, format);
+    });
+
+    addFormatToken('MMMM', 0, 0, function (format) {
+        return this.localeData().months(this, format);
+    });
+
+    // ALIASES
+
+    addUnitAlias('month', 'M');
+
+    // PRIORITY
+
+    addUnitPriority('month', 8);
+
+    // PARSING
+
+    addRegexToken('M',    match1to2);
+    addRegexToken('MM',   match1to2, match2);
+    addRegexToken('MMM',  function (isStrict, locale) {
+        return locale.monthsShortRegex(isStrict);
+    });
+    addRegexToken('MMMM', function (isStrict, locale) {
+        return locale.monthsRegex(isStrict);
+    });
+
+    addParseToken(['M', 'MM'], function (input, array) {
+        array[MONTH] = toInt(input) - 1;
+    });
+
+    addParseToken(['MMM', 'MMMM'], function (input, array, config, token) {
+        var month = config._locale.monthsParse(input, token, config._strict);
+        // if we didn't find a month name, mark the date as invalid.
+        if (month != null) {
+            array[MONTH] = month;
+        } else {
+            getParsingFlags(config).invalidMonth = input;
+        }
+    });
+
+    // LOCALES
+
+    var MONTHS_IN_FORMAT = /D[oD]?(\[[^\[\]]*\]|\s)+MMMM?/;
+    var defaultLocaleMonths = 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_');
+    function localeMonths (m, format) {
+        if (!m) {
+            return isArray(this._months) ? this._months :
+                this._months['standalone'];
+        }
+        return isArray(this._months) ? this._months[m.month()] :
+            this._months[(this._months.isFormat || MONTHS_IN_FORMAT).test(format) ? 'format' : 'standalone'][m.month()];
+    }
+
+    var defaultLocaleMonthsShort = 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_');
+    function localeMonthsShort (m, format) {
+        if (!m) {
+            return isArray(this._monthsShort) ? this._monthsShort :
+                this._monthsShort['standalone'];
+        }
+        return isArray(this._monthsShort) ? this._monthsShort[m.month()] :
+            this._monthsShort[MONTHS_IN_FORMAT.test(format) ? 'format' : 'standalone'][m.month()];
+    }
+
+    function handleStrictParse(monthName, format, strict) {
+        var i, ii, mom, llc = monthName.toLocaleLowerCase();
+        if (!this._monthsParse) {
+            // this is not used
+            this._monthsParse = [];
+            this._longMonthsParse = [];
+            this._shortMonthsParse = [];
+            for (i = 0; i < 12; ++i) {
+                mom = createUTC([2000, i]);
+                this._shortMonthsParse[i] = this.monthsShort(mom, '').toLocaleLowerCase();
+                this._longMonthsParse[i] = this.months(mom, '').toLocaleLowerCase();
+            }
+        }
+
+        if (strict) {
+            if (format === 'MMM') {
+                ii = indexOf.call(this._shortMonthsParse, llc);
+                return ii !== -1 ? ii : null;
+            } else {
+                ii = indexOf.call(this._longMonthsParse, llc);
+                return ii !== -1 ? ii : null;
+            }
+        } else {
+            if (format === 'MMM') {
+                ii = indexOf.call(this._shortMonthsParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._longMonthsParse, llc);
+                return ii !== -1 ? ii : null;
+            } else {
+                ii = indexOf.call(this._longMonthsParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._shortMonthsParse, llc);
+                return ii !== -1 ? ii : null;
+            }
+        }
+    }
+
+    function localeMonthsParse (monthName, format, strict) {
+        var i, mom, regex;
+
+        if (this._monthsParseExact) {
+            return handleStrictParse.call(this, monthName, format, strict);
+        }
+
+        if (!this._monthsParse) {
+            this._monthsParse = [];
+            this._longMonthsParse = [];
+            this._shortMonthsParse = [];
+        }
+
+        // TODO: add sorting
+        // Sorting makes sure if one month (or abbr) is a prefix of another
+        // see sorting in computeMonthsParse
+        for (i = 0; i < 12; i++) {
+            // make the regex if we don't have it already
+            mom = createUTC([2000, i]);
+            if (strict && !this._longMonthsParse[i]) {
+                this._longMonthsParse[i] = new RegExp('^' + this.months(mom, '').replace('.', '') + '$', 'i');
+                this._shortMonthsParse[i] = new RegExp('^' + this.monthsShort(mom, '').replace('.', '') + '$', 'i');
+            }
+            if (!strict && !this._monthsParse[i]) {
+                regex = '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
+                this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
+            }
+            // test the regex
+            if (strict && format === 'MMMM' && this._longMonthsParse[i].test(monthName)) {
+                return i;
+            } else if (strict && format === 'MMM' && this._shortMonthsParse[i].test(monthName)) {
+                return i;
+            } else if (!strict && this._monthsParse[i].test(monthName)) {
+                return i;
+            }
+        }
+    }
+
+    // MOMENTS
+
+    function setMonth (mom, value) {
+        var dayOfMonth;
+
+        if (!mom.isValid()) {
+            // No op
+            return mom;
+        }
+
+        if (typeof value === 'string') {
+            if (/^\d+$/.test(value)) {
+                value = toInt(value);
+            } else {
+                value = mom.localeData().monthsParse(value);
+                // TODO: Another silent failure?
+                if (!isNumber(value)) {
+                    return mom;
+                }
+            }
+        }
+
+        dayOfMonth = Math.min(mom.date(), daysInMonth(mom.year(), value));
+        mom._d['set' + (mom._isUTC ? 'UTC' : '') + 'Month'](value, dayOfMonth);
+        return mom;
+    }
+
+    function getSetMonth (value) {
+        if (value != null) {
+            setMonth(this, value);
+            hooks.updateOffset(this, true);
+            return this;
+        } else {
+            return get(this, 'Month');
+        }
+    }
+
+    function getDaysInMonth () {
+        return daysInMonth(this.year(), this.month());
+    }
+
+    var defaultMonthsShortRegex = matchWord;
+    function monthsShortRegex (isStrict) {
+        if (this._monthsParseExact) {
+            if (!hasOwnProp(this, '_monthsRegex')) {
+                computeMonthsParse.call(this);
+            }
+            if (isStrict) {
+                return this._monthsShortStrictRegex;
+            } else {
+                return this._monthsShortRegex;
+            }
+        } else {
+            if (!hasOwnProp(this, '_monthsShortRegex')) {
+                this._monthsShortRegex = defaultMonthsShortRegex;
+            }
+            return this._monthsShortStrictRegex && isStrict ?
+                this._monthsShortStrictRegex : this._monthsShortRegex;
+        }
+    }
+
+    var defaultMonthsRegex = matchWord;
+    function monthsRegex (isStrict) {
+        if (this._monthsParseExact) {
+            if (!hasOwnProp(this, '_monthsRegex')) {
+                computeMonthsParse.call(this);
+            }
+            if (isStrict) {
+                return this._monthsStrictRegex;
+            } else {
+                return this._monthsRegex;
+            }
+        } else {
+            if (!hasOwnProp(this, '_monthsRegex')) {
+                this._monthsRegex = defaultMonthsRegex;
+            }
+            return this._monthsStrictRegex && isStrict ?
+                this._monthsStrictRegex : this._monthsRegex;
+        }
+    }
+
+    function computeMonthsParse () {
+        function cmpLenRev(a, b) {
+            return b.length - a.length;
+        }
+
+        var shortPieces = [], longPieces = [], mixedPieces = [],
+            i, mom;
+        for (i = 0; i < 12; i++) {
+            // make the regex if we don't have it already
+            mom = createUTC([2000, i]);
+            shortPieces.push(this.monthsShort(mom, ''));
+            longPieces.push(this.months(mom, ''));
+            mixedPieces.push(this.months(mom, ''));
+            mixedPieces.push(this.monthsShort(mom, ''));
+        }
+        // Sorting makes sure if one month (or abbr) is a prefix of another it
+        // will match the longer piece.
+        shortPieces.sort(cmpLenRev);
+        longPieces.sort(cmpLenRev);
+        mixedPieces.sort(cmpLenRev);
+        for (i = 0; i < 12; i++) {
+            shortPieces[i] = regexEscape(shortPieces[i]);
+            longPieces[i] = regexEscape(longPieces[i]);
+        }
+        for (i = 0; i < 24; i++) {
+            mixedPieces[i] = regexEscape(mixedPieces[i]);
+        }
+
+        this._monthsRegex = new RegExp('^(' + mixedPieces.join('|') + ')', 'i');
+        this._monthsShortRegex = this._monthsRegex;
+        this._monthsStrictRegex = new RegExp('^(' + longPieces.join('|') + ')', 'i');
+        this._monthsShortStrictRegex = new RegExp('^(' + shortPieces.join('|') + ')', 'i');
+    }
+
+    function createDate (y, m, d, h, M, s, ms) {
+        // can't just apply() to create a date:
+        // https://stackoverflow.com/q/181348
+        var date;
+        // the date constructor remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            date = new Date(y + 400, m, d, h, M, s, ms);
+            if (isFinite(date.getFullYear())) {
+                date.setFullYear(y);
+            }
+        } else {
+            date = new Date(y, m, d, h, M, s, ms);
+        }
+
+        return date;
+    }
+
+    function createUTCDate (y) {
+        var date;
+        // the Date.UTC function remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            var args = Array.prototype.slice.call(arguments);
+            // preserve leap years using a full 400 year cycle, then reset
+            args[0] = y + 400;
+            date = new Date(Date.UTC.apply(null, args));
+            if (isFinite(date.getUTCFullYear())) {
+                date.setUTCFullYear(y);
+            }
+        } else {
+            date = new Date(Date.UTC.apply(null, arguments));
+        }
+
+        return date;
+    }
+
+    // start-of-first-week - start-of-year
+    function firstWeekOffset(year, dow, doy) {
+        var // first-week day -- which january is always in the first week (4 for iso, 1 for other)
+            fwd = 7 + dow - doy,
+            // first-week day local weekday -- which local weekday is fwd
+            fwdlw = (7 + createUTCDate(year, 0, fwd).getUTCDay() - dow) % 7;
+
+        return -fwdlw + fwd - 1;
+    }
+
+    // https://en.wikipedia.org/wiki/ISO_week_date#Calculating_a_date_given_the_year.2C_week_number_and_weekday
+    function dayOfYearFromWeeks(year, week, weekday, dow, doy) {
+        var localWeekday = (7 + weekday - dow) % 7,
+            weekOffset = firstWeekOffset(year, dow, doy),
+            dayOfYear = 1 + 7 * (week - 1) + localWeekday + weekOffset,
+            resYear, resDayOfYear;
+
+        if (dayOfYear <= 0) {
+            resYear = year - 1;
+            resDayOfYear = daysInYear(resYear) + dayOfYear;
+        } else if (dayOfYear > daysInYear(year)) {
+            resYear = year + 1;
+            resDayOfYear = dayOfYear - daysInYear(year);
+        } else {
+            resYear = year;
+            resDayOfYear = dayOfYear;
+        }
+
+        return {
+            year: resYear,
+            dayOfYear: resDayOfYear
+        };
+    }
+
+    function weekOfYear(mom, dow, doy) {
+        var weekOffset = firstWeekOffset(mom.year(), dow, doy),
+            week = Math.floor((mom.dayOfYear() - weekOffset - 1) / 7) + 1,
+            resWeek, resYear;
+
+        if (week < 1) {
+            resYear = mom.year() - 1;
+            resWeek = week + weeksInYear(resYear, dow, doy);
+        } else if (week > weeksInYear(mom.year(), dow, doy)) {
+            resWeek = week - weeksInYear(mom.year(), dow, doy);
+            resYear = mom.year() + 1;
+        } else {
+            resYear = mom.year();
+            resWeek = week;
+        }
+
+        return {
+            week: resWeek,
+            year: resYear
+        };
+    }
+
+    function weeksInYear(year, dow, doy) {
+        var weekOffset = firstWeekOffset(year, dow, doy),
+            weekOffsetNext = firstWeekOffset(year + 1, dow, doy);
+        return (daysInYear(year) - weekOffset + weekOffsetNext) / 7;
+    }
+
+    // FORMATTING
+
+    addFormatToken('w', ['ww', 2], 'wo', 'week');
+    addFormatToken('W', ['WW', 2], 'Wo', 'isoWeek');
+
+    // ALIASES
+
+    addUnitAlias('week', 'w');
+    addUnitAlias('isoWeek', 'W');
+
+    // PRIORITIES
+
+    addUnitPriority('week', 5);
+    addUnitPriority('isoWeek', 5);
+
+    // PARSING
+
+    addRegexToken('w',  match1to2);
+    addRegexToken('ww', match1to2, match2);
+    addRegexToken('W',  match1to2);
+    addRegexToken('WW', match1to2, match2);
+
+    addWeekParseToken(['w', 'ww', 'W', 'WW'], function (input, week, config, token) {
+        week[token.substr(0, 1)] = toInt(input);
+    });
+
+    // HELPERS
+
+    // LOCALES
+
+    function localeWeek (mom) {
+        return weekOfYear(mom, this._week.dow, this._week.doy).week;
+    }
+
+    var defaultLocaleWeek = {
+        dow : 0, // Sunday is the first day of the week.
+        doy : 6  // The week that contains Jan 6th is the first week of the year.
+    };
+
+    function localeFirstDayOfWeek () {
+        return this._week.dow;
+    }
+
+    function localeFirstDayOfYear () {
+        return this._week.doy;
+    }
+
+    // MOMENTS
+
+    function getSetWeek (input) {
+        var week = this.localeData().week(this);
+        return input == null ? week : this.add((input - week) * 7, 'd');
+    }
+
+    function getSetISOWeek (input) {
+        var week = weekOfYear(this, 1, 4).week;
+        return input == null ? week : this.add((input - week) * 7, 'd');
+    }
+
+    // FORMATTING
+
+    addFormatToken('d', 0, 'do', 'day');
+
+    addFormatToken('dd', 0, 0, function (format) {
+        return this.localeData().weekdaysMin(this, format);
+    });
+
+    addFormatToken('ddd', 0, 0, function (format) {
+        return this.localeData().weekdaysShort(this, format);
+    });
+
+    addFormatToken('dddd', 0, 0, function (format) {
+        return this.localeData().weekdays(this, format);
+    });
+
+    addFormatToken('e', 0, 0, 'weekday');
+    addFormatToken('E', 0, 0, 'isoWeekday');
+
+    // ALIASES
+
+    addUnitAlias('day', 'd');
+    addUnitAlias('weekday', 'e');
+    addUnitAlias('isoWeekday', 'E');
+
+    // PRIORITY
+    addUnitPriority('day', 11);
+    addUnitPriority('weekday', 11);
+    addUnitPriority('isoWeekday', 11);
+
+    // PARSING
+
+    addRegexToken('d',    match1to2);
+    addRegexToken('e',    match1to2);
+    addRegexToken('E',    match1to2);
+    addRegexToken('dd',   function (isStrict, locale) {
+        return locale.weekdaysMinRegex(isStrict);
+    });
+    addRegexToken('ddd',   function (isStrict, locale) {
+        return locale.weekdaysShortRegex(isStrict);
+    });
+    addRegexToken('dddd',   function (isStrict, locale) {
+        return locale.weekdaysRegex(isStrict);
+    });
+
+    addWeekParseToken(['dd', 'ddd', 'dddd'], function (input, week, config, token) {
+        var weekday = config._locale.weekdaysParse(input, token, config._strict);
+        // if we didn't get a weekday name, mark the date as invalid
+        if (weekday != null) {
+            week.d = weekday;
+        } else {
+            getParsingFlags(config).invalidWeekday = input;
+        }
+    });
+
+    addWeekParseToken(['d', 'e', 'E'], function (input, week, config, token) {
+        week[token] = toInt(input);
+    });
+
+    // HELPERS
+
+    function parseWeekday(input, locale) {
+        if (typeof input !== 'string') {
+            return input;
+        }
+
+        if (!isNaN(input)) {
+            return parseInt(input, 10);
+        }
+
+        input = locale.weekdaysParse(input);
+        if (typeof input === 'number') {
+            return input;
+        }
+
+        return null;
+    }
+
+    function parseIsoWeekday(input, locale) {
+        if (typeof input === 'string') {
+            return locale.weekdaysParse(input) % 7 || 7;
+        }
+        return isNaN(input) ? null : input;
+    }
+
+    // LOCALES
+    function shiftWeekdays (ws, n) {
+        return ws.slice(n, 7).concat(ws.slice(0, n));
+    }
+
+    var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_');
+    function localeWeekdays (m, format) {
+        var weekdays = isArray(this._weekdays) ? this._weekdays :
+            this._weekdays[(m && m !== true && this._weekdays.isFormat.test(format)) ? 'format' : 'standalone'];
+        return (m === true) ? shiftWeekdays(weekdays, this._week.dow)
+            : (m) ? weekdays[m.day()] : weekdays;
+    }
+
+    var defaultLocaleWeekdaysShort = 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_');
+    function localeWeekdaysShort (m) {
+        return (m === true) ? shiftWeekdays(this._weekdaysShort, this._week.dow)
+            : (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
+    }
+
+    var defaultLocaleWeekdaysMin = 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_');
+    function localeWeekdaysMin (m) {
+        return (m === true) ? shiftWeekdays(this._weekdaysMin, this._week.dow)
+            : (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
+    }
+
+    function handleStrictParse$1(weekdayName, format, strict) {
+        var i, ii, mom, llc = weekdayName.toLocaleLowerCase();
+        if (!this._weekdaysParse) {
+            this._weekdaysParse = [];
+            this._shortWeekdaysParse = [];
+            this._minWeekdaysParse = [];
+
+            for (i = 0; i < 7; ++i) {
+                mom = createUTC([2000, 1]).day(i);
+                this._minWeekdaysParse[i] = this.weekdaysMin(mom, '').toLocaleLowerCase();
+                this._shortWeekdaysParse[i] = this.weekdaysShort(mom, '').toLocaleLowerCase();
+                this._weekdaysParse[i] = this.weekdays(mom, '').toLocaleLowerCase();
+            }
+        }
+
+        if (strict) {
+            if (format === 'dddd') {
+                ii = indexOf.call(this._weekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            } else if (format === 'ddd') {
+                ii = indexOf.call(this._shortWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            } else {
+                ii = indexOf.call(this._minWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            }
+        } else {
+            if (format === 'dddd') {
+                ii = indexOf.call(this._weekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._shortWeekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._minWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            } else if (format === 'ddd') {
+                ii = indexOf.call(this._shortWeekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._weekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._minWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            } else {
+                ii = indexOf.call(this._minWeekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._weekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._shortWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            }
+        }
+    }
+
+    function localeWeekdaysParse (weekdayName, format, strict) {
+        var i, mom, regex;
+
+        if (this._weekdaysParseExact) {
+            return handleStrictParse$1.call(this, weekdayName, format, strict);
+        }
+
+        if (!this._weekdaysParse) {
+            this._weekdaysParse = [];
+            this._minWeekdaysParse = [];
+            this._shortWeekdaysParse = [];
+            this._fullWeekdaysParse = [];
+        }
+
+        for (i = 0; i < 7; i++) {
+            // make the regex if we don't have it already
+
+            mom = createUTC([2000, 1]).day(i);
+            if (strict && !this._fullWeekdaysParse[i]) {
+                this._fullWeekdaysParse[i] = new RegExp('^' + this.weekdays(mom, '').replace('.', '\\.?') + '$', 'i');
+                this._shortWeekdaysParse[i] = new RegExp('^' + this.weekdaysShort(mom, '').replace('.', '\\.?') + '$', 'i');
+                this._minWeekdaysParse[i] = new RegExp('^' + this.weekdaysMin(mom, '').replace('.', '\\.?') + '$', 'i');
+            }
+            if (!this._weekdaysParse[i]) {
+                regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
+                this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
+            }
+            // test the regex
+            if (strict && format === 'dddd' && this._fullWeekdaysParse[i].test(weekdayName)) {
+                return i;
+            } else if (strict && format === 'ddd' && this._shortWeekdaysParse[i].test(weekdayName)) {
+                return i;
+            } else if (strict && format === 'dd' && this._minWeekdaysParse[i].test(weekdayName)) {
+                return i;
+            } else if (!strict && this._weekdaysParse[i].test(weekdayName)) {
+                return i;
+            }
+        }
+    }
+
+    // MOMENTS
+
+    function getSetDayOfWeek (input) {
+        if (!this.isValid()) {
+            return input != null ? this : NaN;
+        }
+        var day = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
+        if (input != null) {
+            input = parseWeekday(input, this.localeData());
+            return this.add(input - day, 'd');
+        } else {
+            return day;
+        }
+    }
+
+    function getSetLocaleDayOfWeek (input) {
+        if (!this.isValid()) {
+            return input != null ? this : NaN;
+        }
+        var weekday = (this.day() + 7 - this.localeData()._week.dow) % 7;
+        return input == null ? weekday : this.add(input - weekday, 'd');
+    }
+
+    function getSetISODayOfWeek (input) {
+        if (!this.isValid()) {
+            return input != null ? this : NaN;
+        }
+
+        // behaves the same as moment#day except
+        // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
+        // as a setter, sunday should belong to the previous week.
+
+        if (input != null) {
+            var weekday = parseIsoWeekday(input, this.localeData());
+            return this.day(this.day() % 7 ? weekday : weekday - 7);
+        } else {
+            return this.day() || 7;
+        }
+    }
+
+    var defaultWeekdaysRegex = matchWord;
+    function weekdaysRegex (isStrict) {
+        if (this._weekdaysParseExact) {
+            if (!hasOwnProp(this, '_weekdaysRegex')) {
+                computeWeekdaysParse.call(this);
+            }
+            if (isStrict) {
+                return this._weekdaysStrictRegex;
+            } else {
+                return this._weekdaysRegex;
+            }
+        } else {
+            if (!hasOwnProp(this, '_weekdaysRegex')) {
+                this._weekdaysRegex = defaultWeekdaysRegex;
+            }
+            return this._weekdaysStrictRegex && isStrict ?
+                this._weekdaysStrictRegex : this._weekdaysRegex;
+        }
+    }
+
+    var defaultWeekdaysShortRegex = matchWord;
+    function weekdaysShortRegex (isStrict) {
+        if (this._weekdaysParseExact) {
+            if (!hasOwnProp(this, '_weekdaysRegex')) {
+                computeWeekdaysParse.call(this);
+            }
+            if (isStrict) {
+                return this._weekdaysShortStrictRegex;
+            } else {
+                return this._weekdaysShortRegex;
+            }
+        } else {
+            if (!hasOwnProp(this, '_weekdaysShortRegex')) {
+                this._weekdaysShortRegex = defaultWeekdaysShortRegex;
+            }
+            return this._weekdaysShortStrictRegex && isStrict ?
+                this._weekdaysShortStrictRegex : this._weekdaysShortRegex;
+        }
+    }
+
+    var defaultWeekdaysMinRegex = matchWord;
+    function weekdaysMinRegex (isStrict) {
+        if (this._weekdaysParseExact) {
+            if (!hasOwnProp(this, '_weekdaysRegex')) {
+                computeWeekdaysParse.call(this);
+            }
+            if (isStrict) {
+                return this._weekdaysMinStrictRegex;
+            } else {
+                return this._weekdaysMinRegex;
+            }
+        } else {
+            if (!hasOwnProp(this, '_weekdaysMinRegex')) {
+                this._weekdaysMinRegex = defaultWeekdaysMinRegex;
+            }
+            return this._weekdaysMinStrictRegex && isStrict ?
+                this._weekdaysMinStrictRegex : this._weekdaysMinRegex;
+        }
+    }
+
+
+    function computeWeekdaysParse () {
+        function cmpLenRev(a, b) {
+            return b.length - a.length;
+        }
+
+        var minPieces = [], shortPieces = [], longPieces = [], mixedPieces = [],
+            i, mom, minp, shortp, longp;
+        for (i = 0; i < 7; i++) {
+            // make the regex if we don't have it already
+            mom = createUTC([2000, 1]).day(i);
+            minp = this.weekdaysMin(mom, '');
+            shortp = this.weekdaysShort(mom, '');
+            longp = this.weekdays(mom, '');
+            minPieces.push(minp);
+            shortPieces.push(shortp);
+            longPieces.push(longp);
+            mixedPieces.push(minp);
+            mixedPieces.push(shortp);
+            mixedPieces.push(longp);
+        }
+        // Sorting makes sure if one weekday (or abbr) is a prefix of another it
+        // will match the longer piece.
+        minPieces.sort(cmpLenRev);
+        shortPieces.sort(cmpLenRev);
+        longPieces.sort(cmpLenRev);
+        mixedPieces.sort(cmpLenRev);
+        for (i = 0; i < 7; i++) {
+            shortPieces[i] = regexEscape(shortPieces[i]);
+            longPieces[i] = regexEscape(longPieces[i]);
+            mixedPieces[i] = regexEscape(mixedPieces[i]);
+        }
+
+        this._weekdaysRegex = new RegExp('^(' + mixedPieces.join('|') + ')', 'i');
+        this._weekdaysShortRegex = this._weekdaysRegex;
+        this._weekdaysMinRegex = this._weekdaysRegex;
+
+        this._weekdaysStrictRegex = new RegExp('^(' + longPieces.join('|') + ')', 'i');
+        this._weekdaysShortStrictRegex = new RegExp('^(' + shortPieces.join('|') + ')', 'i');
+        this._weekdaysMinStrictRegex = new RegExp('^(' + minPieces.join('|') + ')', 'i');
+    }
+
+    // FORMATTING
+
+    function hFormat() {
+        return this.hours() % 12 || 12;
+    }
+
+    function kFormat() {
+        return this.hours() || 24;
+    }
+
+    addFormatToken('H', ['HH', 2], 0, 'hour');
+    addFormatToken('h', ['hh', 2], 0, hFormat);
+    addFormatToken('k', ['kk', 2], 0, kFormat);
+
+    addFormatToken('hmm', 0, 0, function () {
+        return '' + hFormat.apply(this) + zeroFill(this.minutes(), 2);
+    });
+
+    addFormatToken('hmmss', 0, 0, function () {
+        return '' + hFormat.apply(this) + zeroFill(this.minutes(), 2) +
+            zeroFill(this.seconds(), 2);
+    });
+
+    addFormatToken('Hmm', 0, 0, function () {
+        return '' + this.hours() + zeroFill(this.minutes(), 2);
+    });
+
+    addFormatToken('Hmmss', 0, 0, function () {
+        return '' + this.hours() + zeroFill(this.minutes(), 2) +
+            zeroFill(this.seconds(), 2);
+    });
+
+    function meridiem (token, lowercase) {
+        addFormatToken(token, 0, 0, function () {
+            return this.localeData().meridiem(this.hours(), this.minutes(), lowercase);
+        });
+    }
+
+    meridiem('a', true);
+    meridiem('A', false);
+
+    // ALIASES
+
+    addUnitAlias('hour', 'h');
+
+    // PRIORITY
+    addUnitPriority('hour', 13);
+
+    // PARSING
+
+    function matchMeridiem (isStrict, locale) {
+        return locale._meridiemParse;
+    }
+
+    addRegexToken('a',  matchMeridiem);
+    addRegexToken('A',  matchMeridiem);
+    addRegexToken('H',  match1to2);
+    addRegexToken('h',  match1to2);
+    addRegexToken('k',  match1to2);
+    addRegexToken('HH', match1to2, match2);
+    addRegexToken('hh', match1to2, match2);
+    addRegexToken('kk', match1to2, match2);
+
+    addRegexToken('hmm', match3to4);
+    addRegexToken('hmmss', match5to6);
+    addRegexToken('Hmm', match3to4);
+    addRegexToken('Hmmss', match5to6);
+
+    addParseToken(['H', 'HH'], HOUR);
+    addParseToken(['k', 'kk'], function (input, array, config) {
+        var kInput = toInt(input);
+        array[HOUR] = kInput === 24 ? 0 : kInput;
+    });
+    addParseToken(['a', 'A'], function (input, array, config) {
+        config._isPm = config._locale.isPM(input);
+        config._meridiem = input;
+    });
+    addParseToken(['h', 'hh'], function (input, array, config) {
+        array[HOUR] = toInt(input);
+        getParsingFlags(config).bigHour = true;
+    });
+    addParseToken('hmm', function (input, array, config) {
+        var pos = input.length - 2;
+        array[HOUR] = toInt(input.substr(0, pos));
+        array[MINUTE] = toInt(input.substr(pos));
+        getParsingFlags(config).bigHour = true;
+    });
+    addParseToken('hmmss', function (input, array, config) {
+        var pos1 = input.length - 4;
+        var pos2 = input.length - 2;
+        array[HOUR] = toInt(input.substr(0, pos1));
+        array[MINUTE] = toInt(input.substr(pos1, 2));
+        array[SECOND] = toInt(input.substr(pos2));
+        getParsingFlags(config).bigHour = true;
+    });
+    addParseToken('Hmm', function (input, array, config) {
+        var pos = input.length - 2;
+        array[HOUR] = toInt(input.substr(0, pos));
+        array[MINUTE] = toInt(input.substr(pos));
+    });
+    addParseToken('Hmmss', function (input, array, config) {
+        var pos1 = input.length - 4;
+        var pos2 = input.length - 2;
+        array[HOUR] = toInt(input.substr(0, pos1));
+        array[MINUTE] = toInt(input.substr(pos1, 2));
+        array[SECOND] = toInt(input.substr(pos2));
+    });
+
+    // LOCALES
+
+    function localeIsPM (input) {
+        // IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays
+        // Using charAt should be more compatible.
+        return ((input + '').toLowerCase().charAt(0) === 'p');
+    }
+
+    var defaultLocaleMeridiemParse = /[ap]\.?m?\.?/i;
+    function localeMeridiem (hours, minutes, isLower) {
+        if (hours > 11) {
+            return isLower ? 'pm' : 'PM';
+        } else {
+            return isLower ? 'am' : 'AM';
+        }
+    }
+
+
+    // MOMENTS
+
+    // Setting the hour should keep the time, because the user explicitly
+    // specified which hour they want. So trying to maintain the same hour (in
+    // a new timezone) makes sense. Adding/subtracting hours does not follow
+    // this rule.
+    var getSetHour = makeGetSet('Hours', true);
+
+    var baseConfig = {
+        calendar: defaultCalendar,
+        longDateFormat: defaultLongDateFormat,
+        invalidDate: defaultInvalidDate,
+        ordinal: defaultOrdinal,
+        dayOfMonthOrdinalParse: defaultDayOfMonthOrdinalParse,
+        relativeTime: defaultRelativeTime,
+
+        months: defaultLocaleMonths,
+        monthsShort: defaultLocaleMonthsShort,
+
+        week: defaultLocaleWeek,
+
+        weekdays: defaultLocaleWeekdays,
+        weekdaysMin: defaultLocaleWeekdaysMin,
+        weekdaysShort: defaultLocaleWeekdaysShort,
+
+        meridiemParse: defaultLocaleMeridiemParse
+    };
+
+    // internal storage for locale config files
+    var locales = {};
+    var localeFamilies = {};
+    var globalLocale;
+
+    function normalizeLocale(key) {
+        return key ? key.toLowerCase().replace('_', '-') : key;
+    }
+
+    // pick the locale from the array
+    // try ['en-au', 'en-gb'] as 'en-au', 'en-gb', 'en', as in move through the list trying each
+    // substring from most specific to least, but move to the next array item if it's a more specific variant than the current root
+    function chooseLocale(names) {
+        var i = 0, j, next, locale, split;
+
+        while (i < names.length) {
+            split = normalizeLocale(names[i]).split('-');
+            j = split.length;
+            next = normalizeLocale(names[i + 1]);
+            next = next ? next.split('-') : null;
+            while (j > 0) {
+                locale = loadLocale(split.slice(0, j).join('-'));
+                if (locale) {
+                    return locale;
+                }
+                if (next && next.length >= j && compareArrays(split, next, true) >= j - 1) {
+                    //the next array item is better than a shallower substring of this one
+                    break;
+                }
+                j--;
+            }
+            i++;
+        }
+        return globalLocale;
+    }
+
+    function loadLocale(name) {
+        var oldLocale = null;
+        // TODO: Find a better way to register and load all the locales in Node
+        if (!locales[name] && (typeof module !== 'undefined') &&
+                module && module.exports) {
+            try {
+                oldLocale = globalLocale._abbr;
+                var aliasedRequire = require;
+                aliasedRequire('./locale/' + name);
+                getSetGlobalLocale(oldLocale);
+            } catch (e) {}
+        }
+        return locales[name];
+    }
+
+    // This function will load locale and then set the global locale.  If
+    // no arguments are passed in, it will simply return the current global
+    // locale key.
+    function getSetGlobalLocale (key, values) {
+        var data;
+        if (key) {
+            if (isUndefined(values)) {
+                data = getLocale(key);
+            }
+            else {
+                data = defineLocale(key, values);
+            }
+
+            if (data) {
+                // moment.duration._locale = moment._locale = data;
+                globalLocale = data;
+            }
+            else {
+                if ((typeof console !==  'undefined') && console.warn) {
+                    //warn user if arguments are passed but the locale could not be set
+                    console.warn('Locale ' + key +  ' not found. Did you forget to load it?');
+                }
+            }
+        }
+
+        return globalLocale._abbr;
+    }
+
+    function defineLocale (name, config) {
+        if (config !== null) {
+            var locale, parentConfig = baseConfig;
+            config.abbr = name;
+            if (locales[name] != null) {
+                deprecateSimple('defineLocaleOverride',
+                        'use moment.updateLocale(localeName, config) to change ' +
+                        'an existing locale. moment.defineLocale(localeName, ' +
+                        'config) should only be used for creating a new locale ' +
+                        'See http://momentjs.com/guides/#/warnings/define-locale/ for more info.');
+                parentConfig = locales[name]._config;
+            } else if (config.parentLocale != null) {
+                if (locales[config.parentLocale] != null) {
+                    parentConfig = locales[config.parentLocale]._config;
+                } else {
+                    locale = loadLocale(config.parentLocale);
+                    if (locale != null) {
+                        parentConfig = locale._config;
+                    } else {
+                        if (!localeFamilies[config.parentLocale]) {
+                            localeFamilies[config.parentLocale] = [];
+                        }
+                        localeFamilies[config.parentLocale].push({
+                            name: name,
+                            config: config
+                        });
+                        return null;
+                    }
+                }
+            }
+            locales[name] = new Locale(mergeConfigs(parentConfig, config));
+
+            if (localeFamilies[name]) {
+                localeFamilies[name].forEach(function (x) {
+                    defineLocale(x.name, x.config);
+                });
+            }
+
+            // backwards compat for now: also set the locale
+            // make sure we set the locale AFTER all child locales have been
+            // created, so we won't end up with the child locale set.
+            getSetGlobalLocale(name);
+
+
+            return locales[name];
+        } else {
+            // useful for testing
+            delete locales[name];
+            return null;
+        }
+    }
+
+    function updateLocale(name, config) {
+        if (config != null) {
+            var locale, tmpLocale, parentConfig = baseConfig;
+            // MERGE
+            tmpLocale = loadLocale(name);
+            if (tmpLocale != null) {
+                parentConfig = tmpLocale._config;
+            }
+            config = mergeConfigs(parentConfig, config);
+            locale = new Locale(config);
+            locale.parentLocale = locales[name];
+            locales[name] = locale;
+
+            // backwards compat for now: also set the locale
+            getSetGlobalLocale(name);
+        } else {
+            // pass null for config to unupdate, useful for tests
+            if (locales[name] != null) {
+                if (locales[name].parentLocale != null) {
+                    locales[name] = locales[name].parentLocale;
+                } else if (locales[name] != null) {
+                    delete locales[name];
+                }
+            }
+        }
+        return locales[name];
+    }
+
+    // returns locale data
+    function getLocale (key) {
+        var locale;
+
+        if (key && key._locale && key._locale._abbr) {
+            key = key._locale._abbr;
+        }
+
+        if (!key) {
+            return globalLocale;
+        }
+
+        if (!isArray(key)) {
+            //short-circuit everything else
+            locale = loadLocale(key);
+            if (locale) {
+                return locale;
+            }
+            key = [key];
+        }
+
+        return chooseLocale(key);
+    }
+
+    function listLocales() {
+        return keys(locales);
+    }
+
+    function checkOverflow (m) {
+        var overflow;
+        var a = m._a;
+
+        if (a && getParsingFlags(m).overflow === -2) {
+            overflow =
+                a[MONTH]       < 0 || a[MONTH]       > 11  ? MONTH :
+                a[DATE]        < 1 || a[DATE]        > daysInMonth(a[YEAR], a[MONTH]) ? DATE :
+                a[HOUR]        < 0 || a[HOUR]        > 24 || (a[HOUR] === 24 && (a[MINUTE] !== 0 || a[SECOND] !== 0 || a[MILLISECOND] !== 0)) ? HOUR :
+                a[MINUTE]      < 0 || a[MINUTE]      > 59  ? MINUTE :
+                a[SECOND]      < 0 || a[SECOND]      > 59  ? SECOND :
+                a[MILLISECOND] < 0 || a[MILLISECOND] > 999 ? MILLISECOND :
+                -1;
+
+            if (getParsingFlags(m)._overflowDayOfYear && (overflow < YEAR || overflow > DATE)) {
+                overflow = DATE;
+            }
+            if (getParsingFlags(m)._overflowWeeks && overflow === -1) {
+                overflow = WEEK;
+            }
+            if (getParsingFlags(m)._overflowWeekday && overflow === -1) {
+                overflow = WEEKDAY;
+            }
+
+            getParsingFlags(m).overflow = overflow;
+        }
+
+        return m;
+    }
+
+    // Pick the first defined of two or three arguments.
+    function defaults(a, b, c) {
+        if (a != null) {
+            return a;
+        }
+        if (b != null) {
+            return b;
+        }
+        return c;
+    }
+
+    function currentDateArray(config) {
+        // hooks is actually the exported moment object
+        var nowValue = new Date(hooks.now());
+        if (config._useUTC) {
+            return [nowValue.getUTCFullYear(), nowValue.getUTCMonth(), nowValue.getUTCDate()];
+        }
+        return [nowValue.getFullYear(), nowValue.getMonth(), nowValue.getDate()];
+    }
+
+    // convert an array to a date.
+    // the array should mirror the parameters below
+    // note: all values past the year are optional and will default to the lowest possible value.
+    // [year, month, day , hour, minute, second, millisecond]
+    function configFromArray (config) {
+        var i, date, input = [], currentDate, expectedWeekday, yearToUse;
+
+        if (config._d) {
+            return;
+        }
+
+        currentDate = currentDateArray(config);
+
+        //compute day of the year from weeks and weekdays
+        if (config._w && config._a[DATE] == null && config._a[MONTH] == null) {
+            dayOfYearFromWeekInfo(config);
+        }
+
+        //if the day of the year is set, figure out what it is
+        if (config._dayOfYear != null) {
+            yearToUse = defaults(config._a[YEAR], currentDate[YEAR]);
+
+            if (config._dayOfYear > daysInYear(yearToUse) || config._dayOfYear === 0) {
+                getParsingFlags(config)._overflowDayOfYear = true;
+            }
+
+            date = createUTCDate(yearToUse, 0, config._dayOfYear);
+            config._a[MONTH] = date.getUTCMonth();
+            config._a[DATE] = date.getUTCDate();
+        }
+
+        // Default to current date.
+        // * if no year, month, day of month are given, default to today
+        // * if day of month is given, default month and year
+        // * if month is given, default only year
+        // * if year is given, don't default anything
+        for (i = 0; i < 3 && config._a[i] == null; ++i) {
+            config._a[i] = input[i] = currentDate[i];
+        }
+
+        // Zero out whatever was not defaulted, including time
+        for (; i < 7; i++) {
+            config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
+        }
+
+        // Check for 24:00:00.000
+        if (config._a[HOUR] === 24 &&
+                config._a[MINUTE] === 0 &&
+                config._a[SECOND] === 0 &&
+                config._a[MILLISECOND] === 0) {
+            config._nextDay = true;
+            config._a[HOUR] = 0;
+        }
+
+        config._d = (config._useUTC ? createUTCDate : createDate).apply(null, input);
+        expectedWeekday = config._useUTC ? config._d.getUTCDay() : config._d.getDay();
+
+        // Apply timezone offset from input. The actual utcOffset can be changed
+        // with parseZone.
+        if (config._tzm != null) {
+            config._d.setUTCMinutes(config._d.getUTCMinutes() - config._tzm);
+        }
+
+        if (config._nextDay) {
+            config._a[HOUR] = 24;
+        }
+
+        // check for mismatching day of week
+        if (config._w && typeof config._w.d !== 'undefined' && config._w.d !== expectedWeekday) {
+            getParsingFlags(config).weekdayMismatch = true;
+        }
+    }
+
+    function dayOfYearFromWeekInfo(config) {
+        var w, weekYear, week, weekday, dow, doy, temp, weekdayOverflow;
+
+        w = config._w;
+        if (w.GG != null || w.W != null || w.E != null) {
+            dow = 1;
+            doy = 4;
+
+            // TODO: We need to take the current isoWeekYear, but that depends on
+            // how we interpret now (local, utc, fixed offset). So create
+            // a now version of current config (take local/utc/offset flags, and
+            // create now).
+            weekYear = defaults(w.GG, config._a[YEAR], weekOfYear(createLocal(), 1, 4).year);
+            week = defaults(w.W, 1);
+            weekday = defaults(w.E, 1);
+            if (weekday < 1 || weekday > 7) {
+                weekdayOverflow = true;
+            }
+        } else {
+            dow = config._locale._week.dow;
+            doy = config._locale._week.doy;
+
+            var curWeek = weekOfYear(createLocal(), dow, doy);
+
+            weekYear = defaults(w.gg, config._a[YEAR], curWeek.year);
+
+            // Default to current week.
+            week = defaults(w.w, curWeek.week);
+
+            if (w.d != null) {
+                // weekday -- low day numbers are considered next week
+                weekday = w.d;
+                if (weekday < 0 || weekday > 6) {
+                    weekdayOverflow = true;
+                }
+            } else if (w.e != null) {
+                // local weekday -- counting starts from beginning of week
+                weekday = w.e + dow;
+                if (w.e < 0 || w.e > 6) {
+                    weekdayOverflow = true;
+                }
+            } else {
+                // default to beginning of week
+                weekday = dow;
+            }
+        }
+        if (week < 1 || week > weeksInYear(weekYear, dow, doy)) {
+            getParsingFlags(config)._overflowWeeks = true;
+        } else if (weekdayOverflow != null) {
+            getParsingFlags(config)._overflowWeekday = true;
+        } else {
+            temp = dayOfYearFromWeeks(weekYear, week, weekday, dow, doy);
+            config._a[YEAR] = temp.year;
+            config._dayOfYear = temp.dayOfYear;
+        }
+    }
+
+    // iso 8601 regex
+    // 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)
+    var extendedIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})-(?:\d\d-\d\d|W\d\d-\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?::\d\d(?::\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/;
+    var basicIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})(?:\d\d\d\d|W\d\d\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?:\d\d(?:\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/;
+
+    var tzRegex = /Z|[+-]\d\d(?::?\d\d)?/;
+
+    var isoDates = [
+        ['YYYYYY-MM-DD', /[+-]\d{6}-\d\d-\d\d/],
+        ['YYYY-MM-DD', /\d{4}-\d\d-\d\d/],
+        ['GGGG-[W]WW-E', /\d{4}-W\d\d-\d/],
+        ['GGGG-[W]WW', /\d{4}-W\d\d/, false],
+        ['YYYY-DDD', /\d{4}-\d{3}/],
+        ['YYYY-MM', /\d{4}-\d\d/, false],
+        ['YYYYYYMMDD', /[+-]\d{10}/],
+        ['YYYYMMDD', /\d{8}/],
+        // YYYYMM is NOT allowed by the standard
+        ['GGGG[W]WWE', /\d{4}W\d{3}/],
+        ['GGGG[W]WW', /\d{4}W\d{2}/, false],
+        ['YYYYDDD', /\d{7}/]
+    ];
+
+    // iso time formats and regexes
+    var isoTimes = [
+        ['HH:mm:ss.SSSS', /\d\d:\d\d:\d\d\.\d+/],
+        ['HH:mm:ss,SSSS', /\d\d:\d\d:\d\d,\d+/],
+        ['HH:mm:ss', /\d\d:\d\d:\d\d/],
+        ['HH:mm', /\d\d:\d\d/],
+        ['HHmmss.SSSS', /\d\d\d\d\d\d\.\d+/],
+        ['HHmmss,SSSS', /\d\d\d\d\d\d,\d+/],
+        ['HHmmss', /\d\d\d\d\d\d/],
+        ['HHmm', /\d\d\d\d/],
+        ['HH', /\d\d/]
+    ];
+
+    var aspNetJsonRegex = /^\/?Date\((\-?\d+)/i;
+
+    // date from iso format
+    function configFromISO(config) {
+        var i, l,
+            string = config._i,
+            match = extendedIsoRegex.exec(string) || basicIsoRegex.exec(string),
+            allowTime, dateFormat, timeFormat, tzFormat;
+
+        if (match) {
+            getParsingFlags(config).iso = true;
+
+            for (i = 0, l = isoDates.length; i < l; i++) {
+                if (isoDates[i][1].exec(match[1])) {
+                    dateFormat = isoDates[i][0];
+                    allowTime = isoDates[i][2] !== false;
+                    break;
+                }
+            }
+            if (dateFormat == null) {
+                config._isValid = false;
+                return;
+            }
+            if (match[3]) {
+                for (i = 0, l = isoTimes.length; i < l; i++) {
+                    if (isoTimes[i][1].exec(match[3])) {
+                        // match[2] should be 'T' or space
+                        timeFormat = (match[2] || ' ') + isoTimes[i][0];
+                        break;
+                    }
+                }
+                if (timeFormat == null) {
+                    config._isValid = false;
+                    return;
+                }
+            }
+            if (!allowTime && timeFormat != null) {
+                config._isValid = false;
+                return;
+            }
+            if (match[4]) {
+                if (tzRegex.exec(match[4])) {
+                    tzFormat = 'Z';
+                } else {
+                    config._isValid = false;
+                    return;
+                }
+            }
+            config._f = dateFormat + (timeFormat || '') + (tzFormat || '');
+            configFromStringAndFormat(config);
+        } else {
+            config._isValid = false;
+        }
+    }
+
+    // RFC 2822 regex: For details see https://tools.ietf.org/html/rfc2822#section-3.3
+    var rfc2822 = /^(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s)?(\d{1,2})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\d{2,4})\s(\d\d):(\d\d)(?::(\d\d))?\s(?:(UT|GMT|[ECMP][SD]T)|([Zz])|([+-]\d{4}))$/;
+
+    function extractFromRFC2822Strings(yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr) {
+        var result = [
+            untruncateYear(yearStr),
+            defaultLocaleMonthsShort.indexOf(monthStr),
+            parseInt(dayStr, 10),
+            parseInt(hourStr, 10),
+            parseInt(minuteStr, 10)
+        ];
+
+        if (secondStr) {
+            result.push(parseInt(secondStr, 10));
+        }
+
+        return result;
+    }
+
+    function untruncateYear(yearStr) {
+        var year = parseInt(yearStr, 10);
+        if (year <= 49) {
+            return 2000 + year;
+        } else if (year <= 999) {
+            return 1900 + year;
+        }
+        return year;
+    }
+
+    function preprocessRFC2822(s) {
+        // Remove comments and folding whitespace and replace multiple-spaces with a single space
+        return s.replace(/\([^)]*\)|[\n\t]/g, ' ').replace(/(\s\s+)/g, ' ').replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    }
+
+    function checkWeekday(weekdayStr, parsedInput, config) {
+        if (weekdayStr) {
+            // TODO: Replace the vanilla JS Date object with an indepentent day-of-week check.
+            var weekdayProvided = defaultLocaleWeekdaysShort.indexOf(weekdayStr),
+                weekdayActual = new Date(parsedInput[0], parsedInput[1], parsedInput[2]).getDay();
+            if (weekdayProvided !== weekdayActual) {
+                getParsingFlags(config).weekdayMismatch = true;
+                config._isValid = false;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    var obsOffsets = {
+        UT: 0,
+        GMT: 0,
+        EDT: -4 * 60,
+        EST: -5 * 60,
+        CDT: -5 * 60,
+        CST: -6 * 60,
+        MDT: -6 * 60,
+        MST: -7 * 60,
+        PDT: -7 * 60,
+        PST: -8 * 60
+    };
+
+    function calculateOffset(obsOffset, militaryOffset, numOffset) {
+        if (obsOffset) {
+            return obsOffsets[obsOffset];
+        } else if (militaryOffset) {
+            // the only allowed military tz is Z
+            return 0;
+        } else {
+            var hm = parseInt(numOffset, 10);
+            var m = hm % 100, h = (hm - m) / 100;
+            return h * 60 + m;
+        }
+    }
+
+    // date and time from ref 2822 format
+    function configFromRFC2822(config) {
+        var match = rfc2822.exec(preprocessRFC2822(config._i));
+        if (match) {
+            var parsedArray = extractFromRFC2822Strings(match[4], match[3], match[2], match[5], match[6], match[7]);
+            if (!checkWeekday(match[1], parsedArray, config)) {
+                return;
+            }
+
+            config._a = parsedArray;
+            config._tzm = calculateOffset(match[8], match[9], match[10]);
+
+            config._d = createUTCDate.apply(null, config._a);
+            config._d.setUTCMinutes(config._d.getUTCMinutes() - config._tzm);
+
+            getParsingFlags(config).rfc2822 = true;
+        } else {
+            config._isValid = false;
+        }
+    }
+
+    // date from iso format or fallback
+    function configFromString(config) {
+        var matched = aspNetJsonRegex.exec(config._i);
+
+        if (matched !== null) {
+            config._d = new Date(+matched[1]);
+            return;
+        }
+
+        configFromISO(config);
+        if (config._isValid === false) {
+            delete config._isValid;
+        } else {
+            return;
+        }
+
+        configFromRFC2822(config);
+        if (config._isValid === false) {
+            delete config._isValid;
+        } else {
+            return;
+        }
+
+        // Final attempt, use Input Fallback
+        hooks.createFromInputFallback(config);
+    }
+
+    hooks.createFromInputFallback = deprecate(
+        'value provided is not in a recognized RFC2822 or ISO format. moment construction falls back to js Date(), ' +
+        'which is not reliable across all browsers and versions. Non RFC2822/ISO date formats are ' +
+        'discouraged and will be removed in an upcoming major release. Please refer to ' +
+        'http://momentjs.com/guides/#/warnings/js-date/ for more info.',
+        function (config) {
+            config._d = new Date(config._i + (config._useUTC ? ' UTC' : ''));
+        }
+    );
+
+    // constant that refers to the ISO standard
+    hooks.ISO_8601 = function () {};
+
+    // constant that refers to the RFC 2822 form
+    hooks.RFC_2822 = function () {};
+
+    // date from string and format string
+    function configFromStringAndFormat(config) {
+        // TODO: Move this to another part of the creation flow to prevent circular deps
+        if (config._f === hooks.ISO_8601) {
+            configFromISO(config);
+            return;
+        }
+        if (config._f === hooks.RFC_2822) {
+            configFromRFC2822(config);
+            return;
+        }
+        config._a = [];
+        getParsingFlags(config).empty = true;
+
+        // This array is used to make a Date, either with `new Date` or `Date.UTC`
+        var string = '' + config._i,
+            i, parsedInput, tokens, token, skipped,
+            stringLength = string.length,
+            totalParsedInputLength = 0;
+
+        tokens = expandFormat(config._f, config._locale).match(formattingTokens) || [];
+
+        for (i = 0; i < tokens.length; i++) {
+            token = tokens[i];
+            parsedInput = (string.match(getParseRegexForToken(token, config)) || [])[0];
+            // console.log('token', token, 'parsedInput', parsedInput,
+            //         'regex', getParseRegexForToken(token, config));
+            if (parsedInput) {
+                skipped = string.substr(0, string.indexOf(parsedInput));
+                if (skipped.length > 0) {
+                    getParsingFlags(config).unusedInput.push(skipped);
+                }
+                string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
+                totalParsedInputLength += parsedInput.length;
+            }
+            // don't parse if it's not a known token
+            if (formatTokenFunctions[token]) {
+                if (parsedInput) {
+                    getParsingFlags(config).empty = false;
+                }
+                else {
+                    getParsingFlags(config).unusedTokens.push(token);
+                }
+                addTimeToArrayFromToken(token, parsedInput, config);
+            }
+            else if (config._strict && !parsedInput) {
+                getParsingFlags(config).unusedTokens.push(token);
+            }
+        }
+
+        // add remaining unparsed input length to the string
+        getParsingFlags(config).charsLeftOver = stringLength - totalParsedInputLength;
+        if (string.length > 0) {
+            getParsingFlags(config).unusedInput.push(string);
+        }
+
+        // clear _12h flag if hour is <= 12
+        if (config._a[HOUR] <= 12 &&
+            getParsingFlags(config).bigHour === true &&
+            config._a[HOUR] > 0) {
+            getParsingFlags(config).bigHour = undefined;
+        }
+
+        getParsingFlags(config).parsedDateParts = config._a.slice(0);
+        getParsingFlags(config).meridiem = config._meridiem;
+        // handle meridiem
+        config._a[HOUR] = meridiemFixWrap(config._locale, config._a[HOUR], config._meridiem);
+
+        configFromArray(config);
+        checkOverflow(config);
+    }
+
+
+    function meridiemFixWrap (locale, hour, meridiem) {
+        var isPm;
+
+        if (meridiem == null) {
+            // nothing to do
+            return hour;
+        }
+        if (locale.meridiemHour != null) {
+            return locale.meridiemHour(hour, meridiem);
+        } else if (locale.isPM != null) {
+            // Fallback
+            isPm = locale.isPM(meridiem);
+            if (isPm && hour < 12) {
+                hour += 12;
+            }
+            if (!isPm && hour === 12) {
+                hour = 0;
+            }
+            return hour;
+        } else {
+            // this is not supposed to happen
+            return hour;
+        }
+    }
+
+    // date from string and array of format strings
+    function configFromStringAndArray(config) {
+        var tempConfig,
+            bestMoment,
+
+            scoreToBeat,
+            i,
+            currentScore;
+
+        if (config._f.length === 0) {
+            getParsingFlags(config).invalidFormat = true;
+            config._d = new Date(NaN);
+            return;
+        }
+
+        for (i = 0; i < config._f.length; i++) {
+            currentScore = 0;
+            tempConfig = copyConfig({}, config);
+            if (config._useUTC != null) {
+                tempConfig._useUTC = config._useUTC;
+            }
+            tempConfig._f = config._f[i];
+            configFromStringAndFormat(tempConfig);
+
+            if (!isValid(tempConfig)) {
+                continue;
+            }
+
+            // if there is any input that was not parsed add a penalty for that format
+            currentScore += getParsingFlags(tempConfig).charsLeftOver;
+
+            //or tokens
+            currentScore += getParsingFlags(tempConfig).unusedTokens.length * 10;
+
+            getParsingFlags(tempConfig).score = currentScore;
+
+            if (scoreToBeat == null || currentScore < scoreToBeat) {
+                scoreToBeat = currentScore;
+                bestMoment = tempConfig;
+            }
+        }
+
+        extend(config, bestMoment || tempConfig);
+    }
+
+    function configFromObject(config) {
+        if (config._d) {
+            return;
+        }
+
+        var i = normalizeObjectUnits(config._i);
+        config._a = map([i.year, i.month, i.day || i.date, i.hour, i.minute, i.second, i.millisecond], function (obj) {
+            return obj && parseInt(obj, 10);
+        });
+
+        configFromArray(config);
+    }
+
+    function createFromConfig (config) {
+        var res = new Moment(checkOverflow(prepareConfig(config)));
+        if (res._nextDay) {
+            // Adding is smart enough around DST
+            res.add(1, 'd');
+            res._nextDay = undefined;
+        }
+
+        return res;
+    }
+
+    function prepareConfig (config) {
+        var input = config._i,
+            format = config._f;
+
+        config._locale = config._locale || getLocale(config._l);
+
+        if (input === null || (format === undefined && input === '')) {
+            return createInvalid({nullInput: true});
+        }
+
+        if (typeof input === 'string') {
+            config._i = input = config._locale.preparse(input);
+        }
+
+        if (isMoment(input)) {
+            return new Moment(checkOverflow(input));
+        } else if (isDate(input)) {
+            config._d = input;
+        } else if (isArray(format)) {
+            configFromStringAndArray(config);
+        } else if (format) {
+            configFromStringAndFormat(config);
+        }  else {
+            configFromInput(config);
+        }
+
+        if (!isValid(config)) {
+            config._d = null;
+        }
+
+        return config;
+    }
+
+    function configFromInput(config) {
+        var input = config._i;
+        if (isUndefined(input)) {
+            config._d = new Date(hooks.now());
+        } else if (isDate(input)) {
+            config._d = new Date(input.valueOf());
+        } else if (typeof input === 'string') {
+            configFromString(config);
+        } else if (isArray(input)) {
+            config._a = map(input.slice(0), function (obj) {
+                return parseInt(obj, 10);
+            });
+            configFromArray(config);
+        } else if (isObject(input)) {
+            configFromObject(config);
+        } else if (isNumber(input)) {
+            // from milliseconds
+            config._d = new Date(input);
+        } else {
+            hooks.createFromInputFallback(config);
+        }
+    }
+
+    function createLocalOrUTC (input, format, locale, strict, isUTC) {
+        var c = {};
+
+        if (locale === true || locale === false) {
+            strict = locale;
+            locale = undefined;
+        }
+
+        if ((isObject(input) && isObjectEmpty(input)) ||
+                (isArray(input) && input.length === 0)) {
+            input = undefined;
+        }
+        // object construction must be done this way.
+        // https://github.com/moment/moment/issues/1423
+        c._isAMomentObject = true;
+        c._useUTC = c._isUTC = isUTC;
+        c._l = locale;
+        c._i = input;
+        c._f = format;
+        c._strict = strict;
+
+        return createFromConfig(c);
+    }
+
+    function createLocal (input, format, locale, strict) {
+        return createLocalOrUTC(input, format, locale, strict, false);
+    }
+
+    var prototypeMin = deprecate(
+        'moment().min is deprecated, use moment.max instead. http://momentjs.com/guides/#/warnings/min-max/',
+        function () {
+            var other = createLocal.apply(null, arguments);
+            if (this.isValid() && other.isValid()) {
+                return other < this ? this : other;
+            } else {
+                return createInvalid();
+            }
+        }
+    );
+
+    var prototypeMax = deprecate(
+        'moment().max is deprecated, use moment.min instead. http://momentjs.com/guides/#/warnings/min-max/',
+        function () {
+            var other = createLocal.apply(null, arguments);
+            if (this.isValid() && other.isValid()) {
+                return other > this ? this : other;
+            } else {
+                return createInvalid();
+            }
+        }
+    );
+
+    // Pick a moment m from moments so that m[fn](other) is true for all
+    // other. This relies on the function fn to be transitive.
+    //
+    // moments should either be an array of moment objects or an array, whose
+    // first element is an array of moment objects.
+    function pickBy(fn, moments) {
+        var res, i;
+        if (moments.length === 1 && isArray(moments[0])) {
+            moments = moments[0];
+        }
+        if (!moments.length) {
+            return createLocal();
+        }
+        res = moments[0];
+        for (i = 1; i < moments.length; ++i) {
+            if (!moments[i].isValid() || moments[i][fn](res)) {
+                res = moments[i];
+            }
+        }
+        return res;
+    }
+
+    // TODO: Use [].sort instead?
+    function min () {
+        var args = [].slice.call(arguments, 0);
+
+        return pickBy('isBefore', args);
+    }
+
+    function max () {
+        var args = [].slice.call(arguments, 0);
+
+        return pickBy('isAfter', args);
+    }
+
+    var now = function () {
+        return Date.now ? Date.now() : +(new Date());
+    };
+
+    var ordering = ['year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', 'second', 'millisecond'];
+
+    function isDurationValid(m) {
+        for (var key in m) {
+            if (!(indexOf.call(ordering, key) !== -1 && (m[key] == null || !isNaN(m[key])))) {
+                return false;
+            }
+        }
+
+        var unitHasDecimal = false;
+        for (var i = 0; i < ordering.length; ++i) {
+            if (m[ordering[i]]) {
+                if (unitHasDecimal) {
+                    return false; // only allow non-integers for smallest unit
+                }
+                if (parseFloat(m[ordering[i]]) !== toInt(m[ordering[i]])) {
+                    unitHasDecimal = true;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function isValid$1() {
+        return this._isValid;
+    }
+
+    function createInvalid$1() {
+        return createDuration(NaN);
+    }
+
+    function Duration (duration) {
+        var normalizedInput = normalizeObjectUnits(duration),
+            years = normalizedInput.year || 0,
+            quarters = normalizedInput.quarter || 0,
+            months = normalizedInput.month || 0,
+            weeks = normalizedInput.week || normalizedInput.isoWeek || 0,
+            days = normalizedInput.day || 0,
+            hours = normalizedInput.hour || 0,
+            minutes = normalizedInput.minute || 0,
+            seconds = normalizedInput.second || 0,
+            milliseconds = normalizedInput.millisecond || 0;
+
+        this._isValid = isDurationValid(normalizedInput);
+
+        // representation for dateAddRemove
+        this._milliseconds = +milliseconds +
+            seconds * 1e3 + // 1000
+            minutes * 6e4 + // 1000 * 60
+            hours * 1000 * 60 * 60; //using 1000 * 60 * 60 instead of 36e5 to avoid floating point rounding errors https://github.com/moment/moment/issues/2978
+        // Because of dateAddRemove treats 24 hours as different from a
+        // day when working around DST, we need to store them separately
+        this._days = +days +
+            weeks * 7;
+        // It is impossible to translate months into days without knowing
+        // which months you are are talking about, so we have to store
+        // it separately.
+        this._months = +months +
+            quarters * 3 +
+            years * 12;
+
+        this._data = {};
+
+        this._locale = getLocale();
+
+        this._bubble();
+    }
+
+    function isDuration (obj) {
+        return obj instanceof Duration;
+    }
+
+    function absRound (number) {
+        if (number < 0) {
+            return Math.round(-1 * number) * -1;
+        } else {
+            return Math.round(number);
+        }
+    }
+
+    // FORMATTING
+
+    function offset (token, separator) {
+        addFormatToken(token, 0, 0, function () {
+            var offset = this.utcOffset();
+            var sign = '+';
+            if (offset < 0) {
+                offset = -offset;
+                sign = '-';
+            }
+            return sign + zeroFill(~~(offset / 60), 2) + separator + zeroFill(~~(offset) % 60, 2);
+        });
+    }
+
+    offset('Z', ':');
+    offset('ZZ', '');
+
+    // PARSING
+
+    addRegexToken('Z',  matchShortOffset);
+    addRegexToken('ZZ', matchShortOffset);
+    addParseToken(['Z', 'ZZ'], function (input, array, config) {
+        config._useUTC = true;
+        config._tzm = offsetFromString(matchShortOffset, input);
+    });
+
+    // HELPERS
+
+    // timezone chunker
+    // '+10:00' > ['10',  '00']
+    // '-1530'  > ['-15', '30']
+    var chunkOffset = /([\+\-]|\d\d)/gi;
+
+    function offsetFromString(matcher, string) {
+        var matches = (string || '').match(matcher);
+
+        if (matches === null) {
+            return null;
+        }
+
+        var chunk   = matches[matches.length - 1] || [];
+        var parts   = (chunk + '').match(chunkOffset) || ['-', 0, 0];
+        var minutes = +(parts[1] * 60) + toInt(parts[2]);
+
+        return minutes === 0 ?
+          0 :
+          parts[0] === '+' ? minutes : -minutes;
+    }
+
+    // Return a moment from input, that is local/utc/zone equivalent to model.
+    function cloneWithOffset(input, model) {
+        var res, diff;
+        if (model._isUTC) {
+            res = model.clone();
+            diff = (isMoment(input) || isDate(input) ? input.valueOf() : createLocal(input).valueOf()) - res.valueOf();
+            // Use low-level api, because this fn is low-level api.
+            res._d.setTime(res._d.valueOf() + diff);
+            hooks.updateOffset(res, false);
+            return res;
+        } else {
+            return createLocal(input).local();
+        }
+    }
+
+    function getDateOffset (m) {
+        // On Firefox.24 Date#getTimezoneOffset returns a floating point.
+        // https://github.com/moment/moment/pull/1871
+        return -Math.round(m._d.getTimezoneOffset() / 15) * 15;
+    }
+
+    // HOOKS
+
+    // This function will be called whenever a moment is mutated.
+    // It is intended to keep the offset in sync with the timezone.
+    hooks.updateOffset = function () {};
+
+    // MOMENTS
+
+    // keepLocalTime = true means only change the timezone, without
+    // affecting the local hour. So 5:31:26 +0300 --[utcOffset(2, true)]-->
+    // 5:31:26 +0200 It is possible that 5:31:26 doesn't exist with offset
+    // +0200, so we adjust the time as needed, to be valid.
+    //
+    // Keeping the time actually adds/subtracts (one hour)
+    // from the actual represented time. That is why we call updateOffset
+    // a second time. In case it wants us to change the offset again
+    // _changeInProgress == true case, then we have to adjust, because
+    // there is no such time in the given timezone.
+    function getSetOffset (input, keepLocalTime, keepMinutes) {
+        var offset = this._offset || 0,
+            localAdjust;
+        if (!this.isValid()) {
+            return input != null ? this : NaN;
+        }
+        if (input != null) {
+            if (typeof input === 'string') {
+                input = offsetFromString(matchShortOffset, input);
+                if (input === null) {
+                    return this;
+                }
+            } else if (Math.abs(input) < 16 && !keepMinutes) {
+                input = input * 60;
+            }
+            if (!this._isUTC && keepLocalTime) {
+                localAdjust = getDateOffset(this);
+            }
+            this._offset = input;
+            this._isUTC = true;
+            if (localAdjust != null) {
+                this.add(localAdjust, 'm');
+            }
+            if (offset !== input) {
+                if (!keepLocalTime || this._changeInProgress) {
+                    addSubtract(this, createDuration(input - offset, 'm'), 1, false);
+                } else if (!this._changeInProgress) {
+                    this._changeInProgress = true;
+                    hooks.updateOffset(this, true);
+                    this._changeInProgress = null;
+                }
+            }
+            return this;
+        } else {
+            return this._isUTC ? offset : getDateOffset(this);
+        }
+    }
+
+    function getSetZone (input, keepLocalTime) {
+        if (input != null) {
+            if (typeof input !== 'string') {
+                input = -input;
+            }
+
+            this.utcOffset(input, keepLocalTime);
+
+            return this;
+        } else {
+            return -this.utcOffset();
+        }
+    }
+
+    function setOffsetToUTC (keepLocalTime) {
+        return this.utcOffset(0, keepLocalTime);
+    }
+
+    function setOffsetToLocal (keepLocalTime) {
+        if (this._isUTC) {
+            this.utcOffset(0, keepLocalTime);
+            this._isUTC = false;
+
+            if (keepLocalTime) {
+                this.subtract(getDateOffset(this), 'm');
+            }
+        }
+        return this;
+    }
+
+    function setOffsetToParsedOffset () {
+        if (this._tzm != null) {
+            this.utcOffset(this._tzm, false, true);
+        } else if (typeof this._i === 'string') {
+            var tZone = offsetFromString(matchOffset, this._i);
+            if (tZone != null) {
+                this.utcOffset(tZone);
+            }
+            else {
+                this.utcOffset(0, true);
+            }
+        }
+        return this;
+    }
+
+    function hasAlignedHourOffset (input) {
+        if (!this.isValid()) {
+            return false;
+        }
+        input = input ? createLocal(input).utcOffset() : 0;
+
+        return (this.utcOffset() - input) % 60 === 0;
+    }
+
+    function isDaylightSavingTime () {
+        return (
+            this.utcOffset() > this.clone().month(0).utcOffset() ||
+            this.utcOffset() > this.clone().month(5).utcOffset()
+        );
+    }
+
+    function isDaylightSavingTimeShifted () {
+        if (!isUndefined(this._isDSTShifted)) {
+            return this._isDSTShifted;
+        }
+
+        var c = {};
+
+        copyConfig(c, this);
+        c = prepareConfig(c);
+
+        if (c._a) {
+            var other = c._isUTC ? createUTC(c._a) : createLocal(c._a);
+            this._isDSTShifted = this.isValid() &&
+                compareArrays(c._a, other.toArray()) > 0;
+        } else {
+            this._isDSTShifted = false;
+        }
+
+        return this._isDSTShifted;
+    }
+
+    function isLocal () {
+        return this.isValid() ? !this._isUTC : false;
+    }
+
+    function isUtcOffset () {
+        return this.isValid() ? this._isUTC : false;
+    }
+
+    function isUtc () {
+        return this.isValid() ? this._isUTC && this._offset === 0 : false;
+    }
+
+    // ASP.NET json date format regex
+    var aspNetRegex = /^(\-|\+)?(?:(\d*)[. ])?(\d+)\:(\d+)(?:\:(\d+)(\.\d*)?)?$/;
+
+    // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html
+    // somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere
+    // and further modified to allow for strings containing both week and day
+    var isoRegex = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/;
+
+    function createDuration (input, key) {
+        var duration = input,
+            // matching against regexp is expensive, do it on demand
+            match = null,
+            sign,
+            ret,
+            diffRes;
+
+        if (isDuration(input)) {
+            duration = {
+                ms : input._milliseconds,
+                d  : input._days,
+                M  : input._months
+            };
+        } else if (isNumber(input)) {
+            duration = {};
+            if (key) {
+                duration[key] = input;
+            } else {
+                duration.milliseconds = input;
+            }
+        } else if (!!(match = aspNetRegex.exec(input))) {
+            sign = (match[1] === '-') ? -1 : 1;
+            duration = {
+                y  : 0,
+                d  : toInt(match[DATE])                         * sign,
+                h  : toInt(match[HOUR])                         * sign,
+                m  : toInt(match[MINUTE])                       * sign,
+                s  : toInt(match[SECOND])                       * sign,
+                ms : toInt(absRound(match[MILLISECOND] * 1000)) * sign // the millisecond decimal point is included in the match
+            };
+        } else if (!!(match = isoRegex.exec(input))) {
+            sign = (match[1] === '-') ? -1 : 1;
+            duration = {
+                y : parseIso(match[2], sign),
+                M : parseIso(match[3], sign),
+                w : parseIso(match[4], sign),
+                d : parseIso(match[5], sign),
+                h : parseIso(match[6], sign),
+                m : parseIso(match[7], sign),
+                s : parseIso(match[8], sign)
+            };
+        } else if (duration == null) {// checks for null or undefined
+            duration = {};
+        } else if (typeof duration === 'object' && ('from' in duration || 'to' in duration)) {
+            diffRes = momentsDifference(createLocal(duration.from), createLocal(duration.to));
+
+            duration = {};
+            duration.ms = diffRes.milliseconds;
+            duration.M = diffRes.months;
+        }
+
+        ret = new Duration(duration);
+
+        if (isDuration(input) && hasOwnProp(input, '_locale')) {
+            ret._locale = input._locale;
+        }
+
+        return ret;
+    }
+
+    createDuration.fn = Duration.prototype;
+    createDuration.invalid = createInvalid$1;
+
+    function parseIso (inp, sign) {
+        // We'd normally use ~~inp for this, but unfortunately it also
+        // converts floats to ints.
+        // inp may be undefined, so careful calling replace on it.
+        var res = inp && parseFloat(inp.replace(',', '.'));
+        // apply sign while we're at it
+        return (isNaN(res) ? 0 : res) * sign;
+    }
+
+    function positiveMomentsDifference(base, other) {
+        var res = {};
+
+        res.months = other.month() - base.month() +
+            (other.year() - base.year()) * 12;
+        if (base.clone().add(res.months, 'M').isAfter(other)) {
+            --res.months;
+        }
+
+        res.milliseconds = +other - +(base.clone().add(res.months, 'M'));
+
+        return res;
+    }
+
+    function momentsDifference(base, other) {
+        var res;
+        if (!(base.isValid() && other.isValid())) {
+            return {milliseconds: 0, months: 0};
+        }
+
+        other = cloneWithOffset(other, base);
+        if (base.isBefore(other)) {
+            res = positiveMomentsDifference(base, other);
+        } else {
+            res = positiveMomentsDifference(other, base);
+            res.milliseconds = -res.milliseconds;
+            res.months = -res.months;
+        }
+
+        return res;
+    }
+
+    // TODO: remove 'name' arg after deprecation is removed
+    function createAdder(direction, name) {
+        return function (val, period) {
+            var dur, tmp;
+            //invert the arguments, but complain about it
+            if (period !== null && !isNaN(+period)) {
+                deprecateSimple(name, 'moment().' + name  + '(period, number) is deprecated. Please use moment().' + name + '(number, period). ' +
+                'See http://momentjs.com/guides/#/warnings/add-inverted-param/ for more info.');
+                tmp = val; val = period; period = tmp;
+            }
+
+            val = typeof val === 'string' ? +val : val;
+            dur = createDuration(val, period);
+            addSubtract(this, dur, direction);
+            return this;
+        };
+    }
+
+    function addSubtract (mom, duration, isAdding, updateOffset) {
+        var milliseconds = duration._milliseconds,
+            days = absRound(duration._days),
+            months = absRound(duration._months);
+
+        if (!mom.isValid()) {
+            // No op
+            return;
+        }
+
+        updateOffset = updateOffset == null ? true : updateOffset;
+
+        if (months) {
+            setMonth(mom, get(mom, 'Month') + months * isAdding);
+        }
+        if (days) {
+            set$1(mom, 'Date', get(mom, 'Date') + days * isAdding);
+        }
+        if (milliseconds) {
+            mom._d.setTime(mom._d.valueOf() + milliseconds * isAdding);
+        }
+        if (updateOffset) {
+            hooks.updateOffset(mom, days || months);
+        }
+    }
+
+    var add      = createAdder(1, 'add');
+    var subtract = createAdder(-1, 'subtract');
+
+    function getCalendarFormat(myMoment, now) {
+        var diff = myMoment.diff(now, 'days', true);
+        return diff < -6 ? 'sameElse' :
+                diff < -1 ? 'lastWeek' :
+                diff < 0 ? 'lastDay' :
+                diff < 1 ? 'sameDay' :
+                diff < 2 ? 'nextDay' :
+                diff < 7 ? 'nextWeek' : 'sameElse';
+    }
+
+    function calendar$1 (time, formats) {
+        // We want to compare the start of today, vs this.
+        // Getting start-of-today depends on whether we're local/utc/offset or not.
+        var now = time || createLocal(),
+            sod = cloneWithOffset(now, this).startOf('day'),
+            format = hooks.calendarFormat(this, sod) || 'sameElse';
+
+        var output = formats && (isFunction(formats[format]) ? formats[format].call(this, now) : formats[format]);
+
+        return this.format(output || this.localeData().calendar(format, this, createLocal(now)));
+    }
+
+    function clone () {
+        return new Moment(this);
+    }
+
+    function isAfter (input, units) {
+        var localInput = isMoment(input) ? input : createLocal(input);
+        if (!(this.isValid() && localInput.isValid())) {
+            return false;
+        }
+        units = normalizeUnits(units) || 'millisecond';
+        if (units === 'millisecond') {
+            return this.valueOf() > localInput.valueOf();
+        } else {
+            return localInput.valueOf() < this.clone().startOf(units).valueOf();
+        }
+    }
+
+    function isBefore (input, units) {
+        var localInput = isMoment(input) ? input : createLocal(input);
+        if (!(this.isValid() && localInput.isValid())) {
+            return false;
+        }
+        units = normalizeUnits(units) || 'millisecond';
+        if (units === 'millisecond') {
+            return this.valueOf() < localInput.valueOf();
+        } else {
+            return this.clone().endOf(units).valueOf() < localInput.valueOf();
+        }
+    }
+
+    function isBetween (from, to, units, inclusivity) {
+        var localFrom = isMoment(from) ? from : createLocal(from),
+            localTo = isMoment(to) ? to : createLocal(to);
+        if (!(this.isValid() && localFrom.isValid() && localTo.isValid())) {
+            return false;
+        }
+        inclusivity = inclusivity || '()';
+        return (inclusivity[0] === '(' ? this.isAfter(localFrom, units) : !this.isBefore(localFrom, units)) &&
+            (inclusivity[1] === ')' ? this.isBefore(localTo, units) : !this.isAfter(localTo, units));
+    }
+
+    function isSame (input, units) {
+        var localInput = isMoment(input) ? input : createLocal(input),
+            inputMs;
+        if (!(this.isValid() && localInput.isValid())) {
+            return false;
+        }
+        units = normalizeUnits(units) || 'millisecond';
+        if (units === 'millisecond') {
+            return this.valueOf() === localInput.valueOf();
+        } else {
+            inputMs = localInput.valueOf();
+            return this.clone().startOf(units).valueOf() <= inputMs && inputMs <= this.clone().endOf(units).valueOf();
+        }
+    }
+
+    function isSameOrAfter (input, units) {
+        return this.isSame(input, units) || this.isAfter(input, units);
+    }
+
+    function isSameOrBefore (input, units) {
+        return this.isSame(input, units) || this.isBefore(input, units);
+    }
+
+    function diff (input, units, asFloat) {
+        var that,
+            zoneDelta,
+            output;
+
+        if (!this.isValid()) {
+            return NaN;
+        }
+
+        that = cloneWithOffset(input, this);
+
+        if (!that.isValid()) {
+            return NaN;
+        }
+
+        zoneDelta = (that.utcOffset() - this.utcOffset()) * 6e4;
+
+        units = normalizeUnits(units);
+
+        switch (units) {
+            case 'year': output = monthDiff(this, that) / 12; break;
+            case 'month': output = monthDiff(this, that); break;
+            case 'quarter': output = monthDiff(this, that) / 3; break;
+            case 'second': output = (this - that) / 1e3; break; // 1000
+            case 'minute': output = (this - that) / 6e4; break; // 1000 * 60
+            case 'hour': output = (this - that) / 36e5; break; // 1000 * 60 * 60
+            case 'day': output = (this - that - zoneDelta) / 864e5; break; // 1000 * 60 * 60 * 24, negate dst
+            case 'week': output = (this - that - zoneDelta) / 6048e5; break; // 1000 * 60 * 60 * 24 * 7, negate dst
+            default: output = this - that;
+        }
+
+        return asFloat ? output : absFloor(output);
+    }
+
+    function monthDiff (a, b) {
+        // difference in months
+        var wholeMonthDiff = ((b.year() - a.year()) * 12) + (b.month() - a.month()),
+            // b is in (anchor - 1 month, anchor + 1 month)
+            anchor = a.clone().add(wholeMonthDiff, 'months'),
+            anchor2, adjust;
+
+        if (b - anchor < 0) {
+            anchor2 = a.clone().add(wholeMonthDiff - 1, 'months');
+            // linear across the month
+            adjust = (b - anchor) / (anchor - anchor2);
+        } else {
+            anchor2 = a.clone().add(wholeMonthDiff + 1, 'months');
+            // linear across the month
+            adjust = (b - anchor) / (anchor2 - anchor);
+        }
+
+        //check for negative zero, return zero if negative zero
+        return -(wholeMonthDiff + adjust) || 0;
+    }
+
+    hooks.defaultFormat = 'YYYY-MM-DDTHH:mm:ssZ';
+    hooks.defaultFormatUtc = 'YYYY-MM-DDTHH:mm:ss[Z]';
+
+    function toString () {
+        return this.clone().locale('en').format('ddd MMM DD YYYY HH:mm:ss [GMT]ZZ');
+    }
+
+    function toISOString(keepOffset) {
+        if (!this.isValid()) {
+            return null;
+        }
+        var utc = keepOffset !== true;
+        var m = utc ? this.clone().utc() : this;
+        if (m.year() < 0 || m.year() > 9999) {
+            return formatMoment(m, utc ? 'YYYYYY-MM-DD[T]HH:mm:ss.SSS[Z]' : 'YYYYYY-MM-DD[T]HH:mm:ss.SSSZ');
+        }
+        if (isFunction(Date.prototype.toISOString)) {
+            // native implementation is ~50x faster, use it when we can
+            if (utc) {
+                return this.toDate().toISOString();
+            } else {
+                return new Date(this.valueOf() + this.utcOffset() * 60 * 1000).toISOString().replace('Z', formatMoment(m, 'Z'));
+            }
+        }
+        return formatMoment(m, utc ? 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]' : 'YYYY-MM-DD[T]HH:mm:ss.SSSZ');
+    }
+
+    /**
+     * Return a human readable representation of a moment that can
+     * also be evaluated to get a new moment which is the same
+     *
+     * @link https://nodejs.org/dist/latest/docs/api/util.html#util_custom_inspect_function_on_objects
+     */
+    function inspect () {
+        if (!this.isValid()) {
+            return 'moment.invalid(/* ' + this._i + ' */)';
+        }
+        var func = 'moment';
+        var zone = '';
+        if (!this.isLocal()) {
+            func = this.utcOffset() === 0 ? 'moment.utc' : 'moment.parseZone';
+            zone = 'Z';
+        }
+        var prefix = '[' + func + '("]';
+        var year = (0 <= this.year() && this.year() <= 9999) ? 'YYYY' : 'YYYYYY';
+        var datetime = '-MM-DD[T]HH:mm:ss.SSS';
+        var suffix = zone + '[")]';
+
+        return this.format(prefix + year + datetime + suffix);
+    }
+
+    function format (inputString) {
+        if (!inputString) {
+            inputString = this.isUtc() ? hooks.defaultFormatUtc : hooks.defaultFormat;
+        }
+        var output = formatMoment(this, inputString);
+        return this.localeData().postformat(output);
+    }
+
+    function from (time, withoutSuffix) {
+        if (this.isValid() &&
+                ((isMoment(time) && time.isValid()) ||
+                 createLocal(time).isValid())) {
+            return createDuration({to: this, from: time}).locale(this.locale()).humanize(!withoutSuffix);
+        } else {
+            return this.localeData().invalidDate();
+        }
+    }
+
+    function fromNow (withoutSuffix) {
+        return this.from(createLocal(), withoutSuffix);
+    }
+
+    function to (time, withoutSuffix) {
+        if (this.isValid() &&
+                ((isMoment(time) && time.isValid()) ||
+                 createLocal(time).isValid())) {
+            return createDuration({from: this, to: time}).locale(this.locale()).humanize(!withoutSuffix);
+        } else {
+            return this.localeData().invalidDate();
+        }
+    }
+
+    function toNow (withoutSuffix) {
+        return this.to(createLocal(), withoutSuffix);
+    }
+
+    // If passed a locale key, it will set the locale for this
+    // instance.  Otherwise, it will return the locale configuration
+    // variables for this instance.
+    function locale (key) {
+        var newLocaleData;
+
+        if (key === undefined) {
+            return this._locale._abbr;
+        } else {
+            newLocaleData = getLocale(key);
+            if (newLocaleData != null) {
+                this._locale = newLocaleData;
+            }
+            return this;
+        }
+    }
+
+    var lang = deprecate(
+        'moment().lang() is deprecated. Instead, use moment().localeData() to get the language configuration. Use moment().locale() to change languages.',
+        function (key) {
+            if (key === undefined) {
+                return this.localeData();
+            } else {
+                return this.locale(key);
+            }
+        }
+    );
+
+    function localeData () {
+        return this._locale;
+    }
+
+    var MS_PER_SECOND = 1000;
+    var MS_PER_MINUTE = 60 * MS_PER_SECOND;
+    var MS_PER_HOUR = 60 * MS_PER_MINUTE;
+    var MS_PER_400_YEARS = (365 * 400 + 97) * 24 * MS_PER_HOUR;
+
+    // actual modulo - handles negative numbers (for dates before 1970):
+    function mod$1(dividend, divisor) {
+        return (dividend % divisor + divisor) % divisor;
+    }
+
+    function localStartOfDate(y, m, d) {
+        // the date constructor remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            return new Date(y + 400, m, d) - MS_PER_400_YEARS;
+        } else {
+            return new Date(y, m, d).valueOf();
+        }
+    }
+
+    function utcStartOfDate(y, m, d) {
+        // Date.UTC remaps years 0-99 to 1900-1999
+        if (y < 100 && y >= 0) {
+            // preserve leap years using a full 400 year cycle, then reset
+            return Date.UTC(y + 400, m, d) - MS_PER_400_YEARS;
+        } else {
+            return Date.UTC(y, m, d);
+        }
+    }
+
+    function startOf (units) {
+        var time;
+        units = normalizeUnits(units);
+        if (units === undefined || units === 'millisecond' || !this.isValid()) {
+            return this;
+        }
+
+        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
+        switch (units) {
+            case 'year':
+                time = startOfDate(this.year(), 0, 1);
+                break;
+            case 'quarter':
+                time = startOfDate(this.year(), this.month() - this.month() % 3, 1);
+                break;
+            case 'month':
+                time = startOfDate(this.year(), this.month(), 1);
+                break;
+            case 'week':
+                time = startOfDate(this.year(), this.month(), this.date() - this.weekday());
+                break;
+            case 'isoWeek':
+                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1));
+                break;
+            case 'day':
+            case 'date':
+                time = startOfDate(this.year(), this.month(), this.date());
+                break;
+            case 'hour':
+                time = this._d.valueOf();
+                time -= mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR);
+                break;
+            case 'minute':
+                time = this._d.valueOf();
+                time -= mod$1(time, MS_PER_MINUTE);
+                break;
+            case 'second':
+                time = this._d.valueOf();
+                time -= mod$1(time, MS_PER_SECOND);
+                break;
+        }
+
+        this._d.setTime(time);
+        hooks.updateOffset(this, true);
+        return this;
+    }
+
+    function endOf (units) {
+        var time;
+        units = normalizeUnits(units);
+        if (units === undefined || units === 'millisecond' || !this.isValid()) {
+            return this;
+        }
+
+        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+
+        switch (units) {
+            case 'year':
+                time = startOfDate(this.year() + 1, 0, 1) - 1;
+                break;
+            case 'quarter':
+                time = startOfDate(this.year(), this.month() - this.month() % 3 + 3, 1) - 1;
+                break;
+            case 'month':
+                time = startOfDate(this.year(), this.month() + 1, 1) - 1;
+                break;
+            case 'week':
+                time = startOfDate(this.year(), this.month(), this.date() - this.weekday() + 7) - 1;
+                break;
+            case 'isoWeek':
+                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1) + 7) - 1;
+                break;
+            case 'day':
+            case 'date':
+                time = startOfDate(this.year(), this.month(), this.date() + 1) - 1;
+                break;
+            case 'hour':
+                time = this._d.valueOf();
+                time += MS_PER_HOUR - mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR) - 1;
+                break;
+            case 'minute':
+                time = this._d.valueOf();
+                time += MS_PER_MINUTE - mod$1(time, MS_PER_MINUTE) - 1;
+                break;
+            case 'second':
+                time = this._d.valueOf();
+                time += MS_PER_SECOND - mod$1(time, MS_PER_SECOND) - 1;
+                break;
+        }
+
+        this._d.setTime(time);
+        hooks.updateOffset(this, true);
+        return this;
+    }
+
+    function valueOf () {
+        return this._d.valueOf() - ((this._offset || 0) * 60000);
+    }
+
+    function unix () {
+        return Math.floor(this.valueOf() / 1000);
+    }
+
+    function toDate () {
+        return new Date(this.valueOf());
+    }
+
+    function toArray () {
+        var m = this;
+        return [m.year(), m.month(), m.date(), m.hour(), m.minute(), m.second(), m.millisecond()];
+    }
+
+    function toObject () {
+        var m = this;
+        return {
+            years: m.year(),
+            months: m.month(),
+            date: m.date(),
+            hours: m.hours(),
+            minutes: m.minutes(),
+            seconds: m.seconds(),
+            milliseconds: m.milliseconds()
+        };
+    }
+
+    function toJSON () {
+        // new Date(NaN).toJSON() === null
+        return this.isValid() ? this.toISOString() : null;
+    }
+
+    function isValid$2 () {
+        return isValid(this);
+    }
+
+    function parsingFlags () {
+        return extend({}, getParsingFlags(this));
+    }
+
+    function invalidAt () {
+        return getParsingFlags(this).overflow;
+    }
+
+    function creationData() {
+        return {
+            input: this._i,
+            format: this._f,
+            locale: this._locale,
+            isUTC: this._isUTC,
+            strict: this._strict
+        };
+    }
+
+    // FORMATTING
+
+    addFormatToken(0, ['gg', 2], 0, function () {
+        return this.weekYear() % 100;
+    });
+
+    addFormatToken(0, ['GG', 2], 0, function () {
+        return this.isoWeekYear() % 100;
+    });
+
+    function addWeekYearFormatToken (token, getter) {
+        addFormatToken(0, [token, token.length], 0, getter);
+    }
+
+    addWeekYearFormatToken('gggg',     'weekYear');
+    addWeekYearFormatToken('ggggg',    'weekYear');
+    addWeekYearFormatToken('GGGG',  'isoWeekYear');
+    addWeekYearFormatToken('GGGGG', 'isoWeekYear');
+
+    // ALIASES
+
+    addUnitAlias('weekYear', 'gg');
+    addUnitAlias('isoWeekYear', 'GG');
+
+    // PRIORITY
+
+    addUnitPriority('weekYear', 1);
+    addUnitPriority('isoWeekYear', 1);
+
+
+    // PARSING
+
+    addRegexToken('G',      matchSigned);
+    addRegexToken('g',      matchSigned);
+    addRegexToken('GG',     match1to2, match2);
+    addRegexToken('gg',     match1to2, match2);
+    addRegexToken('GGGG',   match1to4, match4);
+    addRegexToken('gggg',   match1to4, match4);
+    addRegexToken('GGGGG',  match1to6, match6);
+    addRegexToken('ggggg',  match1to6, match6);
+
+    addWeekParseToken(['gggg', 'ggggg', 'GGGG', 'GGGGG'], function (input, week, config, token) {
+        week[token.substr(0, 2)] = toInt(input);
+    });
+
+    addWeekParseToken(['gg', 'GG'], function (input, week, config, token) {
+        week[token] = hooks.parseTwoDigitYear(input);
+    });
+
+    // MOMENTS
+
+    function getSetWeekYear (input) {
+        return getSetWeekYearHelper.call(this,
+                input,
+                this.week(),
+                this.weekday(),
+                this.localeData()._week.dow,
+                this.localeData()._week.doy);
+    }
+
+    function getSetISOWeekYear (input) {
+        return getSetWeekYearHelper.call(this,
+                input, this.isoWeek(), this.isoWeekday(), 1, 4);
+    }
+
+    function getISOWeeksInYear () {
+        return weeksInYear(this.year(), 1, 4);
+    }
+
+    function getWeeksInYear () {
+        var weekInfo = this.localeData()._week;
+        return weeksInYear(this.year(), weekInfo.dow, weekInfo.doy);
+    }
+
+    function getSetWeekYearHelper(input, week, weekday, dow, doy) {
+        var weeksTarget;
+        if (input == null) {
+            return weekOfYear(this, dow, doy).year;
+        } else {
+            weeksTarget = weeksInYear(input, dow, doy);
+            if (week > weeksTarget) {
+                week = weeksTarget;
+            }
+            return setWeekAll.call(this, input, week, weekday, dow, doy);
+        }
+    }
+
+    function setWeekAll(weekYear, week, weekday, dow, doy) {
+        var dayOfYearData = dayOfYearFromWeeks(weekYear, week, weekday, dow, doy),
+            date = createUTCDate(dayOfYearData.year, 0, dayOfYearData.dayOfYear);
+
+        this.year(date.getUTCFullYear());
+        this.month(date.getUTCMonth());
+        this.date(date.getUTCDate());
+        return this;
+    }
+
+    // FORMATTING
+
+    addFormatToken('Q', 0, 'Qo', 'quarter');
+
+    // ALIASES
+
+    addUnitAlias('quarter', 'Q');
+
+    // PRIORITY
+
+    addUnitPriority('quarter', 7);
+
+    // PARSING
+
+    addRegexToken('Q', match1);
+    addParseToken('Q', function (input, array) {
+        array[MONTH] = (toInt(input) - 1) * 3;
+    });
+
+    // MOMENTS
+
+    function getSetQuarter (input) {
+        return input == null ? Math.ceil((this.month() + 1) / 3) : this.month((input - 1) * 3 + this.month() % 3);
+    }
+
+    // FORMATTING
+
+    addFormatToken('D', ['DD', 2], 'Do', 'date');
+
+    // ALIASES
+
+    addUnitAlias('date', 'D');
+
+    // PRIORITY
+    addUnitPriority('date', 9);
+
+    // PARSING
+
+    addRegexToken('D',  match1to2);
+    addRegexToken('DD', match1to2, match2);
+    addRegexToken('Do', function (isStrict, locale) {
+        // TODO: Remove "ordinalParse" fallback in next major release.
+        return isStrict ?
+          (locale._dayOfMonthOrdinalParse || locale._ordinalParse) :
+          locale._dayOfMonthOrdinalParseLenient;
+    });
+
+    addParseToken(['D', 'DD'], DATE);
+    addParseToken('Do', function (input, array) {
+        array[DATE] = toInt(input.match(match1to2)[0]);
+    });
+
+    // MOMENTS
+
+    var getSetDayOfMonth = makeGetSet('Date', true);
+
+    // FORMATTING
+
+    addFormatToken('DDD', ['DDDD', 3], 'DDDo', 'dayOfYear');
+
+    // ALIASES
+
+    addUnitAlias('dayOfYear', 'DDD');
+
+    // PRIORITY
+    addUnitPriority('dayOfYear', 4);
+
+    // PARSING
+
+    addRegexToken('DDD',  match1to3);
+    addRegexToken('DDDD', match3);
+    addParseToken(['DDD', 'DDDD'], function (input, array, config) {
+        config._dayOfYear = toInt(input);
+    });
+
+    // HELPERS
+
+    // MOMENTS
+
+    function getSetDayOfYear (input) {
+        var dayOfYear = Math.round((this.clone().startOf('day') - this.clone().startOf('year')) / 864e5) + 1;
+        return input == null ? dayOfYear : this.add((input - dayOfYear), 'd');
+    }
+
+    // FORMATTING
+
+    addFormatToken('m', ['mm', 2], 0, 'minute');
+
+    // ALIASES
+
+    addUnitAlias('minute', 'm');
+
+    // PRIORITY
+
+    addUnitPriority('minute', 14);
+
+    // PARSING
+
+    addRegexToken('m',  match1to2);
+    addRegexToken('mm', match1to2, match2);
+    addParseToken(['m', 'mm'], MINUTE);
+
+    // MOMENTS
+
+    var getSetMinute = makeGetSet('Minutes', false);
+
+    // FORMATTING
+
+    addFormatToken('s', ['ss', 2], 0, 'second');
+
+    // ALIASES
+
+    addUnitAlias('second', 's');
+
+    // PRIORITY
+
+    addUnitPriority('second', 15);
+
+    // PARSING
+
+    addRegexToken('s',  match1to2);
+    addRegexToken('ss', match1to2, match2);
+    addParseToken(['s', 'ss'], SECOND);
+
+    // MOMENTS
+
+    var getSetSecond = makeGetSet('Seconds', false);
+
+    // FORMATTING
+
+    addFormatToken('S', 0, 0, function () {
+        return ~~(this.millisecond() / 100);
+    });
+
+    addFormatToken(0, ['SS', 2], 0, function () {
+        return ~~(this.millisecond() / 10);
+    });
+
+    addFormatToken(0, ['SSS', 3], 0, 'millisecond');
+    addFormatToken(0, ['SSSS', 4], 0, function () {
+        return this.millisecond() * 10;
+    });
+    addFormatToken(0, ['SSSSS', 5], 0, function () {
+        return this.millisecond() * 100;
+    });
+    addFormatToken(0, ['SSSSSS', 6], 0, function () {
+        return this.millisecond() * 1000;
+    });
+    addFormatToken(0, ['SSSSSSS', 7], 0, function () {
+        return this.millisecond() * 10000;
+    });
+    addFormatToken(0, ['SSSSSSSS', 8], 0, function () {
+        return this.millisecond() * 100000;
+    });
+    addFormatToken(0, ['SSSSSSSSS', 9], 0, function () {
+        return this.millisecond() * 1000000;
+    });
+
+
+    // ALIASES
+
+    addUnitAlias('millisecond', 'ms');
+
+    // PRIORITY
+
+    addUnitPriority('millisecond', 16);
+
+    // PARSING
+
+    addRegexToken('S',    match1to3, match1);
+    addRegexToken('SS',   match1to3, match2);
+    addRegexToken('SSS',  match1to3, match3);
+
+    var token;
+    for (token = 'SSSS'; token.length <= 9; token += 'S') {
+        addRegexToken(token, matchUnsigned);
+    }
+
+    function parseMs(input, array) {
+        array[MILLISECOND] = toInt(('0.' + input) * 1000);
+    }
+
+    for (token = 'S'; token.length <= 9; token += 'S') {
+        addParseToken(token, parseMs);
+    }
+    // MOMENTS
+
+    var getSetMillisecond = makeGetSet('Milliseconds', false);
+
+    // FORMATTING
+
+    addFormatToken('z',  0, 0, 'zoneAbbr');
+    addFormatToken('zz', 0, 0, 'zoneName');
+
+    // MOMENTS
+
+    function getZoneAbbr () {
+        return this._isUTC ? 'UTC' : '';
+    }
+
+    function getZoneName () {
+        return this._isUTC ? 'Coordinated Universal Time' : '';
+    }
+
+    var proto = Moment.prototype;
+
+    proto.add               = add;
+    proto.calendar          = calendar$1;
+    proto.clone             = clone;
+    proto.diff              = diff;
+    proto.endOf             = endOf;
+    proto.format            = format;
+    proto.from              = from;
+    proto.fromNow           = fromNow;
+    proto.to                = to;
+    proto.toNow             = toNow;
+    proto.get               = stringGet;
+    proto.invalidAt         = invalidAt;
+    proto.isAfter           = isAfter;
+    proto.isBefore          = isBefore;
+    proto.isBetween         = isBetween;
+    proto.isSame            = isSame;
+    proto.isSameOrAfter     = isSameOrAfter;
+    proto.isSameOrBefore    = isSameOrBefore;
+    proto.isValid           = isValid$2;
+    proto.lang              = lang;
+    proto.locale            = locale;
+    proto.localeData        = localeData;
+    proto.max               = prototypeMax;
+    proto.min               = prototypeMin;
+    proto.parsingFlags      = parsingFlags;
+    proto.set               = stringSet;
+    proto.startOf           = startOf;
+    proto.subtract          = subtract;
+    proto.toArray           = toArray;
+    proto.toObject          = toObject;
+    proto.toDate            = toDate;
+    proto.toISOString       = toISOString;
+    proto.inspect           = inspect;
+    proto.toJSON            = toJSON;
+    proto.toString          = toString;
+    proto.unix              = unix;
+    proto.valueOf           = valueOf;
+    proto.creationData      = creationData;
+    proto.year       = getSetYear;
+    proto.isLeapYear = getIsLeapYear;
+    proto.weekYear    = getSetWeekYear;
+    proto.isoWeekYear = getSetISOWeekYear;
+    proto.quarter = proto.quarters = getSetQuarter;
+    proto.month       = getSetMonth;
+    proto.daysInMonth = getDaysInMonth;
+    proto.week           = proto.weeks        = getSetWeek;
+    proto.isoWeek        = proto.isoWeeks     = getSetISOWeek;
+    proto.weeksInYear    = getWeeksInYear;
+    proto.isoWeeksInYear = getISOWeeksInYear;
+    proto.date       = getSetDayOfMonth;
+    proto.day        = proto.days             = getSetDayOfWeek;
+    proto.weekday    = getSetLocaleDayOfWeek;
+    proto.isoWeekday = getSetISODayOfWeek;
+    proto.dayOfYear  = getSetDayOfYear;
+    proto.hour = proto.hours = getSetHour;
+    proto.minute = proto.minutes = getSetMinute;
+    proto.second = proto.seconds = getSetSecond;
+    proto.millisecond = proto.milliseconds = getSetMillisecond;
+    proto.utcOffset            = getSetOffset;
+    proto.utc                  = setOffsetToUTC;
+    proto.local                = setOffsetToLocal;
+    proto.parseZone            = setOffsetToParsedOffset;
+    proto.hasAlignedHourOffset = hasAlignedHourOffset;
+    proto.isDST                = isDaylightSavingTime;
+    proto.isLocal              = isLocal;
+    proto.isUtcOffset          = isUtcOffset;
+    proto.isUtc                = isUtc;
+    proto.isUTC                = isUtc;
+    proto.zoneAbbr = getZoneAbbr;
+    proto.zoneName = getZoneName;
+    proto.dates  = deprecate('dates accessor is deprecated. Use date instead.', getSetDayOfMonth);
+    proto.months = deprecate('months accessor is deprecated. Use month instead', getSetMonth);
+    proto.years  = deprecate('years accessor is deprecated. Use year instead', getSetYear);
+    proto.zone   = deprecate('moment().zone is deprecated, use moment().utcOffset instead. http://momentjs.com/guides/#/warnings/zone/', getSetZone);
+    proto.isDSTShifted = deprecate('isDSTShifted is deprecated. See http://momentjs.com/guides/#/warnings/dst-shifted/ for more information', isDaylightSavingTimeShifted);
+
+    function createUnix (input) {
+        return createLocal(input * 1000);
+    }
+
+    function createInZone () {
+        return createLocal.apply(null, arguments).parseZone();
+    }
+
+    function preParsePostFormat (string) {
+        return string;
+    }
+
+    var proto$1 = Locale.prototype;
+
+    proto$1.calendar        = calendar;
+    proto$1.longDateFormat  = longDateFormat;
+    proto$1.invalidDate     = invalidDate;
+    proto$1.ordinal         = ordinal;
+    proto$1.preparse        = preParsePostFormat;
+    proto$1.postformat      = preParsePostFormat;
+    proto$1.relativeTime    = relativeTime;
+    proto$1.pastFuture      = pastFuture;
+    proto$1.set             = set;
+
+    proto$1.months            =        localeMonths;
+    proto$1.monthsShort       =        localeMonthsShort;
+    proto$1.monthsParse       =        localeMonthsParse;
+    proto$1.monthsRegex       = monthsRegex;
+    proto$1.monthsShortRegex  = monthsShortRegex;
+    proto$1.week = localeWeek;
+    proto$1.firstDayOfYear = localeFirstDayOfYear;
+    proto$1.firstDayOfWeek = localeFirstDayOfWeek;
+
+    proto$1.weekdays       =        localeWeekdays;
+    proto$1.weekdaysMin    =        localeWeekdaysMin;
+    proto$1.weekdaysShort  =        localeWeekdaysShort;
+    proto$1.weekdaysParse  =        localeWeekdaysParse;
+
+    proto$1.weekdaysRegex       =        weekdaysRegex;
+    proto$1.weekdaysShortRegex  =        weekdaysShortRegex;
+    proto$1.weekdaysMinRegex    =        weekdaysMinRegex;
+
+    proto$1.isPM = localeIsPM;
+    proto$1.meridiem = localeMeridiem;
+
+    function get$1 (format, index, field, setter) {
+        var locale = getLocale();
+        var utc = createUTC().set(setter, index);
+        return locale[field](utc, format);
+    }
+
+    function listMonthsImpl (format, index, field) {
+        if (isNumber(format)) {
+            index = format;
+            format = undefined;
+        }
+
+        format = format || '';
+
+        if (index != null) {
+            return get$1(format, index, field, 'month');
+        }
+
+        var i;
+        var out = [];
+        for (i = 0; i < 12; i++) {
+            out[i] = get$1(format, i, field, 'month');
+        }
+        return out;
+    }
+
+    // ()
+    // (5)
+    // (fmt, 5)
+    // (fmt)
+    // (true)
+    // (true, 5)
+    // (true, fmt, 5)
+    // (true, fmt)
+    function listWeekdaysImpl (localeSorted, format, index, field) {
+        if (typeof localeSorted === 'boolean') {
+            if (isNumber(format)) {
+                index = format;
+                format = undefined;
+            }
+
+            format = format || '';
+        } else {
+            format = localeSorted;
+            index = format;
+            localeSorted = false;
+
+            if (isNumber(format)) {
+                index = format;
+                format = undefined;
+            }
+
+            format = format || '';
+        }
+
+        var locale = getLocale(),
+            shift = localeSorted ? locale._week.dow : 0;
+
+        if (index != null) {
+            return get$1(format, (index + shift) % 7, field, 'day');
+        }
+
+        var i;
+        var out = [];
+        for (i = 0; i < 7; i++) {
+            out[i] = get$1(format, (i + shift) % 7, field, 'day');
+        }
+        return out;
+    }
+
+    function listMonths (format, index) {
+        return listMonthsImpl(format, index, 'months');
+    }
+
+    function listMonthsShort (format, index) {
+        return listMonthsImpl(format, index, 'monthsShort');
+    }
+
+    function listWeekdays (localeSorted, format, index) {
+        return listWeekdaysImpl(localeSorted, format, index, 'weekdays');
+    }
+
+    function listWeekdaysShort (localeSorted, format, index) {
+        return listWeekdaysImpl(localeSorted, format, index, 'weekdaysShort');
+    }
+
+    function listWeekdaysMin (localeSorted, format, index) {
+        return listWeekdaysImpl(localeSorted, format, index, 'weekdaysMin');
+    }
+
+    getSetGlobalLocale('en', {
+        dayOfMonthOrdinalParse: /\d{1,2}(th|st|nd|rd)/,
+        ordinal : function (number) {
+            var b = number % 10,
+                output = (toInt(number % 100 / 10) === 1) ? 'th' :
+                (b === 1) ? 'st' :
+                (b === 2) ? 'nd' :
+                (b === 3) ? 'rd' : 'th';
+            return number + output;
+        }
+    });
+
+    // Side effect imports
+
+    hooks.lang = deprecate('moment.lang is deprecated. Use moment.locale instead.', getSetGlobalLocale);
+    hooks.langData = deprecate('moment.langData is deprecated. Use moment.localeData instead.', getLocale);
+
+    var mathAbs = Math.abs;
+
+    function abs () {
+        var data           = this._data;
+
+        this._milliseconds = mathAbs(this._milliseconds);
+        this._days         = mathAbs(this._days);
+        this._months       = mathAbs(this._months);
+
+        data.milliseconds  = mathAbs(data.milliseconds);
+        data.seconds       = mathAbs(data.seconds);
+        data.minutes       = mathAbs(data.minutes);
+        data.hours         = mathAbs(data.hours);
+        data.months        = mathAbs(data.months);
+        data.years         = mathAbs(data.years);
+
+        return this;
+    }
+
+    function addSubtract$1 (duration, input, value, direction) {
+        var other = createDuration(input, value);
+
+        duration._milliseconds += direction * other._milliseconds;
+        duration._days         += direction * other._days;
+        duration._months       += direction * other._months;
+
+        return duration._bubble();
+    }
+
+    // supports only 2.0-style add(1, 's') or add(duration)
+    function add$1 (input, value) {
+        return addSubtract$1(this, input, value, 1);
+    }
+
+    // supports only 2.0-style subtract(1, 's') or subtract(duration)
+    function subtract$1 (input, value) {
+        return addSubtract$1(this, input, value, -1);
+    }
+
+    function absCeil (number) {
+        if (number < 0) {
+            return Math.floor(number);
+        } else {
+            return Math.ceil(number);
+        }
+    }
+
+    function bubble () {
+        var milliseconds = this._milliseconds;
+        var days         = this._days;
+        var months       = this._months;
+        var data         = this._data;
+        var seconds, minutes, hours, years, monthsFromDays;
+
+        // if we have a mix of positive and negative values, bubble down first
+        // check: https://github.com/moment/moment/issues/2166
+        if (!((milliseconds >= 0 && days >= 0 && months >= 0) ||
+                (milliseconds <= 0 && days <= 0 && months <= 0))) {
+            milliseconds += absCeil(monthsToDays(months) + days) * 864e5;
+            days = 0;
+            months = 0;
+        }
+
+        // The following code bubbles up values, see the tests for
+        // examples of what that means.
+        data.milliseconds = milliseconds % 1000;
+
+        seconds           = absFloor(milliseconds / 1000);
+        data.seconds      = seconds % 60;
+
+        minutes           = absFloor(seconds / 60);
+        data.minutes      = minutes % 60;
+
+        hours             = absFloor(minutes / 60);
+        data.hours        = hours % 24;
+
+        days += absFloor(hours / 24);
+
+        // convert days to months
+        monthsFromDays = absFloor(daysToMonths(days));
+        months += monthsFromDays;
+        days -= absCeil(monthsToDays(monthsFromDays));
+
+        // 12 months -> 1 year
+        years = absFloor(months / 12);
+        months %= 12;
+
+        data.days   = days;
+        data.months = months;
+        data.years  = years;
+
+        return this;
+    }
+
+    function daysToMonths (days) {
+        // 400 years have 146097 days (taking into account leap year rules)
+        // 400 years have 12 months === 4800
+        return days * 4800 / 146097;
+    }
+
+    function monthsToDays (months) {
+        // the reverse of daysToMonths
+        return months * 146097 / 4800;
+    }
+
+    function as (units) {
+        if (!this.isValid()) {
+            return NaN;
+        }
+        var days;
+        var months;
+        var milliseconds = this._milliseconds;
+
+        units = normalizeUnits(units);
+
+        if (units === 'month' || units === 'quarter' || units === 'year') {
+            days = this._days + milliseconds / 864e5;
+            months = this._months + daysToMonths(days);
+            switch (units) {
+                case 'month':   return months;
+                case 'quarter': return months / 3;
+                case 'year':    return months / 12;
+            }
+        } else {
+            // handle milliseconds separately because of floating point math errors (issue #1867)
+            days = this._days + Math.round(monthsToDays(this._months));
+            switch (units) {
+                case 'week'   : return days / 7     + milliseconds / 6048e5;
+                case 'day'    : return days         + milliseconds / 864e5;
+                case 'hour'   : return days * 24    + milliseconds / 36e5;
+                case 'minute' : return days * 1440  + milliseconds / 6e4;
+                case 'second' : return days * 86400 + milliseconds / 1000;
+                // Math.floor prevents floating point math errors here
+                case 'millisecond': return Math.floor(days * 864e5) + milliseconds;
+                default: throw new Error('Unknown unit ' + units);
+            }
+        }
+    }
+
+    // TODO: Use this.as('ms')?
+    function valueOf$1 () {
+        if (!this.isValid()) {
+            return NaN;
+        }
+        return (
+            this._milliseconds +
+            this._days * 864e5 +
+            (this._months % 12) * 2592e6 +
+            toInt(this._months / 12) * 31536e6
+        );
+    }
+
+    function makeAs (alias) {
+        return function () {
+            return this.as(alias);
+        };
+    }
+
+    var asMilliseconds = makeAs('ms');
+    var asSeconds      = makeAs('s');
+    var asMinutes      = makeAs('m');
+    var asHours        = makeAs('h');
+    var asDays         = makeAs('d');
+    var asWeeks        = makeAs('w');
+    var asMonths       = makeAs('M');
+    var asQuarters     = makeAs('Q');
+    var asYears        = makeAs('y');
+
+    function clone$1 () {
+        return createDuration(this);
+    }
+
+    function get$2 (units) {
+        units = normalizeUnits(units);
+        return this.isValid() ? this[units + 's']() : NaN;
+    }
+
+    function makeGetter(name) {
+        return function () {
+            return this.isValid() ? this._data[name] : NaN;
+        };
+    }
+
+    var milliseconds = makeGetter('milliseconds');
+    var seconds      = makeGetter('seconds');
+    var minutes      = makeGetter('minutes');
+    var hours        = makeGetter('hours');
+    var days         = makeGetter('days');
+    var months       = makeGetter('months');
+    var years        = makeGetter('years');
+
+    function weeks () {
+        return absFloor(this.days() / 7);
+    }
+
+    var round = Math.round;
+    var thresholds = {
+        ss: 44,         // a few seconds to seconds
+        s : 45,         // seconds to minute
+        m : 45,         // minutes to hour
+        h : 22,         // hours to day
+        d : 26,         // days to month
+        M : 11          // months to year
+    };
+
+    // helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize
+    function substituteTimeAgo(string, number, withoutSuffix, isFuture, locale) {
+        return locale.relativeTime(number || 1, !!withoutSuffix, string, isFuture);
+    }
+
+    function relativeTime$1 (posNegDuration, withoutSuffix, locale) {
+        var duration = createDuration(posNegDuration).abs();
+        var seconds  = round(duration.as('s'));
+        var minutes  = round(duration.as('m'));
+        var hours    = round(duration.as('h'));
+        var days     = round(duration.as('d'));
+        var months   = round(duration.as('M'));
+        var years    = round(duration.as('y'));
+
+        var a = seconds <= thresholds.ss && ['s', seconds]  ||
+                seconds < thresholds.s   && ['ss', seconds] ||
+                minutes <= 1             && ['m']           ||
+                minutes < thresholds.m   && ['mm', minutes] ||
+                hours   <= 1             && ['h']           ||
+                hours   < thresholds.h   && ['hh', hours]   ||
+                days    <= 1             && ['d']           ||
+                days    < thresholds.d   && ['dd', days]    ||
+                months  <= 1             && ['M']           ||
+                months  < thresholds.M   && ['MM', months]  ||
+                years   <= 1             && ['y']           || ['yy', years];
+
+        a[2] = withoutSuffix;
+        a[3] = +posNegDuration > 0;
+        a[4] = locale;
+        return substituteTimeAgo.apply(null, a);
+    }
+
+    // This function allows you to set the rounding function for relative time strings
+    function getSetRelativeTimeRounding (roundingFunction) {
+        if (roundingFunction === undefined) {
+            return round;
+        }
+        if (typeof(roundingFunction) === 'function') {
+            round = roundingFunction;
+            return true;
+        }
+        return false;
+    }
+
+    // This function allows you to set a threshold for relative time strings
+    function getSetRelativeTimeThreshold (threshold, limit) {
+        if (thresholds[threshold] === undefined) {
+            return false;
+        }
+        if (limit === undefined) {
+            return thresholds[threshold];
+        }
+        thresholds[threshold] = limit;
+        if (threshold === 's') {
+            thresholds.ss = limit - 1;
+        }
+        return true;
+    }
+
+    function humanize (withSuffix) {
+        if (!this.isValid()) {
+            return this.localeData().invalidDate();
+        }
+
+        var locale = this.localeData();
+        var output = relativeTime$1(this, !withSuffix, locale);
+
+        if (withSuffix) {
+            output = locale.pastFuture(+this, output);
+        }
+
+        return locale.postformat(output);
+    }
+
+    var abs$1 = Math.abs;
+
+    function sign(x) {
+        return ((x > 0) - (x < 0)) || +x;
+    }
+
+    function toISOString$1() {
+        // for ISO strings we do not use the normal bubbling rules:
+        //  * milliseconds bubble up until they become hours
+        //  * days do not bubble at all
+        //  * months bubble up until they become years
+        // This is because there is no context-free conversion between hours and days
+        // (think of clock changes)
+        // and also not between days and months (28-31 days per month)
+        if (!this.isValid()) {
+            return this.localeData().invalidDate();
+        }
+
+        var seconds = abs$1(this._milliseconds) / 1000;
+        var days         = abs$1(this._days);
+        var months       = abs$1(this._months);
+        var minutes, hours, years;
+
+        // 3600 seconds -> 60 minutes -> 1 hour
+        minutes           = absFloor(seconds / 60);
+        hours             = absFloor(minutes / 60);
+        seconds %= 60;
+        minutes %= 60;
+
+        // 12 months -> 1 year
+        years  = absFloor(months / 12);
+        months %= 12;
+
+
+        // inspired by https://github.com/dordille/moment-isoduration/blob/master/moment.isoduration.js
+        var Y = years;
+        var M = months;
+        var D = days;
+        var h = hours;
+        var m = minutes;
+        var s = seconds ? seconds.toFixed(3).replace(/\.?0+$/, '') : '';
+        var total = this.asSeconds();
+
+        if (!total) {
+            // this is the same as C#'s (Noda) and python (isodate)...
+            // but not other JS (goog.date)
+            return 'P0D';
+        }
+
+        var totalSign = total < 0 ? '-' : '';
+        var ymSign = sign(this._months) !== sign(total) ? '-' : '';
+        var daysSign = sign(this._days) !== sign(total) ? '-' : '';
+        var hmsSign = sign(this._milliseconds) !== sign(total) ? '-' : '';
+
+        return totalSign + 'P' +
+            (Y ? ymSign + Y + 'Y' : '') +
+            (M ? ymSign + M + 'M' : '') +
+            (D ? daysSign + D + 'D' : '') +
+            ((h || m || s) ? 'T' : '') +
+            (h ? hmsSign + h + 'H' : '') +
+            (m ? hmsSign + m + 'M' : '') +
+            (s ? hmsSign + s + 'S' : '');
+    }
+
+    var proto$2 = Duration.prototype;
+
+    proto$2.isValid        = isValid$1;
+    proto$2.abs            = abs;
+    proto$2.add            = add$1;
+    proto$2.subtract       = subtract$1;
+    proto$2.as             = as;
+    proto$2.asMilliseconds = asMilliseconds;
+    proto$2.asSeconds      = asSeconds;
+    proto$2.asMinutes      = asMinutes;
+    proto$2.asHours        = asHours;
+    proto$2.asDays         = asDays;
+    proto$2.asWeeks        = asWeeks;
+    proto$2.asMonths       = asMonths;
+    proto$2.asQuarters     = asQuarters;
+    proto$2.asYears        = asYears;
+    proto$2.valueOf        = valueOf$1;
+    proto$2._bubble        = bubble;
+    proto$2.clone          = clone$1;
+    proto$2.get            = get$2;
+    proto$2.milliseconds   = milliseconds;
+    proto$2.seconds        = seconds;
+    proto$2.minutes        = minutes;
+    proto$2.hours          = hours;
+    proto$2.days           = days;
+    proto$2.weeks          = weeks;
+    proto$2.months         = months;
+    proto$2.years          = years;
+    proto$2.humanize       = humanize;
+    proto$2.toISOString    = toISOString$1;
+    proto$2.toString       = toISOString$1;
+    proto$2.toJSON         = toISOString$1;
+    proto$2.locale         = locale;
+    proto$2.localeData     = localeData;
+
+    proto$2.toIsoString = deprecate('toIsoString() is deprecated. Please use toISOString() instead (notice the capitals)', toISOString$1);
+    proto$2.lang = lang;
+
+    // Side effect imports
+
+    // FORMATTING
+
+    addFormatToken('X', 0, 0, 'unix');
+    addFormatToken('x', 0, 0, 'valueOf');
+
+    // PARSING
+
+    addRegexToken('x', matchSigned);
+    addRegexToken('X', matchTimestamp);
+    addParseToken('X', function (input, array, config) {
+        config._d = new Date(parseFloat(input, 10) * 1000);
+    });
+    addParseToken('x', function (input, array, config) {
+        config._d = new Date(toInt(input));
+    });
+
+    // Side effect imports
+
+
+    hooks.version = '2.24.0';
+
+    setHookCallback(createLocal);
+
+    hooks.fn                    = proto;
+    hooks.min                   = min;
+    hooks.max                   = max;
+    hooks.now                   = now;
+    hooks.utc                   = createUTC;
+    hooks.unix                  = createUnix;
+    hooks.months                = listMonths;
+    hooks.isDate                = isDate;
+    hooks.locale                = getSetGlobalLocale;
+    hooks.invalid               = createInvalid;
+    hooks.duration              = createDuration;
+    hooks.isMoment              = isMoment;
+    hooks.weekdays              = listWeekdays;
+    hooks.parseZone             = createInZone;
+    hooks.localeData            = getLocale;
+    hooks.isDuration            = isDuration;
+    hooks.monthsShort           = listMonthsShort;
+    hooks.weekdaysMin           = listWeekdaysMin;
+    hooks.defineLocale          = defineLocale;
+    hooks.updateLocale          = updateLocale;
+    hooks.locales               = listLocales;
+    hooks.weekdaysShort         = listWeekdaysShort;
+    hooks.normalizeUnits        = normalizeUnits;
+    hooks.relativeTimeRounding  = getSetRelativeTimeRounding;
+    hooks.relativeTimeThreshold = getSetRelativeTimeThreshold;
+    hooks.calendarFormat        = getCalendarFormat;
+    hooks.prototype             = proto;
+
+    // currently HTML5 input type only supports 24-hour formats
+    hooks.HTML5_FMT = {
+        DATETIME_LOCAL: 'YYYY-MM-DDTHH:mm',             // <input type="datetime-local" />
+        DATETIME_LOCAL_SECONDS: 'YYYY-MM-DDTHH:mm:ss',  // <input type="datetime-local" step="1" />
+        DATETIME_LOCAL_MS: 'YYYY-MM-DDTHH:mm:ss.SSS',   // <input type="datetime-local" step="0.001" />
+        DATE: 'YYYY-MM-DD',                             // <input type="date" />
+        TIME: 'HH:mm',                                  // <input type="time" />
+        TIME_SECONDS: 'HH:mm:ss',                       // <input type="time" step="1" />
+        TIME_MS: 'HH:mm:ss.SSS',                        // <input type="time" step="0.001" />
+        WEEK: 'GGGG-[W]WW',                             // <input type="week" />
+        MONTH: 'YYYY-MM'                                // <input type="month" />
+    };
+
+    return hooks;
+
+})));
+
+},{}],117:[function(require,module,exports){
 'use strict';
 
 var keysShim;
@@ -9621,25 +14067,653 @@ var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
 },{"./SyncEvent":123,"./defs":126}],128:[function(require,module,exports){
-module.exports = "<style>\r\n    .id_UiButtonBar .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiButtonBar .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n    @media (min-width: 768px) {\r\n        .id_UiButtonBar .id_g1 {\r\n            padding-right: 0px !important;\r\n        }\r\n        .id_UiButtonBar .id_g2 {\r\n            padding-left: 0px !important;\r\n        }\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiButtonBar col-xs-12 mb10\">\r\n\r\n    <div class=\"row\">\r\n\r\n        <div class=\"id_g1 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-default\">Details</button>\r\n                <button type=\"button\" class=\"btn btn-default\"> <i class=\"fa fa-arrow-left\"></i> </button>\r\n                <button type=\"button\" class=\"btn btn-danger\">Delete</button>\r\n                <button type=\"button\" class=\"btn btn-primary\">Contacts</button>\r\n            </div>\r\n        </div>\r\n        <div class=\"id_g2 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-success\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Make SIM usable by other Semasim users\">Share</button>\r\n                <button type=\"button\" class=\"btn btn-default\">Rename</button>\r\n                <button type=\"button\" class=\"btn btn-default\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Restart the GSM dongle that hold the SIM\">Reboot</button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n    \r\n</div>\r\n";
+module.exports = "<div class=\"id_UiConversation panel panel-default\">\r\n    <div class=\"panel-heading pr5\">\r\n        <h4 class=\"panel-title\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-chat\"></use>\r\n                </svg>\r\n            </i>\r\n            <span class=\"id_name\"></span>\r\n            <span class=\"id_number ml10\"></span>\r\n        </h4>\r\n        <button class=\"id_updateContact btn btn-primary ml10\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                </svg>\r\n            </i>\r\n        </button>\r\n        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n            <i class=\"glyphicon glyphicon-trash\"></i>\r\n        </button>\r\n        <div class=\"pull-right mt5\">\r\n            <button class=\"id_call btn btn-primary\" type=\"button\">\r\n                <i>\r\n                    <svg class=\"custom-icon\">\r\n                        <use xlink:href=\"#icon-call\"></use>\r\n                    </svg>\r\n                </i>\r\n                <span>Call</span>\r\n            </button>\r\n        </div>\r\n    </div>\r\n    <div class=\"panel-body bnb\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"panel-footer white-bg\">\r\n        <form action=\"#\" role=\"form\" class=\"mb5 mr5 ml5\">\r\n                <textarea class=\"form-control elastic\" rows=\"1\"> </textarea>\r\n                <a class=\"id_send\" href=\"javascript:void(0);\">\r\n                    <i class=\"fa fa-send s20\"></i>\r\n                </a>\r\n        </form>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div class=\"message\">\r\n            <p class=\"id_emitter\"></p>\r\n            <div class=\"id_status\">\r\n                <span class=\"id_date\"></span>\r\n                <span class=\"id_check\"></span>\r\n            </div>\r\n            <p class=\"id_content\">\r\n            </p>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
 },{}],129:[function(require,module,exports){
-module.exports = "\r\n<div class=\"id_UiController container-fluid panel-body row\">\r\n\r\n\r\n</div>";
-},{}],130:[function(require,module,exports){
-module.exports = "<style>\r\n\r\n    .id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    .id_UiPhonebook ul li > div .id_number {\r\n        cursor: text;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.selected > div {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n</style>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_number \"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>\r\n\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiPhonebook modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Sim Phonebook</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body p0\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row\">\r\n\r\n                                <div class=\"col-xd-12 pt15 pr15 pl15 pb5\">\r\n\r\n                                    <div style=\"float: right\">\r\n\r\n                                        <button class=\"id_edit btn btn-primary\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                        </button>\r\n                                        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n                                            <i class=\"glyphicon glyphicon-trash\"></i>\r\n                                            <span></span>\r\n                                        </button>\r\n                                        <button class=\"id_createContact btn btn-success btn-sm\" type=\"button\" >\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-add_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                        </button>\r\n\r\n                                    </div>\r\n                                    <div style=\"overflow: hidden; padding-right: .5em;\">\r\n                                        <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search\"  style=\"width: 100%;\"/>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                                <div class=\"col-xs-12 pb15 bl15 pr15\">\r\n\r\n                                    <ul class=\"nav \">\r\n                                    </ul>\r\n\r\n                                </div>\r\n\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n";
+var css = ".id_UiConversation .panel-heading {\n  cursor: default;\n}\n.id_UiConversation .panel-title {\n  display: inline-block;\n}\n.id_UiConversation .panel-title span {\n  cursor: text;\n}\n.id_UiConversation .panel-body {\n  padding: 0;\n}\n.id_UiConversation .panel-footer {\n  padding: 0;\n}\n.id_UiConversation form {\n  position: relative;\n}\n.id_UiConversation textarea {\n  padding-right: 36px;\n}\n.id_UiConversation a.id_send {\n  position: absolute;\n  top: 7px;\n  right: 0px;\n  left: auto;\n  width: 33px;\n}\n.id_UiConversation ul {\n  margin: 0 10px 0;\n  padding: 0;\n  list-style: none;\n}\n.id_UiConversation ul li {\n  margin-bottom: 5px;\n  margin-top: 5px;\n}\n.id_UiConversation ul li div.message {\n  border-radius: 4px;\n  padding: 5px 10px;\n  border: 1px solid #ecf0f1;\n  position: relative;\n}\n.id_UiConversation ul li div.message.notification {\n  background-color: #ecefde;\n  text-align: center;\n  font-style: italic;\n  margin-left: 80px;\n  margin-right: 80px;\n}\n.id_UiConversation ul li div.message.in,\n.id_UiConversation ul li div.message.out {\n  background-color: #ecf0f1;\n}\n.id_UiConversation ul li div.message.in:after,\n.id_UiConversation ul li div.message.out:after,\n.id_UiConversation ul li div.message.in:before,\n.id_UiConversation ul li div.message.out:before {\n  top: 20px;\n  border: solid transparent;\n  content: '';\n  position: absolute;\n}\n.id_UiConversation ul li div.message.in:after,\n.id_UiConversation ul li div.message.out:after {\n  border-width: 8px;\n  margin-top: -8px;\n}\n.id_UiConversation ul li div.message.in {\n  margin-left: 7px;\n  margin-right: 60px;\n}\n.id_UiConversation ul li div.message.in:after,\n.id_UiConversation ul li div.message.in:before {\n  right: 100%;\n}\n.id_UiConversation ul li div.message.in:after {\n  border-right-color: #ecf0f1;\n}\n.id_UiConversation ul li div.message.out {\n  margin-left: 60px;\n  margin-right: 7px;\n}\n.id_UiConversation ul li div.message.out:after,\n.id_UiConversation ul li div.message.out:before {\n  left: 100%;\n}\n.id_UiConversation ul li div.message.out:after {\n  border-left-color: #ecf0f1;\n}\n.id_UiConversation ul li div.message p.id_emitter {\n  color: #95a5a6;\n  margin-bottom: 2px;\n}\n.id_UiConversation ul li div.message div.id_status {\n  float: right;\n  padding: 2px 0;\n  position: absolute;\n  right: 10px;\n  bottom: 2px;\n}\n.id_UiConversation ul li div.message span.id_date {\n  font-size: 75%;\n  font-style: italic;\n}\n.id_UiConversation ul li div.message span.id_check {\n  font-size: 75%;\n  font-style: italic;\n}\n.id_UiConversation ul li div.message p.id_content {\n  font-size: 13px;\n  line-height: 18px;\n  margin-bottom: 0;\n  padding-bottom: 15px;\n}\n";(require('lessify'))(css); module.exports = css;
+},{"lessify":115}],130:[function(require,module,exports){
+module.exports = "\r\n<div class=\"id_UiHeader page-header\">\r\n    <h4>\r\n        <i class=\"id_icon_sim_up\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <i class=\"id_icon_sim_down\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card_alert\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <span class=\"id_number\"></span>\r\n        &nbsp;\r\n        <span class=\"id_offline color-red\"><b>Offline</b></span>\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\" style=\"display: inline-block;\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Current location: </strong>\r\n        <span class=\"id_geoInfo\"></span>\r\n    </div>\r\n\r\n</div>\r\n";
 },{}],131:[function(require,module,exports){
-module.exports = "<style>\r\n</style>\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiShareSim modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Share SIM card</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row _toHideIfNotShared\">\r\n\r\n                                <div class=\"col-md-12\">\r\n\r\n                                    <label class=\"pt5\">Allowed users:</label>\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"id_stopSharing btn btn-danger btn-sm\" type=\"button\">\r\n                                            <span>Stop sharing</span>\r\n                                        </button>\r\n                                    </div>\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n                            <div class=\"id_list row b mt10 _toHideIfNotShared\">\r\n\r\n                            </div>\r\n\r\n                            <div class=\"row mt10\">\r\n\r\n                                <label class=\"col-md-12 pt5\">Invite users:</label>\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10\">\r\n                                    <input type=\"text\" class=\"id_emails\" name=\"email\">\r\n                                </div>\r\n\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10 id_message\">\r\n                                    <textarea class=\"form-control\" rows=\"2\">I would like to share SIM Free (06 34 39 39 99 ) with you.</textarea>\r\n                                    <i class=\"fa fa-comments textarea-icon s16\"></i>\r\n                                </div>\r\n\r\n                                <div class=\"col-md-12 mt10\">\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"btn btn-success id_submit\" type=\"button\">\r\n                                            <span>Submit share request</span>\r\n                                        </button>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_row col-md-12 pt10 pb10\">\r\n        <i class=\"glyphicon glyphicon-user mr10\"></i>\r\n        <span class=\"mr10 strong id_email\"></span>\r\n        <span class=\"mr10 text-nowrap id_isConfirmed\"></span>\r\n    </div>\r\n\r\n</div>";
+module.exports = "<style>\r\n    .id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    .id_UiPhonebook ul li .id_number {\r\n        cursor: text !important;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.selected > div,\r\n    .id_UiPhonebook ul li > div:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.has-messages > div {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number pl15\"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
 },{}],132:[function(require,module,exports){
-var css = ".id_UiShareSim .id_row {\n  cursor: pointer;\n}\n.id_UiShareSim .selected {\n  background-color: #e2e0db;\n}\n.id_UiShareSim .id_message textarea {\n  padding-left: 32px;\n}\n.id_UiShareSim .id_message i {\n  position: absolute;\n  top: 7px;\n  left: 8px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":116}],133:[function(require,module,exports){
-module.exports = "<div class=\"id_UiSimRow col-xs-12\">\r\n    <div class=\"id_row  bb p10\">\r\n        <i>\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <span class=\"id_simId strong mr10\">---My sim1 (0654996385)---</span>\r\n        <span class=\"id_connectivity mr10\">---Online---</span>\r\n        <span class=\"id_ownership hidden-xs\">---Owned---</span>\r\n    </div>\r\n    <div class=\"id_details pr0 pl0 pt15\">\r\n        <p>\r\n            <span class=\"strong p10\">Physical location:</span>\r\n            <span class=\"id_gw_location\">---Montpellier, Languedoc Rousillong, FR ( 82.302.102.2 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Owner:</span>\r\n            <span class=\"id_owner\">---foo@gmail.com---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Phone number:</span>\r\n            <span class=\"id_number\">---0636786385 ( +33636786385 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Service provider:</span>\r\n            <span class=\"id_serviceProvider\">---Free Mobile ( France )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle model:</span>\r\n            <span class=\"id_dongle_model\">---Huawei E160X</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle firmware:</span>\r\n            <span class=\"id_dongle_firm\">---10.12222---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle imei:</span>\r\n            <span class=\"id_dongle_imei\">---111111111111111---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle voice support:</span>\r\n            <span class=\"id_voice_support\">---yes---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM IMSI:</span>\r\n            <span class=\"id_imsi\">---332344242344---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM ICCID:</span>\r\n            <span class=\"id_iccid\">---2343334340342343---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM Phonebook memory usage:</span>\r\n            <span class=\"id_phonebook\">--12/123---</span>\r\n        </p>\r\n    </div>\r\n</div>";
+module.exports = "<style>\r\n    .id_UiQuickAction .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-xs-12 mt5 mb10 pl20 pr20\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input form-control\" type=\"text\" required>\r\n                    </div>\r\n\r\n                    <div class=\"col-xs-12\">\r\n\r\n                        <div class=\"st_flex\">\r\n\r\n                            <button type=\"button\" class=\"id_call btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-call\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-sms\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-add_contact\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">New Contact</span>\r\n                            </button>\r\n\r\n                        </div>\r\n\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\">salut</span>\r\n    </div>\r\n</div>";
+},{}],133:[function(require,module,exports){
+module.exports = "<style>\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .id_UiVoiceCall .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n    .id_UiVoiceCall.modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n    \r\n    /*\r\n\r\n    NOTE: To center vertically but create \r\n    big margin on small screens so commented.\r\n\r\n    .id_UiVoiceCall.modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n    }\r\n\r\n    .id_UiVoiceCall .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n    */\r\n\r\n    .id_UiVoiceCall .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_UiVoiceCall .id_numpad .btn {\r\n        margin-bottom: 10px !important;\r\n        margin-right: 5px !important;\r\n    }\r\n\r\n    .id_UiVoiceCall .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiVoiceCall .st_flex > div {\r\n        width: 100%;\r\n    }\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n\r\n                            <div class=\"col-xs-12\">\r\n\r\n                                <div class=\"st_flex\">\r\n\r\n                                    <div class=\"text-center\">\r\n                                            <p><span class=\"id_me\"></span></p>\r\n                                            <p><span class=\"id_me_under\"></span></p>\r\n                                    </div>\r\n                                    <div class=\"mt10\" style=\"width: 10% !important; margin-right: 5px;\">\r\n                                        <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                        <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                                    </div>\r\n                                    <div class=\"text-center mt10\" style=\"width: 10% !important;\">\r\n                                        <span class=\"id_timer\"></span>\r\n                                        <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                        <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                        <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                                    </div>\r\n                                    <div class=\"mt10\" style=\"width: 10% !important; margin-left: 5px;\">\r\n                                        <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                        <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                                    </div>\r\n                                    <div class=\"text-center\">\r\n                                            <p><span class=\"id_contact\"> <span></p>\r\n                                            <p><span class=\"id_contact_under\"></span></p>\r\n                                    </div>\r\n\r\n\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
 },{}],134:[function(require,module,exports){
-var css = ".id_UiSimRow .id_row {\n  cursor: pointer;\n}\n.id_UiSimRow .selected {\n  background-color: #e2e0db;\n}\n.id_UiSimRow .offline {\n  opacity: 0.6;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":116}],135:[function(require,module,exports){
+module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-5 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-7 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
+},{}],135:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.backToAppUrl = "semasim://main";
+var types = require("../../../gateway/dist/lib/types");
+exports.types = types;
+var sipRouting_1 = require("../../../gateway/dist/lib/misc/sipRouting");
+exports.readImsi = sipRouting_1.readImsi;
+var bundledData_1 = require("../../../gateway/dist/lib/misc/bundledData");
+exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
+exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
+exports.urlSafeB64 = bundledData_1.urlSafeB64;
 
-},{}],136:[function(require,module,exports){
+},{"../../../gateway/dist/lib/misc/bundledData":191,"../../../gateway/dist/lib/misc/sipRouting":192,"../../../gateway/dist/lib/types":193}],136:[function(require,module,exports){
+(function (Buffer){
+"use strict";
+//NOTE: Require jssip_compat loaded on the page.
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var ts_events_extended_1 = require("ts-events-extended");
+var gateway_1 = require("../gateway");
+var sip = require("ts-sip");
+var runExclusive = require("run-exclusive");
+var connection = require("./toBackend/connection");
+var localApiHandlers = require("./toBackend/localApiHandlers");
+//JsSIP.debug.enable("JsSIP:*");
+JsSIP.debug.disable("JsSIP:*");
+var Ua = /** @class */ (function () {
+    function Ua(imsi, sipPassword, disabledMessage) {
+        if (disabledMessage === void 0) { disabledMessage = false; }
+        var _this = this;
+        /** post isRegistered */
+        this.evtRegistrationStateChanged = new ts_events_extended_1.SyncEvent();
+        this.evtRingback = new ts_events_extended_1.SyncEvent();
+        this.isRegistered = false;
+        this.evtIncomingMessage = new ts_events_extended_1.SyncEvent();
+        this.postEvtIncomingMessage = runExclusive.buildMethod(function (evtData) {
+            var onProcessed;
+            var pr = new Promise(function (resolve) { return onProcessed = resolve; });
+            _this.evtIncomingMessage.post(__assign({}, evtData, { "onProcessed": onProcessed }));
+            return pr;
+        });
+        /** return exactSendDate to match with sendReport and statusReport */
+        this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
+        var uri = "sip:" + imsi + "-webRTC@" + connection.baseDomain;
+        this.jsSipSocket = new JsSipSocket(imsi, uri);
+        this.jsSipUa = new JsSIP.UA({
+            "sockets": this.jsSipSocket,
+            uri: uri,
+            "authorization_user": imsi,
+            "password": sipPassword,
+            "instance_id": Ua.instanceId.match(/"<urn:([^>]+)>"$/)[1],
+            "register": false,
+            "contact_uri": uri + ";enc_email=" + gateway_1.urlSafeB64.enc(Ua.email) + (!disabledMessage ? "" : ";no_messages"),
+            "register_expires": 345600
+        });
+        /*
+        evt 'registered' is posted only when register change
+        so we use this instead.
+        */
+        this.jsSipSocket.evtSipPacket.attach(function (sipPacket) { return (!sip.matchRequest(sipPacket) &&
+            sipPacket.headers.cseq.method === "REGISTER" &&
+            sipPacket.status === 200); }, function () {
+            _this.isRegistered = true;
+            _this.evtRegistrationStateChanged.post(true);
+        });
+        this.jsSipUa.on("unregistered", function () {
+            _this.isRegistered = false;
+            _this.evtRegistrationStateChanged.post(false);
+        });
+        this.jsSipUa.on("newMessage", function (_a) {
+            var originator = _a.originator, request = _a.request;
+            if (originator === "remote") {
+                _this.onMessage(request);
+            }
+        });
+        this.jsSipUa.on("newRTCSession", function (_a) {
+            var originator = _a.originator, session = _a.session, request = _a.request;
+            if (originator === "remote") {
+                _this.onIncomingCall(session, request);
+            }
+        });
+        this.jsSipUa.start();
+    }
+    /** Must be called in webphone.ts */
+    Ua.setUaInstanceId = function (uaInstanceId, email) {
+        this.email = email;
+        this.instanceId = uaInstanceId;
+    };
+    //TODO: If no response to register do something
+    Ua.prototype.register = function () {
+        this.jsSipUa.register();
+    };
+    /**
+     * Do not actually send a REGISTER expire=0.
+     * Assert no packet will arrive to this UA until next register.
+     * */
+    Ua.prototype.unregister = function () {
+        this.jsSipUa.emit("unregistered");
+    };
+    Ua.prototype.onMessage = function (request) {
+        var bundledData = gateway_1.extractBundledDataFromHeaders((function () {
+            var out = {};
+            for (var key in request.headers) {
+                out[key] = request.headers[key][0].raw;
+            }
+            return out;
+        })());
+        var fromNumber = request.from.uri.user;
+        if (bundledData.type === "RINGBACK") {
+            this.evtRingback.post(bundledData.callId);
+            return;
+        }
+        var pr = this.postEvtIncomingMessage({
+            fromNumber: fromNumber,
+            bundledData: bundledData,
+            "text": request.body,
+        });
+        this.jsSipSocket.setMessageOkDelay(request, pr);
+    };
+    Ua.prototype.sendMessage = function (number, text, exactSendDate, appendPromotionalMessage) {
+        var _this = this;
+        var extraHeaders = (function () {
+            var headers = gateway_1.smuggleBundledDataInHeaders((function () {
+                var bundledData = {
+                    "type": "MESSAGE",
+                    exactSendDate: exactSendDate,
+                };
+                if (appendPromotionalMessage) {
+                    bundledData.appendPromotionalMessage = true;
+                }
+                return bundledData;
+            })());
+            var out = [];
+            for (var key in headers) {
+                out.push(key + ": " + headers[key]);
+            }
+            return out;
+        })();
+        return new Promise(function (resolve, reject) { return _this.jsSipUa.sendMessage("sip:" + number + "@" + connection.baseDomain, text, {
+            "contentType": "text/plain; charset=UTF-8",
+            extraHeaders: extraHeaders,
+            "eventHandlers": {
+                "succeeded": function () { return resolve(); },
+                "failed": function (_a) {
+                    var cause = _a.cause;
+                    return reject(new Error("Send message failed " + cause));
+                }
+            }
+        }); });
+    };
+    Ua.prototype.onIncomingCall = function (jsSipRtcSession, request) {
+        var _this = this;
+        var evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
+        var evtAccepted = new ts_events_extended_1.VoidSyncEvent();
+        var evtTerminated = new ts_events_extended_1.VoidSyncEvent();
+        var evtDtmf = new ts_events_extended_1.SyncEvent();
+        var evtEstablished = new ts_events_extended_1.VoidSyncEvent();
+        evtRequestTerminate.attachOnce(function () { return jsSipRtcSession.terminate(); });
+        evtDtmf.attach(function (_a) {
+            var signal = _a.signal, duration = _a.duration;
+            return jsSipRtcSession.sendDTMF(signal, { duration: duration });
+        });
+        evtAccepted.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
+            var rtcIceServer;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, localApiHandlers.getRTCIceServer()];
+                    case 1:
+                        rtcIceServer = _a.sent();
+                        jsSipRtcSession.on("icecandidate", newIceCandidateHandler(rtcIceServer));
+                        jsSipRtcSession.answer({
+                            "mediaConstraints": { "audio": true, "video": false },
+                            "pcConfig": { "iceServers": [rtcIceServer] }
+                        });
+                        jsSipRtcSession.connection.ontrack =
+                            function (_a) {
+                                var _b = __read(_a.streams, 1), stream = _b[0];
+                                return playAudioStream(stream);
+                            };
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        jsSipRtcSession.once("confirmed", function () { return evtEstablished.post(); });
+        jsSipRtcSession.once("ended", function () { return evtTerminated.post(); });
+        jsSipRtcSession.once("failed", function () { return evtTerminated.post(); });
+        this.evtIncomingCall.post({
+            "fromNumber": request.from.uri.user,
+            "terminate": function () { return evtRequestTerminate.post(); },
+            "prTerminated": Promise.race([
+                evtRequestTerminate.waitFor(),
+                evtTerminated.waitFor()
+            ]),
+            "onAccepted": function () { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            evtAccepted.post();
+                            return [4 /*yield*/, evtEstablished.waitFor()];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/, {
+                                    "state": "ESTABLISHED",
+                                    "sendDtmf": function (signal, duration) { return evtDtmf.post({ signal: signal, duration: duration }); }
+                                }];
+                    }
+                });
+            }); }
+        });
+    };
+    Ua.prototype.placeOutgoingCall = function (number) {
+        return __awaiter(this, void 0, void 0, function () {
+            var evtEstablished, evtTerminated, evtDtmf, evtRequestTerminate, evtRingback, rtcICEServer;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        evtEstablished = new ts_events_extended_1.VoidSyncEvent();
+                        evtTerminated = new ts_events_extended_1.VoidSyncEvent();
+                        evtDtmf = new ts_events_extended_1.SyncEvent();
+                        evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
+                        evtRingback = new ts_events_extended_1.VoidSyncEvent();
+                        return [4 /*yield*/, localApiHandlers.getRTCIceServer()];
+                    case 1:
+                        rtcICEServer = _a.sent();
+                        this.jsSipUa.call("sip:" + number + "@" + connection.baseDomain, {
+                            "mediaConstraints": { "audio": true, "video": false },
+                            "pcConfig": {
+                                "iceServers": [rtcICEServer],
+                                "gatheringTimeoutAfterRelay": 700
+                            },
+                            "eventHandlers": {
+                                "icecandidate": newIceCandidateHandler(rtcICEServer),
+                                "connecting": function () {
+                                    var jsSipRtcSession = this;
+                                    if (!!evtRequestTerminate.postCount) {
+                                        jsSipRtcSession.terminate();
+                                        return;
+                                    }
+                                    evtRequestTerminate.attachOnce(function () { return jsSipRtcSession.terminate(); });
+                                    evtDtmf.attach(function (_a) {
+                                        var signal = _a.signal, duration = _a.duration;
+                                        return jsSipRtcSession.sendDTMF(signal, { duration: duration });
+                                    });
+                                    jsSipRtcSession.connection.ontrack =
+                                        function (_a) {
+                                            var _b = __read(_a.streams, 1), stream = _b[0];
+                                            return playAudioStream(stream);
+                                        };
+                                },
+                                "confirmed": function () { return evtEstablished.post(); },
+                                "ended": function () { return evtTerminated.post(); },
+                                "failed": function () { return evtTerminated.post(); },
+                                "sending": function (_a) {
+                                    var request = _a.request;
+                                    return _this.evtRingback.waitFor(function (callId) { return callId === request.call_id; }, 30000)
+                                        .then(function () { return evtRingback.post(); })
+                                        .catch(function () { });
+                                }
+                            }
+                        });
+                        return [2 /*return*/, {
+                                "prNextState": new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                                    var _this = this;
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0: return [4 /*yield*/, Promise.race([
+                                                    evtRingback.waitFor(),
+                                                    evtEstablished.waitFor()
+                                                ])];
+                                            case 1:
+                                                _a.sent();
+                                                resolve({
+                                                    "state": "RINGBACK",
+                                                    "prNextState": new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                                                        return __generator(this, function (_a) {
+                                                            switch (_a.label) {
+                                                                case 0:
+                                                                    if (!!evtEstablished.postCount) return [3 /*break*/, 2];
+                                                                    return [4 /*yield*/, evtEstablished.waitFor()];
+                                                                case 1:
+                                                                    _a.sent();
+                                                                    _a.label = 2;
+                                                                case 2:
+                                                                    resolve({
+                                                                        "state": "ESTABLISHED",
+                                                                        "sendDtmf": function (signal, duration) {
+                                                                            return evtDtmf.post({ signal: signal, duration: duration });
+                                                                        }
+                                                                    });
+                                                                    return [2 /*return*/];
+                                                            }
+                                                        });
+                                                    }); })
+                                                });
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); }),
+                                "prTerminated": Promise.race([
+                                    evtRequestTerminate.waitFor(),
+                                    evtTerminated.waitFor()
+                                ]),
+                                "terminate": function () { return evtRequestTerminate.post(); }
+                            }];
+                }
+            });
+        });
+    };
+    return Ua;
+}());
+exports.Ua = Ua;
+function playAudioStream(stream) {
+    var audio = document.createElement("audio");
+    audio.autoplay = true;
+    audio.srcObject = stream;
+}
+var JsSipSocket = /** @class */ (function () {
+    function JsSipSocket(imsi, sip_uri) {
+        var _this = this;
+        this.sip_uri = sip_uri;
+        this.evtSipPacket = new ts_events_extended_1.SyncEvent();
+        this.via_transport = "WSS";
+        this.url = connection.url;
+        this.messageOkDelays = new Map();
+        (function () { return __awaiter(_this, void 0, void 0, function () {
+            var onBackedSocketConnect, socket;
+            var _this = this;
+            return __generator(this, function (_a) {
+                onBackedSocketConnect = function (backendSocket) {
+                    var onSipPacket = function (sipPacket) {
+                        if (gateway_1.readImsi(sipPacket) !== imsi) {
+                            return;
+                        }
+                        sipPacket = _this.sdpHacks(sipPacket);
+                        _this.evtSipPacket.post(sipPacket);
+                        _this.ondata(sip.toData(sipPacket).toString("utf8"));
+                    };
+                    backendSocket.evtRequest.attach(onSipPacket);
+                    backendSocket.evtResponse.attach(onSipPacket);
+                };
+                connection.evtConnect.attach(function (socket) { return onBackedSocketConnect(socket); });
+                socket = connection.get();
+                if (!(socket instanceof Promise)) {
+                    onBackedSocketConnect(socket);
+                }
+                return [2 /*return*/];
+            });
+        }); })();
+    }
+    JsSipSocket.prototype.sdpHacks = function (sipPacket) {
+        if (sipPacket.headers["content-type"] !== "application/sdp") {
+            return sipPacket;
+        }
+        //NOTE: Sdp Hack for Mozilla
+        if (/firefox/i.test(navigator.userAgent)) {
+            console.log("Firefox SDP hack !");
+            var parsedSdp = sip.parseSdp(sip.getPacketContent(sipPacket).toString("utf8"));
+            var a = parsedSdp["m"][0]["a"];
+            if (!!a.find(function (v) { return /^mid:/i.test(v); })) {
+                return sipPacket;
+            }
+            parsedSdp["m"][0]["a"] = __spread(a, ["mid:0"]);
+            var modifiedSipPacket = sip.clonePacket(sipPacket);
+            sip.setPacketContent(modifiedSipPacket, sip.stringifySdp(parsedSdp));
+            return modifiedSipPacket;
+        }
+        return sipPacket;
+    };
+    JsSipSocket.prototype.connect = function () {
+        this.onconnect();
+    };
+    JsSipSocket.prototype.disconnect = function () {
+        throw new Error("JsSip should not call disconnect");
+    };
+    /**
+     * To call when receiving as SIP MESSAGE
+     * to prevent directly sending the 200 OK
+     * response immediately but rather wait
+     * until some action have been completed.
+     *
+     * @param request the request prop of the
+     * eventData emitted by JsSIP UA for the
+     * "newMessage" event. ( when originator === remote )
+     * @param pr The response to the SIP MESSAGE
+     * will not be sent until this promise resolve.
+     */
+    JsSipSocket.prototype.setMessageOkDelay = function (request, pr) {
+        this.messageOkDelays.set(request.getHeader("Call-ID"), pr);
+    };
+    JsSipSocket.prototype.send = function (data) {
+        var _this = this;
+        (function () { return __awaiter(_this, void 0, void 0, function () {
+            var sipPacket, sipResponse, callId, pr, socketOrPrSocket, socket, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        sipPacket = sip.parse(Buffer.from(data, "utf8"));
+                        if (!!sip.matchRequest(sipPacket)) return [3 /*break*/, 2];
+                        sipResponse = sipPacket;
+                        if (!(sipResponse.headers.cseq.method === "MESSAGE")) return [3 /*break*/, 2];
+                        callId = sipResponse.headers["call-id"];
+                        pr = this.messageOkDelays.get(callId);
+                        if (!!!pr) return [3 /*break*/, 2];
+                        return [4 /*yield*/, pr];
+                    case 1:
+                        _b.sent();
+                        this.messageOkDelays.delete(callId);
+                        _b.label = 2;
+                    case 2:
+                        socketOrPrSocket = connection.get();
+                        if (!(socketOrPrSocket instanceof Promise)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, socketOrPrSocket];
+                    case 3:
+                        _a = (_b.sent());
+                        return [3 /*break*/, 5];
+                    case 4:
+                        _a = socketOrPrSocket;
+                        _b.label = 5;
+                    case 5:
+                        socket = _a;
+                        socket.write(sip.parse(Buffer.from(data, "utf8")));
+                        return [2 /*return*/];
+                }
+            });
+        }); })();
+        return true;
+    };
+    JsSipSocket.prototype.onconnect = function () {
+        throw new Error("Missing impl");
+    };
+    JsSipSocket.prototype.ondisconnect = function (error, code, reason) {
+        throw new Error("Missing impl");
+    };
+    JsSipSocket.prototype.ondata = function (data) {
+        throw new Error("Missing impl");
+    };
+    return JsSipSocket;
+}());
+/** Let end gathering ICE candidates as quickly as possible. */
+function newIceCandidateHandler(rtcICEServer) {
+    var isReady = newIceCandidateHandler.isReadyFactory(rtcICEServer);
+    var readyTimer = undefined;
+    return function (data) {
+        var candidate = data.candidate, ready = data.ready;
+        //console.log(candidate);
+        var readyState = isReady(candidate.candidate);
+        console.log(readyState);
+        switch (readyState) {
+            case "NOT READY": return;
+            case "AT LEAST ONE RELAY CANDIDATE READY":
+                if (readyTimer === undefined) {
+                    readyTimer = setTimeout(function () {
+                        console.log("Timing out ice candidates gathering");
+                        ready();
+                    }, 300);
+                }
+                return;
+            case "ALL CANDIDATES READY":
+                clearTimeout(readyTimer);
+                ready();
+                return;
+        }
+    };
+}
+(function (newIceCandidateHandler) {
+    function isReadyFactory(rtcICEServer) {
+        //console.log(JSON.stringify(rtcICEServer, null, 2));
+        var p = (function () {
+            var urls = typeof rtcICEServer.urls === "string" ?
+                [rtcICEServer.urls] : rtcICEServer.urls;
+            ;
+            return {
+                "isSrflxCandidateExpected": !!urls.find(function (url) { return !!url.match(/^stun/i); }),
+                "isRelayCandidateExpected": !!urls.find(function (url) { return !!url.match(/^turn:/i); }),
+                "isEncryptedRelayCandidateExpected": !!urls.find(function (url) { return !!url.match(/^turns:/i); }),
+                "lines": new Array()
+            };
+        })();
+        //console.log(JSON.stringify(p, null, 2));
+        return function (line) {
+            p.lines.push(line);
+            var isRtcpExcepted = !!p.lines
+                .map(function (line) { return parseLine(line); })
+                .find(function (_a) {
+                var component = _a.component;
+                return component === "RTCP";
+            });
+            if (isFullyReady(__assign({}, p, { isRtcpExcepted: isRtcpExcepted }))) {
+                return "ALL CANDIDATES READY";
+            }
+            return countRelayCandidatesReady(p.lines, isRtcpExcepted) >= 1 ?
+                "AT LEAST ONE RELAY CANDIDATE READY" : "NOT READY";
+        };
+    }
+    newIceCandidateHandler.isReadyFactory = isReadyFactory;
+    function parseLine(line) {
+        var match = line.match(/(1|2)\s+(?:udp|tcp)\s+([0-9]+)\s/i);
+        return {
+            "component": match[1] === "1" ? "RTP" : "RTCP",
+            "priority": parseInt(match[2])
+        };
+    }
+    function countRelayCandidatesReady(lines, isRtcpExcepted) {
+        var parsedLines = lines
+            .filter(function (line) { return !!line.match(/udp.+relay/i); })
+            .map(parseLine);
+        var parsedRtpLines = parsedLines
+            .filter(function (_a) {
+            var component = _a.component;
+            return component === "RTP";
+        });
+        if (!isRtcpExcepted) {
+            return parsedRtpLines.length;
+        }
+        var parsedRtcpLines = parsedLines
+            .filter(function (_a) {
+            var component = _a.component;
+            return component === "RTCP";
+        });
+        return parsedRtpLines
+            .filter(function (_a) {
+            var rtpPriority = _a.priority;
+            return !!parsedRtcpLines.find(function (_a) {
+                var priority = _a.priority;
+                return Math.abs(priority - rtpPriority) === 1;
+            });
+        })
+            .length;
+    }
+    function isSrflxCandidateReady(lines, isRtcpExcepted) {
+        var parsedLines = lines
+            .filter(function (line) { return !!line.match(/udp.+srflx/i); })
+            .map(parseLine);
+        var parsedRtpLines = parsedLines
+            .filter(function (_a) {
+            var component = _a.component;
+            return component === "RTP";
+        });
+        if (!isRtcpExcepted) {
+            return parsedRtpLines.length !== 0;
+        }
+        var parsedRtcpLines = parsedLines
+            .filter(function (_a) {
+            var component = _a.component;
+            return component === "RTCP";
+        });
+        return !!parsedRtpLines
+            .find(function (_a) {
+            var rtpPriority = _a.priority;
+            return !!parsedRtcpLines.find(function (_a) {
+                var priority = _a.priority;
+                return Math.abs(priority - rtpPriority) === 1;
+            });
+        });
+    }
+    function isFullyReady(p) {
+        return (!p.isSrflxCandidateExpected ?
+            true :
+            isSrflxCandidateReady(p.lines, p.isRtcpExcepted)) && ((p.isRelayCandidateExpected ? 1 : 0)
+            +
+                (p.isEncryptedRelayCandidateExpected ? 1 : 0)
+            <=
+                countRelayCandidatesReady(p.lines, p.isRtcpExcepted));
+    }
+})(newIceCandidateHandler || (newIceCandidateHandler = {}));
+
+}).call(this,require("buffer").Buffer)
+},{"../gateway":135,"./toBackend/connection":138,"./toBackend/localApiHandlers":139,"buffer":2,"run-exclusive":167,"ts-events-extended":179,"ts-sip":187}],137:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -9653,7 +14727,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],137:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9721,7 +14795,7 @@ var socketCurrent = undefined;
 var userSims = undefined;
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
 /** Called from outside isReconnect should never be passed */
-function connect(requestTurnCred, isReconnect) {
+function connect(sessionParams, isReconnect) {
     var _this = this;
     //We register 'offline' event only on the first call of connect()
     if (socketCurrent === undefined) {
@@ -9733,7 +14807,8 @@ function connect(requestTurnCred, isReconnect) {
             socket.destroy("Browser is offline");
         });
     }
-    Cookies.set("requestTurnCred", "" + !!requestTurnCred);
+    Cookies.set("requestTurnCred", "" + sessionParams.requestTurnCred);
+    Cookies.set("sessionType", sessionParams.sessionType);
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
         "remoteAddress": "web." + exports.baseDomain,
         "remotePort": 443
@@ -9761,11 +14836,19 @@ function connect(requestTurnCred, isReconnect) {
         if (!!isReconnect) {
             bootbox_custom.dismissLoading();
         }
+        var includeContacts = (function () {
+            switch (sessionParams.sessionType) {
+                case "MAIN": return true;
+                case "AUXILIARY": return false;
+            }
+        })();
         if (userSims === undefined) {
-            remoteApiCaller.getUsableUserSims().then(function (userSims_) { return userSims = userSims_; });
+            remoteApiCaller.getUsableUserSims(includeContacts)
+                .then(function (userSims_) { return userSims = userSims_; });
         }
         else {
-            remoteApiCaller.getUsableUserSims("STATELESS").then(function (userSims_) {
+            remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
+                .then(function (userSims_) {
                 var e_1, _a;
                 var _loop_1 = function (userSim_) {
                     var userSim = userSims
@@ -9850,7 +14933,7 @@ function connect(requestTurnCred, isReconnect) {
                     _d.sent();
                     return [3 /*break*/, 1];
                 case 3:
-                    connect(requestTurnCred, "RECONNECT");
+                    connect(sessionParams, "RECONNECT");
                     return [2 /*return*/];
             }
         });
@@ -9869,7 +14952,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../tools/bootbox_custom":140,"./localApiHandlers":138,"./remoteApiCaller":139,"js-cookie":165,"ts-events-extended":179,"ts-sip":187}],138:[function(require,module,exports){
+},{"../tools/bootbox_custom":141,"./localApiHandlers":139,"./remoteApiCaller":140,"js-cookie":165,"ts-events-extended":179,"ts-sip":187}],139:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10482,7 +15565,7 @@ exports.getRTCIceServer = (function () {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":147,"../tools/bootbox_custom":140,"./remoteApiCaller":139,"chan-dongle-extended-client/dist/lib/types":149,"ts-events-extended":179}],139:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":147,"../tools/bootbox_custom":141,"./remoteApiCaller":140,"chan-dongle-extended-client/dist/lib/types":149,"ts-events-extended":179}],140:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -10555,17 +15638,25 @@ exports.getUsableUserSims = (function () {
     var methodName = apiDeclaration.getUsableUserSims.methodName;
     var prUsableUserSims = undefined;
     /**
+     *
+     * includeContacts is true by defaults.
+     *
      * The stateless argument is used to re fetch the userSim from the server regardless
      * of if it have been done previously already, it will return a new array.
      * If the 'stateless' argument is omitted then the returned value is static.
      * ( only one request is sent to the server )
+     *
+     * Note that if the method have already been called and called with
+     * stateless falsy includeContacts will not have any effect.
+     *
      */
-    return function (stateless) {
+    return function (includeContacts, stateless) {
+        if (includeContacts === void 0) { includeContacts = true; }
         if (stateless === void 0) { stateless = false; }
         if (!stateless && !!prUsableUserSims) {
             return prUsableUserSims;
         }
-        var prUsableUserSims_ = sendRequest(methodName, undefined);
+        var prUsableUserSims_ = sendRequest(methodName, { includeContacts: includeContacts });
         if (!!stateless) {
             return prUsableUserSims_;
         }
@@ -10878,13 +15969,13 @@ exports.shouldAppendPromotionalMessage = (function () {
         return sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
     };
 })();
-//WebData sync things :
-exports.getUaInstanceIdAndEmail = (function () {
-    var methodName = apiDeclaration.getUaInstanceIdAndEmail.methodName;
+exports.getUaInstanceId = (function () {
+    var methodName = apiDeclaration.getUaInstanceId.methodName;
     return function () {
         return sendRequest(methodName, undefined);
     };
 })();
+//WebData sync things :
 exports.getOrCreateWdInstance = (function () {
     var methodName = apiDeclaration.getOrCreateInstance.methodName;
     function synchronizeUserSimAndWdInstance(userSim, wdInstance) {
@@ -11348,7 +16439,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":146,"../types":144,"./connection":137,"phone-number":166,"ts-events-extended":179,"ts-sip":187}],140:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":146,"../types":144,"./connection":138,"phone-number":166,"ts-events-extended":179,"ts-sip":187}],141:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11456,22 +16547,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":143}],141:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function getURLParameter(sParam) {
-    var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split("&");
-    for (var i = 0; i < sURLVariables.length; i++) {
-        var sParameterName = sURLVariables[i].split("=");
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1];
-        }
-    }
-}
-exports.getURLParameter = getURLParameter;
-
-},{}],142:[function(require,module,exports){
+},{"./modal_stack":143}],142:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -12026,11 +17102,11 @@ var shouldAppendPromotionalMessage;
 (function (shouldAppendPromotionalMessage) {
     shouldAppendPromotionalMessage.methodName = "shouldAppendSenTWithSemasim";
 })(shouldAppendPromotionalMessage = exports.shouldAppendPromotionalMessage || (exports.shouldAppendPromotionalMessage = {}));
+var getUaInstanceId;
+(function (getUaInstanceId) {
+    getUaInstanceId.methodName = "getUaCredentials";
+})(getUaInstanceId = exports.getUaInstanceId || (exports.getUaInstanceId = {}));
 //WebphoneData Sync things:
-var getUaInstanceIdAndEmail;
-(function (getUaInstanceIdAndEmail) {
-    getUaInstanceIdAndEmail.methodName = "getUaInstanceIdAndEmail";
-})(getUaInstanceIdAndEmail = exports.getUaInstanceIdAndEmail || (exports.getUaInstanceIdAndEmail = {}));
 var getOrCreateInstance;
 (function (getOrCreateInstance) {
     getOrCreateInstance.methodName = "getInstance";
@@ -12988,12 +18064,12 @@ module.exports = {
 
 }).call(this,require('_process'))
 },{"./has-flag.js":160,"_process":6,"os":5}],162:[function(require,module,exports){
+arguments[4][106][0].apply(exports,arguments)
+},{"dup":106}],163:[function(require,module,exports){
 arguments[4][107][0].apply(exports,arguments)
-},{"dup":107}],163:[function(require,module,exports){
-arguments[4][108][0].apply(exports,arguments)
-},{"./implementation":162,"dup":108}],164:[function(require,module,exports){
-arguments[4][111][0].apply(exports,arguments)
-},{"dup":111,"function-bind":163}],165:[function(require,module,exports){
+},{"./implementation":162,"dup":107}],164:[function(require,module,exports){
+arguments[4][110][0].apply(exports,arguments)
+},{"dup":110,"function-bind":163}],165:[function(require,module,exports){
 /*!
  * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
@@ -15847,4 +20923,238 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":186,"buffer":2}]},{},[14]);
+},{"./core":186,"buffer":2}],191:[function(require,module,exports){
+"use strict";
+/* NOTE: Used in the browser. */
+Object.defineProperty(exports, "__esModule", { value: true });
+//NOTE: Transpiled to ES3.
+var stringTransform = require("transfer-tools/dist/lib/stringTransform");
+exports.urlSafeB64 = stringTransform.transcode("base64", { "=": "_" });
+var header = function (i) { return "Bundled-Data-" + i; };
+/**
+ *
+ * In order to ease the cross implementation in Java and Objective C
+ * we use this function to serialize Date instead of JSON_CUSTOM.
+ * We serialize by converting date into timestamp.
+ *
+ * We enforce that any date property must have as name a string
+ * that end with Date or date otherwise an error will be thrown.
+ *
+ * Date are allowed to be null.
+ *
+ */
+function replacer_reviver(isReplacer, key, value) {
+    if (value === null) {
+        return value;
+    }
+    var cKey = !!key.match(/[Dd]ate$/);
+    var cVal = isReplacer ? (typeof value === "string" &&
+        !!value.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/)) : typeof value === "number";
+    if (isReplacer ? (cKey !== cVal) : (cKey && !cVal)) {
+        throw new Error("Bundled data design error");
+    }
+    if (!cKey) {
+        return value;
+    }
+    var date = new Date(value);
+    return isReplacer ? date.getTime() : date;
+}
+;
+function smuggleBundledDataInHeaders(data, headers) {
+    if (headers === void 0) { headers = {}; }
+    var split = stringTransform.textSplit(125, exports.urlSafeB64.enc(JSON.stringify(data, function (key, value) { return replacer_reviver(true, key, value); })));
+    for (var i = 0; i < split.length; i++) {
+        headers[header(i)] = split[i];
+    }
+    return headers;
+}
+exports.smuggleBundledDataInHeaders = smuggleBundledDataInHeaders;
+/** assert there is data */
+function extractBundledDataFromHeaders(headers) {
+    var split = [];
+    var i = 0;
+    while (true) {
+        var key = header(i++);
+        var part = headers[key] || headers[key.toLowerCase()];
+        if (!!part) {
+            split.push(part);
+        }
+        else {
+            break;
+        }
+    }
+    if (!split.length) {
+        throw new Error("No bundled data in header");
+    }
+    return JSON.parse(exports.urlSafeB64.dec(split.join("")), function (key, value) { return replacer_reviver(false, key, value); });
+}
+exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
+
+},{"transfer-tools/dist/lib/stringTransform":214}],192:[function(require,module,exports){
+"use strict";
+/* NOTE: Used in the browser. */
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+//NOTE: Transpiled to ES3.
+var stringTransform = require("transfer-tools/dist/lib/stringTransform");
+//NOTE: Transpiled to ES5
+var sipLibrary = require("ts-sip");
+/**
+ * Return true if it's a sipRequest originated of UA
+ * or if it's a sipResponse of a request originated by UA.
+ * */
+function isRequestFromClient(sipPacket) {
+    return sipPacket.headers.via[sipPacket.headers.via.length - 1].protocol !== "TCP";
+}
+function readImsi(sipPacket) {
+    return sipLibrary.parseUri(sipPacket.headers[isRequestFromClient(sipPacket) ? "from" : "to"].uri).user.match(/^([0-9]{15})/)[1];
+}
+exports.readImsi = readImsi;
+/**
+ *
+ * connectionId:
+ *
+ * An uniq id of every UA connection to the backend
+ * Should be included in every sip packet.
+ * The token enclose a timestamp of when the
+ * UA connection to the backend was established,
+ * the public address of the UA and the source
+ * port the UA used to connect.
+ *
+ * */
+var cid;
+(function (cid) {
+    var _a = stringTransform.transcode("base64", { "=": "_" }), enc = _a.enc, dec = _a.dec;
+    /** on backend when ua connect */
+    function generate(uaSocket, timestamp) {
+        if (timestamp === void 0) { timestamp = Date.now(); }
+        return enc(timestamp + ":" + uaSocket.remoteAddress + ":" + uaSocket.remotePort);
+    }
+    cid.generate = generate;
+    function parse(connectionId) {
+        var _a = __read(dec(connectionId).split(":"), 3), a = _a[0], b = _a[1], c = _a[2];
+        return {
+            "timestamp": parseInt(a),
+            "uaSocket": {
+                "remoteAddress": b,
+                "remotePort": parseInt(c)
+            }
+        };
+    }
+    cid.parse = parse;
+    var key = "connection_id";
+    /**
+     * Include a connection id in a sipRequest.
+     * This must be applied to every new sip request.
+     * ( No need to include the connection id on sip response
+     * as it is already present )
+     */
+    function set(sipRequestNextHop, connectionId) {
+        sipRequestNextHop.headers[isRequestFromClient(sipRequestNextHop) ? "from" : "to"].params[key] = connectionId;
+    }
+    cid.set = set;
+    /** Read the connection id */
+    function read(sipPacket) {
+        return sipPacket.headers[isRequestFromClient(sipPacket) ? "from" : "to"].params[key];
+    }
+    cid.read = read;
+})(cid = exports.cid || (exports.cid = {}));
+
+},{"transfer-tools/dist/lib/stringTransform":214,"ts-sip":229}],193:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+
+},{}],194:[function(require,module,exports){
+arguments[4][150][0].apply(exports,arguments)
+},{"./custom/trap":195,"./custom/zalgo":196,"./maps/america":199,"./maps/rainbow":200,"./maps/random":201,"./maps/zebra":202,"./styles":203,"./system/supports-colors":205,"dup":150,"util":8}],195:[function(require,module,exports){
+arguments[4][151][0].apply(exports,arguments)
+},{"dup":151}],196:[function(require,module,exports){
+arguments[4][152][0].apply(exports,arguments)
+},{"dup":152}],197:[function(require,module,exports){
+arguments[4][153][0].apply(exports,arguments)
+},{"./colors":194,"dup":153}],198:[function(require,module,exports){
+arguments[4][154][0].apply(exports,arguments)
+},{"./colors":194,"./extendStringPrototype":197,"dup":154}],199:[function(require,module,exports){
+arguments[4][155][0].apply(exports,arguments)
+},{"dup":155}],200:[function(require,module,exports){
+arguments[4][156][0].apply(exports,arguments)
+},{"dup":156}],201:[function(require,module,exports){
+arguments[4][157][0].apply(exports,arguments)
+},{"dup":157}],202:[function(require,module,exports){
+arguments[4][158][0].apply(exports,arguments)
+},{"dup":158}],203:[function(require,module,exports){
+arguments[4][159][0].apply(exports,arguments)
+},{"dup":159}],204:[function(require,module,exports){
+arguments[4][160][0].apply(exports,arguments)
+},{"_process":6,"dup":160}],205:[function(require,module,exports){
+arguments[4][161][0].apply(exports,arguments)
+},{"./has-flag.js":204,"_process":6,"dup":161,"os":5}],206:[function(require,module,exports){
+arguments[4][106][0].apply(exports,arguments)
+},{"dup":106}],207:[function(require,module,exports){
+arguments[4][107][0].apply(exports,arguments)
+},{"./implementation":206,"dup":107}],208:[function(require,module,exports){
+arguments[4][110][0].apply(exports,arguments)
+},{"dup":110,"function-bind":207}],209:[function(require,module,exports){
+arguments[4][121][0].apply(exports,arguments)
+},{"dup":121}],210:[function(require,module,exports){
+arguments[4][122][0].apply(exports,arguments)
+},{"dup":122}],211:[function(require,module,exports){
+arguments[4][169][0].apply(exports,arguments)
+},{"dup":169,"has":208}],212:[function(require,module,exports){
+arguments[4][170][0].apply(exports,arguments)
+},{"dup":170,"super-json":211}],213:[function(require,module,exports){
+arguments[4][171][0].apply(exports,arguments)
+},{"./JSON_CUSTOM":212,"./stringTransform":214,"./stringTransformExt":215,"./testing":216,"dup":171}],214:[function(require,module,exports){
+arguments[4][172][0].apply(exports,arguments)
+},{"buffer":2,"dup":172}],215:[function(require,module,exports){
+arguments[4][173][0].apply(exports,arguments)
+},{"./stringTransform":214,"dup":173}],216:[function(require,module,exports){
+arguments[4][174][0].apply(exports,arguments)
+},{"./stringTransform":214,"dup":174}],217:[function(require,module,exports){
+arguments[4][123][0].apply(exports,arguments)
+},{"./SyncEventBase":218,"dup":123}],218:[function(require,module,exports){
+arguments[4][124][0].apply(exports,arguments)
+},{"./SyncEventBaseProtected":219,"dup":124}],219:[function(require,module,exports){
+arguments[4][125][0].apply(exports,arguments)
+},{"./defs":220,"dup":125,"run-exclusive":209}],220:[function(require,module,exports){
+arguments[4][126][0].apply(exports,arguments)
+},{"dup":126,"setprototypeof":210}],221:[function(require,module,exports){
+arguments[4][127][0].apply(exports,arguments)
+},{"./SyncEvent":217,"./defs":220,"dup":127}],222:[function(require,module,exports){
+arguments[4][180][0].apply(exports,arguments)
+},{"buffer":2,"dup":180,"ts-events-extended":221}],223:[function(require,module,exports){
+arguments[4][181][0].apply(exports,arguments)
+},{"./IConnection":222,"./api/ApiMessage":224,"./core":228,"./misc":232,"colors":198,"dup":181,"ts-events-extended":221}],224:[function(require,module,exports){
+arguments[4][182][0].apply(exports,arguments)
+},{"../core":228,"../misc":232,"buffer":2,"dup":182,"transfer-tools":213}],225:[function(require,module,exports){
+arguments[4][183][0].apply(exports,arguments)
+},{"../misc":232,"./ApiMessage":224,"colors":198,"dup":183,"util":8}],226:[function(require,module,exports){
+arguments[4][184][0].apply(exports,arguments)
+},{"../misc":232,"./ApiMessage":224,"dup":184,"setprototypeof":210}],227:[function(require,module,exports){
+arguments[4][185][0].apply(exports,arguments)
+},{"./Server":225,"./client":226,"dup":185}],228:[function(require,module,exports){
+arguments[4][186][0].apply(exports,arguments)
+},{"./legacy/sdp":230,"./legacy/sip":231,"buffer":2,"dup":186,"setprototypeof":210}],229:[function(require,module,exports){
+arguments[4][187][0].apply(exports,arguments)
+},{"./Socket":223,"./api":227,"./core":228,"./misc":232,"dup":187}],230:[function(require,module,exports){
+arguments[4][188][0].apply(exports,arguments)
+},{"dup":188}],231:[function(require,module,exports){
+arguments[4][189][0].apply(exports,arguments)
+},{"dup":189}],232:[function(require,module,exports){
+arguments[4][190][0].apply(exports,arguments)
+},{"./core":228,"buffer":2,"dup":190}]},{},[15]);

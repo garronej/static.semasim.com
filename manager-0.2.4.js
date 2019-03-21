@@ -4470,7 +4470,10 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                     webApiCaller.logoutUser();
                     window.location.href = "/login";
                 });
-                connection.connect();
+                connection.connect({
+                    "sessionType": "MAIN",
+                    "requestTurnCred": false
+                });
                 action = (function () {
                     var type = getURLParameter_1.getURLParameter("action");
                     if (!type) {
@@ -9721,7 +9724,7 @@ var socketCurrent = undefined;
 var userSims = undefined;
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
 /** Called from outside isReconnect should never be passed */
-function connect(requestTurnCred, isReconnect) {
+function connect(sessionParams, isReconnect) {
     var _this = this;
     //We register 'offline' event only on the first call of connect()
     if (socketCurrent === undefined) {
@@ -9733,7 +9736,8 @@ function connect(requestTurnCred, isReconnect) {
             socket.destroy("Browser is offline");
         });
     }
-    Cookies.set("requestTurnCred", "" + !!requestTurnCred);
+    Cookies.set("requestTurnCred", "" + sessionParams.requestTurnCred);
+    Cookies.set("sessionType", sessionParams.sessionType);
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
         "remoteAddress": "web." + exports.baseDomain,
         "remotePort": 443
@@ -9761,11 +9765,19 @@ function connect(requestTurnCred, isReconnect) {
         if (!!isReconnect) {
             bootbox_custom.dismissLoading();
         }
+        var includeContacts = (function () {
+            switch (sessionParams.sessionType) {
+                case "MAIN": return true;
+                case "AUXILIARY": return false;
+            }
+        })();
         if (userSims === undefined) {
-            remoteApiCaller.getUsableUserSims().then(function (userSims_) { return userSims = userSims_; });
+            remoteApiCaller.getUsableUserSims(includeContacts)
+                .then(function (userSims_) { return userSims = userSims_; });
         }
         else {
-            remoteApiCaller.getUsableUserSims("STATELESS").then(function (userSims_) {
+            remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
+                .then(function (userSims_) {
                 var e_1, _a;
                 var _loop_1 = function (userSim_) {
                     var userSim = userSims
@@ -9850,7 +9862,7 @@ function connect(requestTurnCred, isReconnect) {
                     _d.sent();
                     return [3 /*break*/, 1];
                 case 3:
-                    connect(requestTurnCred, "RECONNECT");
+                    connect(sessionParams, "RECONNECT");
                     return [2 /*return*/];
             }
         });
@@ -10555,17 +10567,25 @@ exports.getUsableUserSims = (function () {
     var methodName = apiDeclaration.getUsableUserSims.methodName;
     var prUsableUserSims = undefined;
     /**
+     *
+     * includeContacts is true by defaults.
+     *
      * The stateless argument is used to re fetch the userSim from the server regardless
      * of if it have been done previously already, it will return a new array.
      * If the 'stateless' argument is omitted then the returned value is static.
      * ( only one request is sent to the server )
+     *
+     * Note that if the method have already been called and called with
+     * stateless falsy includeContacts will not have any effect.
+     *
      */
-    return function (stateless) {
+    return function (includeContacts, stateless) {
+        if (includeContacts === void 0) { includeContacts = true; }
         if (stateless === void 0) { stateless = false; }
         if (!stateless && !!prUsableUserSims) {
             return prUsableUserSims;
         }
-        var prUsableUserSims_ = sendRequest(methodName, undefined);
+        var prUsableUserSims_ = sendRequest(methodName, { includeContacts: includeContacts });
         if (!!stateless) {
             return prUsableUserSims_;
         }
@@ -10878,13 +10898,13 @@ exports.shouldAppendPromotionalMessage = (function () {
         return sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
     };
 })();
-//WebData sync things :
-exports.getUaInstanceIdAndEmail = (function () {
-    var methodName = apiDeclaration.getUaInstanceIdAndEmail.methodName;
+exports.getUaInstanceId = (function () {
+    var methodName = apiDeclaration.getUaInstanceId.methodName;
     return function () {
         return sendRequest(methodName, undefined);
     };
 })();
+//WebData sync things :
 exports.getOrCreateWdInstance = (function () {
     var methodName = apiDeclaration.getOrCreateInstance.methodName;
     function synchronizeUserSimAndWdInstance(userSim, wdInstance) {
@@ -12026,11 +12046,11 @@ var shouldAppendPromotionalMessage;
 (function (shouldAppendPromotionalMessage) {
     shouldAppendPromotionalMessage.methodName = "shouldAppendSenTWithSemasim";
 })(shouldAppendPromotionalMessage = exports.shouldAppendPromotionalMessage || (exports.shouldAppendPromotionalMessage = {}));
+var getUaInstanceId;
+(function (getUaInstanceId) {
+    getUaInstanceId.methodName = "getUaCredentials";
+})(getUaInstanceId = exports.getUaInstanceId || (exports.getUaInstanceId = {}));
 //WebphoneData Sync things:
-var getUaInstanceIdAndEmail;
-(function (getUaInstanceIdAndEmail) {
-    getUaInstanceIdAndEmail.methodName = "getUaInstanceIdAndEmail";
-})(getUaInstanceIdAndEmail = exports.getUaInstanceIdAndEmail || (exports.getUaInstanceIdAndEmail = {}));
 var getOrCreateInstance;
 (function (getOrCreateInstance) {
     getOrCreateInstance.methodName = "getInstance";

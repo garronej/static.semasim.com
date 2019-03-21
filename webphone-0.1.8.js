@@ -4613,6 +4613,8 @@ var UiWebphoneController = /** @class */ (function () {
             }
             else {
                 _this.uiQuickAction.evtVoiceCall.post(action.number);
+                console.log("Playing water droplet debug");
+                ion.sound.play("water_droplet");
                 _this.uiVoiceCall.evtModalClosed.attach(function () {
                     return window.location.href = backToAndroidAppUrl_1.backToAppUrl;
                 });
