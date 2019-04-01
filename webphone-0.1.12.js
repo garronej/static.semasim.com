@@ -14809,8 +14809,12 @@ function connect(connectionParams, isReconnect) {
     Cookies.set("requestTurnCred", "" + connectionParams.requestTurnCred);
     {
         var uaInstanceId = connectionParams.uaInstanceId;
+        var key = "uaInstanceId";
         if (uaInstanceId !== undefined) {
-            Cookies.set("uaInstanceId", "" + uaInstanceId);
+            Cookies.set(key, uaInstanceId);
+        }
+        else {
+            Cookies.remove(key);
         }
     }
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
