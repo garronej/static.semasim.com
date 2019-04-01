@@ -1,0 +1,36 @@
+@font-face {
+	font-family: 'Quattrocento Sans';
+	font-style: normal;
+	font-weight: 400;
+	src:
+		local('Quattrocento Sans'),
+		local('QuattrocentoSans'),
+		/* from https://fonts.gstatic.com/s/quattrocentosans/v11/va9c4lja2NVIDdIAAoMR5MfuElaRB0zJt08.woff2 */
+		url('Quattrocento_Sans_400.woff2') format('woff2'),
+		/* from https://fonts.gstatic.com/s/quattrocentosans/v11/va9c4lja2NVIDdIAAoMR5MfuElaRB0zJt0k.woff */
+		url('Quattrocento_Sans_400.woff') format('woff'),
+		/* from https://fonts.gstatic.com/s/quattrocentosans/v11/va9c4lja2NVIDdIAAoMR5MfuElaRB0zJt0s.eot */
+		url('Quattrocento_Sans_400.eot?#iefix') format('embedded-opentype'),
+		/* from https://fonts.gstatic.com/l/font?kit=va9c4lja2NVIDdIAAoMR5MfuElaRB0zJt0g&skey=4b4d15162b835c7c&v=v11#QuattrocentoSans */
+		url('Quattrocento_Sans_400.svg#QuattrocentoSans') format('svg'),
+		/* from https://fonts.gstatic.com/s/quattrocentosans/v11/va9c4lja2NVIDdIAAoMR5MfuElaRB0zJt0o.ttf */
+		url('Quattrocento_Sans_400.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'Quattrocento Sans';
+	font-style: normal;
+	font-weight: 700;
+	src:
+		local('Quattrocento Sans Bold'),
+		local('QuattrocentoSans-Bold'),
+		/* from https://fonts.gstatic.com/s/quattrocentosans/v11/va9Z4lja2NVIDdIAAoMR5MfuElaRB0RyklrRPXw.woff2 */
+		url('Quattrocento_Sans_700.woff2') format('woff2'),
+		/* from https://fonts.gstatic.com/s/quattrocentosans/v11/va9Z4lja2NVIDdIAAoMR5MfuElaRB0RyklrRPXo.woff */
+		url('Quattrocento_Sans_700.woff') format('woff'),
+		/* from https://fonts.gstatic.com/s/quattrocentosans/v11/va9Z4lja2NVIDdIAAoMR5MfuElaRB0RyklrRPXg.eot */
+		url('Quattrocento_Sans_700.eot?#iefix') format('embedded-opentype'),
+		/* from https://fonts.gstatic.com/l/font?kit=va9Z4lja2NVIDdIAAoMR5MfuElaRB0RyklrRPXs&skey=48f79e8b8193b1cc&v=v11#QuattrocentoSans */
+		url('Quattrocento_Sans_700.svg#QuattrocentoSans') format('svg'),
+		/* from https://fonts.gstatic.com/s/quattrocentosans/v11/va9Z4lja2NVIDdIAAoMR5MfuElaRB0RyklrRPXk.ttf */
+		url('Quattrocento_Sans_700.ttf') format('truetype');
+}
