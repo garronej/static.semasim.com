@@ -3659,6 +3659,16 @@ exports.UiQuickAction = UiQuickAction;
 },{"../../../shared/dist/lib/loadUiClassHtml":137,"../../../shared/dist/lib/tools/bootbox_custom":141,"../templates/UiQuickAction.html":132,"phone-number":120,"ts-events-extended":127}],13:[function(require,module,exports){
 "use strict";
 //NOTE: Require ion sound loaded on the page.
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
@@ -3792,6 +3802,7 @@ var UiVoiceCall = /** @class */ (function () {
     };
     UiVoiceCall.prototype.setState = function (state, message) {
         var _this = this;
+        var e_1, _a;
         if (state === this.state) {
             return;
         }
@@ -3810,9 +3821,21 @@ var UiVoiceCall = /** @class */ (function () {
         this.btnRed.addClass("hide");
         this.showModal();
         try {
-            ion.sound.stop("semasim_ringtone");
+            try {
+                for (var _b = __values(["semasim_ringtone", "loading"]), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var soundName = _c.value;
+                    ion.sound.stop(soundName);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
         }
-        catch (_a) { }
+        catch (_d) { }
         switch (state) {
             case "RINGING":
                 ion.sound.play("semasim_ringtone", { "loop": true });
@@ -3830,6 +3853,7 @@ var UiVoiceCall = /** @class */ (function () {
                 spanTimer["timer"]("start");
                 break;
             case "LOADING":
+                ion.sound.play("loading", { "loop": true });
                 this.btnRed.removeClass("hide").html("Cancel");
                 this.structure.find(".id_icon-spin").removeClass("hide");
                 break;
