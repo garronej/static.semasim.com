@@ -10447,7 +10447,7 @@ exports.evtOpenElsewhere = new ts_events_extended_1.VoidSyncEvent();
         "handler": function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 exports.evtOpenElsewhere.post();
-                bootbox_custom.alert("This session is over, only one semasim web browser tab can be active.");
+                bootbox_custom.alert("You are connected somewhere else", function () { return location.reload(); });
                 return [2 /*return*/, undefined];
             });
         }); }
