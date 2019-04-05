@@ -4453,6 +4453,11 @@ if (!Array.from)
 if (!ArrayBuffer.isView) {
     Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
 }
+if (typeof String.prototype.startsWith != 'function') {
+    String.prototype.startsWith = function startsWith(str) {
+        return this.indexOf(str) === 0;
+    };
+}
 var connection = require("../../../shared/dist/lib/toBackend/connection");
 var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var UiController_1 = require("./UiController");
