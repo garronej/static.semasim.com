@@ -2958,7 +2958,7 @@ var UiButtonBar = /** @class */ (function () {
 }());
 exports.UiButtonBar = UiButtonBar;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":136,"../templates/UiButtonBar.html":128,"ts-events-extended":127}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":135,"../templates/UiButtonBar.html":128,"ts-events-extended":127}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -3001,7 +3001,6 @@ var types = require("../../../shared/dist/lib/types");
 var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var backToAndroidAppUrl_1 = require("../../../shared/dist/lib/backToAndroidAppUrl");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var UiButtonBar_1 = require("./UiButtonBar");
 var UiPhonebook_1 = require("./UiPhonebook");
@@ -3010,10 +3009,9 @@ var UiShareSim_1 = require("./UiShareSim");
 var phone_number_1 = require("phone-number");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
 var UiController = /** @class */ (function () {
-    function UiController(userSims, action) {
+    function UiController(userSims) {
         var _this = this;
         this.userSims = userSims;
-        this.action = action;
         this.structure = html.structure.clone();
         this.uiButtonBar = new UiButtonBar_1.UiButtonBar();
         this.uiShareSim = new UiShareSim_1.UiShareSim((function () {
@@ -3039,7 +3037,6 @@ var UiController = /** @class */ (function () {
         }
         remoteApiCaller.evtUsableSim.attach(function (userSim) { return _this.addUserSim(userSim); });
         localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) { return _this.removeUserSim(userSim); });
-        this.handleAction();
     }
     UiController.prototype.setState = function (placeholder) {
         switch (placeholder) {
@@ -3132,107 +3129,6 @@ var UiController = /** @class */ (function () {
             });
         });
     };
-    UiController.prototype.handleAction = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var action, userSim, uiSimRow;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!this.action) {
-                            return [2 /*return*/];
-                        }
-                        action = this.action;
-                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
-                                var _a, userSims_1, prettyNumber_1, index;
-                                return __generator(this, function (_b) {
-                                    switch (_b.label) {
-                                        case 0:
-                                            _a = action.type;
-                                            switch (_a) {
-                                                case "UPDATE_CONTACT_NAME": return [3 /*break*/, 1];
-                                                case "DELETE_CONTACT": return [3 /*break*/, 1];
-                                                case "CREATE_CONTACT": return [3 /*break*/, 9];
-                                            }
-                                            return [3 /*break*/, 10];
-                                        case 1: return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
-                                        case 2:
-                                            _b.sent();
-                                            userSims_1 = this.userSims
-                                                .filter(function (_a) {
-                                                var phonebook = _a.phonebook;
-                                                return !!phonebook.find(function (_a) {
-                                                    var number_raw = _a.number_raw;
-                                                    return phone_number_1.phoneNumber.areSame(action.number, number_raw);
-                                                });
-                                            });
-                                            prettyNumber_1 = phone_number_1.phoneNumber.prettyPrint(action.number);
-                                            if (!(userSims_1.length === 0)) return [3 /*break*/, 4];
-                                            return [4 /*yield*/, new Promise(function (resolve) {
-                                                    return bootbox_custom.alert([
-                                                        prettyNumber_1 + " is not saved in any of your SIM phonebook.",
-                                                        "Use the android contacts native feature to edit contact stored in your phone."
-                                                    ].join("<br>"), function () { return resolve(); });
-                                                })];
-                                        case 3:
-                                            _b.sent();
-                                            return [2 /*return*/, undefined];
-                                        case 4:
-                                            if (userSims_1.length === 1) {
-                                                return [2 /*return*/, userSims_1.pop()];
-                                            }
-                                            _b.label = 5;
-                                        case 5: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                                "title": prettyNumber_1 + " is present in " + userSims_1.length + ", select phonebook to edit.",
-                                                "inputType": "select",
-                                                "inputOptions": userSims_1.map(function (userSim) { return ({
-                                                    "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
-                                                    "value": userSims_1.indexOf(userSim)
-                                                }); }),
-                                                "callback": function (indexAsString) { return resolve(parseInt(indexAsString)); }
-                                            }); })];
-                                        case 6:
-                                            index = _b.sent();
-                                            if (!(index === null)) return [3 /*break*/, 8];
-                                            return [4 /*yield*/, new Promise(function (resolve) {
-                                                    return bootbox_custom.alert("No SIM selected, aborting.", function () { return resolve(); });
-                                                })];
-                                        case 7:
-                                            _b.sent();
-                                            return [2 /*return*/, undefined];
-                                        case 8: return [2 /*return*/, userSims_1[index]];
-                                        case 9: return [2 /*return*/, this.userSims.find(function (_a) {
-                                                var sim = _a.sim;
-                                                return sim.imsi === action.imsi;
-                                            })];
-                                        case 10: return [2 /*return*/];
-                                    }
-                                });
-                            }); })()];
-                    case 1:
-                        userSim = _a.sent();
-                        if (!userSim) {
-                            window.location.href = backToAndroidAppUrl_1.backToAppUrl;
-                            return [2 /*return*/];
-                        }
-                        if (!!userSim.isOnline) return [3 /*break*/, 3];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert(userSim.friendlyName + " is not currently online. Can't edit phonebook", function () { return resolve(); });
-                            })];
-                    case 2:
-                        _a.sent();
-                        window.location.href = backToAndroidAppUrl_1.backToAppUrl;
-                        return [2 /*return*/];
-                    case 3:
-                        uiSimRow = this.uiSimRows.find(function (uiSimRow) { return uiSimRow.userSim === userSim; });
-                        uiSimRow.structure.click();
-                        //NOTE: Spaghetti code continue in evtClickContact handler....
-                        this.uiButtonBar.evtClickContacts.post();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
     UiController.prototype.getSelectedUiSimRow = function (notUiSimRow) {
         return this.uiSimRows.find(function (uiSimRow) { return uiSimRow !== notUiSimRow && uiSimRow.isSelected; });
     };
@@ -3305,50 +3201,21 @@ var UiController = /** @class */ (function () {
             }
         });
         this.uiButtonBar.evtClickContacts.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim, uiPhonebook, pr;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var userSim, uiPhonebook, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         userSim = this.getSelectedUiSimRow().userSim;
-                        uiPhonebook = this.uiPhonebooks.find(function (uiPhonebook) { return uiPhonebook.userSim === userSim; });
-                        if (!!uiPhonebook) return [3 /*break*/, 2];
+                        _a = this.uiPhonebooks.find(function (uiPhonebook) { return uiPhonebook.userSim === userSim; });
+                        if (_a) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.initUiPhonebook(userSim)];
                     case 1:
-                        uiPhonebook = _a.sent();
-                        _a.label = 2;
+                        _a = (_b.sent());
+                        _b.label = 2;
                     case 2:
-                        if (!!this.action) return [3 /*break*/, 3];
+                        uiPhonebook = _a;
                         uiPhonebook.showModal();
-                        return [3 /*break*/, 6];
-                    case 3:
-                        pr = void 0;
-                        switch (this.action.type) {
-                            case "CREATE_CONTACT":
-                                pr = uiPhonebook.interact_createContact(this.action.number);
-                                break;
-                            case "UPDATE_CONTACT_NAME":
-                                pr = uiPhonebook.interact_updateContact(this.action.number);
-                                break;
-                            case "DELETE_CONTACT":
-                                pr = uiPhonebook.interact_deleteContacts(this.action.number);
-                                break;
-                        }
-                        this.action = undefined;
-                        return [4 /*yield*/, pr];
-                    case 4:
-                        _a.sent();
-                        //NOTE: Do not remove this feedback as it leave the time 
-                        //to the push notification to land before we go back to app.
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("Success", function () { return resolve(); });
-                            })];
-                    case 5:
-                        //NOTE: Do not remove this feedback as it leave the time 
-                        //to the push notification to land before we go back to app.
-                        _a.sent();
-                        window.location.href = backToAndroidAppUrl_1.backToAppUrl;
-                        _a.label = 6;
-                    case 6: return [2 /*return*/];
+                        return [2 /*return*/];
                 }
             });
         }); });
@@ -3478,11 +3345,175 @@ var UiController = /** @class */ (function () {
             });
         });
     };
+    UiController.prototype.interact_updateContactName = function (number) {
+        return this.interact_({ "type": "UPDATE_CONTACT_NAME", number: number });
+    };
+    UiController.prototype.interact_deleteContact = function (number) {
+        return this.interact_({ "type": "DELETE_CONTACT", number: number });
+    };
+    UiController.prototype.interact_createContact = function (imsi, number) {
+        return this.interact_({ "type": "CREATE_CONTACT", imsi: imsi, number: number });
+    };
+    UiController.prototype.interact_ = function (action) {
+        return __awaiter(this, void 0, void 0, function () {
+            var userSim, _a, uiPhonebook, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        if (!("imsi" in action)) return [3 /*break*/, 1];
+                        _a = this.userSims.find(function (_a) {
+                            var sim = _a.sim;
+                            return sim.imsi === action.imsi;
+                        });
+                        return [3 /*break*/, 3];
+                    case 1: return [4 /*yield*/, interact_getUserSimContainingNumber(this.userSims, action.number)];
+                    case 2:
+                        _a = _d.sent();
+                        _d.label = 3;
+                    case 3:
+                        userSim = _a;
+                        if (!!userSim) return [3 /*break*/, 5];
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.alert("No SIM selected, aborting.", function () { return resolve(); });
+                            })];
+                    case 4:
+                        _d.sent();
+                        return [2 /*return*/];
+                    case 5:
+                        if (!!userSim.isOnline) return [3 /*break*/, 7];
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.alert(userSim.friendlyName + " is not currently online. Can't edit phonebook", function () { return resolve(); });
+                            })];
+                    case 6:
+                        _d.sent();
+                        return [2 /*return*/];
+                    case 7:
+                        _b = this.uiPhonebooks.find(function (uiPhonebook) { return uiPhonebook.userSim === userSim; });
+                        if (_b) return [3 /*break*/, 9];
+                        return [4 /*yield*/, this.initUiPhonebook(userSim)];
+                    case 8:
+                        _b = (_d.sent());
+                        _d.label = 9;
+                    case 9:
+                        uiPhonebook = _b;
+                        _c = action.type;
+                        switch (_c) {
+                            case "CREATE_CONTACT": return [3 /*break*/, 10];
+                            case "DELETE_CONTACT": return [3 /*break*/, 12];
+                            case "UPDATE_CONTACT_NAME": return [3 /*break*/, 14];
+                        }
+                        return [3 /*break*/, 16];
+                    case 10: return [4 /*yield*/, uiPhonebook.interact_createContact(action.number)];
+                    case 11:
+                        _d.sent();
+                        return [3 /*break*/, 16];
+                    case 12: return [4 /*yield*/, uiPhonebook.interact_deleteContacts(action.number)];
+                    case 13:
+                        _d.sent();
+                        return [3 /*break*/, 16];
+                    case 14: return [4 /*yield*/, uiPhonebook.interact_updateContact(action.number)];
+                    case 15:
+                        _d.sent();
+                        return [3 /*break*/, 16];
+                    case 16: return [2 /*return*/];
+                }
+            });
+        });
+    };
     return UiController;
 }());
 exports.UiController = UiController;
+/** Interact only if more than one SIM holds the phone number */
+function interact_getUserSimContainingNumber(userSims, number) {
+    return __awaiter(this, void 0, void 0, function () {
+        var userSimsContainingNumber, getPrettyNumber, index;
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    userSimsContainingNumber = userSims
+                        .filter(function (_a) {
+                        var phonebook = _a.phonebook;
+                        return !!phonebook.find(function (_a) {
+                            var number_raw = _a.number_raw;
+                            return phone_number_1.phoneNumber.areSame(number, number_raw);
+                        });
+                    });
+                    getPrettyNumber = (function () {
+                        var prettyNumber = undefined;
+                        return function () { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        if (prettyNumber !== undefined) {
+                                            return [2 /*return*/, prettyNumber];
+                                        }
+                                        if (!!UiPhonebook_1.UiPhonebook.isPhoneNumberUtilityScriptLoaded) return [3 /*break*/, 2];
+                                        return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
+                                    case 1:
+                                        _a.sent();
+                                        _a.label = 2;
+                                    case 2: return [2 /*return*/, prettyNumber = phone_number_1.phoneNumber.prettyPrint(number)];
+                                }
+                            });
+                        }); };
+                    })();
+                    if (!(userSimsContainingNumber.length === 0)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                            var _a, _b;
+                            return __generator(this, function (_c) {
+                                switch (_c.label) {
+                                    case 0:
+                                        _b = (_a = bootbox_custom).alert;
+                                        return [4 /*yield*/, getPrettyNumber()];
+                                    case 1: return [2 /*return*/, _b.apply(_a, [[
+                                                (_c.sent()) + " is not saved in any of your SIM phonebook.",
+                                                "Use the android contacts native feature to edit contact stored in your phone."
+                                            ].join("<br>"),
+                                            function () { return resolve(); }])];
+                                }
+                            });
+                        }); })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/, undefined];
+                case 2:
+                    if (userSimsContainingNumber.length === 1) {
+                        return [2 /*return*/, userSimsContainingNumber.pop()];
+                    }
+                    _a.label = 3;
+                case 3: return [4 /*yield*/, new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, _b, _c, _d;
+                        return __generator(this, function (_e) {
+                            switch (_e.label) {
+                                case 0:
+                                    _b = (_a = bootbox_custom).prompt;
+                                    _c = {};
+                                    _d = "title";
+                                    return [4 /*yield*/, getPrettyNumber()];
+                                case 1: return [2 /*return*/, _b.apply(_a, [(_c[_d] = (_e.sent()) + " is present in " + userSimsContainingNumber.length + ", select phonebook to edit.",
+                                            _c["inputType"] = "select",
+                                            _c["inputOptions"] = userSimsContainingNumber.map(function (userSim) { return ({
+                                                "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
+                                                "value": userSimsContainingNumber.indexOf(userSim)
+                                            }); }),
+                                            _c["callback"] = function (indexAsString) { return resolve(parseInt(indexAsString)); },
+                                            _c)])];
+                            }
+                        });
+                    }); })];
+                case 4:
+                    index = _a.sent();
+                    if (index === null) {
+                        return [2 /*return*/, undefined];
+                    }
+                    return [2 /*return*/, userSimsContainingNumber[index]];
+            }
+        });
+    });
+}
 
-},{"../../../shared/dist/lib/backToAndroidAppUrl":135,"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/toBackend/localApiHandlers":138,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/types":144,"../templates/UiController.html":129,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":120,"ts-events-extended":127}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":135,"../../../shared/dist/lib/toBackend/localApiHandlers":137,"../../../shared/dist/lib/toBackend/remoteApiCaller":138,"../../../shared/dist/lib/tools/bootbox_custom":139,"../../../shared/dist/lib/types":142,"../templates/UiController.html":129,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":120,"ts-events-extended":127}],11:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -4019,7 +4050,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/toBackend/connection":137,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder":142,"../../../shared/dist/lib/tools/modal_stack":143,"../templates/UiPhonebook.html":130,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":135,"../../../shared/dist/lib/toBackend/connection":136,"../../../shared/dist/lib/tools/bootbox_custom":139,"../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder":140,"../../../shared/dist/lib/tools/modal_stack":141,"../templates/UiPhonebook.html":130,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4251,7 +4282,7 @@ var UiShareSim = /** @class */ (function () {
 }());
 exports.UiShareSim = UiShareSim;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/modal_stack":143,"../templates/UiShareSim.html":131,"../templates/UiShareSim.less":132,"ts-events-extended":127}],13:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":135,"../../../shared/dist/lib/tools/bootbox_custom":139,"../../../shared/dist/lib/tools/modal_stack":141,"../templates/UiShareSim.html":131,"../templates/UiShareSim.less":132,"ts-events-extended":127}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -4406,8 +4437,7 @@ var UiSimRow = /** @class */ (function () {
 }());
 exports.UiSimRow = UiSimRow;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":136,"../templates/UiSimRow.html":133,"../templates/UiSimRow.less":134,"ts-events-extended":127}],14:[function(require,module,exports){
-(function (Buffer){
+},{"../../../shared/dist/lib/loadUiClassHtml":135,"../templates/UiSimRow.html":133,"../templates/UiSimRow.less":134,"ts-events-extended":127}],14:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4460,9 +4490,73 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var UiController_1 = require("./UiController");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
-var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
+try {
+    androidEventHandlers;
+    window.onerror = function (msg, url, lineNumber) {
+        androidEventHandlers.onDone(msg + "\n'" + url + ":" + lineNumber);
+        return false;
+    };
+    if ("onPossiblyUnhandledRejection" in Promise) {
+        Promise.onPossiblyUnhandledRejection(function (error) {
+            androidEventHandlers.onDone(error.message + " " + error.stack);
+        });
+    }
+}
+catch (_a) {
+}
+var resolvePrUiController;
+window["exposedToAndroid"] = (function () {
+    var prUiController = new Promise(function (resolve) { return resolvePrUiController = resolve; });
+    return {
+        "createContact": function (imsi, number) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, prUiController];
+                    case 1: return [4 /*yield*/, (_a.sent()).interact_createContact(imsi, number)];
+                    case 2:
+                        _a.sent();
+                        try {
+                            androidEventHandlers.onDone(null);
+                        }
+                        catch (_b) { }
+                        return [2 /*return*/];
+                }
+            });
+        }); },
+        "updateContactName": function (number) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, prUiController];
+                    case 1: return [4 /*yield*/, (_a.sent()).interact_updateContactName(number)];
+                    case 2:
+                        _a.sent();
+                        try {
+                            androidEventHandlers.onDone(null);
+                        }
+                        catch (_b) { }
+                        return [2 /*return*/];
+                }
+            });
+        }); },
+        "deleteContact": function (number) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, prUiController];
+                    case 1: return [4 /*yield*/, (_a.sent()).interact_deleteContact(number)];
+                    case 2:
+                        _a.sent();
+                        try {
+                            androidEventHandlers.onDone(null);
+                        }
+                        catch (_b) { }
+                        return [2 /*return*/];
+                }
+            });
+        }); }
+    };
+})();
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var action, uiController, _a;
+    var uiController, _a;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -4470,32 +4564,12 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                     webApiCaller.logoutUser();
                     window.location.href = "/login";
                 });
-                connection.connect();
-                action = (function () {
-                    var type = getURLParameter_1.getURLParameter("action");
-                    if (!type) {
-                        return undefined;
-                    }
-                    var getNumber = function () { return Buffer.from(getURLParameter_1.getURLParameter("number_as_hex"), "hex").toString("utf8"); };
-                    switch (type) {
-                        case "UPDATE_CONTACT_NAME":
-                        case "DELETE_CONTACT":
-                            return {
-                                type: type,
-                                "number": getNumber()
-                            };
-                        case "CREATE_CONTACT": return {
-                            type: type,
-                            "number": getNumber(),
-                            "imsi": getURLParameter_1.getURLParameter("imsi")
-                        };
-                    }
-                })();
+                connection.connect({ "requestTurnCred": false });
                 _a = UiController_1.UiController.bind;
                 return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
             case 1:
-                uiController = new (_a.apply(UiController_1.UiController, [void 0, _b.sent(),
-                    action]))();
+                uiController = new (_a.apply(UiController_1.UiController, [void 0, _b.sent()]))();
+                resolvePrUiController(uiController);
                 $("#page-payload").html("").append(uiController.structure);
                 $("#register-new-sim")
                     .removeClass("hidden")
@@ -4506,8 +4580,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-}).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/toBackend/connection":137,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/getURLParameter":141,"../../../shared/dist/lib/webApiCaller":145,"./UiController":10,"array-from":15,"array.prototype.find":18,"buffer":2,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":136,"../../../shared/dist/lib/toBackend/remoteApiCaller":138,"../../../shared/dist/lib/tools/bootbox_custom":139,"../../../shared/dist/lib/webApiCaller":143,"./UiController":10,"array-from":15,"array.prototype.find":18,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
 module.exports = (typeof Array.from === 'function' ?
   Array.from :
   require('./polyfill')
@@ -9637,11 +9710,6 @@ var css = ".id_UiSimRow .id_row {\n  cursor: pointer;\n}\n.id_UiSimRow .selected
 },{"lessify":116}],135:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.backToAppUrl = "semasim://main";
-
-},{}],136:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
 function loadUiClassHtml(html, widgetClassName) {
     var wrap = $("<div>").html(html);
@@ -9653,7 +9721,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],137:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9720,8 +9788,18 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
 var socketCurrent = undefined;
 var userSims = undefined;
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
-/** Called from outside isReconnect should never be passed */
-function connect(requestTurnCred, isReconnect) {
+/**
+ * Pass uaInstanceId to connect as an auxiliary connection of the user account.
+ * - Multiple auxiliary connection can be established at the same time.
+ * - On the contrary only one main connection can be active at the same time for a given user account )
+ * - Auxiliary connections does not receive most of the events defined in localApiHandler.
+ *   But will receive notifyIceServer ( if requestTurnCred === true ).
+ * - Auxiliary connections will not receive phonebook entries
+ * ( userSims will appear as if they had no contacts stored )
+ *
+ * Called from outside isReconnect should never be passed.
+ *  */
+function connect(connectionParams, isReconnect) {
     var _this = this;
     //We register 'offline' event only on the first call of connect()
     if (socketCurrent === undefined) {
@@ -9733,7 +9811,17 @@ function connect(requestTurnCred, isReconnect) {
             socket.destroy("Browser is offline");
         });
     }
-    Cookies.set("requestTurnCred", "" + !!requestTurnCred);
+    Cookies.set("requestTurnCred", "" + connectionParams.requestTurnCred);
+    {
+        var uaInstanceId = connectionParams.uaInstanceId;
+        var key = "uaInstanceId";
+        if (uaInstanceId !== undefined) {
+            Cookies.set(key, uaInstanceId);
+        }
+        else {
+            Cookies.remove(key);
+        }
+    }
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
         "remoteAddress": "web." + exports.baseDomain,
         "remotePort": 443
@@ -9761,11 +9849,14 @@ function connect(requestTurnCred, isReconnect) {
         if (!!isReconnect) {
             bootbox_custom.dismissLoading();
         }
+        var includeContacts = connectionParams.uaInstanceId === undefined;
         if (userSims === undefined) {
-            remoteApiCaller.getUsableUserSims().then(function (userSims_) { return userSims = userSims_; });
+            remoteApiCaller.getUsableUserSims(includeContacts)
+                .then(function (userSims_) { return userSims = userSims_; });
         }
         else {
-            remoteApiCaller.getUsableUserSims("STATELESS").then(function (userSims_) {
+            remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
+                .then(function (userSims_) {
                 var e_1, _a;
                 var _loop_1 = function (userSim_) {
                     var userSim = userSims
@@ -9850,7 +9941,7 @@ function connect(requestTurnCred, isReconnect) {
                     _d.sent();
                     return [3 /*break*/, 1];
                 case 3:
-                    connect(requestTurnCred, "RECONNECT");
+                    connect(connectionParams, "RECONNECT");
                     return [2 /*return*/];
             }
         });
@@ -9869,7 +9960,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../tools/bootbox_custom":140,"./localApiHandlers":138,"./remoteApiCaller":139,"js-cookie":165,"ts-events-extended":179,"ts-sip":187}],138:[function(require,module,exports){
+},{"../tools/bootbox_custom":139,"./localApiHandlers":137,"./remoteApiCaller":138,"js-cookie":163,"ts-events-extended":177,"ts-sip":185}],137:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10424,7 +10515,7 @@ exports.evtOpenElsewhere = new ts_events_extended_1.VoidSyncEvent();
         "handler": function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 exports.evtOpenElsewhere.post();
-                bootbox_custom.alert("This session is over, only one semasim web browser tab can be active.");
+                bootbox_custom.alert("You are connected somewhere else", function () { return location.reload(); });
                 return [2 /*return*/, undefined];
             });
         }); }
@@ -10482,7 +10573,7 @@ exports.getRTCIceServer = (function () {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":147,"../tools/bootbox_custom":140,"./remoteApiCaller":139,"chan-dongle-extended-client/dist/lib/types":149,"ts-events-extended":179}],139:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":145,"../tools/bootbox_custom":139,"./remoteApiCaller":138,"chan-dongle-extended-client/dist/lib/types":147,"ts-events-extended":177}],138:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -10555,17 +10646,25 @@ exports.getUsableUserSims = (function () {
     var methodName = apiDeclaration.getUsableUserSims.methodName;
     var prUsableUserSims = undefined;
     /**
+     *
+     * includeContacts is true by defaults.
+     *
      * The stateless argument is used to re fetch the userSim from the server regardless
      * of if it have been done previously already, it will return a new array.
      * If the 'stateless' argument is omitted then the returned value is static.
      * ( only one request is sent to the server )
+     *
+     * Note that if the method have already been called and called with
+     * stateless falsy includeContacts will not have any effect.
+     *
      */
-    return function (stateless) {
+    return function (includeContacts, stateless) {
+        if (includeContacts === void 0) { includeContacts = true; }
         if (stateless === void 0) { stateless = false; }
         if (!stateless && !!prUsableUserSims) {
             return prUsableUserSims;
         }
-        var prUsableUserSims_ = sendRequest(methodName, undefined);
+        var prUsableUserSims_ = sendRequest(methodName, { includeContacts: includeContacts });
         if (!!stateless) {
             return prUsableUserSims_;
         }
@@ -10878,13 +10977,13 @@ exports.shouldAppendPromotionalMessage = (function () {
         return sendRequest(methodName, undefined).then(function (response) { return cachedResponse = response; });
     };
 })();
-//WebData sync things :
-exports.getUaInstanceIdAndEmail = (function () {
-    var methodName = apiDeclaration.getUaInstanceIdAndEmail.methodName;
+exports.getUaInstanceId = (function () {
+    var methodName = apiDeclaration.getUaInstanceId.methodName;
     return function () {
         return sendRequest(methodName, undefined);
     };
 })();
+//WebData sync things :
 exports.getOrCreateWdInstance = (function () {
     var methodName = apiDeclaration.getOrCreateInstance.methodName;
     function synchronizeUserSimAndWdInstance(userSim, wdInstance) {
@@ -11348,7 +11447,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":146,"../types":144,"./connection":137,"phone-number":166,"ts-events-extended":179,"ts-sip":187}],140:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":144,"../types":142,"./connection":136,"phone-number":164,"ts-events-extended":177,"ts-sip":185}],139:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11456,22 +11555,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":143}],141:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function getURLParameter(sParam) {
-    var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split("&");
-    for (var i = 0; i < sURLVariables.length; i++) {
-        var sParameterName = sURLVariables[i].split("=");
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1];
-        }
-    }
-}
-exports.getURLParameter = getURLParameter;
-
-},{}],142:[function(require,module,exports){
+},{"./modal_stack":141}],140:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -11494,7 +11578,7 @@ function isAscendingAlphabeticalOrder(a, b) {
 }
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
 
-},{}],143:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -11613,7 +11697,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],144:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -11810,7 +11894,7 @@ var webphoneData;
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
 
-},{"./tools/isAscendingAlphabeticalOrder":142}],145:[function(require,module,exports){
+},{"./tools/isAscendingAlphabeticalOrder":140}],143:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11965,7 +12049,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":148,"transfer-tools/dist/lib/JSON_CUSTOM":170}],146:[function(require,module,exports){
+},{"../web_api_declaration":146,"transfer-tools/dist/lib/JSON_CUSTOM":168}],144:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -12026,11 +12110,11 @@ var shouldAppendPromotionalMessage;
 (function (shouldAppendPromotionalMessage) {
     shouldAppendPromotionalMessage.methodName = "shouldAppendSenTWithSemasim";
 })(shouldAppendPromotionalMessage = exports.shouldAppendPromotionalMessage || (exports.shouldAppendPromotionalMessage = {}));
+var getUaInstanceId;
+(function (getUaInstanceId) {
+    getUaInstanceId.methodName = "getUaCredentials";
+})(getUaInstanceId = exports.getUaInstanceId || (exports.getUaInstanceId = {}));
 //WebphoneData Sync things:
-var getUaInstanceIdAndEmail;
-(function (getUaInstanceIdAndEmail) {
-    getUaInstanceIdAndEmail.methodName = "getUaInstanceIdAndEmail";
-})(getUaInstanceIdAndEmail = exports.getUaInstanceIdAndEmail || (exports.getUaInstanceIdAndEmail = {}));
 var getOrCreateInstance;
 (function (getOrCreateInstance) {
     getOrCreateInstance.methodName = "getInstance";
@@ -12064,7 +12148,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],147:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -12117,7 +12201,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],148:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -12158,7 +12242,7 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],149:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -12179,7 +12263,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],150:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -12382,7 +12466,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":151,"./custom/zalgo":152,"./maps/america":155,"./maps/rainbow":156,"./maps/random":157,"./maps/zebra":158,"./styles":159,"./system/supports-colors":161,"util":8}],151:[function(require,module,exports){
+},{"./custom/trap":149,"./custom/zalgo":150,"./maps/america":153,"./maps/rainbow":154,"./maps/random":155,"./maps/zebra":156,"./styles":157,"./system/supports-colors":159,"util":8}],149:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -12430,7 +12514,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],152:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -12542,7 +12626,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],153:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -12654,7 +12738,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":150}],154:[function(require,module,exports){
+},{"./colors":148}],152:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -12669,7 +12753,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":150,"./extendStringPrototype":153}],155:[function(require,module,exports){
+},{"./colors":148,"./extendStringPrototype":151}],153:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -12681,7 +12765,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],156:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -12695,7 +12779,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],157:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -12707,14 +12791,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],158:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],159:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -12793,7 +12877,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],160:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -12832,7 +12916,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],161:[function(require,module,exports){
+},{"_process":6}],159:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -12987,13 +13071,13 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":160,"_process":6,"os":5}],162:[function(require,module,exports){
+},{"./has-flag.js":158,"_process":6,"os":5}],160:[function(require,module,exports){
 arguments[4][107][0].apply(exports,arguments)
-},{"dup":107}],163:[function(require,module,exports){
+},{"dup":107}],161:[function(require,module,exports){
 arguments[4][108][0].apply(exports,arguments)
-},{"./implementation":162,"dup":108}],164:[function(require,module,exports){
+},{"./implementation":160,"dup":108}],162:[function(require,module,exports){
 arguments[4][111][0].apply(exports,arguments)
-},{"dup":111,"function-bind":163}],165:[function(require,module,exports){
+},{"dup":111,"function-bind":161}],163:[function(require,module,exports){
 /*!
  * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
@@ -13160,13 +13244,13 @@ arguments[4][111][0].apply(exports,arguments)
 	return init(function () {});
 }));
 
-},{}],166:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"_process":6,"dup":120}],167:[function(require,module,exports){
+},{"_process":6,"dup":120}],165:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"dup":121}],168:[function(require,module,exports){
+},{"dup":121}],166:[function(require,module,exports){
 arguments[4][122][0].apply(exports,arguments)
-},{"dup":122}],169:[function(require,module,exports){
+},{"dup":122}],167:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -13501,7 +13585,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":164}],170:[function(require,module,exports){
+},{"has":162}],168:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -13551,7 +13635,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":169}],171:[function(require,module,exports){
+},{"super-json":167}],169:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -13563,7 +13647,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":170,"./stringTransform":172,"./stringTransformExt":173,"./testing":174}],172:[function(require,module,exports){
+},{"./JSON_CUSTOM":168,"./stringTransform":170,"./stringTransformExt":171,"./testing":172}],170:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -13625,7 +13709,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],173:[function(require,module,exports){
+},{"buffer":2}],171:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -13693,7 +13777,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":172}],174:[function(require,module,exports){
+},{"./stringTransform":170}],172:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -13962,17 +14046,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":172}],175:[function(require,module,exports){
+},{"./stringTransform":170}],173:[function(require,module,exports){
 arguments[4][123][0].apply(exports,arguments)
-},{"./SyncEventBase":176,"dup":123}],176:[function(require,module,exports){
+},{"./SyncEventBase":174,"dup":123}],174:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":177,"dup":124}],177:[function(require,module,exports){
+},{"./SyncEventBaseProtected":175,"dup":124}],175:[function(require,module,exports){
 arguments[4][125][0].apply(exports,arguments)
-},{"./defs":178,"dup":125,"run-exclusive":167}],178:[function(require,module,exports){
+},{"./defs":176,"dup":125,"run-exclusive":165}],176:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"dup":126,"setprototypeof":168}],179:[function(require,module,exports){
+},{"dup":126,"setprototypeof":166}],177:[function(require,module,exports){
 arguments[4][127][0].apply(exports,arguments)
-},{"./SyncEvent":175,"./defs":178,"dup":127}],180:[function(require,module,exports){
+},{"./SyncEvent":173,"./defs":176,"dup":127}],178:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14144,7 +14228,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":179}],181:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":177}],179:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -14456,7 +14540,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":180,"./api/ApiMessage":182,"./core":186,"./misc":190,"colors":154,"ts-events-extended":179}],182:[function(require,module,exports){
+},{"./IConnection":178,"./api/ApiMessage":180,"./core":184,"./misc":188,"colors":152,"ts-events-extended":177}],180:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14537,7 +14621,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":186,"../misc":190,"buffer":2,"transfer-tools":171}],183:[function(require,module,exports){
+},{"../core":184,"../misc":188,"buffer":2,"transfer-tools":169}],181:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14719,7 +14803,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":190,"./ApiMessage":182,"colors":154,"util":8}],184:[function(require,module,exports){
+},{"../misc":188,"./ApiMessage":180,"colors":152,"util":8}],182:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -14938,7 +15022,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":190,"./ApiMessage":182,"setprototypeof":168}],185:[function(require,module,exports){
+},{"../misc":188,"./ApiMessage":180,"setprototypeof":166}],183:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -14946,7 +15030,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":183,"./client":184}],186:[function(require,module,exports){
+},{"./Server":181,"./client":182}],184:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -15030,7 +15114,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":188,"./legacy/sip":189,"buffer":2,"setprototypeof":168}],187:[function(require,module,exports){
+},{"./legacy/sdp":186,"./legacy/sip":187,"buffer":2,"setprototypeof":166}],185:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -15042,7 +15126,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":181,"./api":185,"./core":186,"./misc":190}],188:[function(require,module,exports){
+},{"./Socket":179,"./api":183,"./core":184,"./misc":188}],186:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -15158,7 +15242,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],189:[function(require,module,exports){
+},{}],187:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -15549,7 +15633,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],190:[function(require,module,exports){
+},{}],188:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -15847,4 +15931,4 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":186,"buffer":2}]},{},[14]);
+},{"./core":184,"buffer":2}]},{},[14]);
