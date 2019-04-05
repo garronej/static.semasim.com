@@ -4002,7 +4002,7 @@ var UiContact = /** @class */ (function () {
             .on("click", function () {
             var selection = window.getSelection();
             //Do not trigger click if text selected.
-            if (selection.toString().length !== 0) {
+            if (selection !== null && selection.toString().length !== 0) {
                 return;
             }
             _this.evtClick.post();
@@ -4010,11 +4010,13 @@ var UiContact = /** @class */ (function () {
             .find(".id_number")
             .on("dblclick", function (e) {
             e.preventDefault(); //cancel system double-click event
-            var selection = window.getSelection();
             var range = document.createRange();
             range.selectNodeContents(e.currentTarget);
-            selection.removeAllRanges();
-            selection.addRange(range);
+            var selection = window.getSelection();
+            if (selection !== null) {
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
         });
         this.updateContactName();
         this.structure.find("span.id_notifications").hide();
@@ -4490,8 +4492,8 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var UiController_1 = require("./UiController");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
-try {
-    androidEventHandlers;
+//TODO: See if defined
+if (typeof androidEventHandlers !== "undefined") {
     window.onerror = function (msg, url, lineNumber) {
         androidEventHandlers.onDone(msg + "\n'" + url + ":" + lineNumber);
         return false;
@@ -4501,8 +4503,6 @@ try {
             androidEventHandlers.onDone(error.message + " " + error.stack);
         });
     }
-}
-catch (_a) {
 }
 var resolvePrUiController;
 window["exposedToAndroid"] = (function () {
@@ -8618,6 +8618,7 @@ var phoneNumber;
             return;
         }
         if (typeof process !== "undefined" &&
+            typeof process.release === "object" &&
             process.release.name === "node") {
             //Trick browserify so it does not bundle.
             var path = "../../res/utils";

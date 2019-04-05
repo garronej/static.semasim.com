@@ -2918,8 +2918,8 @@ var checkMark = Buffer.from("e29c93", "hex").toString("utf8");
 var crossMark = Buffer.from("e29d8c", "hex").toString("utf8");
 var UiConversation = /** @class */ (function () {
     function UiConversation(userSim, wdChat) {
-        var e_1, _a;
         var _this = this;
+        var e_1, _a;
         this.userSim = userSim;
         this.wdChat = wdChat;
         this.structure = html.structure.clone();
@@ -2951,8 +2951,10 @@ var UiConversation = /** @class */ (function () {
             var selection = window.getSelection();
             var range = document.createRange();
             range.selectNodeContents(e.currentTarget);
-            selection.removeAllRanges();
-            selection.addRange(range);
+            if (selection !== null) {
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
         });
         this.aSend.on("click", function () {
             var text = _this.textarea.val();
@@ -3262,8 +3264,10 @@ var UiHeader = /** @class */ (function () {
             var selection = window.getSelection();
             var range = document.createRange();
             range.selectNodeContents(e.currentTarget);
-            selection.removeAllRanges();
-            selection.addRange(range);
+            if (selection !== null) {
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
         });
         this.templates.find("div.id_popover div.id_flag").addClass(this.userSim.sim.country ? this.userSim.sim.country.iso : "");
         this.templates.find("div.id_popover span.id_network").html(this.userSim.sim.serviceProvider.fromImsi ||
@@ -3463,7 +3467,7 @@ var UiContact = /** @class */ (function () {
             .on("click", function () {
             var selection = window.getSelection();
             //Do not trigger click if text selected.
-            if (selection.toString().length !== 0) {
+            if (selection !== null && selection.toString().length !== 0) {
                 return;
             }
             _this.evtClick.post();
@@ -3474,8 +3478,10 @@ var UiContact = /** @class */ (function () {
             var selection = window.getSelection();
             var range = document.createRange();
             range.selectNodeContents(e.currentTarget);
-            selection.removeAllRanges();
-            selection.addRange(range);
+            if (selection !== null) {
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
         });
         this.updateContactName();
         this.structure.find("span.id_notifications").hide();
@@ -13011,6 +13017,7 @@ var phoneNumber;
             return;
         }
         if (typeof process !== "undefined" &&
+            typeof process.release === "object" &&
             process.release.name === "node") {
             //Trick browserify so it does not bundle.
             var path = "../../res/utils";
@@ -14193,8 +14200,8 @@ var localApiHandlers = require("./toBackend/localApiHandlers");
 JsSIP.debug.disable("JsSIP:*");
 var Ua = /** @class */ (function () {
     function Ua(imsi, sipPassword, disabledMessage) {
-        if (disabledMessage === void 0) { disabledMessage = false; }
         var _this = this;
+        if (disabledMessage === void 0) { disabledMessage = false; }
         /** post isRegistered */
         this.evtRegistrationStateChanged = new ts_events_extended_1.SyncEvent();
         this.evtRingback = new ts_events_extended_1.SyncEvent();
