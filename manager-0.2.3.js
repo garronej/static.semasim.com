@@ -3426,11 +3426,16 @@ exports.UiController = UiController;
 /** Interact only if more than one SIM holds the phone number */
 function interact_getUserSimContainingNumber(userSims, number) {
     return __awaiter(this, void 0, void 0, function () {
-        var userSimsContainingNumber, getPrettyNumber, index;
-        var _this = this;
+        var userSimsContainingNumber, index;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (!!UiPhonebook_1.UiPhonebook.isPhoneNumberUtilityScriptLoaded) return [3 /*break*/, 2];
+                    return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
+                case 1:
+                    _a.sent();
+                    _a.label = 2;
+                case 2:
                     userSimsContainingNumber = userSims
                         .filter(function (_a) {
                         var phonebook = _a.phonebook;
@@ -3439,70 +3444,31 @@ function interact_getUserSimContainingNumber(userSims, number) {
                             return phone_number_1.phoneNumber.areSame(number, number_raw);
                         });
                     });
-                    getPrettyNumber = (function () {
-                        var prettyNumber = undefined;
-                        return function () { return __awaiter(_this, void 0, void 0, function () {
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0:
-                                        if (prettyNumber !== undefined) {
-                                            return [2 /*return*/, prettyNumber];
-                                        }
-                                        if (!!UiPhonebook_1.UiPhonebook.isPhoneNumberUtilityScriptLoaded) return [3 /*break*/, 2];
-                                        return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
-                                    case 1:
-                                        _a.sent();
-                                        _a.label = 2;
-                                    case 2: return [2 /*return*/, prettyNumber = phone_number_1.phoneNumber.prettyPrint(number)];
-                                }
-                            });
-                        }); };
-                    })();
-                    if (!(userSimsContainingNumber.length === 0)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
-                            var _a, _b;
-                            return __generator(this, function (_c) {
-                                switch (_c.label) {
-                                    case 0:
-                                        _b = (_a = bootbox_custom).alert;
-                                        return [4 /*yield*/, getPrettyNumber()];
-                                    case 1: return [2 /*return*/, _b.apply(_a, [[
-                                                (_c.sent()) + " is not saved in any of your SIM phonebook.",
-                                                "Use the android contacts native feature to edit contact stored in your phone."
-                                            ].join("<br>"),
-                                            function () { return resolve(); }])];
-                                }
-                            });
-                        }); })];
-                case 1:
+                    if (!(userSimsContainingNumber.length === 0)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, new Promise(function (resolve) {
+                            return bootbox_custom.alert([
+                                phone_number_1.phoneNumber.prettyPrint(number) + " is not saved in any of your SIM phonebook.",
+                                "Use the android contacts native feature to edit contact stored in your phone."
+                            ].join("<br>"), function () { return resolve(); });
+                        })];
+                case 3:
                     _a.sent();
                     return [2 /*return*/, undefined];
-                case 2:
+                case 4:
                     if (userSimsContainingNumber.length === 1) {
                         return [2 /*return*/, userSimsContainingNumber.pop()];
                     }
-                    _a.label = 3;
-                case 3: return [4 /*yield*/, new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a, _b, _c, _d;
-                        return __generator(this, function (_e) {
-                            switch (_e.label) {
-                                case 0:
-                                    _b = (_a = bootbox_custom).prompt;
-                                    _c = {};
-                                    _d = "title";
-                                    return [4 /*yield*/, getPrettyNumber()];
-                                case 1: return [2 /*return*/, _b.apply(_a, [(_c[_d] = (_e.sent()) + " is present in " + userSimsContainingNumber.length + ", select phonebook to edit.",
-                                            _c["inputType"] = "select",
-                                            _c["inputOptions"] = userSimsContainingNumber.map(function (userSim) { return ({
-                                                "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
-                                                "value": userSimsContainingNumber.indexOf(userSim)
-                                            }); }),
-                                            _c["callback"] = function (indexAsString) { return resolve(parseInt(indexAsString)); },
-                                            _c)])];
-                            }
-                        });
+                    _a.label = 5;
+                case 5: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
+                        "title": phone_number_1.phoneNumber.prettyPrint(number) + " is present in " + userSimsContainingNumber.length + ", select phonebook to edit.",
+                        "inputType": "select",
+                        "inputOptions": userSimsContainingNumber.map(function (userSim) { return ({
+                            "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
+                            "value": userSimsContainingNumber.indexOf(userSim)
+                        }); }),
+                        "callback": function (indexAsString) { return resolve(parseInt(indexAsString)); }
                     }); })];
-                case 4:
+                case 6:
                     index = _a.sent();
                     if (index === null) {
                         return [2 /*return*/, undefined];
