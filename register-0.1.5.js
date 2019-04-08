@@ -2060,33 +2060,17 @@ exports.__esModule = true;
 var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
-var requestRenewPassword_1 = require("./requestRenewPassword");
-if (!ArrayBuffer.isView) {
-    Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
-}
-if (typeof androidEventHandlers !== "undefined") {
-    window.onerror = function (msg, url, lineNumber) {
-        console.log(msg + "\n'" + url + ":" + lineNumber);
-        androidEventHandlers.onDone(msg + "\n'" + url + ":" + lineNumber);
-        return false;
-    };
-    if ("onPossiblyUnhandledRejection" in Promise) {
-        Promise.onPossiblyUnhandledRejection(function (error) {
-            console.log(error);
-            androidEventHandlers.onDone(error.message + " " + error.stack);
-        });
-    }
-}
+require("../../../shared/dist/lib/tools/standalonePolyfills");
 function setHandlers() {
-    /* Start import from theme */
-    $("#login-form").validate({
+    /* Start code from template */
+    $("#register-form").validate({
         ignore: 'input[type="hidden"]',
         errorPlacement: function (error, element) {
             var place = element.closest('.input-group');
             if (!place.get(0)) {
                 place = element;
             }
-            if (error.text() !== "") {
+            if (error.text() !== '') {
                 place.after(error);
             }
         },
@@ -2099,6 +2083,9 @@ function setHandlers() {
             password: {
                 required: true,
                 minlength: 5
+            },
+            password1: {
+                equalTo: '#password'
             }
         },
         messages: {
@@ -2116,51 +2103,34 @@ function setHandlers() {
             label.remove();
         }
     });
-    /* End import from theme */
-    $("#login-form").on("submit", function (event) {
+    /* End code from template */
+    $("#register-form").on("submit", function (event) {
         return __awaiter(this, void 0, void 0, function () {
-            var email, password, resp;
+            var email, password, regStatus;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         event.preventDefault();
                         if (!$(this).valid())
                             return [2 /*return*/];
-                        email = $("#email").val().toLowerCase();
+                        email = $("#email").val();
                         password = $("#password").val();
-                        return [4 /*yield*/, webApiCaller.loginUser(email, password)];
+                        return [4 /*yield*/, webApiCaller.registerUser(email, password)];
                     case 1:
-                        resp = _a.sent();
-                        if (resp.status !== "SUCCESS") {
-                            $("#password").val("");
-                        }
-                        switch (resp.status) {
-                            case "SUCCESS":
-                                Cookies.set("email", email);
-                                if (typeof androidEventHandlers !== "undefined") {
-                                    androidEventHandlers.onDone(null, email, password);
-                                }
-                                else {
-                                    window.location.href = "/manager";
-                                }
+                        regStatus = _a.sent();
+                        switch (regStatus) {
+                            case "EMAIL NOT AVAILABLE":
+                                bootbox_custom.alert("Semasim account for " + email + " has already been created");
+                                $("#email").val("");
                                 break;
-                            case "NO SUCH ACCOUNT":
-                                bootbox_custom.alert("No Semasim account correspond to this email");
-                                break;
-                            case "WRONG PASSWORD":
-                                bootbox_custom.alert("Wrong password, please wait " + resp.retryDelay / 1000 + " second before retrying");
-                                break;
-                            case "RETRY STILL FORBIDDEN":
-                                bootbox_custom.alert([
-                                    "Due to unsuccessful attempt to login your account is temporally locked",
-                                    "please wait " + resp.retryDelayLeft / 1000 + " second before retrying"
-                                ].join(" "));
-                                break;
-                            case "NOT VALIDATED YET":
-                                bootbox_custom.alert([
-                                    "This account have not been validated yet.",
-                                    "Please check your emails"
-                                ].join(" "));
+                            case "CREATED":
+                            case "CREATED NO ACTIVATION REQUIRED":
+                                Cookies.set("password", password, { "expires": 1 });
+                                window.location.href = "/login?" + [
+                                    regStatus === "CREATED NO ACTIVATION REQUIRED" ?
+                                        undefined : "email_confirmation_code=__prompt__",
+                                    "email_as_hex=" + Buffer.from(email, "utf8").toString("hex")
+                                ].filter(function (v) { return !!v; }).join("&");
                                 break;
                         }
                         return [2 /*return*/];
@@ -2168,130 +2138,13 @@ function setHandlers() {
             });
         });
     });
-    $("#forgot-password").click(function (event) {
-        event.preventDefault();
-        requestRenewPassword_1.requestRenewPassword();
-    });
 }
 function handleQueryString() {
-    return __awaiter(this, void 0, void 0, function () {
-        var emailAsHex, email, password, emailConfirmationCode, isEmailValidated, renewPasswordToken;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    emailAsHex = getURLParameter_1.getURLParameter("email_as_hex");
-                    email = "";
-                    if (!!emailAsHex) {
-                        email = Buffer.from(emailAsHex, "hex").toString("utf8");
-                        $("#email").val(email);
-                    }
-                    password = Cookies.get("password");
-                    if (!!password) {
-                        Cookies.remove("password");
-                        $("#password").val(password);
-                    }
-                    emailConfirmationCode = getURLParameter_1.getURLParameter("email_confirmation_code");
-                    if (!!!emailConfirmationCode) return [3 /*break*/, 7];
-                    if (!(emailConfirmationCode === "__prompt__")) return [3 /*break*/, 2];
-                    return [4 /*yield*/, (function callee() {
-                            return __awaiter(this, void 0, void 0, function () {
-                                var out;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                                "title": "Please enter the code to confirm your email ( check also your SPAM inbox )",
-                                                "inputType": "number",
-                                                "placeholder": "XXXX",
-                                                "callback": function (result) { return resolve(result); }
-                                            }); })];
-                                        case 1:
-                                            out = _a.sent();
-                                            if (!!out) return [3 /*break*/, 3];
-                                            return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert("Validating you email address is mandatory to access Semasim services", function () { return resolve(); }); })];
-                                        case 2:
-                                            _a.sent();
-                                            return [2 /*return*/, callee()];
-                                        case 3: return [2 /*return*/, out];
-                                    }
-                                });
-                            });
-                        })()];
-                case 1:
-                    emailConfirmationCode = _a.sent();
-                    _a.label = 2;
-                case 2: return [4 /*yield*/, webApiCaller.validateEmail(email, emailConfirmationCode)];
-                case 3:
-                    isEmailValidated = _a.sent();
-                    if (!!isEmailValidated) return [3 /*break*/, 5];
-                    return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert("Email was already validated or provided activation code was wrong", function () { return resolve(); }); })];
-                case 4:
-                    _a.sent();
-                    window.close();
-                    return [2 /*return*/];
-                case 5: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert("Semasim account successfully validated", function () { return resolve(); }); })];
-                case 6:
-                    _a.sent();
-                    _a.label = 7;
-                case 7:
-                    if (!!emailAsHex && !!password) {
-                        $("#login-form").submit();
-                        return [2 /*return*/];
-                    }
-                    renewPasswordToken = getURLParameter_1.getURLParameter("renew_password_token");
-                    if (!!renewPasswordToken) {
-                        (function callee() {
-                            return __awaiter(this, void 0, void 0, function () {
-                                var newPassword, newPasswordConfirm, wasTokenStillValid;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                                "title": "Chose a new password",
-                                                "inputType": "password",
-                                                "callback": function (result) { return resolve(result); }
-                                            }); })];
-                                        case 1:
-                                            newPassword = _a.sent();
-                                            if (!(!newPassword || newPassword.length < 5)) return [3 /*break*/, 3];
-                                            return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert("Password must be at least 5 character long", function () { return resolve(); }); })];
-                                        case 2:
-                                            _a.sent();
-                                            callee();
-                                            return [2 /*return*/];
-                                        case 3: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                                "title": "Confirm your new password",
-                                                "inputType": "password",
-                                                "callback": function (result) { return resolve(result); }
-                                            }); })];
-                                        case 4:
-                                            newPasswordConfirm = _a.sent();
-                                            if (!(newPassword !== newPasswordConfirm)) return [3 /*break*/, 6];
-                                            return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert("The two entry mismatch", function () { return resolve(); }); })];
-                                        case 5:
-                                            _a.sent();
-                                            callee();
-                                            return [2 /*return*/];
-                                        case 6:
-                                            bootbox_custom.loading("Renewing password");
-                                            return [4 /*yield*/, webApiCaller.renewPassword(email, newPassword, renewPasswordToken)];
-                                        case 7:
-                                            wasTokenStillValid = _a.sent();
-                                            bootbox_custom.dismissLoading();
-                                            if (!wasTokenStillValid) {
-                                                bootbox_custom.alert("This password renew email was no longer valid");
-                                                return [2 /*return*/];
-                                            }
-                                            $("#password").val(newPassword);
-                                            $("#login-form").submit();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            });
-                        })();
-                    }
-                    return [2 /*return*/];
-            }
-        });
-    });
+    var emailAsHex = getURLParameter_1.getURLParameter("email_as_hex");
+    if (emailAsHex) {
+        $("#email").val(Buffer.from(emailAsHex, "hex").toString("utf8"));
+        $("#email").prop("readonly", true);
+    }
 }
 $(document).ready(function () {
     setHandlers();
@@ -2299,111 +2152,7 @@ $(document).ready(function () {
 });
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/tools/bootbox_custom":6,"../../../shared/dist/lib/tools/getURLParameter":7,"../../../shared/dist/lib/webApiCaller":9,"./requestRenewPassword":5,"buffer":2}],5:[function(require,module,exports){
-(function (Buffer){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-exports.__esModule = true;
-var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
-var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
-function requestRenewPassword() {
-    return __awaiter(this, void 0, void 0, function () {
-        var email, isSuccess, shouldProceed;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                        "title": "Account email?",
-                        "inputType": "email",
-                        "value": $("#email").val() || "",
-                        "callback": function (result) { return resolve(result); }
-                    }); })];
-                case 1:
-                    email = _a.sent();
-                    if (!email) {
-                        return [2 /*return*/];
-                    }
-                    return [4 /*yield*/, webApiCaller.sendRenewPasswordEmail(email)];
-                case 2:
-                    isSuccess = _a.sent();
-                    if (!isSuccess) return [3 /*break*/, 3];
-                    bootbox_custom.alert("An email that will let you renew your password have been sent to you");
-                    return [3 /*break*/, 5];
-                case 3: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.dialog({
-                        "title": "Not found",
-                        "message": "Account '" + email + "' does not exist",
-                        "buttons": {
-                            "cancel": {
-                                "label": "Retry",
-                                "callback": function () { return resolve("RETRY"); }
-                            },
-                            "success": {
-                                "label": "Register",
-                                "className": "btn-success",
-                                "callback": function () { return resolve("REGISTER"); }
-                            }
-                        },
-                        "onEscape": function () { return resolve("CANCEL"); }
-                    }); })];
-                case 4:
-                    shouldProceed = _a.sent();
-                    switch (shouldProceed) {
-                        case "CANCEL": return [2 /*return*/];
-                        case "REGISTER":
-                            window.location.href = [
-                                "/register",
-                                "?",
-                                "email_as_hex=" + Buffer.from(email, "utf8").toString("hex")
-                            ].join("");
-                            return [2 /*return*/];
-                        case "RETRY":
-                            $("#email").val("");
-                            requestRenewPassword();
-                            return [2 /*return*/];
-                    }
-                    _a.label = 5;
-                case 5: return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.requestRenewPassword = requestRenewPassword;
-
-}).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/tools/bootbox_custom":6,"../../../shared/dist/lib/webApiCaller":9,"buffer":2}],6:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":5,"../../../shared/dist/lib/tools/getURLParameter":6,"../../../shared/dist/lib/tools/standalonePolyfills":8,"../../../shared/dist/lib/webApiCaller":9,"buffer":2}],5:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -2511,7 +2260,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":8}],7:[function(require,module,exports){
+},{"./modal_stack":7}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getURLParameter(sParam) {
@@ -2526,7 +2275,7 @@ function getURLParameter(sParam) {
 }
 exports.getURLParameter = getURLParameter;
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -2644,6 +2393,16 @@ function add(modal, options) {
     };
 }
 exports.add = add;
+
+},{}],8:[function(require,module,exports){
+if (typeof ArrayBuffer.isView !== "function") {
+    Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
+}
+if (typeof String.prototype.startsWith !== "function") {
+    String.prototype.startsWith = function startsWith(str) {
+        return this.indexOf(str) === 0;
+    };
+}
 
 },{}],9:[function(require,module,exports){
 "use strict";

@@ -2060,6 +2060,22 @@ exports.__esModule = true;
 var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
+if (!ArrayBuffer.isView) {
+    Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
+}
+if (typeof androidEventHandlers !== "undefined") {
+    window.onerror = function (msg, url, lineNumber) {
+        console.log(msg + "\n'" + url + ":" + lineNumber);
+        androidEventHandlers.onDone(msg + "\n'" + url + ":" + lineNumber);
+        return false;
+    };
+    if ("onPossiblyUnhandledRejection" in Promise) {
+        Promise.onPossiblyUnhandledRejection(function (error) {
+            console.log(error);
+            androidEventHandlers.onDone(error.message + " " + error.stack);
+        });
+    }
+}
 function setHandlers() {
     /* Start code from template */
     $("#register-form").validate({

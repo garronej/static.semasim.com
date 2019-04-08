@@ -2878,87 +2878,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./support/isBuffer":7,"_process":6,"inherits":4}],9:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiButtonBar.html"), "UiButtonBar");
-var UiButtonBar = /** @class */ (function () {
-    function UiButtonBar() {
-        var _this = this;
-        this.structure = html.structure.clone();
-        /** true if detail was clicked */
-        this.evtToggleDetailVisibility = new ts_events_extended_1.SyncEvent();
-        this.evtClickDelete = new ts_events_extended_1.VoidSyncEvent();
-        this.evtClickShare = new ts_events_extended_1.VoidSyncEvent();
-        this.evtClickRename = new ts_events_extended_1.VoidSyncEvent();
-        this.evtClickReboot = new ts_events_extended_1.VoidSyncEvent();
-        this.evtClickContacts = new ts_events_extended_1.VoidSyncEvent();
-        this.buttons = this.structure.find("button");
-        this.btnDetail = $(this.buttons.get(0));
-        this.btnBack = $(this.buttons.get(1));
-        this.btnDelete = $(this.buttons.get(2));
-        this.btnContacts = $(this.buttons.get(3));
-        this.btnShare = $(this.buttons.get(4));
-        this.btnRename = $(this.buttons.get(5));
-        this.btnReboot = $(this.buttons.get(6));
-        this.btnDetail.click(function () {
-            _this.setState({ "areDetailsShown": true });
-            _this.evtToggleDetailVisibility.post(true);
-        });
-        this.btnBack.click(function () {
-            _this.setState({ "areDetailsShown": false });
-            _this.evtToggleDetailVisibility.post(false);
-        });
-        this.btnDelete.click(function () { return _this.evtClickDelete.post(); });
-        this.btnContacts.click(function () { return _this.evtClickContacts.post(); });
-        this.btnShare.tooltip();
-        this.btnShare.click(function () { return _this.evtClickShare.post(); });
-        this.btnRename.click(function () { return _this.evtClickRename.post(); });
-        this.btnReboot.tooltip();
-        this.btnReboot.click(function () { return _this.evtClickReboot.post(); });
-        this.state = (function () {
-            var state = {
-                "isSimRowSelected": false,
-                "isSimSharable": false,
-                "isSimOnline": false,
-                "areDetailsShown": false
-            };
-            return state;
-        })();
-        this.setState({});
-    }
-    UiButtonBar.prototype.setState = function (state) {
-        var _this = this;
-        for (var key in state) {
-            this.state[key] = state[key];
-        }
-        this.buttons.prop("disabled", false);
-        this.btnDetail.show();
-        this.btnBack.show();
-        if (!this.state.isSimRowSelected) {
-            this.buttons.each(function (i) {
-                $(_this.buttons[i]).prop("disabled", true);
-            });
-        }
-        if (this.state.areDetailsShown) {
-            this.btnDetail.hide();
-        }
-        else {
-            this.btnBack.hide();
-        }
-        if (!this.state.isSimSharable) {
-            this.btnShare.prop("disabled", true);
-        }
-        if (!this.state.isSimOnline) {
-            this.btnReboot.prop("disabled", true);
-        }
-    };
-    return UiButtonBar;
-}());
-exports.UiButtonBar = UiButtonBar;
-
-},{"../../../shared/dist/lib/loadUiClassHtml":135,"../templates/UiButtonBar.html":128,"ts-events-extended":127}],10:[function(require,module,exports){
+(function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2995,5765 +2915,166 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var types = require("../../../shared/dist/lib/types");
-var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
-var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
-var UiButtonBar_1 = require("./UiButtonBar");
-var UiPhonebook_1 = require("./UiPhonebook");
-var UiSimRow_1 = require("./UiSimRow");
-var UiShareSim_1 = require("./UiShareSim");
-var phone_number_1 = require("phone-number");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
-var UiController = /** @class */ (function () {
-    function UiController(userSims) {
-        var _this = this;
-        this.userSims = userSims;
-        this.structure = html.structure.clone();
-        this.uiButtonBar = new UiButtonBar_1.UiButtonBar();
-        this.uiShareSim = new UiShareSim_1.UiShareSim((function () {
-            var evt = new ts_events_extended_1.SyncEvent();
-            localApiHandlers.evtSharingRequestResponse.attach(function (_a) {
-                var userSim = _a.userSim, email = _a.email;
-                return evt.post({ userSim: userSim, email: email });
-            });
-            localApiHandlers.evtSharedSimUnregistered.attach(function (_a) {
-                var userSim = _a.userSim, email = _a.email;
-                return evt.post({ userSim: userSim, email: email });
-            });
-            return evt;
-        })());
-        this.uiSimRows = [];
-        this.uiPhonebooks = [];
-        this.setState("NO SIM");
-        this.initUiButtonBar();
-        this.initUiShareSim();
-        for (var _i = 0, _a = userSims.sort(function (a, b) { return +b.isOnline - +a.isOnline; }); _i < _a.length; _i++) {
-            var userSim = _a[_i];
-            this.addUserSim(userSim);
-        }
-        remoteApiCaller.evtUsableSim.attach(function (userSim) { return _this.addUserSim(userSim); });
-        localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) { return _this.removeUserSim(userSim); });
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
     }
-    UiController.prototype.setState = function (placeholder) {
-        switch (placeholder) {
-            case "MAIN":
-                {
-                    $("#loader-line-mask").removeClass("loader-line-mask");
-                    this.structure.show();
-                }
-                ;
-                break;
-            case "NO SIM":
-                {
-                    $("#loader-line-mask").addClass("loader-line-mask");
-                    this.structure.hide();
-                }
-                ;
-                break;
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
         }
-    };
-    UiController.prototype.addUserSim = function (userSim) {
-        var _this = this;
-        this.setState("MAIN");
-        var uiSimRow = new UiSimRow_1.UiSimRow(userSim);
-        this.uiSimRows.push(uiSimRow);
-        this.structure.append(uiSimRow.structure);
-        uiSimRow.evtSelected.attach(function () {
-            if (_this.uiButtonBar.state.isSimRowSelected) {
-                _this.getSelectedUiSimRow(uiSimRow).unselect();
-            }
-            _this.uiButtonBar.setState({
-                "isSimRowSelected": true,
-                "isSimSharable": types.UserSim.Owned.match(userSim),
-                "isSimOnline": userSim.isOnline
-            });
-        });
-        localApiHandlers.evtSimIsOnlineStatusChange.attach(function (userSim_) { return userSim_ === userSim; }, function () {
-            uiSimRow.populate();
-            if (uiSimRow.isSelected) {
-                _this.uiButtonBar.setState({ "isSimOnline": userSim.isOnline });
-            }
-            var uiPhonebook = _this.uiPhonebooks.find(function (ui) { return ui.userSim === userSim; });
-            if (!!uiPhonebook) {
-                uiPhonebook.updateButtons();
-            }
-        });
-        //NOTE: Edge case where if other user that share the SIM create or delete contact the phonebook number is updated.
-        for (var _i = 0, _a = [
-            localApiHandlers.evtContactCreatedOrUpdated,
-            localApiHandlers.evtContactDeleted
-        ]; _i < _a.length; _i++) {
-            var evt = _a[_i];
-            evt.attach(function (_a) {
-                var _userSim = _a.userSim, contact = _a.contact;
-                return _userSim === userSim && contact.mem_index !== undefined;
-            }, function () {
-                uiSimRow.populate();
-            });
-        }
-        //If no sim is selected in the list select this one by triggering a click on the row element.
-        if (!this.uiButtonBar.state.isSimRowSelected) {
-            uiSimRow.structure.click();
-        }
-    };
-    UiController.prototype.removeUserSim = function (userSim) {
-        return __awaiter(this, void 0, void 0, function () {
-            var uiSimRow;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        uiSimRow = this.uiSimRows.find(function (uiSimRow) { return uiSimRow.userSim === userSim; });
-                        if (this.uiButtonBar.state.isSimRowSelected) {
-                            if (uiSimRow === this.getSelectedUiSimRow()) {
-                                this.uiButtonBar.setState({
-                                    "isSimRowSelected": false,
-                                    "isSimSharable": false,
-                                    "isSimOnline": false,
-                                    "areDetailsShown": false
-                                });
-                                uiSimRow.unselect();
-                            }
-                        }
-                        uiSimRow.structure.remove();
-                        return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
-                    case 1:
-                        if ((_a.sent()).length === 0) {
-                            this.setState("NO SIM");
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UiController.prototype.getSelectedUiSimRow = function (notUiSimRow) {
-        return this.uiSimRows.find(function (uiSimRow) { return uiSimRow !== notUiSimRow && uiSimRow.isSelected; });
-    };
-    UiController.prototype.initUiPhonebook = function (userSim) {
-        return __awaiter(this, void 0, void 0, function () {
-            var uiPhonebook;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!!UiPhonebook_1.UiPhonebook.isPhoneNumberUtilityScriptLoaded) return [3 /*break*/, 2];
-                        bootbox_custom.loading("Loading");
-                        return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
-                    case 1:
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        _a.label = 2;
-                    case 2:
-                        uiPhonebook = new UiPhonebook_1.UiPhonebook(userSim);
-                        this.uiPhonebooks.push(uiPhonebook);
-                        uiPhonebook.evtClickCreateContact.attach(function (_a) {
-                            var name = _a.name, number = _a.number, onSubmitted = _a.onSubmitted;
-                            return remoteApiCaller.createContact(userSim, name, number).then(function (contact) { return onSubmitted(contact); });
-                        });
-                        uiPhonebook.evtClickDeleteContacts.attach(function (_a) {
-                            var contacts = _a.contacts, onSubmitted = _a.onSubmitted;
-                            return Promise.all(contacts.map(function (contact) { return remoteApiCaller.deleteContact(userSim, contact); })).then(function () { return onSubmitted(); });
-                        });
-                        uiPhonebook.evtClickUpdateContactName.attach(function (_a) {
-                            var contact = _a.contact, newName = _a.newName, onSubmitted = _a.onSubmitted;
-                            return remoteApiCaller.updateContactName(userSim, contact, newName).then(function () { return onSubmitted(); });
-                        });
-                        localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim_) { return userSim_ === userSim; }, function () { return uiPhonebook.hideModal().then(function () {
-                            return uiPhonebook.structure.detach();
-                        }); });
-                        localApiHandlers.evtContactCreatedOrUpdated.attach(function (e) { return e.userSim === userSim; }, function (_a) {
-                            var contact = _a.contact;
-                            return uiPhonebook.notifyContactChanged(contact);
-                        });
-                        localApiHandlers.evtContactDeleted.attach(function (e) { return e.userSim === userSim; }, function (_a) {
-                            var contact = _a.contact;
-                            return uiPhonebook.notifyContactChanged(contact);
-                        });
-                        return [2 /*return*/, uiPhonebook];
-                }
-            });
-        });
-    };
-    UiController.prototype.initUiButtonBar = function () {
-        var _this = this;
-        this.structure.append(this.uiButtonBar.structure);
-        this.uiButtonBar.evtToggleDetailVisibility.attach(function (isShown) {
-            for (var _i = 0, _a = _this.uiSimRows; _i < _a.length; _i++) {
-                var uiSimRow = _a[_i];
-                if (isShown) {
-                    if (uiSimRow.isSelected) {
-                        uiSimRow.setDetailsVisibility("SHOWN");
-                    }
-                    else {
-                        uiSimRow.setVisibility("HIDDEN");
-                    }
-                }
-                else {
-                    if (uiSimRow.isSelected) {
-                        uiSimRow.setDetailsVisibility("HIDDEN");
-                    }
-                    else {
-                        uiSimRow.setVisibility("SHOWN");
-                    }
-                }
-            }
-        });
-        this.uiButtonBar.evtClickContacts.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim, uiPhonebook, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        userSim = this.getSelectedUiSimRow().userSim;
-                        _a = this.uiPhonebooks.find(function (uiPhonebook) { return uiPhonebook.userSim === userSim; });
-                        if (_a) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.initUiPhonebook(userSim)];
-                    case 1:
-                        _a = (_b.sent());
-                        _b.label = 2;
-                    case 2:
-                        uiPhonebook = _a;
-                        uiPhonebook.showModal();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-        this.uiButtonBar.evtClickDelete.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim, shouldProceed;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        userSim = this.getSelectedUiSimRow().userSim;
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
-                                "title": "Unregister SIM",
-                                "message": "Do you really want to unregister " + userSim.friendlyName + "?",
-                                callback: function (result) { return resolve(result); }
-                            }); })];
-                    case 1:
-                        shouldProceed = _a.sent();
-                        if (!shouldProceed) return [3 /*break*/, 3];
-                        return [4 /*yield*/, remoteApiCaller.unregisterSim(userSim)];
-                    case 2:
-                        _a.sent();
-                        this.removeUserSim(userSim);
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
-                }
-            });
-        }); });
-        this.uiButtonBar.evtClickShare.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim;
-            return __generator(this, function (_a) {
-                userSim = this.getSelectedUiSimRow().userSim;
-                /*
-                NOTE: If the user was able to click on share the
-                selected SIM is owned.
-                */
-                this.uiShareSim.open(userSim);
-                return [2 /*return*/];
-            });
-        }); });
-        this.uiButtonBar.evtClickRename.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var uiSimRow, friendlyNameSubmitted;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        uiSimRow = this.getSelectedUiSimRow();
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                "title": "Friendly name for this sim?",
-                                "value": uiSimRow.userSim.friendlyName,
-                                "callback": function (result) { return resolve(result); },
-                            }); })];
-                    case 1:
-                        friendlyNameSubmitted = _a.sent();
-                        if (!!!friendlyNameSubmitted) return [3 /*break*/, 3];
-                        return [4 /*yield*/, remoteApiCaller.changeSimFriendlyName(uiSimRow.userSim, friendlyNameSubmitted)];
-                    case 2:
-                        _a.sent();
-                        uiSimRow.populate();
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
-                }
-            });
-        }); });
-        this.uiButtonBar.evtClickReboot.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim, shouldProceed;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        userSim = this.getSelectedUiSimRow().userSim;
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
-                                "title": "Reboot GSM Dongle",
-                                "message": "Do you really want to reboot Dongle " + userSim.dongle.manufacturer + " " + userSim.dongle.model + "?",
-                                callback: function (result) { return resolve(result); }
-                            }); })];
-                    case 1:
-                        shouldProceed = _a.sent();
-                        if (!shouldProceed) {
-                            return [2 /*return*/];
-                        }
-                        bootbox_custom.loading("Sending reboot command to dongle");
-                        /*
-                        NOTE: If the user was able to click on the reboot button
-                        the sim is necessary online.
-                        */
-                        return [4 /*yield*/, remoteApiCaller.rebootDongle(userSim)];
-                    case 2:
-                        /*
-                        NOTE: If the user was able to click on the reboot button
-                        the sim is necessary online.
-                        */
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.alert("Restart command issued successfully, the SIM should be back online within 30 seconds", function () { return resolve(); }); })];
-                    case 3:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-    };
-    UiController.prototype.initUiShareSim = function () {
-        var _this = this;
-        this.uiShareSim.evtShare.attach(function (_a) {
-            var userSim = _a.userSim, emails = _a.emails, message = _a.message, onSubmitted = _a.onSubmitted;
-            return __awaiter(_this, void 0, void 0, function () {
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0: return [4 /*yield*/, remoteApiCaller.shareSim(userSim, emails, message)];
-                        case 1:
-                            _b.sent();
-                            onSubmitted();
-                            return [2 /*return*/];
-                    }
-                });
-            });
-        });
-        this.uiShareSim.evtStopSharing.attach(function (_a) {
-            var userSim = _a.userSim, emails = _a.emails, onSubmitted = _a.onSubmitted;
-            return __awaiter(_this, void 0, void 0, function () {
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0: return [4 /*yield*/, remoteApiCaller.stopSharingSim(userSim, emails)];
-                        case 1:
-                            _b.sent();
-                            onSubmitted();
-                            return [2 /*return*/];
-                    }
-                });
-            });
-        });
-    };
-    UiController.prototype.interact_updateContactName = function (number) {
-        return this.interact_({ "type": "UPDATE_CONTACT_NAME", number: number });
-    };
-    UiController.prototype.interact_deleteContact = function (number) {
-        return this.interact_({ "type": "DELETE_CONTACT", number: number });
-    };
-    UiController.prototype.interact_createContact = function (imsi, number) {
-        return this.interact_({ "type": "CREATE_CONTACT", imsi: imsi, number: number });
-    };
-    UiController.prototype.interact_ = function (action) {
-        return __awaiter(this, void 0, void 0, function () {
-            var userSim, _a, uiPhonebook, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        if (!("imsi" in action)) return [3 /*break*/, 1];
-                        _a = this.userSims.find(function (_a) {
-                            var sim = _a.sim;
-                            return sim.imsi === action.imsi;
-                        });
-                        return [3 /*break*/, 3];
-                    case 1: return [4 /*yield*/, interact_getUserSimContainingNumber(this.userSims, action.number)];
-                    case 2:
-                        _a = _d.sent();
-                        _d.label = 3;
-                    case 3:
-                        userSim = _a;
-                        if (!!userSim) return [3 /*break*/, 5];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("No SIM selected, aborting.", function () { return resolve(); });
-                            })];
-                    case 4:
-                        _d.sent();
-                        return [2 /*return*/];
-                    case 5:
-                        if (!!userSim.isOnline) return [3 /*break*/, 7];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert(userSim.friendlyName + " is not currently online. Can't edit phonebook", function () { return resolve(); });
-                            })];
-                    case 6:
-                        _d.sent();
-                        return [2 /*return*/];
-                    case 7:
-                        _b = this.uiPhonebooks.find(function (uiPhonebook) { return uiPhonebook.userSim === userSim; });
-                        if (_b) return [3 /*break*/, 9];
-                        return [4 /*yield*/, this.initUiPhonebook(userSim)];
-                    case 8:
-                        _b = (_d.sent());
-                        _d.label = 9;
-                    case 9:
-                        uiPhonebook = _b;
-                        _c = action.type;
-                        switch (_c) {
-                            case "CREATE_CONTACT": return [3 /*break*/, 10];
-                            case "DELETE_CONTACT": return [3 /*break*/, 12];
-                            case "UPDATE_CONTACT_NAME": return [3 /*break*/, 14];
-                        }
-                        return [3 /*break*/, 16];
-                    case 10: return [4 /*yield*/, uiPhonebook.interact_createContact(action.number)];
-                    case 11:
-                        _d.sent();
-                        return [3 /*break*/, 16];
-                    case 12: return [4 /*yield*/, uiPhonebook.interact_deleteContacts(action.number)];
-                    case 13:
-                        _d.sent();
-                        return [3 /*break*/, 16];
-                    case 14: return [4 /*yield*/, uiPhonebook.interact_updateContact(action.number)];
-                    case 15:
-                        _d.sent();
-                        return [3 /*break*/, 16];
-                    case 16: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    return UiController;
-}());
-exports.UiController = UiController;
-/** Interact only if more than one SIM holds the phone number */
-function interact_getUserSimContainingNumber(userSims, number) {
-    return __awaiter(this, void 0, void 0, function () {
-        var userSimsContainingNumber, index;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!!UiPhonebook_1.UiPhonebook.isPhoneNumberUtilityScriptLoaded) return [3 /*break*/, 2];
-                    return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
-                case 1:
-                    _a.sent();
-                    _a.label = 2;
-                case 2:
-                    userSimsContainingNumber = userSims
-                        .filter(function (_a) {
-                        var phonebook = _a.phonebook;
-                        return !!phonebook.find(function (_a) {
-                            var number_raw = _a.number_raw;
-                            return phone_number_1.phoneNumber.areSame(number, number_raw);
-                        });
-                    });
-                    if (!(userSimsContainingNumber.length === 0)) return [3 /*break*/, 4];
-                    return [4 /*yield*/, new Promise(function (resolve) {
-                            return bootbox_custom.alert([
-                                phone_number_1.phoneNumber.prettyPrint(number) + " is not saved in any of your SIM phonebook.",
-                                "Use the android contacts native feature to edit contact stored in your phone."
-                            ].join("<br>"), function () { return resolve(); });
-                        })];
-                case 3:
-                    _a.sent();
-                    return [2 /*return*/, undefined];
-                case 4:
-                    if (userSimsContainingNumber.length === 1) {
-                        return [2 /*return*/, userSimsContainingNumber.pop()];
-                    }
-                    _a.label = 5;
-                case 5: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                        "title": phone_number_1.phoneNumber.prettyPrint(number) + " is present in " + userSimsContainingNumber.length + ", select phonebook to edit.",
-                        "inputType": "select",
-                        "inputOptions": userSimsContainingNumber.map(function (userSim) { return ({
-                            "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
-                            "value": userSimsContainingNumber.indexOf(userSim)
-                        }); }),
-                        "callback": function (indexAsString) { return resolve(parseInt(indexAsString)); }
-                    }); })];
-                case 6:
-                    index = _a.sent();
-                    if (index === null) {
-                        return [2 /*return*/, undefined];
-                    }
-                    return [2 /*return*/, userSimsContainingNumber[index]];
-            }
-        });
-    });
-}
-
-},{"../../../shared/dist/lib/loadUiClassHtml":135,"../../../shared/dist/lib/toBackend/localApiHandlers":137,"../../../shared/dist/lib/toBackend/remoteApiCaller":138,"../../../shared/dist/lib/tools/bootbox_custom":139,"../../../shared/dist/lib/types":143,"../templates/UiController.html":129,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":120,"ts-events-extended":127}],11:[function(require,module,exports){
-"use strict";
-//NOTE: Slimscroll must be loaded on the page.
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+        finally { if (e) throw e.error; }
     }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var connection_1 = require("../../../shared/dist/lib/toBackend/connection");
-var ts_events_extended_1 = require("ts-events-extended");
-var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
-var modal_stack = require("../../../shared/dist/lib/tools/modal_stack");
-var isAscendingAlphabeticalOrder_1 = require("../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var phone_number_1 = require("phone-number");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiPhonebook.html"), "UiPhonebook");
-var UiPhonebook = /** @class */ (function () {
-    function UiPhonebook(userSim) {
-        var _this = this;
-        this.userSim = userSim;
-        this.structure = html.structure.clone();
-        this.buttonClose = this.structure.find(".id_close");
-        this.buttonEdit = this.structure.find(".id_edit");
-        this.buttonDelete = this.structure.find(".id_delete");
-        this.buttonCreateContact = this.structure.find(".id_createContact");
-        //private readonly divsToHideIfNoContacts = this.structure.find("._toHideIfNoContacts");
-        this.evtClickCreateContact = new ts_events_extended_1.SyncEvent();
-        this.evtClickDeleteContacts = new ts_events_extended_1.SyncEvent();
-        this.evtClickUpdateContactName = new ts_events_extended_1.SyncEvent();
-        //TODO: Make sure contact ref is kept.
-        /** mapped by types.UserSim.Contact */
-        this.uiContacts = new Map();
-        {
-            var _a = modal_stack.add(this.structure, {
-                "keyboard": false,
-                "backdrop": true
-            }), hide = _a.hide, show = _a.show;
-            this.hideModal = hide;
-            this.showModal = show;
-        }
-        for (var _i = 0, _b = userSim.phonebook; _i < _b.length; _i++) {
-            var contact = _b[_i];
-            this.createUiContact(contact);
-        }
-        this.structure.find("ul").slimScroll({
-            "position": "right",
-            "distance": '0px',
-            "railVisible": true,
-            "alwaysVisible": true,
-            "height": '290px',
-            "size": "5px"
-        });
-        this.updateSearch();
-        this.updateButtons();
-        this.buttonClose.on("click", function () { return _this.hideModal(); });
-        this.buttonDelete.on("click", function () { return _this.interact_deleteContacts(); });
-        this.buttonEdit.on("click", function () { return _this.interact_updateContact(); });
-        this.buttonCreateContact.on("click", function () { return _this.interact_createContact(); });
-    }
-    /** Fetch phone number utils, need to be called before instantiating objects */
-    UiPhonebook.fetchPhoneNumberUtilityScript = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        console.assert(!this.isPhoneNumberUtilityScriptLoaded);
-                        return [4 /*yield*/, phone_number_1.phoneNumber.remoteLoadUtil("//web." + connection_1.baseDomain + "/plugins/ui/intl-tel-input/js/utils.js")];
-                    case 1:
-                        _a.sent();
-                        this.isPhoneNumberUtilityScriptLoaded = true;
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    /** to call (outside of the class) when sim online status change */
-    UiPhonebook.prototype.updateButtons = function () {
-        var _this = this;
-        [
-            this.buttonClose,
-            this.buttonCreateContact,
-            this.buttonDelete,
-            this.buttonEdit
-        ].forEach(function (button) { return button.prop("disabled", !_this.userSim.isOnline); });
-        var selectedCount = Array.from(this.uiContacts.values())
-            .filter(function (uiContact) { return uiContact.isSelected; }).length;
-        if (selectedCount === 0) {
-            this.buttonCreateContact.show();
-            this.buttonDelete.hide();
-            this.buttonEdit.hide();
-        }
-        else {
-            this.buttonCreateContact.hide();
-            if (selectedCount === 1) {
-                this.buttonEdit.show();
-            }
-            else {
-                this.buttonEdit.hide();
-            }
-            this.buttonDelete.show();
-            this.buttonDelete.find("span").html("(" + selectedCount + ")");
-        }
-    };
-    UiPhonebook.prototype.createUiContact = function (contact) {
-        var _this = this;
-        var uiContact = new UiContact(this.userSim, contact);
-        uiContact.evtClick.attach(function () {
-            if (uiContact.isSelected) {
-                uiContact.unselect();
-            }
-            else {
-                uiContact.setSelected();
-            }
-            _this.updateButtons();
-        });
-        this.uiContacts.set(contact, uiContact);
-        this.placeUiContact(uiContact);
-    };
-    UiPhonebook.prototype.placeUiContact = function (uiContact) {
-        var _this = this;
-        var getUiContactFromStructure = function (li_elem) {
-            //for (const uiContact of this.uiContacts.values()) { with downlevel iteration...
-            for (var _i = 0, _a = Array.from(_this.uiContacts).map(function (_a) {
-                var _ = _a[0], v = _a[1];
-                return v;
-            }); _i < _a.length; _i++) {
-                var uiContact_1 = _a[_i];
-                if (uiContact_1.structure.get(0) === li_elem) {
-                    return uiContact_1;
-                }
-            }
-            throw new Error("UiContact not found");
-        };
-        var lis = this.structure.find("ul li");
-        for (var i = 0; i < lis.length; i++) {
-            var uiContact_i = getUiContactFromStructure(lis.get(i));
-            if (this.compareContact(uiContact.contact, uiContact_i.contact) >= 0) {
-                uiContact.structure.insertBefore(uiContact_i.structure);
-                return;
-            }
-        }
-        this.structure.find("ul").append(uiContact.structure);
-    };
-    UiPhonebook.prototype.compareContact = function (contact1, contact2) {
-        var hasContactName = function (contact) { return contact.name !== ""; };
-        if (hasContactName(contact1) || hasContactName(contact1)) {
-            if (!hasContactName(contact1)) {
-                return -1;
-            }
-            if (!hasContactName(contact2)) {
-                return 1;
-            }
-            return isAscendingAlphabeticalOrder_1.isAscendingAlphabeticalOrder(contact1.name, contact2.name) ? 1 : -1;
-        }
-        else {
-            return contact1.number_raw < contact2.number_raw ? -1 : 1;
-        }
-    };
-    UiPhonebook.prototype.updateSearch = function () {
-        this.structure.find("input")
-            .quicksearch(this.structure.find("ul li"));
-        this.structure.find("ul").slimScroll({ "scrollTo": "0" });
-    };
-    /** To create ui contact after init */
-    UiPhonebook.prototype.insertContact = function (contact) {
-        this.structure.find("input").val("");
-        this.createUiContact(contact);
-        this.updateSearch();
-    };
-    /**
-     *
-     * Only call outside of the class when other user updated the contact.
-     *
-     * contact name changed
-     * OR
-     * contact deleted
-     * */
-    UiPhonebook.prototype.notifyContactChanged = function (contact) {
-        var uiContact = this.uiContacts.get(contact);
-        if (this.userSim.phonebook.indexOf(contact) < 0) {
-            uiContact.structure.detach();
-            this.uiContacts.delete(contact);
-        }
-        else {
-            uiContact.updateContactName();
-            this.placeUiContact(uiContact);
-        }
-    };
-    /**
-     * Trigger ui process to create a contact.
-     * External call when create contact from
-     * android app, provide number.
-     * Internally when button is clicked no number provided.
-     */
-    UiPhonebook.prototype.interact_createContact = function (provided_number) {
-        return __awaiter(this, void 0, void 0, function () {
-            var userSim, number, _a, contact, name, contact_1;
-            var _this = this;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        userSim = this.userSim;
-                        _a = provided_number;
-                        if (_a) return [3 /*break*/, 2];
-                        return [4 /*yield*/, new Promise(function callee(resolve) {
-                                var _this = this;
-                                var modal = bootbox_custom.prompt({
-                                    "title": "Phone number",
-                                    "size": "small",
-                                    "callback": function (result) { return __awaiter(_this, void 0, void 0, function () {
-                                        var number;
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0:
-                                                    if (result === null) {
-                                                        resolve(undefined);
-                                                        return [2 /*return*/];
-                                                    }
-                                                    number = phone_number_1.phoneNumber.build(input.val(), input.intlTelInput("getSelectedCountryData").iso2);
-                                                    if (!!phone_number_1.phoneNumber.isDialable(number)) return [3 /*break*/, 2];
-                                                    return [4 /*yield*/, new Promise(function (resolve_) { return bootbox_custom.alert(number + " is not a valid phone number", function () { return resolve_(); }); })];
-                                                case 1:
-                                                    _a.sent();
-                                                    callee(resolve);
-                                                    return [2 /*return*/];
-                                                case 2:
-                                                    resolve(number);
-                                                    return [2 /*return*/];
-                                            }
-                                        });
-                                    }); },
-                                });
-                                modal.find(".bootbox-body").css("text-align", "center");
-                                var input = modal.find("input");
-                                input.intlTelInput((function () {
-                                    var simIso = userSim.sim.country ? userSim.sim.country.iso : undefined;
-                                    var gwIso = userSim.gatewayLocation.countryIso;
-                                    var intlTelInputOptions = {
-                                        "dropdownContainer": "body"
-                                    };
-                                    var preferredCountries = [];
-                                    if (simIso) {
-                                        preferredCountries.push(simIso);
-                                    }
-                                    if (gwIso && simIso !== gwIso) {
-                                        preferredCountries.push(gwIso);
-                                    }
-                                    if (preferredCountries.length) {
-                                        intlTelInputOptions.preferredCountries = preferredCountries;
-                                    }
-                                    if (simIso || gwIso) {
-                                        intlTelInputOptions.initialCountry = simIso || gwIso;
-                                    }
-                                    return intlTelInputOptions;
-                                })());
-                            })];
-                    case 1:
-                        _a = (_b.sent());
-                        _b.label = 2;
-                    case 2:
-                        number = _a;
-                        if (!number) {
-                            return [2 /*return*/];
-                        }
-                        contact = userSim.phonebook.find(function (_a) {
-                            var number_raw = _a.number_raw;
-                            return phone_number_1.phoneNumber.areSame(number, number_raw);
-                        });
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                "title": "Create contact " + phone_number_1.phoneNumber.prettyPrint(number) + " in " + _this.userSim.friendlyName + " internal memory",
-                                "value": !!contact ? contact.name : "New contact",
-                                "callback": function (result) { return resolve(result); },
-                            }); })];
-                    case 3:
-                        name = _b.sent();
-                        if (!name) {
-                            return [2 /*return*/];
-                        }
-                        if (!!this.userSim.isOnline) return [3 /*break*/, 5];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("Can't proceed, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
-                            })];
-                    case 4:
-                        _b.sent();
-                        return [2 /*return*/];
-                    case 5:
-                        if (!!contact) return [3 /*break*/, 7];
-                        bootbox_custom.loading("Creating contact...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickCreateContact.post({
-                                    name: name,
-                                    number: number,
-                                    "onSubmitted": function (contact) { return resolve(contact); }
-                                });
-                            })];
-                    case 6:
-                        contact_1 = _b.sent();
-                        this.createUiContact(contact_1);
-                        return [3 /*break*/, 9];
-                    case 7:
-                        if (contact.name === name) {
-                            return [2 /*return*/];
-                        }
-                        bootbox_custom.loading("Updating contact name...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickUpdateContactName.post({
-                                    contact: contact,
-                                    "newName": name,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 8:
-                        _b.sent();
-                        this.notifyContactChanged(contact);
-                        _b.label = 9;
-                    case 9:
-                        bootbox_custom.dismissLoading();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UiPhonebook.prototype.interact_deleteContacts = function (provided_number) {
-        return __awaiter(this, void 0, void 0, function () {
-            var contacts, isConfirmed, _i, contacts_1, contact;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        contacts = (function () {
-                            if (provided_number !== undefined) {
-                                var contact = _this.userSim.phonebook.find(function (_a) {
-                                    var number_raw = _a.number_raw;
-                                    return phone_number_1.phoneNumber.areSame(provided_number, number_raw);
-                                });
-                                return [contact];
-                            }
-                            else {
-                                return Array.from(_this.uiContacts.values())
-                                    .filter(function (uiContact) { return uiContact.isSelected; })
-                                    .map(function (uiContact) { return uiContact.contact; });
-                            }
-                        })();
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.confirm({
-                                    "size": "small",
-                                    "message": [
-                                        "Are you sure you want to delete",
-                                        contacts.map(function (_a) {
-                                            var name = _a.name;
-                                            return name;
-                                        }).join(" "),
-                                        "from " + _this.userSim.friendlyName + " internal storage ?"
-                                    ].join(" "),
-                                    "callback": function (result) { return resolve(result); }
-                                });
-                            })];
-                    case 1:
-                        isConfirmed = _a.sent();
-                        if (!isConfirmed) {
-                            return [2 /*return*/];
-                        }
-                        if (!!this.userSim.isOnline) return [3 /*break*/, 3];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("Can't delete, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
-                            })];
-                    case 2:
-                        _a.sent();
-                        return [2 /*return*/];
-                    case 3:
-                        bootbox_custom.loading("Deleting contacts...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickDeleteContacts.post({
-                                    contacts: contacts,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 4:
-                        _a.sent();
-                        for (_i = 0, contacts_1 = contacts; _i < contacts_1.length; _i++) {
-                            contact = contacts_1[_i];
-                            this.notifyContactChanged(contact);
-                        }
-                        this.updateButtons();
-                        bootbox_custom.dismissLoading();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UiPhonebook.prototype.interact_updateContact = function (provided_number) {
-        return __awaiter(this, void 0, void 0, function () {
-            var contact, prettyNumber, newName;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        contact = provided_number !== undefined ?
-                            this.userSim.phonebook.find(function (_a) {
-                                var number_raw = _a.number_raw;
-                                return phone_number_1.phoneNumber.areSame(provided_number, number_raw);
-                            }) :
-                            Array.from(this.uiContacts.values())
-                                .find(function (uiContact) { return uiContact.isSelected; }).contact;
-                        prettyNumber = phone_number_1.phoneNumber.prettyPrint(phone_number_1.phoneNumber.build(contact.number_raw, !!this.userSim.sim.country ?
-                            this.userSim.sim.country.iso :
-                            undefined));
-                        return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                "title": "New contact name for " + prettyNumber + " stored in " + _this.userSim.friendlyName,
-                                "value": contact.name,
-                                "callback": function (result) { return resolve(result); },
-                            }); })];
-                    case 1:
-                        newName = _a.sent();
-                        if (!newName || contact.name === newName) {
-                            return [2 /*return*/];
-                        }
-                        if (!!this.userSim.isOnline) return [3 /*break*/, 3];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("Can't update, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
-                            })];
-                    case 2:
-                        _a.sent();
-                        return [2 /*return*/];
-                    case 3:
-                        bootbox_custom.loading("Updating contact name ...");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtClickUpdateContactName.post({
-                                    contact: contact,
-                                    newName: newName,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 4:
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        this.notifyContactChanged(contact);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UiPhonebook.isPhoneNumberUtilityScriptLoaded = false;
-    return UiPhonebook;
-}());
-exports.UiPhonebook = UiPhonebook;
-var UiContact = /** @class */ (function () {
-    function UiContact(userSim, contact) {
-        var _this = this;
-        this.userSim = userSim;
-        this.contact = contact;
-        this.structure = html.templates.find("li").clone();
-        /** only forward click event, need to be selected manually from outside */
-        this.evtClick = new ts_events_extended_1.VoidSyncEvent();
-        this.structure
-            .on("click", function () {
-            var selection = window.getSelection();
-            //Do not trigger click if text selected.
-            if (selection !== null && selection.toString().length !== 0) {
-                return;
-            }
-            _this.evtClick.post();
-        })
-            .find(".id_number")
-            .on("dblclick", function (e) {
-            e.preventDefault(); //cancel system double-click event
-            var range = document.createRange();
-            range.selectNodeContents(e.currentTarget);
-            var selection = window.getSelection();
-            if (selection !== null) {
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-        });
-        this.updateContactName();
-        this.structure.find("span.id_notifications").hide();
-    }
-    //TODO: optimization
-    /** updateName if different */
-    UiContact.prototype.updateContactName = function () {
-        var _this = this;
-        this.structure.find("span.id_name").html(this.contact.name);
-        this.structure
-            .find("span.id_number")
-            .html(function () {
-            var iso = _this.userSim.sim.country ?
-                _this.userSim.sim.country.iso : undefined;
-            return phone_number_1.phoneNumber.prettyPrint(phone_number_1.phoneNumber.build(_this.contact.number_raw, iso), iso);
-        });
-    };
-    /** update wsChat */
-    UiContact.prototype.setSelected = function () {
-        this.structure.addClass("selected");
-    };
-    /** default state */
-    UiContact.prototype.unselect = function () {
-        this.structure.removeClass("selected");
-    };
-    Object.defineProperty(UiContact.prototype, "isSelected", {
-        get: function () {
-            return this.structure.hasClass("selected");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return UiContact;
-}());
-
-},{"../../../shared/dist/lib/loadUiClassHtml":135,"../../../shared/dist/lib/toBackend/connection":136,"../../../shared/dist/lib/tools/bootbox_custom":139,"../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder":140,"../../../shared/dist/lib/tools/modal_stack":141,"../templates/UiPhonebook.html":130,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var modal_stack = require("../../../shared/dist/lib/tools/modal_stack");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiShareSim.html"), "UiShareSim");
-require("../templates/UiShareSim.less");
-var UiShareSim = /** @class */ (function () {
-    /**
-     * The evt argument should post be posted whenever.
-     * -An user accept a sharing request.
-     * -An user reject a sharing request.
-     * -An user unregistered a shared sim.
-     */
-    function UiShareSim(evt) {
-        var _this = this;
-        this.evt = evt;
-        this.structure = html.structure.clone();
-        this.buttonClose = this.structure.find(".id_close");
-        this.buttonStopSharing = this.structure.find(".id_stopSharing");
-        this.divListContainer = this.structure.find(".id_list");
-        this.inputEmails = this.structure.find(".id_emails");
-        this.textareaMessage = this.structure.find(".id_message textarea");
-        this.buttonSubmit = this.structure.find(".id_submit");
-        this.divsToHideIfNotShared = this.structure.find("._toHideIfNotShared");
-        this.evtShare = new ts_events_extended_1.SyncEvent();
-        this.evtStopSharing = new ts_events_extended_1.SyncEvent();
-        this.currentUserSim = undefined;
-        var _a = modal_stack.add(this.structure, {
-            "keyboard": false,
-            "backdrop": true
-        }), hide = _a.hide, show = _a.show;
-        this.hideModal = hide;
-        this.showModal = show;
-        this.buttonClose.on("click", function () { return _this.hideModal(); });
-        this.inputEmails.multiple_emails({
-            "placeholder": "Enter email addresses",
-            "checkDupEmail": true
-        });
-        this.buttonStopSharing.on("click", function () { return __awaiter(_this, void 0, void 0, function () {
-            var emails;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        emails = [];
-                        this.divListContainer.find(".id_row.selected").each(function (_, element) {
-                            emails.push($(element).find(".id_email").html());
-                        });
-                        return [4 /*yield*/, this.hideModal()];
-                    case 1:
-                        _a.sent();
-                        bootbox_custom.loading("Revoking some user's SIM access");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtStopSharing.post({
-                                    "userSim": _this.currentUserSim,
-                                    emails: emails,
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 2:
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        this.open(this.currentUserSim);
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-        this.buttonSubmit.on("click", function () { return __awaiter(_this, void 0, void 0, function () {
-            var emails_1;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!(this.getInputEmails().length === 0)) return [3 /*break*/, 1];
-                        this.structure.find(".id_emails")
-                            .trigger(jQuery.Event("keypress", { "keycode": 13 }));
-                        return [3 /*break*/, 4];
-                    case 1:
-                        emails_1 = this.getInputEmails();
-                        return [4 /*yield*/, this.hideModal()];
-                    case 2:
-                        _a.sent();
-                        bootbox_custom.loading("Granting sim access to some users");
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return _this.evtShare.post({
-                                    "userSim": _this.currentUserSim,
-                                    emails: emails_1,
-                                    "message": _this.textareaMessage.html(),
-                                    "onSubmitted": function () { return resolve(); }
-                                });
-                            })];
-                    case 3:
-                        _a.sent();
-                        bootbox_custom.dismissLoading();
-                        this.open(this.currentUserSim);
-                        _a.label = 4;
-                    case 4: return [2 /*return*/];
-                }
-            });
-        }); });
-        this.inputEmails.change(function () {
-            if (_this.getInputEmails().length === 0) {
-                _this.buttonSubmit.text("Validate email");
-                _this.textareaMessage.parent().hide();
-            }
-            else {
-                _this.buttonSubmit.text("Share");
-                _this.textareaMessage.parent().show({
-                    "done": function () { return _this.textareaMessage.focus(); }
-                });
-            }
-        });
-    }
-    UiShareSim.prototype.getInputEmails = function () {
-        var raw = this.inputEmails.val();
-        return !!raw ? JSON.parse(raw) : [];
-    };
-    UiShareSim.prototype.open = function (userSim) {
-        var _this = this;
-        this.evt.detach(this);
-        this.currentUserSim = userSim;
-        this.textareaMessage.html([
-            "I would like to share the SIM card",
-            userSim.friendlyName,
-            userSim.sim.storage.number || "",
-            "with you."
-        ].join(" "));
-        this.inputEmails.parent().find("li").detach();
-        this.inputEmails.val("");
-        this.inputEmails.trigger("change");
-        if (userSim.ownership.sharedWith.confirmed.length === 0 &&
-            userSim.ownership.sharedWith.notConfirmed.length === 0) {
-            this.divsToHideIfNotShared.hide();
-        }
-        else {
-            this.divListContainer.find(".id_row").detach();
-            this.divsToHideIfNotShared.show();
-            var onRowClick_1 = function (divRow) {
-                if (!!divRow) {
-                    divRow.toggleClass("selected");
-                }
-                var selectedCount = _this.divListContainer.find(".id_row.selected").length;
-                if (selectedCount === 0) {
-                    _this.buttonStopSharing.hide();
-                }
-                else {
-                    _this.buttonStopSharing.show();
-                    _this.buttonStopSharing.find("span").html("Revoke access (" + selectedCount + ")");
-                }
-            };
-            var appendRow = function (email, isConfirmed) {
-                var divRow = html.templates.find(".id_row").clone();
-                divRow.find(".id_email").text(email);
-                divRow.find(".id_isConfirmed")
-                    .text(isConfirmed ? "confirmed" : "Not yet confirmed")
-                    .addClass(isConfirmed ? "color-green" : "color-yellow");
-                divRow.on("click", function () { return onRowClick_1(divRow); });
-                _this.evt.attach(function (_a) {
-                    var userSim = _a.userSim, email_ = _a.email;
-                    return (userSim === _this.currentUserSim &&
-                        email_ === email);
-                }, _this, function () {
-                    if (userSim.ownership.sharedWith.confirmed.indexOf(email) >= 0) {
-                        divRow.find(".id_isConfirmed")
-                            .removeClass("color-yellow")
-                            .text("confirmed")
-                            .addClass("color-green");
-                    }
-                    else {
-                        divRow.remove();
-                        if (userSim.ownership.sharedWith.confirmed.length === 0 &&
-                            userSim.ownership.sharedWith.notConfirmed.length === 0) {
-                            _this.divsToHideIfNotShared.hide();
-                        }
-                    }
-                });
-                _this.divListContainer.append(divRow);
-            };
-            for (var _i = 0, _a = userSim.ownership.sharedWith.confirmed; _i < _a.length; _i++) {
-                var email = _a[_i];
-                appendRow(email, true);
-            }
-            for (var _b = 0, _c = userSim.ownership.sharedWith.notConfirmed; _b < _c.length; _b++) {
-                var email = _c[_b];
-                appendRow(email, false);
-            }
-            onRowClick_1();
-        }
-        this.showModal();
-    };
-    return UiShareSim;
-}());
-exports.UiShareSim = UiShareSim;
-
-},{"../../../shared/dist/lib/loadUiClassHtml":135,"../../../shared/dist/lib/tools/bootbox_custom":139,"../../../shared/dist/lib/tools/modal_stack":141,"../templates/UiShareSim.html":131,"../templates/UiShareSim.less":132,"ts-events-extended":127}],13:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiSimRow.html"), "UiSimRow");
-require("../templates/UiSimRow.less");
-var UiSimRow = /** @class */ (function () {
-    function UiSimRow(userSim) {
-        var _this = this;
-        this.userSim = userSim;
-        this.structure = html.structure.clone();
-        this.evtSelected = new ts_events_extended_1.VoidSyncEvent();
-        this.isSelected = false;
-        this.structure.click(function () {
-            if (!_this.isSelected) {
-                _this.isSelected = true;
-                _this.structure.find(".id_row").addClass("selected");
-                _this.evtSelected.post();
-            }
-        });
-        this.setDetailsVisibility("HIDDEN");
-        this.populate();
-    }
-    UiSimRow.prototype.unselect = function () {
-        this.structure.find(".id_row").removeClass("selected");
-        this.isSelected = false;
-    };
-    UiSimRow.prototype.setDetailsVisibility = function (visibility) {
-        var details = this.structure.find(".id_details");
-        switch (visibility) {
-            case "SHOWN":
-                details.show();
-                break;
-            case "HIDDEN":
-                details.hide();
-                break;
-        }
-    };
-    UiSimRow.prototype.setVisibility = function (visibility) {
-        switch (visibility) {
-            case "SHOWN":
-                this.structure.show();
-                break;
-            case "HIDDEN":
-                this.structure.hide();
-                break;
-        }
-    };
-    /** To call when userSim has changed */
-    UiSimRow.prototype.populate = function () {
-        /*
-        this.structure.find(".id_simId").text(
-            (() => {
-
-                let out = this.userSim.friendlyName;
-
-                const number = this.userSim.sim.storage.number
-
-                if (!!number) {
-                    out += " " + phoneNumber.prettyPrint(
-                        phoneNumber.build(
-                            number,
-                            !!this.userSim.sim.country ? this.userSim.sim.country.iso : undefined
-                        )
-                    ) + " ";
-                }
-
-                return out;
-
-            })()
-        );
-        */
-        var _this = this;
-        this.structure.find(".id_simId").text((function () {
-            var out = _this.userSim.friendlyName;
-            var number = _this.userSim.sim.storage.number;
-            if (!!number) {
-                out += " " + number + " ";
-            }
-            return out;
-        })());
-        this.structure.find(".id_connectivity").text(this.userSim.isOnline ? "online" : "offline");
-        if (!this.userSim.isOnline) {
-            this.structure.find(".id_row").addClass("offline");
-        }
-        else {
-            this.structure.find(".id_row").removeClass("offline");
-        }
-        this.structure.find(".id_ownership").text(this.userSim.ownership.status === "OWNED" ?
-            "" :
-            "owned by: " + this.userSim.ownership.ownerEmail);
-        this.structure.find(".id_gw_location").text([
-            this.userSim.gatewayLocation.city || "",
-            this.userSim.gatewayLocation.countryIso || "",
-            "( " + this.userSim.gatewayLocation.ip + " )"
-        ].join(" "));
-        {
-            var span = this.structure.find(".id_owner");
-            if (this.userSim.ownership.status === "OWNED") {
-                span.parent().hide();
-            }
-            else {
-                span.text(this.userSim.ownership.ownerEmail);
-            }
-        }
-        this.structure.find(".id_number").text((function () {
-            var n = _this.userSim.sim.storage.number;
-            return n || "Unknown";
-        })());
-        this.structure.find(".id_serviceProvider").text((function () {
-            var out;
-            if (_this.userSim.sim.serviceProvider.fromImsi) {
-                out = _this.userSim.sim.serviceProvider.fromImsi;
-            }
-            else if (_this.userSim.sim.serviceProvider.fromNetwork) {
-                out = _this.userSim.sim.serviceProvider.fromNetwork;
-            }
-            else {
-                out = "Unknown";
-            }
-            if (_this.userSim.sim.country) {
-                out += ", " + _this.userSim.sim.country.name;
-            }
-            return out;
-        })());
-        {
-            var d = this.userSim.dongle;
-            this.structure.find(".id_dongle_model").text(d.manufacturer + " " + d.model);
-            this.structure.find(".id_dongle_firm").text(d.firmwareVersion);
-            this.structure.find(".id_dongle_imei").text(d.imei);
-            {
-                var span = this.structure.find(".id_voice_support");
-                if (d.isVoiceEnabled === undefined) {
-                    span.parent().hide();
-                }
-                else {
-                    span.text(d.isVoiceEnabled ?
-                        "yes" :
-                        "<a href='https://www.semasim.com/enable-voice'>Not enabled</a>");
-                }
-            }
-        }
-        this.structure.find(".id_imsi").text(this.userSim.sim.imsi);
-        this.structure.find(".id_iccid").text(this.userSim.sim.iccid);
-        this.structure.find(".id_phonebook").text((function () {
-            var n = _this.userSim.sim.storage.contacts.length;
-            var tot = n + _this.userSim.sim.storage.infos.storageLeft;
-            return n + "/" + tot;
-        })());
-    };
-    return UiSimRow;
-}());
-exports.UiSimRow = UiSimRow;
-
-},{"../../../shared/dist/lib/loadUiClassHtml":135,"../templates/UiSimRow.html":133,"../templates/UiSimRow.less":134,"ts-events-extended":127}],14:[function(require,module,exports){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
+    return ar;
 };
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
-//Polyfill
-require("es6-map/implement");
-require("es6-weak-map/implement");
-require("array.prototype.find").shim();
-if (!Array.from)
-    Array.from = require('array-from');
-require("../../../shared/dist/lib/tools/standalonePolyfills");
+var Ua_1 = require("../../../shared/dist/lib/Ua");
 var connection = require("../../../shared/dist/lib/toBackend/connection");
-var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
-var UiController_1 = require("./UiController");
-var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
-//TODO: See if defined
-if (typeof androidEventHandlers !== "undefined") {
+var localApiHandler = require("../../../shared/dist/lib/toBackend/localApiHandlers");
+var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
+var ts_events_extended_1 = require("ts-events-extended");
+{
+    var resolvePrErrorMessage_1;
+    var prErrorMessage = new Promise(function (resolve) { return resolvePrErrorMessage_1 = resolve; });
     window.onerror = function (msg, url, lineNumber) {
-        androidEventHandlers.onDone(msg + "\n'" + url + ":" + lineNumber);
+        resolvePrErrorMessage_1(msg + "\n'" + url + ":" + lineNumber);
         return false;
     };
-    if ("onPossiblyUnhandledRejection" in Promise) {
-        Promise.onPossiblyUnhandledRejection(function (error) {
-            androidEventHandlers.onDone(error.message + " " + error.stack);
-        });
-    }
-}
-var resolvePrUiController;
-window["exposedToAndroid"] = (function () {
-    var prUiController = new Promise(function (resolve) { return resolvePrUiController = resolve; });
-    return {
-        "createContact": function (imsi, number) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, prUiController];
-                    case 1: return [4 /*yield*/, (_a.sent()).interact_createContact(imsi, number)];
-                    case 2:
-                        _a.sent();
-                        try {
-                            androidEventHandlers.onDone(null);
-                        }
-                        catch (_b) { }
-                        return [2 /*return*/];
-                }
-            });
-        }); },
-        "updateContactName": function (number) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, prUiController];
-                    case 1: return [4 /*yield*/, (_a.sent()).interact_updateContactName(number)];
-                    case 2:
-                        _a.sent();
-                        try {
-                            androidEventHandlers.onDone(null);
-                        }
-                        catch (_b) { }
-                        return [2 /*return*/];
-                }
-            });
-        }); },
-        "deleteContact": function (number) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, prUiController];
-                    case 1: return [4 /*yield*/, (_a.sent()).interact_deleteContact(number)];
-                    case 2:
-                        _a.sent();
-                        try {
-                            androidEventHandlers.onDone(null);
-                        }
-                        catch (_b) { }
-                        return [2 /*return*/];
-                }
-            });
-        }); }
-    };
-})();
-$(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var uiController, _a;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                $("#logout").click(function () {
-                    webApiCaller.logoutUser();
-                    window.location.href = "/login";
-                });
-                connection.connect({ "requestTurnCred": false });
-                _a = UiController_1.UiController.bind;
-                return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
-            case 1:
-                uiController = new (_a.apply(UiController_1.UiController, [void 0, _b.sent()]))();
-                resolvePrUiController(uiController);
-                $("#page-payload").html("").append(uiController.structure);
-                $("#register-new-sim")
-                    .removeClass("hidden")
-                    .click(function () { return bootbox_custom.alert("Any new SIM should be automatically detected, you dont even need to refresh the page.\nNo SIM found ? Make sure that:\n-This device and the Semasim gateway ( the Raspberry Pi ) are connected to the same local network. ( required only for pairing the SIM with the account ).\n-The SIM you are trying to register have not already been registered with an other account.\n-Your Semasim gateway is able to power all the GSM dongles connected to it.\n-The problem does not come from the USB hub you might be using."
-                    .replace(/\n/g, "<br>")); });
-                return [2 /*return*/];
-        }
+    Promise.onPossiblyUnhandledRejection(function (error) {
+        resolvePrErrorMessage_1(error.message + " " + error.stack);
     });
-}); });
-
-},{"../../../shared/dist/lib/toBackend/connection":136,"../../../shared/dist/lib/toBackend/remoteApiCaller":138,"../../../shared/dist/lib/tools/bootbox_custom":139,"../../../shared/dist/lib/tools/standalonePolyfills":142,"../../../shared/dist/lib/webApiCaller":144,"./UiController":10,"array-from":15,"array.prototype.find":18,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
-module.exports = (typeof Array.from === 'function' ?
-  Array.from :
-  require('./polyfill')
-);
-
-},{"./polyfill":16}],16:[function(require,module,exports){
-// Production steps of ECMA-262, Edition 6, 22.1.2.1
-// Reference: http://www.ecma-international.org/ecma-262/6.0/#sec-array.from
-module.exports = (function() {
-  var isCallable = function(fn) {
-    return typeof fn === 'function';
-  };
-  var toInteger = function (value) {
-    var number = Number(value);
-    if (isNaN(number)) { return 0; }
-    if (number === 0 || !isFinite(number)) { return number; }
-    return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number));
-  };
-  var maxSafeInteger = Math.pow(2, 53) - 1;
-  var toLength = function (value) {
-    var len = toInteger(value);
-    return Math.min(Math.max(len, 0), maxSafeInteger);
-  };
-  var iteratorProp = function(value) {
-    if(value != null) {
-      if(['string','number','boolean','symbol'].indexOf(typeof value) > -1){
-        return Symbol.iterator;
-      } else if (
-        (typeof Symbol !== 'undefined') &&
-        ('iterator' in Symbol) &&
-        (Symbol.iterator in value)
-      ) {
-        return Symbol.iterator;
-      }
-      // Support "@@iterator" placeholder, Gecko 27 to Gecko 35
-      else if ('@@iterator' in value) {
-        return '@@iterator';
-      }
-    }
-  };
-  var getMethod = function(O, P) {
-    // Assert: IsPropertyKey(P) is true.
-    if (O != null && P != null) {
-      // Let func be GetV(O, P).
-      var func = O[P];
-      // ReturnIfAbrupt(func).
-      // If func is either undefined or null, return undefined.
-      if(func == null) {
-        return void 0;
-      }
-      // If IsCallable(func) is false, throw a TypeError exception.
-      if (!isCallable(func)) {
-        throw new TypeError(func + ' is not a function');
-      }
-      return func;
-    }
-  };
-  var iteratorStep = function(iterator) {
-    // Let result be IteratorNext(iterator).
-    // ReturnIfAbrupt(result).
-    var result = iterator.next();
-    // Let done be IteratorComplete(result).
-    // ReturnIfAbrupt(done).
-    var done = Boolean(result.done);
-    // If done is true, return false.
-    if(done) {
-      return false;
-    }
-    // Return result.
-    return result;
-  };
-
-  // The length property of the from method is 1.
-  return function from(items /*, mapFn, thisArg */ ) {
-    'use strict';
-
-    // 1. Let C be the this value.
-    var C = this;
-
-    // 2. If mapfn is undefined, let mapping be false.
-    var mapFn = arguments.length > 1 ? arguments[1] : void 0;
-
-    var T;
-    if (typeof mapFn !== 'undefined') {
-      // 3. else
-      //   a. If IsCallable(mapfn) is false, throw a TypeError exception.
-      if (!isCallable(mapFn)) {
-        throw new TypeError(
-          'Array.from: when provided, the second argument must be a function'
-        );
-      }
-
-      //   b. If thisArg was supplied, let T be thisArg; else let T
-      //      be undefined.
-      if (arguments.length > 2) {
-        T = arguments[2];
-      }
-      //   c. Let mapping be true (implied by mapFn)
-    }
-
-    var A, k;
-
-    // 4. Let usingIterator be GetMethod(items, @@iterator).
-    // 5. ReturnIfAbrupt(usingIterator).
-    var usingIterator = getMethod(items, iteratorProp(items));
-
-    // 6. If usingIterator is not undefined, then
-    if (usingIterator !== void 0) {
-      // a. If IsConstructor(C) is true, then
-      //   i. Let A be the result of calling the [[Construct]]
-      //      internal method of C with an empty argument list.
-      // b. Else,
-      //   i. Let A be the result of the abstract operation ArrayCreate
-      //      with argument 0.
-      // c. ReturnIfAbrupt(A).
-      A = isCallable(C) ? Object(new C()) : [];
-
-      // d. Let iterator be GetIterator(items, usingIterator).
-      var iterator = usingIterator.call(items);
-
-      // e. ReturnIfAbrupt(iterator).
-      if (iterator == null) {
-        throw new TypeError(
-          'Array.from requires an array-like or iterable object'
-        );
-      }
-
-      // f. Let k be 0.
-      k = 0;
-
-      // g. Repeat
-      var next, nextValue;
-      while (true) {
-        // i. Let Pk be ToString(k).
-        // ii. Let next be IteratorStep(iterator).
-        // iii. ReturnIfAbrupt(next).
-        next = iteratorStep(iterator);
-
-        // iv. If next is false, then
-        if (!next) {
-
-          // 1. Let setStatus be Set(A, "length", k, true).
-          // 2. ReturnIfAbrupt(setStatus).
-          A.length = k;
-
-          // 3. Return A.
-          return A;
-        }
-        // v. Let nextValue be IteratorValue(next).
-        // vi. ReturnIfAbrupt(nextValue)
-        nextValue = next.value;
-
-        // vii. If mapping is true, then
-        //   1. Let mappedValue be Call(mapfn, T, «nextValue, k»).
-        //   2. If mappedValue is an abrupt completion, return
-        //      IteratorClose(iterator, mappedValue).
-        //   3. Let mappedValue be mappedValue.[[value]].
-        // viii. Else, let mappedValue be nextValue.
-        // ix.  Let defineStatus be the result of
-        //      CreateDataPropertyOrThrow(A, Pk, mappedValue).
-        // x. [TODO] If defineStatus is an abrupt completion, return
-        //    IteratorClose(iterator, defineStatus).
-        if (mapFn) {
-          A[k] = mapFn.call(T, nextValue, k);
-        }
-        else {
-          A[k] = nextValue;
-        }
-        // xi. Increase k by 1.
-        k++;
-      }
-      // 7. Assert: items is not an Iterable so assume it is
-      //    an array-like object.
-    } else {
-
-      // 8. Let arrayLike be ToObject(items).
-      var arrayLike = Object(items);
-
-      // 9. ReturnIfAbrupt(items).
-      if (items == null) {
-        throw new TypeError(
-          'Array.from requires an array-like object - not null or undefined'
-        );
-      }
-
-      // 10. Let len be ToLength(Get(arrayLike, "length")).
-      // 11. ReturnIfAbrupt(len).
-      var len = toLength(arrayLike.length);
-
-      // 12. If IsConstructor(C) is true, then
-      //     a. Let A be Construct(C, «len»).
-      // 13. Else
-      //     a. Let A be ArrayCreate(len).
-      // 14. ReturnIfAbrupt(A).
-      A = isCallable(C) ? Object(new C(len)) : new Array(len);
-
-      // 15. Let k be 0.
-      k = 0;
-      // 16. Repeat, while k < len… (also steps a - h)
-      var kValue;
-      while (k < len) {
-        kValue = arrayLike[k];
-        if (mapFn) {
-          A[k] = mapFn.call(T, kValue, k);
-        }
-        else {
-          A[k] = kValue;
-        }
-        k++;
-      }
-      // 17. Let setStatus be Set(A, "length", len, true).
-      // 18. ReturnIfAbrupt(setStatus).
-      A.length = len;
-      // 19. Return A.
-    }
-    return A;
-  };
-})();
-
-},{}],17:[function(require,module,exports){
-'use strict';
-
-var ES = require('es-abstract/es6');
-
-module.exports = function find(predicate) {
-	var list = ES.ToObject(this);
-	var length = ES.ToInteger(ES.ToLength(list.length));
-	if (!ES.IsCallable(predicate)) {
-		throw new TypeError('Array#find: predicate must be a function');
-	}
-	if (length === 0) {
-		return undefined;
-	}
-	var thisArg = arguments[1];
-	for (var i = 0, value; i < length; i++) {
-		value = list[i];
-		if (ES.Call(predicate, thisArg, [value, i, list])) {
-			return value;
-		}
-	}
-	return undefined;
-};
-
-},{"es-abstract/es6":28}],18:[function(require,module,exports){
-'use strict';
-
-var define = require('define-properties');
-var ES = require('es-abstract/es6');
-
-var implementation = require('./implementation');
-var getPolyfill = require('./polyfill');
-var shim = require('./shim');
-
-var slice = Array.prototype.slice;
-
-var polyfill = getPolyfill();
-
-var boundFindShim = function find(array, predicate) { // eslint-disable-line no-unused-vars
-	ES.RequireObjectCoercible(array);
-	var args = slice.call(arguments, 1);
-	return polyfill.apply(array, args);
-};
-
-define(boundFindShim, {
-	getPolyfill: getPolyfill,
-	implementation: implementation,
-	shim: shim
-});
-
-module.exports = boundFindShim;
-
-},{"./implementation":17,"./polyfill":19,"./shim":20,"define-properties":24,"es-abstract/es6":28}],19:[function(require,module,exports){
-'use strict';
-
-module.exports = function getPolyfill() {
-	// Detect if an implementation exists
-	// Detect early implementations which skipped holes in sparse arrays
-  // eslint-disable-next-line no-sparse-arrays
-	var implemented = Array.prototype.find && [, 1].find(function () {
-		return true;
-	}) !== 1;
-
-  // eslint-disable-next-line global-require
-	return implemented ? Array.prototype.find : require('./implementation');
-};
-
-},{"./implementation":17}],20:[function(require,module,exports){
-'use strict';
-
-var define = require('define-properties');
-var getPolyfill = require('./polyfill');
-
-module.exports = function shimArrayPrototypeFind() {
-	var polyfill = getPolyfill();
-
-	define(Array.prototype, { find: polyfill }, {
-		find: function () {
-			return Array.prototype.find !== polyfill;
-		}
-	});
-
-	return polyfill;
-};
-
-},{"./polyfill":19,"define-properties":24}],21:[function(require,module,exports){
-module.exports = function (css, customDocument) {
-  var doc = customDocument || document;
-  if (doc.createStyleSheet) {
-    var sheet = doc.createStyleSheet()
-    sheet.cssText = css;
-    return sheet.ownerNode;
-  } else {
-    var head = doc.getElementsByTagName('head')[0],
-        style = doc.createElement('style');
-
-    style.type = 'text/css';
-
-    if (style.styleSheet) {
-      style.styleSheet.cssText = css;
-    } else {
-      style.appendChild(doc.createTextNode(css));
-    }
-
-    head.appendChild(style);
-    return style;
-  }
-};
-
-module.exports.byUrl = function(url) {
-  if (document.createStyleSheet) {
-    return document.createStyleSheet(url).ownerNode;
-  } else {
-    var head = document.getElementsByTagName('head')[0],
-        link = document.createElement('link');
-
-    link.rel = 'stylesheet';
-    link.href = url;
-
-    head.appendChild(link);
-    return link;
-  }
-};
-
-},{}],22:[function(require,module,exports){
-'use strict';
-
-var copy             = require('es5-ext/object/copy')
-  , normalizeOptions = require('es5-ext/object/normalize-options')
-  , ensureCallable   = require('es5-ext/object/valid-callable')
-  , map              = require('es5-ext/object/map')
-  , callable         = require('es5-ext/object/valid-callable')
-  , validValue       = require('es5-ext/object/valid-value')
-
-  , bind = Function.prototype.bind, defineProperty = Object.defineProperty
-  , hasOwnProperty = Object.prototype.hasOwnProperty
-  , define;
-
-define = function (name, desc, options) {
-	var value = validValue(desc) && callable(desc.value), dgs;
-	dgs = copy(desc);
-	delete dgs.writable;
-	delete dgs.value;
-	dgs.get = function () {
-		if (!options.overwriteDefinition && hasOwnProperty.call(this, name)) return value;
-		desc.value = bind.call(value, options.resolveContext ? options.resolveContext(this) : this);
-		defineProperty(this, name, desc);
-		return this[name];
-	};
-	return dgs;
-};
-
-module.exports = function (props/*, options*/) {
-	var options = normalizeOptions(arguments[1]);
-	if (options.resolveContext != null) ensureCallable(options.resolveContext);
-	return map(props, function (desc, name) { return define(name, desc, options); });
-};
-
-},{"es5-ext/object/copy":61,"es5-ext/object/map":70,"es5-ext/object/normalize-options":71,"es5-ext/object/valid-callable":76,"es5-ext/object/valid-value":78}],23:[function(require,module,exports){
-'use strict';
-
-var assign        = require('es5-ext/object/assign')
-  , normalizeOpts = require('es5-ext/object/normalize-options')
-  , isCallable    = require('es5-ext/object/is-callable')
-  , contains      = require('es5-ext/string/#/contains')
-
-  , d;
-
-d = module.exports = function (dscr, value/*, options*/) {
-	var c, e, w, options, desc;
-	if ((arguments.length < 2) || (typeof dscr !== 'string')) {
-		options = value;
-		value = dscr;
-		dscr = null;
-	} else {
-		options = arguments[2];
-	}
-	if (dscr == null) {
-		c = w = true;
-		e = false;
-	} else {
-		c = contains.call(dscr, 'c');
-		e = contains.call(dscr, 'e');
-		w = contains.call(dscr, 'w');
-	}
-
-	desc = { value: value, configurable: c, enumerable: e, writable: w };
-	return !options ? desc : assign(normalizeOpts(options), desc);
-};
-
-d.gs = function (dscr, get, set/*, options*/) {
-	var c, e, options, desc;
-	if (typeof dscr !== 'string') {
-		options = set;
-		set = get;
-		get = dscr;
-		dscr = null;
-	} else {
-		options = arguments[3];
-	}
-	if (get == null) {
-		get = undefined;
-	} else if (!isCallable(get)) {
-		options = get;
-		get = set = undefined;
-	} else if (set == null) {
-		set = undefined;
-	} else if (!isCallable(set)) {
-		options = set;
-		set = undefined;
-	}
-	if (dscr == null) {
-		c = true;
-		e = false;
-	} else {
-		c = contains.call(dscr, 'c');
-		e = contains.call(dscr, 'e');
-	}
-
-	desc = { get: get, set: set, configurable: c, enumerable: e };
-	return !options ? desc : assign(normalizeOpts(options), desc);
-};
-
-},{"es5-ext/object/assign":58,"es5-ext/object/is-callable":64,"es5-ext/object/normalize-options":71,"es5-ext/string/#/contains":79}],24:[function(require,module,exports){
-'use strict';
-
-var keys = require('object-keys');
-var hasSymbols = typeof Symbol === 'function' && typeof Symbol('foo') === 'symbol';
-
-var toStr = Object.prototype.toString;
-var concat = Array.prototype.concat;
-var origDefineProperty = Object.defineProperty;
-
-var isFunction = function (fn) {
-	return typeof fn === 'function' && toStr.call(fn) === '[object Function]';
-};
-
-var arePropertyDescriptorsSupported = function () {
-	var obj = {};
-	try {
-		origDefineProperty(obj, 'x', { enumerable: false, value: obj });
-		// eslint-disable-next-line no-unused-vars, no-restricted-syntax
-		for (var _ in obj) { // jscs:ignore disallowUnusedVariables
-			return false;
-		}
-		return obj.x === obj;
-	} catch (e) { /* this is IE 8. */
-		return false;
-	}
-};
-var supportsDescriptors = origDefineProperty && arePropertyDescriptorsSupported();
-
-var defineProperty = function (object, name, value, predicate) {
-	if (name in object && (!isFunction(predicate) || !predicate())) {
-		return;
-	}
-	if (supportsDescriptors) {
-		origDefineProperty(object, name, {
-			configurable: true,
-			enumerable: false,
-			value: value,
-			writable: true
-		});
-	} else {
-		object[name] = value;
-	}
-};
-
-var defineProperties = function (object, map) {
-	var predicates = arguments.length > 2 ? arguments[2] : {};
-	var props = keys(map);
-	if (hasSymbols) {
-		props = concat.call(props, Object.getOwnPropertySymbols(map));
-	}
-	for (var i = 0; i < props.length; i += 1) {
-		defineProperty(object, props[i], map[props[i]], predicates[props[i]]);
-	}
-};
-
-defineProperties.supportsDescriptors = !!supportsDescriptors;
-
-module.exports = defineProperties;
-
-},{"object-keys":118}],25:[function(require,module,exports){
-'use strict';
-
-/* globals
-	Set,
-	Map,
-	WeakSet,
-	WeakMap,
-
-	Promise,
-
-	Symbol,
-	Proxy,
-
-	Atomics,
-	SharedArrayBuffer,
-
-	ArrayBuffer,
-	DataView,
-	Uint8Array,
-	Float32Array,
-	Float64Array,
-	Int8Array,
-	Int16Array,
-	Int32Array,
-	Uint8ClampedArray,
-	Uint16Array,
-	Uint32Array,
+    prErrorMessage.then(function (errorMessage) {
+        return androidEventHandlers.onCallTerminated(errorMessage);
+    });
+}
+var evtAcceptIncomingCall = new ts_events_extended_1.VoidSyncEvent();
+var readEmailFromUrl = function () { return Buffer.from(getURLParameter_1.getURLParameter("email_as_hex"), "hex").toString("utf8"); };
+/**
+ * Never resolve and call onCallTerminated if anything goes wrong.
+ * The returned ua is registering.
 */
-
-var undefined; // eslint-disable-line no-shadow-restricted-names
-
-var ThrowTypeError = Object.getOwnPropertyDescriptor
-	? (function () { return Object.getOwnPropertyDescriptor(arguments, 'callee').get; }())
-	: function () { throw new TypeError(); };
-
-var hasSymbols = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol';
-
-var getProto = Object.getPrototypeOf || function (x) { return x.__proto__; }; // eslint-disable-line no-proto
-
-var generator; // = function * () {};
-var generatorFunction = generator ? getProto(generator) : undefined;
-var asyncFn; // async function() {};
-var asyncFunction = asyncFn ? asyncFn.constructor : undefined;
-var asyncGen; // async function * () {};
-var asyncGenFunction = asyncGen ? getProto(asyncGen) : undefined;
-var asyncGenIterator = asyncGen ? asyncGen() : undefined;
-
-var TypedArray = typeof Uint8Array === 'undefined' ? undefined : getProto(Uint8Array);
-
-var INTRINSICS = {
-	'$ %Array%': Array,
-	'$ %ArrayBuffer%': typeof ArrayBuffer === 'undefined' ? undefined : ArrayBuffer,
-	'$ %ArrayBufferPrototype%': typeof ArrayBuffer === 'undefined' ? undefined : ArrayBuffer.prototype,
-	'$ %ArrayIteratorPrototype%': hasSymbols ? getProto([][Symbol.iterator]()) : undefined,
-	'$ %ArrayPrototype%': Array.prototype,
-	'$ %ArrayProto_entries%': Array.prototype.entries,
-	'$ %ArrayProto_forEach%': Array.prototype.forEach,
-	'$ %ArrayProto_keys%': Array.prototype.keys,
-	'$ %ArrayProto_values%': Array.prototype.values,
-	'$ %AsyncFromSyncIteratorPrototype%': undefined,
-	'$ %AsyncFunction%': asyncFunction,
-	'$ %AsyncFunctionPrototype%': asyncFunction ? asyncFunction.prototype : undefined,
-	'$ %AsyncGenerator%': asyncGen ? getProto(asyncGenIterator) : undefined,
-	'$ %AsyncGeneratorFunction%': asyncGenFunction,
-	'$ %AsyncGeneratorPrototype%': asyncGenFunction ? asyncGenFunction.prototype : undefined,
-	'$ %AsyncIteratorPrototype%': asyncGenIterator && hasSymbols && Symbol.asyncIterator ? asyncGenIterator[Symbol.asyncIterator]() : undefined,
-	'$ %Atomics%': typeof Atomics === 'undefined' ? undefined : Atomics,
-	'$ %Boolean%': Boolean,
-	'$ %BooleanPrototype%': Boolean.prototype,
-	'$ %DataView%': typeof DataView === 'undefined' ? undefined : DataView,
-	'$ %DataViewPrototype%': typeof DataView === 'undefined' ? undefined : DataView.prototype,
-	'$ %Date%': Date,
-	'$ %DatePrototype%': Date.prototype,
-	'$ %decodeURI%': decodeURI,
-	'$ %decodeURIComponent%': decodeURIComponent,
-	'$ %encodeURI%': encodeURI,
-	'$ %encodeURIComponent%': encodeURIComponent,
-	'$ %Error%': Error,
-	'$ %ErrorPrototype%': Error.prototype,
-	'$ %eval%': eval, // eslint-disable-line no-eval
-	'$ %EvalError%': EvalError,
-	'$ %EvalErrorPrototype%': EvalError.prototype,
-	'$ %Float32Array%': typeof Float32Array === 'undefined' ? undefined : Float32Array,
-	'$ %Float32ArrayPrototype%': typeof Float32Array === 'undefined' ? undefined : Float32Array.prototype,
-	'$ %Float64Array%': typeof Float64Array === 'undefined' ? undefined : Float64Array,
-	'$ %Float64ArrayPrototype%': typeof Float64Array === 'undefined' ? undefined : Float64Array.prototype,
-	'$ %Function%': Function,
-	'$ %FunctionPrototype%': Function.prototype,
-	'$ %Generator%': generator ? getProto(generator()) : undefined,
-	'$ %GeneratorFunction%': generatorFunction,
-	'$ %GeneratorPrototype%': generatorFunction ? generatorFunction.prototype : undefined,
-	'$ %Int8Array%': typeof Int8Array === 'undefined' ? undefined : Int8Array,
-	'$ %Int8ArrayPrototype%': typeof Int8Array === 'undefined' ? undefined : Int8Array.prototype,
-	'$ %Int16Array%': typeof Int16Array === 'undefined' ? undefined : Int16Array,
-	'$ %Int16ArrayPrototype%': typeof Int16Array === 'undefined' ? undefined : Int8Array.prototype,
-	'$ %Int32Array%': typeof Int32Array === 'undefined' ? undefined : Int32Array,
-	'$ %Int32ArrayPrototype%': typeof Int32Array === 'undefined' ? undefined : Int32Array.prototype,
-	'$ %isFinite%': isFinite,
-	'$ %isNaN%': isNaN,
-	'$ %IteratorPrototype%': hasSymbols ? getProto(getProto([][Symbol.iterator]())) : undefined,
-	'$ %JSON%': JSON,
-	'$ %JSONParse%': JSON.parse,
-	'$ %Map%': typeof Map === 'undefined' ? undefined : Map,
-	'$ %MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols ? undefined : getProto(new Map()[Symbol.iterator]()),
-	'$ %MapPrototype%': typeof Map === 'undefined' ? undefined : Map.prototype,
-	'$ %Math%': Math,
-	'$ %Number%': Number,
-	'$ %NumberPrototype%': Number.prototype,
-	'$ %Object%': Object,
-	'$ %ObjectPrototype%': Object.prototype,
-	'$ %ObjProto_toString%': Object.prototype.toString,
-	'$ %ObjProto_valueOf%': Object.prototype.valueOf,
-	'$ %parseFloat%': parseFloat,
-	'$ %parseInt%': parseInt,
-	'$ %Promise%': typeof Promise === 'undefined' ? undefined : Promise,
-	'$ %PromisePrototype%': typeof Promise === 'undefined' ? undefined : Promise.prototype,
-	'$ %PromiseProto_then%': typeof Promise === 'undefined' ? undefined : Promise.prototype.then,
-	'$ %Promise_all%': typeof Promise === 'undefined' ? undefined : Promise.all,
-	'$ %Promise_reject%': typeof Promise === 'undefined' ? undefined : Promise.reject,
-	'$ %Promise_resolve%': typeof Promise === 'undefined' ? undefined : Promise.resolve,
-	'$ %Proxy%': typeof Proxy === 'undefined' ? undefined : Proxy,
-	'$ %RangeError%': RangeError,
-	'$ %RangeErrorPrototype%': RangeError.prototype,
-	'$ %ReferenceError%': ReferenceError,
-	'$ %ReferenceErrorPrototype%': ReferenceError.prototype,
-	'$ %Reflect%': typeof Reflect === 'undefined' ? undefined : Reflect,
-	'$ %RegExp%': RegExp,
-	'$ %RegExpPrototype%': RegExp.prototype,
-	'$ %Set%': typeof Set === 'undefined' ? undefined : Set,
-	'$ %SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols ? undefined : getProto(new Set()[Symbol.iterator]()),
-	'$ %SetPrototype%': typeof Set === 'undefined' ? undefined : Set.prototype,
-	'$ %SharedArrayBuffer%': typeof SharedArrayBuffer === 'undefined' ? undefined : SharedArrayBuffer,
-	'$ %SharedArrayBufferPrototype%': typeof SharedArrayBuffer === 'undefined' ? undefined : SharedArrayBuffer.prototype,
-	'$ %String%': String,
-	'$ %StringIteratorPrototype%': hasSymbols ? getProto(''[Symbol.iterator]()) : undefined,
-	'$ %StringPrototype%': String.prototype,
-	'$ %Symbol%': hasSymbols ? Symbol : undefined,
-	'$ %SymbolPrototype%': hasSymbols ? Symbol.prototype : undefined,
-	'$ %SyntaxError%': SyntaxError,
-	'$ %SyntaxErrorPrototype%': SyntaxError.prototype,
-	'$ %ThrowTypeError%': ThrowTypeError,
-	'$ %TypedArray%': TypedArray,
-	'$ %TypedArrayPrototype%': TypedArray ? TypedArray.prototype : undefined,
-	'$ %TypeError%': TypeError,
-	'$ %TypeErrorPrototype%': TypeError.prototype,
-	'$ %Uint8Array%': typeof Uint8Array === 'undefined' ? undefined : Uint8Array,
-	'$ %Uint8ArrayPrototype%': typeof Uint8Array === 'undefined' ? undefined : Uint8Array.prototype,
-	'$ %Uint8ClampedArray%': typeof Uint8ClampedArray === 'undefined' ? undefined : Uint8ClampedArray,
-	'$ %Uint8ClampedArrayPrototype%': typeof Uint8ClampedArray === 'undefined' ? undefined : Uint8ClampedArray.prototype,
-	'$ %Uint16Array%': typeof Uint16Array === 'undefined' ? undefined : Uint16Array,
-	'$ %Uint16ArrayPrototype%': typeof Uint16Array === 'undefined' ? undefined : Uint16Array.prototype,
-	'$ %Uint32Array%': typeof Uint32Array === 'undefined' ? undefined : Uint32Array,
-	'$ %Uint32ArrayPrototype%': typeof Uint32Array === 'undefined' ? undefined : Uint32Array.prototype,
-	'$ %URIError%': URIError,
-	'$ %URIErrorPrototype%': URIError.prototype,
-	'$ %WeakMap%': typeof WeakMap === 'undefined' ? undefined : WeakMap,
-	'$ %WeakMapPrototype%': typeof WeakMap === 'undefined' ? undefined : WeakMap.prototype,
-	'$ %WeakSet%': typeof WeakSet === 'undefined' ? undefined : WeakSet,
-	'$ %WeakSetPrototype%': typeof WeakSet === 'undefined' ? undefined : WeakSet.prototype
-};
-
-module.exports = function GetIntrinsic(name, allowMissing) {
-	if (arguments.length > 1 && typeof allowMissing !== 'boolean') {
-		throw new TypeError('"allowMissing" argument must be a boolean');
-	}
-
-	var key = '$ ' + name;
-	if (!(key in INTRINSICS)) {
-		throw new SyntaxError('intrinsic ' + name + ' does not exist!');
-	}
-
-	// istanbul ignore if // hopefully this is impossible to test :-)
-	if (typeof INTRINSICS[key] === 'undefined' && !allowMissing) {
-		throw new TypeError('intrinsic ' + name + ' exists, but is not available. Please file an issue!');
-	}
-	return INTRINSICS[key];
-};
-
-},{}],26:[function(require,module,exports){
-'use strict';
-
-var has = require('has');
-var toPrimitive = require('es-to-primitive/es6');
-var keys = require('object-keys');
-
-var GetIntrinsic = require('./GetIntrinsic');
-
-var $TypeError = GetIntrinsic('%TypeError%');
-var $SyntaxError = GetIntrinsic('%SyntaxError%');
-var $Array = GetIntrinsic('%Array%');
-var $String = GetIntrinsic('%String%');
-var $Object = GetIntrinsic('%Object%');
-var $Number = GetIntrinsic('%Number%');
-var $Symbol = GetIntrinsic('%Symbol%', true);
-var $RegExp = GetIntrinsic('%RegExp%');
-
-var hasSymbols = !!$Symbol;
-
-var assertRecord = require('./helpers/assertRecord');
-var $isNaN = require('./helpers/isNaN');
-var $isFinite = require('./helpers/isFinite');
-var MAX_SAFE_INTEGER = $Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1;
-
-var assign = require('./helpers/assign');
-var sign = require('./helpers/sign');
-var mod = require('./helpers/mod');
-var isPrimitive = require('./helpers/isPrimitive');
-var parseInteger = parseInt;
-var bind = require('function-bind');
-var arraySlice = bind.call(Function.call, $Array.prototype.slice);
-var strSlice = bind.call(Function.call, $String.prototype.slice);
-var isBinary = bind.call(Function.call, $RegExp.prototype.test, /^0b[01]+$/i);
-var isOctal = bind.call(Function.call, $RegExp.prototype.test, /^0o[0-7]+$/i);
-var regexExec = bind.call(Function.call, $RegExp.prototype.exec);
-var nonWS = ['\u0085', '\u200b', '\ufffe'].join('');
-var nonWSregex = new $RegExp('[' + nonWS + ']', 'g');
-var hasNonWS = bind.call(Function.call, $RegExp.prototype.test, nonWSregex);
-var invalidHexLiteral = /^[-+]0x[0-9a-f]+$/i;
-var isInvalidHexLiteral = bind.call(Function.call, $RegExp.prototype.test, invalidHexLiteral);
-var $charCodeAt = bind.call(Function.call, $String.prototype.charCodeAt);
-
-var toStr = bind.call(Function.call, Object.prototype.toString);
-
-var $NumberValueOf = bind.call(Function.call, GetIntrinsic('%NumberPrototype%').valueOf);
-var $BooleanValueOf = bind.call(Function.call, GetIntrinsic('%BooleanPrototype%').valueOf);
-var $StringValueOf = bind.call(Function.call, GetIntrinsic('%StringPrototype%').valueOf);
-var $DateValueOf = bind.call(Function.call, GetIntrinsic('%DatePrototype%').valueOf);
-
-var $floor = Math.floor;
-var $abs = Math.abs;
-
-var $ObjectCreate = Object.create;
-var $gOPD = $Object.getOwnPropertyDescriptor;
-
-var $isExtensible = $Object.isExtensible;
-
-var $defineProperty = $Object.defineProperty;
-
-// whitespace from: http://es5.github.io/#x15.5.4.20
-// implementation from https://github.com/es-shims/es5-shim/blob/v3.4.0/es5-shim.js#L1304-L1324
-var ws = [
-	'\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003',
-	'\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028',
-	'\u2029\uFEFF'
-].join('');
-var trimRegex = new RegExp('(^[' + ws + ']+)|([' + ws + ']+$)', 'g');
-var replace = bind.call(Function.call, $String.prototype.replace);
-var trim = function (value) {
-	return replace(value, trimRegex, '');
-};
-
-var ES5 = require('./es5');
-
-var hasRegExpMatcher = require('is-regex');
-
-// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-abstract-operations
-var ES6 = assign(assign({}, ES5), {
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-call-f-v-args
-	Call: function Call(F, V) {
-		var args = arguments.length > 2 ? arguments[2] : [];
-		if (!this.IsCallable(F)) {
-			throw new $TypeError(F + ' is not a function');
-		}
-		return F.apply(V, args);
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-toprimitive
-	ToPrimitive: toPrimitive,
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-toboolean
-	// ToBoolean: ES5.ToBoolean,
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-tonumber
-	ToNumber: function ToNumber(argument) {
-		var value = isPrimitive(argument) ? argument : toPrimitive(argument, $Number);
-		if (typeof value === 'symbol') {
-			throw new $TypeError('Cannot convert a Symbol value to a number');
-		}
-		if (typeof value === 'string') {
-			if (isBinary(value)) {
-				return this.ToNumber(parseInteger(strSlice(value, 2), 2));
-			} else if (isOctal(value)) {
-				return this.ToNumber(parseInteger(strSlice(value, 2), 8));
-			} else if (hasNonWS(value) || isInvalidHexLiteral(value)) {
-				return NaN;
-			} else {
-				var trimmed = trim(value);
-				if (trimmed !== value) {
-					return this.ToNumber(trimmed);
-				}
-			}
-		}
-		return $Number(value);
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tointeger
-	// ToInteger: ES5.ToNumber,
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-toint32
-	// ToInt32: ES5.ToInt32,
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-touint32
-	// ToUint32: ES5.ToUint32,
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-toint16
-	ToInt16: function ToInt16(argument) {
-		var int16bit = this.ToUint16(argument);
-		return int16bit >= 0x8000 ? int16bit - 0x10000 : int16bit;
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-touint16
-	// ToUint16: ES5.ToUint16,
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-toint8
-	ToInt8: function ToInt8(argument) {
-		var int8bit = this.ToUint8(argument);
-		return int8bit >= 0x80 ? int8bit - 0x100 : int8bit;
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-touint8
-	ToUint8: function ToUint8(argument) {
-		var number = this.ToNumber(argument);
-		if ($isNaN(number) || number === 0 || !$isFinite(number)) { return 0; }
-		var posInt = sign(number) * $floor($abs(number));
-		return mod(posInt, 0x100);
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-touint8clamp
-	ToUint8Clamp: function ToUint8Clamp(argument) {
-		var number = this.ToNumber(argument);
-		if ($isNaN(number) || number <= 0) { return 0; }
-		if (number >= 0xFF) { return 0xFF; }
-		var f = $floor(argument);
-		if (f + 0.5 < number) { return f + 1; }
-		if (number < f + 0.5) { return f; }
-		if (f % 2 !== 0) { return f + 1; }
-		return f;
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tostring
-	ToString: function ToString(argument) {
-		if (typeof argument === 'symbol') {
-			throw new $TypeError('Cannot convert a Symbol value to a string');
-		}
-		return $String(argument);
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-toobject
-	ToObject: function ToObject(value) {
-		this.RequireObjectCoercible(value);
-		return $Object(value);
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-topropertykey
-	ToPropertyKey: function ToPropertyKey(argument) {
-		var key = this.ToPrimitive(argument, $String);
-		return typeof key === 'symbol' ? key : this.ToString(key);
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
-	ToLength: function ToLength(argument) {
-		var len = this.ToInteger(argument);
-		if (len <= 0) { return 0; } // includes converting -0 to +0
-		if (len > MAX_SAFE_INTEGER) { return MAX_SAFE_INTEGER; }
-		return len;
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-canonicalnumericindexstring
-	CanonicalNumericIndexString: function CanonicalNumericIndexString(argument) {
-		if (toStr(argument) !== '[object String]') {
-			throw new $TypeError('must be a string');
-		}
-		if (argument === '-0') { return -0; }
-		var n = this.ToNumber(argument);
-		if (this.SameValue(this.ToString(n), argument)) { return n; }
-		return void 0;
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-requireobjectcoercible
-	RequireObjectCoercible: ES5.CheckObjectCoercible,
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-isarray
-	IsArray: $Array.isArray || function IsArray(argument) {
-		return toStr(argument) === '[object Array]';
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-iscallable
-	// IsCallable: ES5.IsCallable,
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-isconstructor
-	IsConstructor: function IsConstructor(argument) {
-		return typeof argument === 'function' && !!argument.prototype; // unfortunately there's no way to truly check this without try/catch `new argument`
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-isextensible-o
-	IsExtensible: Object.preventExtensions
-		? function IsExtensible(obj) {
-			if (isPrimitive(obj)) {
-				return false;
-			}
-			return $isExtensible(obj);
-		}
-		: function isExtensible(obj) { return true; }, // eslint-disable-line no-unused-vars
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-isinteger
-	IsInteger: function IsInteger(argument) {
-		if (typeof argument !== 'number' || $isNaN(argument) || !$isFinite(argument)) {
-			return false;
-		}
-		var abs = $abs(argument);
-		return $floor(abs) === abs;
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-ispropertykey
-	IsPropertyKey: function IsPropertyKey(argument) {
-		return typeof argument === 'string' || typeof argument === 'symbol';
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-isregexp
-	IsRegExp: function IsRegExp(argument) {
-		if (!argument || typeof argument !== 'object') {
-			return false;
-		}
-		if (hasSymbols) {
-			var isRegExp = argument[$Symbol.match];
-			if (typeof isRegExp !== 'undefined') {
-				return ES5.ToBoolean(isRegExp);
-			}
-		}
-		return hasRegExpMatcher(argument);
-	},
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevalue
-	// SameValue: ES5.SameValue,
-
-	// https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero
-	SameValueZero: function SameValueZero(x, y) {
-		return (x === y) || ($isNaN(x) && $isNaN(y));
-	},
-
-	/**
-	 * 7.3.2 GetV (V, P)
-	 * 1. Assert: IsPropertyKey(P) is true.
-	 * 2. Let O be ToObject(V).
-	 * 3. ReturnIfAbrupt(O).
-	 * 4. Return O.[[Get]](P, V).
-	 */
-	GetV: function GetV(V, P) {
-		// 7.3.2.1
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('Assertion failed: IsPropertyKey(P) is not true');
-		}
-
-		// 7.3.2.2-3
-		var O = this.ToObject(V);
-
-		// 7.3.2.4
-		return O[P];
-	},
-
-	/**
-	 * 7.3.9 - https://ecma-international.org/ecma-262/6.0/#sec-getmethod
-	 * 1. Assert: IsPropertyKey(P) is true.
-	 * 2. Let func be GetV(O, P).
-	 * 3. ReturnIfAbrupt(func).
-	 * 4. If func is either undefined or null, return undefined.
-	 * 5. If IsCallable(func) is false, throw a TypeError exception.
-	 * 6. Return func.
-	 */
-	GetMethod: function GetMethod(O, P) {
-		// 7.3.9.1
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('Assertion failed: IsPropertyKey(P) is not true');
-		}
-
-		// 7.3.9.2
-		var func = this.GetV(O, P);
-
-		// 7.3.9.4
-		if (func == null) {
-			return void 0;
-		}
-
-		// 7.3.9.5
-		if (!this.IsCallable(func)) {
-			throw new $TypeError(P + 'is not a function');
-		}
-
-		// 7.3.9.6
-		return func;
-	},
-
-	/**
-	 * 7.3.1 Get (O, P) - https://ecma-international.org/ecma-262/6.0/#sec-get-o-p
-	 * 1. Assert: Type(O) is Object.
-	 * 2. Assert: IsPropertyKey(P) is true.
-	 * 3. Return O.[[Get]](P, O).
-	 */
-	Get: function Get(O, P) {
-		// 7.3.1.1
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(O) is not Object');
-		}
-		// 7.3.1.2
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('Assertion failed: IsPropertyKey(P) is not true');
-		}
-		// 7.3.1.3
-		return O[P];
-	},
-
-	Type: function Type(x) {
-		if (typeof x === 'symbol') {
-			return 'Symbol';
-		}
-		return ES5.Type(x);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-speciesconstructor
-	SpeciesConstructor: function SpeciesConstructor(O, defaultConstructor) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(O) is not Object');
-		}
-		var C = O.constructor;
-		if (typeof C === 'undefined') {
-			return defaultConstructor;
-		}
-		if (this.Type(C) !== 'Object') {
-			throw new $TypeError('O.constructor is not an Object');
-		}
-		var S = hasSymbols && $Symbol.species ? C[$Symbol.species] : void 0;
-		if (S == null) {
-			return defaultConstructor;
-		}
-		if (this.IsConstructor(S)) {
-			return S;
-		}
-		throw new $TypeError('no constructor found');
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-completepropertydescriptor
-	CompletePropertyDescriptor: function CompletePropertyDescriptor(Desc) {
-		assertRecord(this, 'Property Descriptor', 'Desc', Desc);
-
-		if (this.IsGenericDescriptor(Desc) || this.IsDataDescriptor(Desc)) {
-			if (!has(Desc, '[[Value]]')) {
-				Desc['[[Value]]'] = void 0;
-			}
-			if (!has(Desc, '[[Writable]]')) {
-				Desc['[[Writable]]'] = false;
-			}
-		} else {
-			if (!has(Desc, '[[Get]]')) {
-				Desc['[[Get]]'] = void 0;
-			}
-			if (!has(Desc, '[[Set]]')) {
-				Desc['[[Set]]'] = void 0;
-			}
-		}
-		if (!has(Desc, '[[Enumerable]]')) {
-			Desc['[[Enumerable]]'] = false;
-		}
-		if (!has(Desc, '[[Configurable]]')) {
-			Desc['[[Configurable]]'] = false;
-		}
-		return Desc;
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-set-o-p-v-throw
-	Set: function Set(O, P, V, Throw) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('O must be an Object');
-		}
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('P must be a Property Key');
-		}
-		if (this.Type(Throw) !== 'Boolean') {
-			throw new $TypeError('Throw must be a Boolean');
-		}
-		if (Throw) {
-			O[P] = V;
-			return true;
-		} else {
-			try {
-				O[P] = V;
-			} catch (e) {
-				return false;
-			}
-		}
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-hasownproperty
-	HasOwnProperty: function HasOwnProperty(O, P) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('O must be an Object');
-		}
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('P must be a Property Key');
-		}
-		return has(O, P);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-hasproperty
-	HasProperty: function HasProperty(O, P) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('O must be an Object');
-		}
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('P must be a Property Key');
-		}
-		return P in O;
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-isconcatspreadable
-	IsConcatSpreadable: function IsConcatSpreadable(O) {
-		if (this.Type(O) !== 'Object') {
-			return false;
-		}
-		if (hasSymbols && typeof $Symbol.isConcatSpreadable === 'symbol') {
-			var spreadable = this.Get(O, Symbol.isConcatSpreadable);
-			if (typeof spreadable !== 'undefined') {
-				return this.ToBoolean(spreadable);
-			}
-		}
-		return this.IsArray(O);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-invoke
-	Invoke: function Invoke(O, P) {
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('P must be a Property Key');
-		}
-		var argumentsList = arraySlice(arguments, 2);
-		var func = this.GetV(O, P);
-		return this.Call(func, O, argumentsList);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-getiterator
-	GetIterator: function GetIterator(obj, method) {
-		if (!hasSymbols) {
-			throw new SyntaxError('ES.GetIterator depends on native iterator support.');
-		}
-
-		var actualMethod = method;
-		if (arguments.length < 2) {
-			actualMethod = this.GetMethod(obj, $Symbol.iterator);
-		}
-		var iterator = this.Call(actualMethod, obj);
-		if (this.Type(iterator) !== 'Object') {
-			throw new $TypeError('iterator must return an object');
-		}
-
-		return iterator;
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-iteratornext
-	IteratorNext: function IteratorNext(iterator, value) {
-		var result = this.Invoke(iterator, 'next', arguments.length < 2 ? [] : [value]);
-		if (this.Type(result) !== 'Object') {
-			throw new $TypeError('iterator next must return an object');
-		}
-		return result;
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-iteratorcomplete
-	IteratorComplete: function IteratorComplete(iterResult) {
-		if (this.Type(iterResult) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(iterResult) is not Object');
-		}
-		return this.ToBoolean(this.Get(iterResult, 'done'));
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-iteratorvalue
-	IteratorValue: function IteratorValue(iterResult) {
-		if (this.Type(iterResult) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(iterResult) is not Object');
-		}
-		return this.Get(iterResult, 'value');
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-iteratorstep
-	IteratorStep: function IteratorStep(iterator) {
-		var result = this.IteratorNext(iterator);
-		var done = this.IteratorComplete(result);
-		return done === true ? false : result;
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-iteratorclose
-	IteratorClose: function IteratorClose(iterator, completion) {
-		if (this.Type(iterator) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(iterator) is not Object');
-		}
-		if (!this.IsCallable(completion)) {
-			throw new $TypeError('Assertion failed: completion is not a thunk for a Completion Record');
-		}
-		var completionThunk = completion;
-
-		var iteratorReturn = this.GetMethod(iterator, 'return');
-
-		if (typeof iteratorReturn === 'undefined') {
-			return completionThunk();
-		}
-
-		var completionRecord;
-		try {
-			var innerResult = this.Call(iteratorReturn, iterator, []);
-		} catch (e) {
-			// if we hit here, then "e" is the innerResult completion that needs re-throwing
-
-			// if the completion is of type "throw", this will throw.
-			completionRecord = completionThunk();
-			completionThunk = null; // ensure it's not called twice.
-
-			// if not, then return the innerResult completion
-			throw e;
-		}
-		completionRecord = completionThunk(); // if innerResult worked, then throw if the completion does
-		completionThunk = null; // ensure it's not called twice.
-
-		if (this.Type(innerResult) !== 'Object') {
-			throw new $TypeError('iterator .return must return an object');
-		}
-
-		return completionRecord;
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-createiterresultobject
-	CreateIterResultObject: function CreateIterResultObject(value, done) {
-		if (this.Type(done) !== 'Boolean') {
-			throw new $TypeError('Assertion failed: Type(done) is not Boolean');
-		}
-		return {
-			value: value,
-			done: done
-		};
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-regexpexec
-	RegExpExec: function RegExpExec(R, S) {
-		if (this.Type(R) !== 'Object') {
-			throw new $TypeError('R must be an Object');
-		}
-		if (this.Type(S) !== 'String') {
-			throw new $TypeError('S must be a String');
-		}
-		var exec = this.Get(R, 'exec');
-		if (this.IsCallable(exec)) {
-			var result = this.Call(exec, R, [S]);
-			if (result === null || this.Type(result) === 'Object') {
-				return result;
-			}
-			throw new $TypeError('"exec" method must return `null` or an Object');
-		}
-		return regexExec(R, S);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-arrayspeciescreate
-	ArraySpeciesCreate: function ArraySpeciesCreate(originalArray, length) {
-		if (!this.IsInteger(length) || length < 0) {
-			throw new $TypeError('Assertion failed: length must be an integer >= 0');
-		}
-		var len = length === 0 ? 0 : length;
-		var C;
-		var isArray = this.IsArray(originalArray);
-		if (isArray) {
-			C = this.Get(originalArray, 'constructor');
-			// TODO: figure out how to make a cross-realm normal Array, a same-realm Array
-			// if (this.IsConstructor(C)) {
-			// 	if C is another realm's Array, C = undefined
-			// 	Object.getPrototypeOf(Object.getPrototypeOf(Object.getPrototypeOf(Array))) === null ?
-			// }
-			if (this.Type(C) === 'Object' && hasSymbols && $Symbol.species) {
-				C = this.Get(C, $Symbol.species);
-				if (C === null) {
-					C = void 0;
-				}
-			}
-		}
-		if (typeof C === 'undefined') {
-			return $Array(len);
-		}
-		if (!this.IsConstructor(C)) {
-			throw new $TypeError('C must be a constructor');
-		}
-		return new C(len); // this.Construct(C, len);
-	},
-
-	CreateDataProperty: function CreateDataProperty(O, P, V) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(O) is not Object');
-		}
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('Assertion failed: IsPropertyKey(P) is not true');
-		}
-		var oldDesc = $gOPD(O, P);
-		var extensible = oldDesc || (typeof $isExtensible !== 'function' || $isExtensible(O));
-		var immutable = oldDesc && (!oldDesc.writable || !oldDesc.configurable);
-		if (immutable || !extensible) {
-			return false;
-		}
-		var newDesc = {
-			configurable: true,
-			enumerable: true,
-			value: V,
-			writable: true
-		};
-		$defineProperty(O, P, newDesc);
-		return true;
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-createdatapropertyorthrow
-	CreateDataPropertyOrThrow: function CreateDataPropertyOrThrow(O, P, V) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(O) is not Object');
-		}
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('Assertion failed: IsPropertyKey(P) is not true');
-		}
-		var success = this.CreateDataProperty(O, P, V);
-		if (!success) {
-			throw new $TypeError('unable to create data property');
-		}
-		return success;
-	},
-
-	// https://www.ecma-international.org/ecma-262/6.0/#sec-objectcreate
-	ObjectCreate: function ObjectCreate(proto, internalSlotsList) {
-		if (proto !== null && this.Type(proto) !== 'Object') {
-			throw new $TypeError('Assertion failed: proto must be null or an object');
-		}
-		var slots = arguments.length < 2 ? [] : internalSlotsList;
-		if (slots.length > 0) {
-			throw new $SyntaxError('es-abstract does not yet support internal slots');
-		}
-
-		if (proto === null && !$ObjectCreate) {
-			throw new $SyntaxError('native Object.create support is required to create null objects');
-		}
-
-		return $ObjectCreate(proto);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-advancestringindex
-	AdvanceStringIndex: function AdvanceStringIndex(S, index, unicode) {
-		if (this.Type(S) !== 'String') {
-			throw new $TypeError('S must be a String');
-		}
-		if (!this.IsInteger(index) || index < 0 || index > MAX_SAFE_INTEGER) {
-			throw new $TypeError('Assertion failed: length must be an integer >= 0 and <= 2**53');
-		}
-		if (this.Type(unicode) !== 'Boolean') {
-			throw new $TypeError('Assertion failed: unicode must be a Boolean');
-		}
-		if (!unicode) {
-			return index + 1;
-		}
-		var length = S.length;
-		if ((index + 1) >= length) {
-			return index + 1;
-		}
-
-		var first = $charCodeAt(S, index);
-		if (first < 0xD800 || first > 0xDBFF) {
-			return index + 1;
-		}
-
-		var second = $charCodeAt(S, index + 1);
-		if (second < 0xDC00 || second > 0xDFFF) {
-			return index + 1;
-		}
-
-		return index + 2;
-	},
-
-	// https://www.ecma-international.org/ecma-262/6.0/#sec-createmethodproperty
-	CreateMethodProperty: function CreateMethodProperty(O, P, V) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(O) is not Object');
-		}
-
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('Assertion failed: IsPropertyKey(P) is not true');
-		}
-
-		var newDesc = {
-			configurable: true,
-			enumerable: false,
-			value: V,
-			writable: true
-		};
-		return !!$defineProperty(O, P, newDesc);
-	},
-
-	// https://www.ecma-international.org/ecma-262/6.0/#sec-definepropertyorthrow
-	DefinePropertyOrThrow: function DefinePropertyOrThrow(O, P, desc) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(O) is not Object');
-		}
-
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('Assertion failed: IsPropertyKey(P) is not true');
-		}
-
-		return !!$defineProperty(O, P, desc);
-	},
-
-	// https://www.ecma-international.org/ecma-262/6.0/#sec-deletepropertyorthrow
-	DeletePropertyOrThrow: function DeletePropertyOrThrow(O, P) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(O) is not Object');
-		}
-
-		if (!this.IsPropertyKey(P)) {
-			throw new $TypeError('Assertion failed: IsPropertyKey(P) is not true');
-		}
-
-		var success = delete O[P];
-		if (!success) {
-			throw new TypeError('Attempt to delete property failed.');
-		}
-		return success;
-	},
-
-	// https://www.ecma-international.org/ecma-262/6.0/#sec-enumerableownnames
-	EnumerableOwnNames: function EnumerableOwnNames(O) {
-		if (this.Type(O) !== 'Object') {
-			throw new $TypeError('Assertion failed: Type(O) is not Object');
-		}
-
-		return keys(O);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-properties-of-the-number-prototype-object
-	thisNumberValue: function thisNumberValue(value) {
-		if (this.Type(value) === 'Number') {
-			return value;
-		}
-
-		return $NumberValueOf(value);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-properties-of-the-boolean-prototype-object
-	thisBooleanValue: function thisBooleanValue(value) {
-		if (this.Type(value) === 'Boolean') {
-			return value;
-		}
-
-		return $BooleanValueOf(value);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-properties-of-the-string-prototype-object
-	thisStringValue: function thisStringValue(value) {
-		if (this.Type(value) === 'String') {
-			return value;
-		}
-
-		return $StringValueOf(value);
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-properties-of-the-date-prototype-object
-	thisTimeValue: function thisTimeValue(value) {
-		return $DateValueOf(value);
-	}
-});
-
-delete ES6.CheckObjectCoercible; // renamed in ES6 to RequireObjectCoercible
-
-module.exports = ES6;
-
-},{"./GetIntrinsic":25,"./es5":27,"./helpers/assertRecord":29,"./helpers/assign":30,"./helpers/isFinite":31,"./helpers/isNaN":32,"./helpers/isPrimitive":33,"./helpers/mod":34,"./helpers/sign":35,"es-to-primitive/es6":38,"function-bind":108,"has":111,"is-regex":114,"object-keys":118}],27:[function(require,module,exports){
-'use strict';
-
-var GetIntrinsic = require('./GetIntrinsic');
-
-var $Object = GetIntrinsic('%Object%');
-var $TypeError = GetIntrinsic('%TypeError%');
-var $String = GetIntrinsic('%String%');
-
-var assertRecord = require('./helpers/assertRecord');
-var $isNaN = require('./helpers/isNaN');
-var $isFinite = require('./helpers/isFinite');
-
-var sign = require('./helpers/sign');
-var mod = require('./helpers/mod');
-
-var IsCallable = require('is-callable');
-var toPrimitive = require('es-to-primitive/es5');
-
-var has = require('has');
-
-// https://es5.github.io/#x9
-var ES5 = {
-	ToPrimitive: toPrimitive,
-
-	ToBoolean: function ToBoolean(value) {
-		return !!value;
-	},
-	ToNumber: function ToNumber(value) {
-		return +value; // eslint-disable-line no-implicit-coercion
-	},
-	ToInteger: function ToInteger(value) {
-		var number = this.ToNumber(value);
-		if ($isNaN(number)) { return 0; }
-		if (number === 0 || !$isFinite(number)) { return number; }
-		return sign(number) * Math.floor(Math.abs(number));
-	},
-	ToInt32: function ToInt32(x) {
-		return this.ToNumber(x) >> 0;
-	},
-	ToUint32: function ToUint32(x) {
-		return this.ToNumber(x) >>> 0;
-	},
-	ToUint16: function ToUint16(value) {
-		var number = this.ToNumber(value);
-		if ($isNaN(number) || number === 0 || !$isFinite(number)) { return 0; }
-		var posInt = sign(number) * Math.floor(Math.abs(number));
-		return mod(posInt, 0x10000);
-	},
-	ToString: function ToString(value) {
-		return $String(value);
-	},
-	ToObject: function ToObject(value) {
-		this.CheckObjectCoercible(value);
-		return $Object(value);
-	},
-	CheckObjectCoercible: function CheckObjectCoercible(value, optMessage) {
-		/* jshint eqnull:true */
-		if (value == null) {
-			throw new $TypeError(optMessage || 'Cannot call method on ' + value);
-		}
-		return value;
-	},
-	IsCallable: IsCallable,
-	SameValue: function SameValue(x, y) {
-		if (x === y) { // 0 === -0, but they are not identical.
-			if (x === 0) { return 1 / x === 1 / y; }
-			return true;
-		}
-		return $isNaN(x) && $isNaN(y);
-	},
-
-	// https://www.ecma-international.org/ecma-262/5.1/#sec-8
-	Type: function Type(x) {
-		if (x === null) {
-			return 'Null';
-		}
-		if (typeof x === 'undefined') {
-			return 'Undefined';
-		}
-		if (typeof x === 'function' || typeof x === 'object') {
-			return 'Object';
-		}
-		if (typeof x === 'number') {
-			return 'Number';
-		}
-		if (typeof x === 'boolean') {
-			return 'Boolean';
-		}
-		if (typeof x === 'string') {
-			return 'String';
-		}
-	},
-
-	// https://ecma-international.org/ecma-262/6.0/#sec-property-descriptor-specification-type
-	IsPropertyDescriptor: function IsPropertyDescriptor(Desc) {
-		if (this.Type(Desc) !== 'Object') {
-			return false;
-		}
-		var allowed = {
-			'[[Configurable]]': true,
-			'[[Enumerable]]': true,
-			'[[Get]]': true,
-			'[[Set]]': true,
-			'[[Value]]': true,
-			'[[Writable]]': true
-		};
-
-		for (var key in Desc) { // eslint-disable-line
-			if (has(Desc, key) && !allowed[key]) {
-				return false;
-			}
-		}
-
-		var isData = has(Desc, '[[Value]]');
-		var IsAccessor = has(Desc, '[[Get]]') || has(Desc, '[[Set]]');
-		if (isData && IsAccessor) {
-			throw new $TypeError('Property Descriptors may not be both accessor and data descriptors');
-		}
-		return true;
-	},
-
-	// https://ecma-international.org/ecma-262/5.1/#sec-8.10.1
-	IsAccessorDescriptor: function IsAccessorDescriptor(Desc) {
-		if (typeof Desc === 'undefined') {
-			return false;
-		}
-
-		assertRecord(this, 'Property Descriptor', 'Desc', Desc);
-
-		if (!has(Desc, '[[Get]]') && !has(Desc, '[[Set]]')) {
-			return false;
-		}
-
-		return true;
-	},
-
-	// https://ecma-international.org/ecma-262/5.1/#sec-8.10.2
-	IsDataDescriptor: function IsDataDescriptor(Desc) {
-		if (typeof Desc === 'undefined') {
-			return false;
-		}
-
-		assertRecord(this, 'Property Descriptor', 'Desc', Desc);
-
-		if (!has(Desc, '[[Value]]') && !has(Desc, '[[Writable]]')) {
-			return false;
-		}
-
-		return true;
-	},
-
-	// https://ecma-international.org/ecma-262/5.1/#sec-8.10.3
-	IsGenericDescriptor: function IsGenericDescriptor(Desc) {
-		if (typeof Desc === 'undefined') {
-			return false;
-		}
-
-		assertRecord(this, 'Property Descriptor', 'Desc', Desc);
-
-		if (!this.IsAccessorDescriptor(Desc) && !this.IsDataDescriptor(Desc)) {
-			return true;
-		}
-
-		return false;
-	},
-
-	// https://ecma-international.org/ecma-262/5.1/#sec-8.10.4
-	FromPropertyDescriptor: function FromPropertyDescriptor(Desc) {
-		if (typeof Desc === 'undefined') {
-			return Desc;
-		}
-
-		assertRecord(this, 'Property Descriptor', 'Desc', Desc);
-
-		if (this.IsDataDescriptor(Desc)) {
-			return {
-				value: Desc['[[Value]]'],
-				writable: !!Desc['[[Writable]]'],
-				enumerable: !!Desc['[[Enumerable]]'],
-				configurable: !!Desc['[[Configurable]]']
-			};
-		} else if (this.IsAccessorDescriptor(Desc)) {
-			return {
-				get: Desc['[[Get]]'],
-				set: Desc['[[Set]]'],
-				enumerable: !!Desc['[[Enumerable]]'],
-				configurable: !!Desc['[[Configurable]]']
-			};
-		} else {
-			throw new $TypeError('FromPropertyDescriptor must be called with a fully populated Property Descriptor');
-		}
-	},
-
-	// https://ecma-international.org/ecma-262/5.1/#sec-8.10.5
-	ToPropertyDescriptor: function ToPropertyDescriptor(Obj) {
-		if (this.Type(Obj) !== 'Object') {
-			throw new $TypeError('ToPropertyDescriptor requires an object');
-		}
-
-		var desc = {};
-		if (has(Obj, 'enumerable')) {
-			desc['[[Enumerable]]'] = this.ToBoolean(Obj.enumerable);
-		}
-		if (has(Obj, 'configurable')) {
-			desc['[[Configurable]]'] = this.ToBoolean(Obj.configurable);
-		}
-		if (has(Obj, 'value')) {
-			desc['[[Value]]'] = Obj.value;
-		}
-		if (has(Obj, 'writable')) {
-			desc['[[Writable]]'] = this.ToBoolean(Obj.writable);
-		}
-		if (has(Obj, 'get')) {
-			var getter = Obj.get;
-			if (typeof getter !== 'undefined' && !this.IsCallable(getter)) {
-				throw new TypeError('getter must be a function');
-			}
-			desc['[[Get]]'] = getter;
-		}
-		if (has(Obj, 'set')) {
-			var setter = Obj.set;
-			if (typeof setter !== 'undefined' && !this.IsCallable(setter)) {
-				throw new $TypeError('setter must be a function');
-			}
-			desc['[[Set]]'] = setter;
-		}
-
-		if ((has(desc, '[[Get]]') || has(desc, '[[Set]]')) && (has(desc, '[[Value]]') || has(desc, '[[Writable]]'))) {
-			throw new $TypeError('Invalid property descriptor. Cannot both specify accessors and a value or writable attribute');
-		}
-		return desc;
-	}
-};
-
-module.exports = ES5;
-
-},{"./GetIntrinsic":25,"./helpers/assertRecord":29,"./helpers/isFinite":31,"./helpers/isNaN":32,"./helpers/mod":34,"./helpers/sign":35,"es-to-primitive/es5":37,"has":111,"is-callable":112}],28:[function(require,module,exports){
-'use strict';
-
-module.exports = require('./es2015');
-
-},{"./es2015":26}],29:[function(require,module,exports){
-'use strict';
-
-var GetIntrinsic = require('../GetIntrinsic');
-
-var $TypeError = GetIntrinsic('%TypeError%');
-var $SyntaxError = GetIntrinsic('%SyntaxError%');
-
-var has = require('has');
-
-var predicates = {
-  // https://ecma-international.org/ecma-262/6.0/#sec-property-descriptor-specification-type
-  'Property Descriptor': function isPropertyDescriptor(ES, Desc) {
-    if (ES.Type(Desc) !== 'Object') {
-      return false;
-    }
-    var allowed = {
-      '[[Configurable]]': true,
-      '[[Enumerable]]': true,
-      '[[Get]]': true,
-      '[[Set]]': true,
-      '[[Value]]': true,
-      '[[Writable]]': true
-    };
-
-    for (var key in Desc) { // eslint-disable-line
-      if (has(Desc, key) && !allowed[key]) {
-        return false;
-      }
-    }
-
-    var isData = has(Desc, '[[Value]]');
-    var IsAccessor = has(Desc, '[[Get]]') || has(Desc, '[[Set]]');
-    if (isData && IsAccessor) {
-      throw new $TypeError('Property Descriptors may not be both accessor and data descriptors');
-    }
-    return true;
-  }
-};
-
-module.exports = function assertRecord(ES, recordType, argumentName, value) {
-  var predicate = predicates[recordType];
-  if (typeof predicate !== 'function') {
-    throw new $SyntaxError('unknown record type: ' + recordType);
-  }
-  if (!predicate(ES, value)) {
-    throw new $TypeError(argumentName + ' must be a ' + recordType);
-  }
-  console.log(predicate(ES, value), value);
-};
-
-},{"../GetIntrinsic":25,"has":111}],30:[function(require,module,exports){
-var bind = require('function-bind');
-var has = bind.call(Function.call, Object.prototype.hasOwnProperty);
-
-var $assign = Object.assign;
-
-module.exports = function assign(target, source) {
-	if ($assign) {
-		return $assign(target, source);
-	}
-
-	for (var key in source) {
-		if (has(source, key)) {
-			target[key] = source[key];
-		}
-	}
-	return target;
-};
-
-},{"function-bind":108}],31:[function(require,module,exports){
-var $isNaN = Number.isNaN || function (a) { return a !== a; };
-
-module.exports = Number.isFinite || function (x) { return typeof x === 'number' && !$isNaN(x) && x !== Infinity && x !== -Infinity; };
-
-},{}],32:[function(require,module,exports){
-module.exports = Number.isNaN || function isNaN(a) {
-	return a !== a;
-};
-
-},{}],33:[function(require,module,exports){
-module.exports = function isPrimitive(value) {
-	return value === null || (typeof value !== 'function' && typeof value !== 'object');
-};
-
-},{}],34:[function(require,module,exports){
-module.exports = function mod(number, modulo) {
-	var remain = number % modulo;
-	return Math.floor(remain >= 0 ? remain : remain + modulo);
-};
-
-},{}],35:[function(require,module,exports){
-module.exports = function sign(number) {
-	return number >= 0 ? 1 : -1;
-};
-
-},{}],36:[function(require,module,exports){
-'use strict';
-
-var hasSymbols = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol';
-
-var isPrimitive = require('./helpers/isPrimitive');
-var isCallable = require('is-callable');
-var isDate = require('is-date-object');
-var isSymbol = require('is-symbol');
-
-var ordinaryToPrimitive = function OrdinaryToPrimitive(O, hint) {
-	if (typeof O === 'undefined' || O === null) {
-		throw new TypeError('Cannot call method on ' + O);
-	}
-	if (typeof hint !== 'string' || (hint !== 'number' && hint !== 'string')) {
-		throw new TypeError('hint must be "string" or "number"');
-	}
-	var methodNames = hint === 'string' ? ['toString', 'valueOf'] : ['valueOf', 'toString'];
-	var method, result, i;
-	for (i = 0; i < methodNames.length; ++i) {
-		method = O[methodNames[i]];
-		if (isCallable(method)) {
-			result = method.call(O);
-			if (isPrimitive(result)) {
-				return result;
-			}
-		}
-	}
-	throw new TypeError('No default value');
-};
-
-var GetMethod = function GetMethod(O, P) {
-	var func = O[P];
-	if (func !== null && typeof func !== 'undefined') {
-		if (!isCallable(func)) {
-			throw new TypeError(func + ' returned for property ' + P + ' of object ' + O + ' is not a function');
-		}
-		return func;
-	}
-	return void 0;
-};
-
-// http://www.ecma-international.org/ecma-262/6.0/#sec-toprimitive
-module.exports = function ToPrimitive(input) {
-	if (isPrimitive(input)) {
-		return input;
-	}
-	var hint = 'default';
-	if (arguments.length > 1) {
-		if (arguments[1] === String) {
-			hint = 'string';
-		} else if (arguments[1] === Number) {
-			hint = 'number';
-		}
-	}
-
-	var exoticToPrim;
-	if (hasSymbols) {
-		if (Symbol.toPrimitive) {
-			exoticToPrim = GetMethod(input, Symbol.toPrimitive);
-		} else if (isSymbol(input)) {
-			exoticToPrim = Symbol.prototype.valueOf;
-		}
-	}
-	if (typeof exoticToPrim !== 'undefined') {
-		var result = exoticToPrim.call(input, hint);
-		if (isPrimitive(result)) {
-			return result;
-		}
-		throw new TypeError('unable to convert exotic object to primitive');
-	}
-	if (hint === 'default' && (isDate(input) || isSymbol(input))) {
-		hint = 'string';
-	}
-	return ordinaryToPrimitive(input, hint === 'default' ? 'number' : hint);
-};
-
-},{"./helpers/isPrimitive":39,"is-callable":112,"is-date-object":113,"is-symbol":115}],37:[function(require,module,exports){
-'use strict';
-
-var toStr = Object.prototype.toString;
-
-var isPrimitive = require('./helpers/isPrimitive');
-
-var isCallable = require('is-callable');
-
-// http://ecma-international.org/ecma-262/5.1/#sec-8.12.8
-var ES5internalSlots = {
-	'[[DefaultValue]]': function (O) {
-		var actualHint;
-		if (arguments.length > 1) {
-			actualHint = arguments[1];
-		} else {
-			actualHint = toStr.call(O) === '[object Date]' ? String : Number;
-		}
-
-		if (actualHint === String || actualHint === Number) {
-			var methods = actualHint === String ? ['toString', 'valueOf'] : ['valueOf', 'toString'];
-			var value, i;
-			for (i = 0; i < methods.length; ++i) {
-				if (isCallable(O[methods[i]])) {
-					value = O[methods[i]]();
-					if (isPrimitive(value)) {
-						return value;
-					}
-				}
-			}
-			throw new TypeError('No default value');
-		}
-		throw new TypeError('invalid [[DefaultValue]] hint supplied');
-	}
-};
-
-// http://ecma-international.org/ecma-262/5.1/#sec-9.1
-module.exports = function ToPrimitive(input) {
-	if (isPrimitive(input)) {
-		return input;
-	}
-	if (arguments.length > 1) {
-		return ES5internalSlots['[[DefaultValue]]'](input, arguments[1]);
-	}
-	return ES5internalSlots['[[DefaultValue]]'](input);
-};
-
-},{"./helpers/isPrimitive":39,"is-callable":112}],38:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"./es2015":36,"dup":28}],39:[function(require,module,exports){
-arguments[4][33][0].apply(exports,arguments)
-},{"dup":33}],40:[function(require,module,exports){
-// Inspired by Google Closure:
-// http://closure-library.googlecode.com/svn/docs/
-// closure_goog_array_array.js.html#goog.array.clear
-
-"use strict";
-
-var value = require("../../object/valid-value");
-
-module.exports = function () {
-	value(this).length = 0;
-	return this;
-};
-
-},{"../../object/valid-value":78}],41:[function(require,module,exports){
-"use strict";
-
-var numberIsNaN       = require("../../number/is-nan")
-  , toPosInt          = require("../../number/to-pos-integer")
-  , value             = require("../../object/valid-value")
-  , indexOf           = Array.prototype.indexOf
-  , objHasOwnProperty = Object.prototype.hasOwnProperty
-  , abs               = Math.abs
-  , floor             = Math.floor;
-
-module.exports = function (searchElement /*, fromIndex*/) {
-	var i, length, fromIndex, val;
-	if (!numberIsNaN(searchElement)) return indexOf.apply(this, arguments);
-
-	length = toPosInt(value(this).length);
-	fromIndex = arguments[1];
-	if (isNaN(fromIndex)) fromIndex = 0;
-	else if (fromIndex >= 0) fromIndex = floor(fromIndex);
-	else fromIndex = toPosInt(this.length) - floor(abs(fromIndex));
-
-	for (i = fromIndex; i < length; ++i) {
-		if (objHasOwnProperty.call(this, i)) {
-			val = this[i];
-			if (numberIsNaN(val)) return i; // Jslint: ignore
-		}
-	}
-	return -1;
-};
-
-},{"../../number/is-nan":52,"../../number/to-pos-integer":56,"../../object/valid-value":78}],42:[function(require,module,exports){
-"use strict";
-
-module.exports = require("./is-implemented")()
-	? Array.from
-	: require("./shim");
-
-},{"./is-implemented":43,"./shim":44}],43:[function(require,module,exports){
-"use strict";
-
-module.exports = function () {
-	var from = Array.from, arr, result;
-	if (typeof from !== "function") return false;
-	arr = ["raz", "dwa"];
-	result = from(arr);
-	return Boolean(result && (result !== arr) && (result[1] === "dwa"));
-};
-
-},{}],44:[function(require,module,exports){
-"use strict";
-
-var iteratorSymbol = require("es6-symbol").iterator
-  , isArguments    = require("../../function/is-arguments")
-  , isFunction     = require("../../function/is-function")
-  , toPosInt       = require("../../number/to-pos-integer")
-  , callable       = require("../../object/valid-callable")
-  , validValue     = require("../../object/valid-value")
-  , isValue        = require("../../object/is-value")
-  , isString       = require("../../string/is-string")
-  , isArray        = Array.isArray
-  , call           = Function.prototype.call
-  , desc           = { configurable: true, enumerable: true, writable: true, value: null }
-  , defineProperty = Object.defineProperty;
-
-// eslint-disable-next-line complexity, max-lines-per-function
-module.exports = function (arrayLike /*, mapFn, thisArg*/) {
-	var mapFn = arguments[1]
-	  , thisArg = arguments[2]
-	  , Context
-	  , i
-	  , j
-	  , arr
-	  , length
-	  , code
-	  , iterator
-	  , result
-	  , getIterator
-	  , value;
-
-	arrayLike = Object(validValue(arrayLike));
-
-	if (isValue(mapFn)) callable(mapFn);
-	if (!this || this === Array || !isFunction(this)) {
-		// Result: Plain array
-		if (!mapFn) {
-			if (isArguments(arrayLike)) {
-				// Source: Arguments
-				length = arrayLike.length;
-				if (length !== 1) return Array.apply(null, arrayLike);
-				arr = new Array(1);
-				arr[0] = arrayLike[0];
-				return arr;
-			}
-			if (isArray(arrayLike)) {
-				// Source: Array
-				arr = new Array(length = arrayLike.length);
-				for (i = 0; i < length; ++i) arr[i] = arrayLike[i];
-				return arr;
-			}
-		}
-		arr = [];
-	} else {
-		// Result: Non plain array
-		Context = this;
-	}
-
-	if (!isArray(arrayLike)) {
-		if ((getIterator = arrayLike[iteratorSymbol]) !== undefined) {
-			// Source: Iterator
-			iterator = callable(getIterator).call(arrayLike);
-			if (Context) arr = new Context();
-			result = iterator.next();
-			i = 0;
-			while (!result.done) {
-				value = mapFn ? call.call(mapFn, thisArg, result.value, i) : result.value;
-				if (Context) {
-					desc.value = value;
-					defineProperty(arr, i, desc);
-				} else {
-					arr[i] = value;
-				}
-				result = iterator.next();
-				++i;
-			}
-			length = i;
-		} else if (isString(arrayLike)) {
-			// Source: String
-			length = arrayLike.length;
-			if (Context) arr = new Context();
-			for (i = 0, j = 0; i < length; ++i) {
-				value = arrayLike[i];
-				if (i + 1 < length) {
-					code = value.charCodeAt(0);
-					// eslint-disable-next-line max-depth
-					if (code >= 0xd800 && code <= 0xdbff) value += arrayLike[++i];
-				}
-				value = mapFn ? call.call(mapFn, thisArg, value, j) : value;
-				if (Context) {
-					desc.value = value;
-					defineProperty(arr, j, desc);
-				} else {
-					arr[j] = value;
-				}
-				++j;
-			}
-			length = j;
-		}
-	}
-	if (length === undefined) {
-		// Source: array or array-like
-		length = toPosInt(arrayLike.length);
-		if (Context) arr = new Context(length);
-		for (i = 0; i < length; ++i) {
-			value = mapFn ? call.call(mapFn, thisArg, arrayLike[i], i) : arrayLike[i];
-			if (Context) {
-				desc.value = value;
-				defineProperty(arr, i, desc);
-			} else {
-				arr[i] = value;
-			}
-		}
-	}
-	if (Context) {
-		desc.value = null;
-		arr.length = length;
-	}
-	return arr;
-};
-
-},{"../../function/is-arguments":45,"../../function/is-function":46,"../../number/to-pos-integer":56,"../../object/is-value":66,"../../object/valid-callable":76,"../../object/valid-value":78,"../../string/is-string":82,"es6-symbol":97}],45:[function(require,module,exports){
-"use strict";
-
-var objToString = Object.prototype.toString
-  , id = objToString.call(
-	(function () {
-		return arguments;
-	})()
-);
-
-module.exports = function (value) {
-	return objToString.call(value) === id;
-};
-
-},{}],46:[function(require,module,exports){
-"use strict";
-
-var objToString = Object.prototype.toString, id = objToString.call(require("./noop"));
-
-module.exports = function (value) {
-	return typeof value === "function" && objToString.call(value) === id;
-};
-
-},{"./noop":47}],47:[function(require,module,exports){
-"use strict";
-
-// eslint-disable-next-line no-empty-function
-module.exports = function () {};
-
-},{}],48:[function(require,module,exports){
-/* eslint strict: "off" */
-
-module.exports = (function () {
-	return this;
-}());
-
-},{}],49:[function(require,module,exports){
-"use strict";
-
-module.exports = require("./is-implemented")()
-	? Math.sign
-	: require("./shim");
-
-},{"./is-implemented":50,"./shim":51}],50:[function(require,module,exports){
-"use strict";
-
-module.exports = function () {
-	var sign = Math.sign;
-	if (typeof sign !== "function") return false;
-	return (sign(10) === 1) && (sign(-20) === -1);
-};
-
-},{}],51:[function(require,module,exports){
-"use strict";
-
-module.exports = function (value) {
-	value = Number(value);
-	if (isNaN(value) || (value === 0)) return value;
-	return value > 0 ? 1 : -1;
-};
-
-},{}],52:[function(require,module,exports){
-"use strict";
-
-module.exports = require("./is-implemented")()
-	? Number.isNaN
-	: require("./shim");
-
-},{"./is-implemented":53,"./shim":54}],53:[function(require,module,exports){
-"use strict";
-
-module.exports = function () {
-	var numberIsNaN = Number.isNaN;
-	if (typeof numberIsNaN !== "function") return false;
-	return !numberIsNaN({}) && numberIsNaN(NaN) && !numberIsNaN(34);
-};
-
-},{}],54:[function(require,module,exports){
-"use strict";
-
-module.exports = function (value) {
-	// eslint-disable-next-line no-self-compare
-	return value !== value;
-};
-
-},{}],55:[function(require,module,exports){
-"use strict";
-
-var sign = require("../math/sign")
-
-  , abs = Math.abs, floor = Math.floor;
-
-module.exports = function (value) {
-	if (isNaN(value)) return 0;
-	value = Number(value);
-	if ((value === 0) || !isFinite(value)) return value;
-	return sign(value) * floor(abs(value));
-};
-
-},{"../math/sign":49}],56:[function(require,module,exports){
-"use strict";
-
-var toInteger = require("./to-integer")
-
-  , max = Math.max;
-
-module.exports = function (value) {
- return max(0, toInteger(value));
-};
-
-},{"./to-integer":55}],57:[function(require,module,exports){
-// Internal method, used by iteration functions.
-// Calls a function for each key-value pair found in object
-// Optionally takes compareFn to iterate object in specific order
-
-"use strict";
-
-var callable                = require("./valid-callable")
-  , value                   = require("./valid-value")
-  , bind                    = Function.prototype.bind
-  , call                    = Function.prototype.call
-  , keys                    = Object.keys
-  , objPropertyIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-module.exports = function (method, defVal) {
-	return function (obj, cb /*, thisArg, compareFn*/) {
-		var list, thisArg = arguments[2], compareFn = arguments[3];
-		obj = Object(value(obj));
-		callable(cb);
-
-		list = keys(obj);
-		if (compareFn) {
-			list.sort(typeof compareFn === "function" ? bind.call(compareFn, obj) : undefined);
-		}
-		if (typeof method !== "function") method = list[method];
-		return call.call(method, list, function (key, index) {
-			if (!objPropertyIsEnumerable.call(obj, key)) return defVal;
-			return call.call(cb, thisArg, obj[key], key, obj, index);
-		});
-	};
-};
-
-},{"./valid-callable":76,"./valid-value":78}],58:[function(require,module,exports){
-"use strict";
-
-module.exports = require("./is-implemented")()
-	? Object.assign
-	: require("./shim");
-
-},{"./is-implemented":59,"./shim":60}],59:[function(require,module,exports){
-"use strict";
-
-module.exports = function () {
-	var assign = Object.assign, obj;
-	if (typeof assign !== "function") return false;
-	obj = { foo: "raz" };
-	assign(obj, { bar: "dwa" }, { trzy: "trzy" });
-	return (obj.foo + obj.bar + obj.trzy) === "razdwatrzy";
-};
-
-},{}],60:[function(require,module,exports){
-"use strict";
-
-var keys  = require("../keys")
-  , value = require("../valid-value")
-  , max   = Math.max;
-
-module.exports = function (dest, src /*, …srcn*/) {
-	var error, i, length = max(arguments.length, 2), assign;
-	dest = Object(value(dest));
-	assign = function (key) {
-		try {
-			dest[key] = src[key];
-		} catch (e) {
-			if (!error) error = e;
-		}
-	};
-	for (i = 1; i < length; ++i) {
-		src = arguments[i];
-		keys(src).forEach(assign);
-	}
-	if (error !== undefined) throw error;
-	return dest;
-};
-
-},{"../keys":67,"../valid-value":78}],61:[function(require,module,exports){
-"use strict";
-
-var aFrom  = require("../array/from")
-  , assign = require("./assign")
-  , value  = require("./valid-value");
-
-module.exports = function (obj/*, propertyNames, options*/) {
-	var copy = Object(value(obj)), propertyNames = arguments[1], options = Object(arguments[2]);
-	if (copy !== obj && !propertyNames) return copy;
-	var result = {};
-	if (propertyNames) {
-		aFrom(propertyNames, function (propertyName) {
-			if (options.ensure || propertyName in obj) result[propertyName] = obj[propertyName];
-		});
-	} else {
-		assign(result, obj);
-	}
-	return result;
-};
-
-},{"../array/from":42,"./assign":58,"./valid-value":78}],62:[function(require,module,exports){
-// Workaround for http://code.google.com/p/v8/issues/detail?id=2804
-
-"use strict";
-
-var create = Object.create, shim;
-
-if (!require("./set-prototype-of/is-implemented")()) {
-	shim = require("./set-prototype-of/shim");
-}
-
-module.exports = (function () {
-	var nullObject, polyProps, desc;
-	if (!shim) return create;
-	if (shim.level !== 1) return create;
-
-	nullObject = {};
-	polyProps = {};
-	desc = {
-		configurable: false,
-		enumerable: false,
-		writable: true,
-		value: undefined
-	};
-	Object.getOwnPropertyNames(Object.prototype).forEach(function (name) {
-		if (name === "__proto__") {
-			polyProps[name] = {
-				configurable: true,
-				enumerable: false,
-				writable: true,
-				value: undefined
-			};
-			return;
-		}
-		polyProps[name] = desc;
-	});
-	Object.defineProperties(nullObject, polyProps);
-
-	Object.defineProperty(shim, "nullPolyfill", {
-		configurable: false,
-		enumerable: false,
-		writable: false,
-		value: nullObject
-	});
-
-	return function (prototype, props) {
-		return create(prototype === null ? nullObject : prototype, props);
-	};
-}());
-
-},{"./set-prototype-of/is-implemented":74,"./set-prototype-of/shim":75}],63:[function(require,module,exports){
-"use strict";
-
-module.exports = require("./_iterate")("forEach");
-
-},{"./_iterate":57}],64:[function(require,module,exports){
-// Deprecated
-
-"use strict";
-
-module.exports = function (obj) {
- return typeof obj === "function";
-};
-
-},{}],65:[function(require,module,exports){
-"use strict";
-
-var isValue = require("./is-value");
-
-var map = { function: true, object: true };
-
-module.exports = function (value) {
-	return (isValue(value) && map[typeof value]) || false;
-};
-
-},{"./is-value":66}],66:[function(require,module,exports){
-"use strict";
-
-var _undefined = require("../function/noop")(); // Support ES3 engines
-
-module.exports = function (val) {
- return (val !== _undefined) && (val !== null);
-};
-
-},{"../function/noop":47}],67:[function(require,module,exports){
-"use strict";
-
-module.exports = require("./is-implemented")() ? Object.keys : require("./shim");
-
-},{"./is-implemented":68,"./shim":69}],68:[function(require,module,exports){
-"use strict";
-
-module.exports = function () {
-	try {
-		Object.keys("primitive");
-		return true;
-	} catch (e) {
-		return false;
-	}
-};
-
-},{}],69:[function(require,module,exports){
-"use strict";
-
-var isValue = require("../is-value");
-
-var keys = Object.keys;
-
-module.exports = function (object) { return keys(isValue(object) ? Object(object) : object); };
-
-},{"../is-value":66}],70:[function(require,module,exports){
-"use strict";
-
-var callable = require("./valid-callable")
-  , forEach  = require("./for-each")
-  , call     = Function.prototype.call;
-
-module.exports = function (obj, cb /*, thisArg*/) {
-	var result = {}, thisArg = arguments[2];
-	callable(cb);
-	forEach(obj, function (value, key, targetObj, index) {
-		result[key] = call.call(cb, thisArg, value, key, targetObj, index);
-	});
-	return result;
-};
-
-},{"./for-each":63,"./valid-callable":76}],71:[function(require,module,exports){
-"use strict";
-
-var isValue = require("./is-value");
-
-var forEach = Array.prototype.forEach, create = Object.create;
-
-var process = function (src, obj) {
-	var key;
-	for (key in src) obj[key] = src[key];
-};
-
-// eslint-disable-next-line no-unused-vars
-module.exports = function (opts1 /*, …options*/) {
-	var result = create(null);
-	forEach.call(arguments, function (options) {
-		if (!isValue(options)) return;
-		process(Object(options), result);
-	});
-	return result;
-};
-
-},{"./is-value":66}],72:[function(require,module,exports){
-"use strict";
-
-var forEach = Array.prototype.forEach, create = Object.create;
-
-// eslint-disable-next-line no-unused-vars
-module.exports = function (arg /*, …args*/) {
-	var set = create(null);
-	forEach.call(arguments, function (name) {
-		set[name] = true;
-	});
-	return set;
-};
-
-},{}],73:[function(require,module,exports){
-"use strict";
-
-module.exports = require("./is-implemented")()
-	? Object.setPrototypeOf
-	: require("./shim");
-
-},{"./is-implemented":74,"./shim":75}],74:[function(require,module,exports){
-"use strict";
-
-var create = Object.create, getPrototypeOf = Object.getPrototypeOf, plainObject = {};
-
-module.exports = function (/* CustomCreate*/) {
-	var setPrototypeOf = Object.setPrototypeOf, customCreate = arguments[0] || create;
-	if (typeof setPrototypeOf !== "function") return false;
-	return getPrototypeOf(setPrototypeOf(customCreate(null), plainObject)) === plainObject;
-};
-
-},{}],75:[function(require,module,exports){
-/* eslint no-proto: "off" */
-
-// Big thanks to @WebReflection for sorting this out
-// https://gist.github.com/WebReflection/5593554
-
-"use strict";
-
-var isObject        = require("../is-object")
-  , value           = require("../valid-value")
-  , objIsPrototypeOf = Object.prototype.isPrototypeOf
-  , defineProperty  = Object.defineProperty
-  , nullDesc        = {
-	configurable: true,
-	enumerable: false,
-	writable: true,
-	value: undefined
-}
-  , validate;
-
-validate = function (obj, prototype) {
-	value(obj);
-	if (prototype === null || isObject(prototype)) return obj;
-	throw new TypeError("Prototype must be null or an object");
-};
-
-module.exports = (function (status) {
-	var fn, set;
-	if (!status) return null;
-	if (status.level === 2) {
-		if (status.set) {
-			set = status.set;
-			fn = function (obj, prototype) {
-				set.call(validate(obj, prototype), prototype);
-				return obj;
-			};
-		} else {
-			fn = function (obj, prototype) {
-				validate(obj, prototype).__proto__ = prototype;
-				return obj;
-			};
-		}
-	} else {
-		fn = function self(obj, prototype) {
-			var isNullBase;
-			validate(obj, prototype);
-			isNullBase = objIsPrototypeOf.call(self.nullPolyfill, obj);
-			if (isNullBase) delete self.nullPolyfill.__proto__;
-			if (prototype === null) prototype = self.nullPolyfill;
-			obj.__proto__ = prototype;
-			if (isNullBase) defineProperty(self.nullPolyfill, "__proto__", nullDesc);
-			return obj;
-		};
-	}
-	return Object.defineProperty(fn, "level", {
-		configurable: false,
-		enumerable: false,
-		writable: false,
-		value: status.level
-	});
-}(
-	(function () {
-		var tmpObj1 = Object.create(null)
-		  , tmpObj2 = {}
-		  , set
-		  , desc = Object.getOwnPropertyDescriptor(Object.prototype, "__proto__");
-
-		if (desc) {
-			try {
-				set = desc.set; // Opera crashes at this point
-				set.call(tmpObj1, tmpObj2);
-			} catch (ignore) {}
-			if (Object.getPrototypeOf(tmpObj1) === tmpObj2) return { set: set, level: 2 };
-		}
-
-		tmpObj1.__proto__ = tmpObj2;
-		if (Object.getPrototypeOf(tmpObj1) === tmpObj2) return { level: 2 };
-
-		tmpObj1 = {};
-		tmpObj1.__proto__ = tmpObj2;
-		if (Object.getPrototypeOf(tmpObj1) === tmpObj2) return { level: 1 };
-
-		return false;
-	})()
-));
-
-require("../create");
-
-},{"../create":62,"../is-object":65,"../valid-value":78}],76:[function(require,module,exports){
-"use strict";
-
-module.exports = function (fn) {
-	if (typeof fn !== "function") throw new TypeError(fn + " is not a function");
-	return fn;
-};
-
-},{}],77:[function(require,module,exports){
-"use strict";
-
-var isObject = require("./is-object");
-
-module.exports = function (value) {
-	if (!isObject(value)) throw new TypeError(value + " is not an Object");
-	return value;
-};
-
-},{"./is-object":65}],78:[function(require,module,exports){
-"use strict";
-
-var isValue = require("./is-value");
-
-module.exports = function (value) {
-	if (!isValue(value)) throw new TypeError("Cannot use null or undefined");
-	return value;
-};
-
-},{"./is-value":66}],79:[function(require,module,exports){
-"use strict";
-
-module.exports = require("./is-implemented")()
-	? String.prototype.contains
-	: require("./shim");
-
-},{"./is-implemented":80,"./shim":81}],80:[function(require,module,exports){
-"use strict";
-
-var str = "razdwatrzy";
-
-module.exports = function () {
-	if (typeof str.contains !== "function") return false;
-	return (str.contains("dwa") === true) && (str.contains("foo") === false);
-};
-
-},{}],81:[function(require,module,exports){
-"use strict";
-
-var indexOf = String.prototype.indexOf;
-
-module.exports = function (searchString/*, position*/) {
-	return indexOf.call(this, searchString, arguments[1]) > -1;
-};
-
-},{}],82:[function(require,module,exports){
-"use strict";
-
-var objToString = Object.prototype.toString, id = objToString.call("");
-
-module.exports = function (value) {
-	return (
-		typeof value === "string" ||
-		(value &&
-			typeof value === "object" &&
-			(value instanceof String || objToString.call(value) === id)) ||
-		false
-	);
-};
-
-},{}],83:[function(require,module,exports){
-"use strict";
-
-var generated = Object.create(null), random = Math.random;
-
-module.exports = function () {
-	var str;
-	do {
-		str = random()
-			.toString(36)
-			.slice(2);
-	} while (generated[str]);
-	return str;
-};
-
-},{}],84:[function(require,module,exports){
-"use strict";
-
-var setPrototypeOf = require("es5-ext/object/set-prototype-of")
-  , contains       = require("es5-ext/string/#/contains")
-  , d              = require("d")
-  , Symbol         = require("es6-symbol")
-  , Iterator       = require("./");
-
-var defineProperty = Object.defineProperty, ArrayIterator;
-
-ArrayIterator = module.exports = function (arr, kind) {
-	if (!(this instanceof ArrayIterator)) throw new TypeError("Constructor requires 'new'");
-	Iterator.call(this, arr);
-	if (!kind) kind = "value";
-	else if (contains.call(kind, "key+value")) kind = "key+value";
-	else if (contains.call(kind, "key")) kind = "key";
-	else kind = "value";
-	defineProperty(this, "__kind__", d("", kind));
-};
-if (setPrototypeOf) setPrototypeOf(ArrayIterator, Iterator);
-
-// Internal %ArrayIteratorPrototype% doesn't expose its constructor
-delete ArrayIterator.prototype.constructor;
-
-ArrayIterator.prototype = Object.create(Iterator.prototype, {
-	_resolve: d(function (i) {
-		if (this.__kind__ === "value") return this.__list__[i];
-		if (this.__kind__ === "key+value") return [i, this.__list__[i]];
-		return i;
-	})
-});
-defineProperty(ArrayIterator.prototype, Symbol.toStringTag, d("c", "Array Iterator"));
-
-},{"./":87,"d":23,"es5-ext/object/set-prototype-of":73,"es5-ext/string/#/contains":79,"es6-symbol":97}],85:[function(require,module,exports){
-"use strict";
-
-var isArguments = require("es5-ext/function/is-arguments")
-  , callable    = require("es5-ext/object/valid-callable")
-  , isString    = require("es5-ext/string/is-string")
-  , get         = require("./get");
-
-var isArray = Array.isArray, call = Function.prototype.call, some = Array.prototype.some;
-
-module.exports = function (iterable, cb /*, thisArg*/) {
-	var mode, thisArg = arguments[2], result, doBreak, broken, i, length, char, code;
-	if (isArray(iterable) || isArguments(iterable)) mode = "array";
-	else if (isString(iterable)) mode = "string";
-	else iterable = get(iterable);
-
-	callable(cb);
-	doBreak = function () {
-		broken = true;
-	};
-	if (mode === "array") {
-		some.call(iterable, function (value) {
-			call.call(cb, thisArg, value, doBreak);
-			return broken;
-		});
-		return;
-	}
-	if (mode === "string") {
-		length = iterable.length;
-		for (i = 0; i < length; ++i) {
-			char = iterable[i];
-			if (i + 1 < length) {
-				code = char.charCodeAt(0);
-				if (code >= 0xd800 && code <= 0xdbff) char += iterable[++i];
-			}
-			call.call(cb, thisArg, char, doBreak);
-			if (broken) break;
-		}
-		return;
-	}
-	result = iterable.next();
-
-	while (!result.done) {
-		call.call(cb, thisArg, result.value, doBreak);
-		if (broken) return;
-		result = iterable.next();
-	}
-};
-
-},{"./get":86,"es5-ext/function/is-arguments":45,"es5-ext/object/valid-callable":76,"es5-ext/string/is-string":82}],86:[function(require,module,exports){
-"use strict";
-
-var isArguments    = require("es5-ext/function/is-arguments")
-  , isString       = require("es5-ext/string/is-string")
-  , ArrayIterator  = require("./array")
-  , StringIterator = require("./string")
-  , iterable       = require("./valid-iterable")
-  , iteratorSymbol = require("es6-symbol").iterator;
-
-module.exports = function (obj) {
-	if (typeof iterable(obj)[iteratorSymbol] === "function") return obj[iteratorSymbol]();
-	if (isArguments(obj)) return new ArrayIterator(obj);
-	if (isString(obj)) return new StringIterator(obj);
-	return new ArrayIterator(obj);
-};
-
-},{"./array":84,"./string":89,"./valid-iterable":90,"es5-ext/function/is-arguments":45,"es5-ext/string/is-string":82,"es6-symbol":97}],87:[function(require,module,exports){
-"use strict";
-
-var clear    = require("es5-ext/array/#/clear")
-  , assign   = require("es5-ext/object/assign")
-  , callable = require("es5-ext/object/valid-callable")
-  , value    = require("es5-ext/object/valid-value")
-  , d        = require("d")
-  , autoBind = require("d/auto-bind")
-  , Symbol   = require("es6-symbol");
-
-var defineProperty = Object.defineProperty, defineProperties = Object.defineProperties, Iterator;
-
-module.exports = Iterator = function (list, context) {
-	if (!(this instanceof Iterator)) throw new TypeError("Constructor requires 'new'");
-	defineProperties(this, {
-		__list__: d("w", value(list)),
-		__context__: d("w", context),
-		__nextIndex__: d("w", 0)
-	});
-	if (!context) return;
-	callable(context.on);
-	context.on("_add", this._onAdd);
-	context.on("_delete", this._onDelete);
-	context.on("_clear", this._onClear);
-};
-
-// Internal %IteratorPrototype% doesn't expose its constructor
-delete Iterator.prototype.constructor;
-
-defineProperties(
-	Iterator.prototype,
-	assign(
-		{
-			_next: d(function () {
-				var i;
-				if (!this.__list__) return undefined;
-				if (this.__redo__) {
-					i = this.__redo__.shift();
-					if (i !== undefined) return i;
-				}
-				if (this.__nextIndex__ < this.__list__.length) return this.__nextIndex__++;
-				this._unBind();
-				return undefined;
-			}),
-			next: d(function () {
-				return this._createResult(this._next());
-			}),
-			_createResult: d(function (i) {
-				if (i === undefined) return { done: true, value: undefined };
-				return { done: false, value: this._resolve(i) };
-			}),
-			_resolve: d(function (i) {
-				return this.__list__[i];
-			}),
-			_unBind: d(function () {
-				this.__list__ = null;
-				delete this.__redo__;
-				if (!this.__context__) return;
-				this.__context__.off("_add", this._onAdd);
-				this.__context__.off("_delete", this._onDelete);
-				this.__context__.off("_clear", this._onClear);
-				this.__context__ = null;
-			}),
-			toString: d(function () {
-				return "[object " + (this[Symbol.toStringTag] || "Object") + "]";
-			})
-		},
-		autoBind({
-			_onAdd: d(function (index) {
-				if (index >= this.__nextIndex__) return;
-				++this.__nextIndex__;
-				if (!this.__redo__) {
-					defineProperty(this, "__redo__", d("c", [index]));
-					return;
-				}
-				this.__redo__.forEach(function (redo, i) {
-					if (redo >= index) this.__redo__[i] = ++redo;
-				}, this);
-				this.__redo__.push(index);
-			}),
-			_onDelete: d(function (index) {
-				var i;
-				if (index >= this.__nextIndex__) return;
-				--this.__nextIndex__;
-				if (!this.__redo__) return;
-				i = this.__redo__.indexOf(index);
-				if (i !== -1) this.__redo__.splice(i, 1);
-				this.__redo__.forEach(function (redo, j) {
-					if (redo > index) this.__redo__[j] = --redo;
-				}, this);
-			}),
-			_onClear: d(function () {
-				if (this.__redo__) clear.call(this.__redo__);
-				this.__nextIndex__ = 0;
-			})
-		})
-	)
-);
-
-defineProperty(
-	Iterator.prototype,
-	Symbol.iterator,
-	d(function () {
-		return this;
-	})
-);
-
-},{"d":23,"d/auto-bind":22,"es5-ext/array/#/clear":40,"es5-ext/object/assign":58,"es5-ext/object/valid-callable":76,"es5-ext/object/valid-value":78,"es6-symbol":97}],88:[function(require,module,exports){
-"use strict";
-
-var isArguments = require("es5-ext/function/is-arguments")
-  , isValue     = require("es5-ext/object/is-value")
-  , isString    = require("es5-ext/string/is-string");
-
-var iteratorSymbol = require("es6-symbol").iterator
-  , isArray        = Array.isArray;
-
-module.exports = function (value) {
-	if (!isValue(value)) return false;
-	if (isArray(value)) return true;
-	if (isString(value)) return true;
-	if (isArguments(value)) return true;
-	return typeof value[iteratorSymbol] === "function";
-};
-
-},{"es5-ext/function/is-arguments":45,"es5-ext/object/is-value":66,"es5-ext/string/is-string":82,"es6-symbol":97}],89:[function(require,module,exports){
-// Thanks @mathiasbynens
-// http://mathiasbynens.be/notes/javascript-unicode#iterating-over-symbols
-
-"use strict";
-
-var setPrototypeOf = require("es5-ext/object/set-prototype-of")
-  , d              = require("d")
-  , Symbol         = require("es6-symbol")
-  , Iterator       = require("./");
-
-var defineProperty = Object.defineProperty, StringIterator;
-
-StringIterator = module.exports = function (str) {
-	if (!(this instanceof StringIterator)) throw new TypeError("Constructor requires 'new'");
-	str = String(str);
-	Iterator.call(this, str);
-	defineProperty(this, "__length__", d("", str.length));
-};
-if (setPrototypeOf) setPrototypeOf(StringIterator, Iterator);
-
-// Internal %ArrayIteratorPrototype% doesn't expose its constructor
-delete StringIterator.prototype.constructor;
-
-StringIterator.prototype = Object.create(Iterator.prototype, {
-	_next: d(function () {
-		if (!this.__list__) return undefined;
-		if (this.__nextIndex__ < this.__length__) return this.__nextIndex__++;
-		this._unBind();
-		return undefined;
-	}),
-	_resolve: d(function (i) {
-		var char = this.__list__[i], code;
-		if (this.__nextIndex__ === this.__length__) return char;
-		code = char.charCodeAt(0);
-		if (code >= 0xd800 && code <= 0xdbff) return char + this.__list__[this.__nextIndex__++];
-		return char;
-	})
-});
-defineProperty(StringIterator.prototype, Symbol.toStringTag, d("c", "String Iterator"));
-
-},{"./":87,"d":23,"es5-ext/object/set-prototype-of":73,"es6-symbol":97}],90:[function(require,module,exports){
-"use strict";
-
-var isIterable = require("./is-iterable");
-
-module.exports = function (value) {
-	if (!isIterable(value)) throw new TypeError(value + " is not iterable");
-	return value;
-};
-
-},{"./is-iterable":88}],91:[function(require,module,exports){
-'use strict';
-
-if (!require('./is-implemented')()) {
-	Object.defineProperty(require('es5-ext/global'), 'Map',
-		{ value: require('./polyfill'), configurable: true, enumerable: false,
-			writable: true });
-}
-
-},{"./is-implemented":92,"./polyfill":96,"es5-ext/global":48}],92:[function(require,module,exports){
-'use strict';
-
-module.exports = function () {
-	var map, iterator, result;
-	if (typeof Map !== 'function') return false;
-	try {
-		// WebKit doesn't support arguments and crashes
-		map = new Map([['raz', 'one'], ['dwa', 'two'], ['trzy', 'three']]);
-	} catch (e) {
-		return false;
-	}
-	if (String(map) !== '[object Map]') return false;
-	if (map.size !== 3) return false;
-	if (typeof map.clear !== 'function') return false;
-	if (typeof map.delete !== 'function') return false;
-	if (typeof map.entries !== 'function') return false;
-	if (typeof map.forEach !== 'function') return false;
-	if (typeof map.get !== 'function') return false;
-	if (typeof map.has !== 'function') return false;
-	if (typeof map.keys !== 'function') return false;
-	if (typeof map.set !== 'function') return false;
-	if (typeof map.values !== 'function') return false;
-
-	iterator = map.entries();
-	result = iterator.next();
-	if (result.done !== false) return false;
-	if (!result.value) return false;
-	if (result.value[0] !== 'raz') return false;
-	if (result.value[1] !== 'one') return false;
-
-	return true;
-};
-
-},{}],93:[function(require,module,exports){
-// Exports true if environment provides native `Map` implementation,
-// whatever that is.
-
-'use strict';
-
-module.exports = (function () {
-	if (typeof Map === 'undefined') return false;
-	return (Object.prototype.toString.call(new Map()) === '[object Map]');
-}());
-
-},{}],94:[function(require,module,exports){
-'use strict';
-
-module.exports = require('es5-ext/object/primitive-set')('key',
-	'value', 'key+value');
-
-},{"es5-ext/object/primitive-set":72}],95:[function(require,module,exports){
-'use strict';
-
-var setPrototypeOf    = require('es5-ext/object/set-prototype-of')
-  , d                 = require('d')
-  , Iterator          = require('es6-iterator')
-  , toStringTagSymbol = require('es6-symbol').toStringTag
-  , kinds             = require('./iterator-kinds')
-
-  , defineProperties = Object.defineProperties
-  , unBind = Iterator.prototype._unBind
-  , MapIterator;
-
-MapIterator = module.exports = function (map, kind) {
-	if (!(this instanceof MapIterator)) return new MapIterator(map, kind);
-	Iterator.call(this, map.__mapKeysData__, map);
-	if (!kind || !kinds[kind]) kind = 'key+value';
-	defineProperties(this, {
-		__kind__: d('', kind),
-		__values__: d('w', map.__mapValuesData__)
-	});
-};
-if (setPrototypeOf) setPrototypeOf(MapIterator, Iterator);
-
-MapIterator.prototype = Object.create(Iterator.prototype, {
-	constructor: d(MapIterator),
-	_resolve: d(function (i) {
-		if (this.__kind__ === 'value') return this.__values__[i];
-		if (this.__kind__ === 'key') return this.__list__[i];
-		return [this.__list__[i], this.__values__[i]];
-	}),
-	_unBind: d(function () {
-		this.__values__ = null;
-		unBind.call(this);
-	}),
-	toString: d(function () { return '[object Map Iterator]'; })
-});
-Object.defineProperty(MapIterator.prototype, toStringTagSymbol,
-	d('c', 'Map Iterator'));
-
-},{"./iterator-kinds":94,"d":23,"es5-ext/object/set-prototype-of":73,"es6-iterator":87,"es6-symbol":97}],96:[function(require,module,exports){
-'use strict';
-
-var clear          = require('es5-ext/array/#/clear')
-  , eIndexOf       = require('es5-ext/array/#/e-index-of')
-  , setPrototypeOf = require('es5-ext/object/set-prototype-of')
-  , callable       = require('es5-ext/object/valid-callable')
-  , validValue     = require('es5-ext/object/valid-value')
-  , d              = require('d')
-  , ee             = require('event-emitter')
-  , Symbol         = require('es6-symbol')
-  , iterator       = require('es6-iterator/valid-iterable')
-  , forOf          = require('es6-iterator/for-of')
-  , Iterator       = require('./lib/iterator')
-  , isNative       = require('./is-native-implemented')
-
-  , call = Function.prototype.call
-  , defineProperties = Object.defineProperties, getPrototypeOf = Object.getPrototypeOf
-  , MapPoly;
-
-module.exports = MapPoly = function (/*iterable*/) {
-	var iterable = arguments[0], keys, values, self;
-	if (!(this instanceof MapPoly)) throw new TypeError('Constructor requires \'new\'');
-	if (isNative && setPrototypeOf && (Map !== MapPoly)) {
-		self = setPrototypeOf(new Map(), getPrototypeOf(this));
-	} else {
-		self = this;
-	}
-	if (iterable != null) iterator(iterable);
-	defineProperties(self, {
-		__mapKeysData__: d('c', keys = []),
-		__mapValuesData__: d('c', values = [])
-	});
-	if (!iterable) return self;
-	forOf(iterable, function (value) {
-		var key = validValue(value)[0];
-		value = value[1];
-		if (eIndexOf.call(keys, key) !== -1) return;
-		keys.push(key);
-		values.push(value);
-	}, self);
-	return self;
-};
-
-if (isNative) {
-	if (setPrototypeOf) setPrototypeOf(MapPoly, Map);
-	MapPoly.prototype = Object.create(Map.prototype, {
-		constructor: d(MapPoly)
-	});
-}
-
-ee(defineProperties(MapPoly.prototype, {
-	clear: d(function () {
-		if (!this.__mapKeysData__.length) return;
-		clear.call(this.__mapKeysData__);
-		clear.call(this.__mapValuesData__);
-		this.emit('_clear');
-	}),
-	delete: d(function (key) {
-		var index = eIndexOf.call(this.__mapKeysData__, key);
-		if (index === -1) return false;
-		this.__mapKeysData__.splice(index, 1);
-		this.__mapValuesData__.splice(index, 1);
-		this.emit('_delete', index, key);
-		return true;
-	}),
-	entries: d(function () { return new Iterator(this, 'key+value'); }),
-	forEach: d(function (cb/*, thisArg*/) {
-		var thisArg = arguments[1], iterator, result;
-		callable(cb);
-		iterator = this.entries();
-		result = iterator._next();
-		while (result !== undefined) {
-			call.call(cb, thisArg, this.__mapValuesData__[result],
-				this.__mapKeysData__[result], this);
-			result = iterator._next();
-		}
-	}),
-	get: d(function (key) {
-		var index = eIndexOf.call(this.__mapKeysData__, key);
-		if (index === -1) return;
-		return this.__mapValuesData__[index];
-	}),
-	has: d(function (key) {
-		return (eIndexOf.call(this.__mapKeysData__, key) !== -1);
-	}),
-	keys: d(function () { return new Iterator(this, 'key'); }),
-	set: d(function (key, value) {
-		var index = eIndexOf.call(this.__mapKeysData__, key), emit;
-		if (index === -1) {
-			index = this.__mapKeysData__.push(key) - 1;
-			emit = true;
-		}
-		this.__mapValuesData__[index] = value;
-		if (emit) this.emit('_add', index, key);
-		return this;
-	}),
-	size: d.gs(function () { return this.__mapKeysData__.length; }),
-	values: d(function () { return new Iterator(this, 'value'); }),
-	toString: d(function () { return '[object Map]'; })
-}));
-Object.defineProperty(MapPoly.prototype, Symbol.iterator, d(function () {
-	return this.entries();
-}));
-Object.defineProperty(MapPoly.prototype, Symbol.toStringTag, d('c', 'Map'));
-
-},{"./is-native-implemented":93,"./lib/iterator":95,"d":23,"es5-ext/array/#/clear":40,"es5-ext/array/#/e-index-of":41,"es5-ext/object/set-prototype-of":73,"es5-ext/object/valid-callable":76,"es5-ext/object/valid-value":78,"es6-iterator/for-of":85,"es6-iterator/valid-iterable":90,"es6-symbol":97,"event-emitter":106}],97:[function(require,module,exports){
-'use strict';
-
-module.exports = require('./is-implemented')() ? Symbol : require('./polyfill');
-
-},{"./is-implemented":98,"./polyfill":100}],98:[function(require,module,exports){
-'use strict';
-
-var validTypes = { object: true, symbol: true };
-
-module.exports = function () {
-	var symbol;
-	if (typeof Symbol !== 'function') return false;
-	symbol = Symbol('test symbol');
-	try { String(symbol); } catch (e) { return false; }
-
-	// Return 'true' also for polyfills
-	if (!validTypes[typeof Symbol.iterator]) return false;
-	if (!validTypes[typeof Symbol.toPrimitive]) return false;
-	if (!validTypes[typeof Symbol.toStringTag]) return false;
-
-	return true;
-};
-
-},{}],99:[function(require,module,exports){
-'use strict';
-
-module.exports = function (x) {
-	if (!x) return false;
-	if (typeof x === 'symbol') return true;
-	if (!x.constructor) return false;
-	if (x.constructor.name !== 'Symbol') return false;
-	return (x[x.constructor.toStringTag] === 'Symbol');
-};
-
-},{}],100:[function(require,module,exports){
-// ES2015 Symbol polyfill for environments that do not (or partially) support it
-
-'use strict';
-
-var d              = require('d')
-  , validateSymbol = require('./validate-symbol')
-
-  , create = Object.create, defineProperties = Object.defineProperties
-  , defineProperty = Object.defineProperty, objPrototype = Object.prototype
-  , NativeSymbol, SymbolPolyfill, HiddenSymbol, globalSymbols = create(null)
-  , isNativeSafe;
-
-if (typeof Symbol === 'function') {
-	NativeSymbol = Symbol;
-	try {
-		String(NativeSymbol());
-		isNativeSafe = true;
-	} catch (ignore) {}
-}
-
-var generateName = (function () {
-	var created = create(null);
-	return function (desc) {
-		var postfix = 0, name, ie11BugWorkaround;
-		while (created[desc + (postfix || '')]) ++postfix;
-		desc += (postfix || '');
-		created[desc] = true;
-		name = '@@' + desc;
-		defineProperty(objPrototype, name, d.gs(null, function (value) {
-			// For IE11 issue see:
-			// https://connect.microsoft.com/IE/feedbackdetail/view/1928508/
-			//    ie11-broken-getters-on-dom-objects
-			// https://github.com/medikoo/es6-symbol/issues/12
-			if (ie11BugWorkaround) return;
-			ie11BugWorkaround = true;
-			defineProperty(this, name, d(value));
-			ie11BugWorkaround = false;
-		}));
-		return name;
-	};
-}());
-
-// Internal constructor (not one exposed) for creating Symbol instances.
-// This one is used to ensure that `someSymbol instanceof Symbol` always return false
-HiddenSymbol = function Symbol(description) {
-	if (this instanceof HiddenSymbol) throw new TypeError('Symbol is not a constructor');
-	return SymbolPolyfill(description);
-};
-
-// Exposed `Symbol` constructor
-// (returns instances of HiddenSymbol)
-module.exports = SymbolPolyfill = function Symbol(description) {
-	var symbol;
-	if (this instanceof Symbol) throw new TypeError('Symbol is not a constructor');
-	if (isNativeSafe) return NativeSymbol(description);
-	symbol = create(HiddenSymbol.prototype);
-	description = (description === undefined ? '' : String(description));
-	return defineProperties(symbol, {
-		__description__: d('', description),
-		__name__: d('', generateName(description))
-	});
-};
-defineProperties(SymbolPolyfill, {
-	for: d(function (key) {
-		if (globalSymbols[key]) return globalSymbols[key];
-		return (globalSymbols[key] = SymbolPolyfill(String(key)));
-	}),
-	keyFor: d(function (s) {
-		var key;
-		validateSymbol(s);
-		for (key in globalSymbols) if (globalSymbols[key] === s) return key;
-	}),
-
-	// To ensure proper interoperability with other native functions (e.g. Array.from)
-	// fallback to eventual native implementation of given symbol
-	hasInstance: d('', (NativeSymbol && NativeSymbol.hasInstance) || SymbolPolyfill('hasInstance')),
-	isConcatSpreadable: d('', (NativeSymbol && NativeSymbol.isConcatSpreadable) ||
-		SymbolPolyfill('isConcatSpreadable')),
-	iterator: d('', (NativeSymbol && NativeSymbol.iterator) || SymbolPolyfill('iterator')),
-	match: d('', (NativeSymbol && NativeSymbol.match) || SymbolPolyfill('match')),
-	replace: d('', (NativeSymbol && NativeSymbol.replace) || SymbolPolyfill('replace')),
-	search: d('', (NativeSymbol && NativeSymbol.search) || SymbolPolyfill('search')),
-	species: d('', (NativeSymbol && NativeSymbol.species) || SymbolPolyfill('species')),
-	split: d('', (NativeSymbol && NativeSymbol.split) || SymbolPolyfill('split')),
-	toPrimitive: d('', (NativeSymbol && NativeSymbol.toPrimitive) || SymbolPolyfill('toPrimitive')),
-	toStringTag: d('', (NativeSymbol && NativeSymbol.toStringTag) || SymbolPolyfill('toStringTag')),
-	unscopables: d('', (NativeSymbol && NativeSymbol.unscopables) || SymbolPolyfill('unscopables'))
-});
-
-// Internal tweaks for real symbol producer
-defineProperties(HiddenSymbol.prototype, {
-	constructor: d(SymbolPolyfill),
-	toString: d('', function () { return this.__name__; })
-});
-
-// Proper implementation of methods exposed on Symbol.prototype
-// They won't be accessible on produced symbol instances as they derive from HiddenSymbol.prototype
-defineProperties(SymbolPolyfill.prototype, {
-	toString: d(function () { return 'Symbol (' + validateSymbol(this).__description__ + ')'; }),
-	valueOf: d(function () { return validateSymbol(this); })
-});
-defineProperty(SymbolPolyfill.prototype, SymbolPolyfill.toPrimitive, d('', function () {
-	var symbol = validateSymbol(this);
-	if (typeof symbol === 'symbol') return symbol;
-	return symbol.toString();
-}));
-defineProperty(SymbolPolyfill.prototype, SymbolPolyfill.toStringTag, d('c', 'Symbol'));
-
-// Proper implementaton of toPrimitive and toStringTag for returned symbol instances
-defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toStringTag,
-	d('c', SymbolPolyfill.prototype[SymbolPolyfill.toStringTag]));
-
-// Note: It's important to define `toPrimitive` as last one, as some implementations
-// implement `toPrimitive` natively without implementing `toStringTag` (or other specified symbols)
-// And that may invoke error in definition flow:
-// See: https://github.com/medikoo/es6-symbol/issues/13#issuecomment-164146149
-defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toPrimitive,
-	d('c', SymbolPolyfill.prototype[SymbolPolyfill.toPrimitive]));
-
-},{"./validate-symbol":101,"d":23}],101:[function(require,module,exports){
-'use strict';
-
-var isSymbol = require('./is-symbol');
-
-module.exports = function (value) {
-	if (!isSymbol(value)) throw new TypeError(value + " is not a symbol");
-	return value;
-};
-
-},{"./is-symbol":99}],102:[function(require,module,exports){
-'use strict';
-
-if (!require('./is-implemented')()) {
-	Object.defineProperty(require('es5-ext/global'), 'WeakMap',
-		{ value: require('./polyfill'), configurable: true, enumerable: false,
-			writable: true });
-}
-
-},{"./is-implemented":103,"./polyfill":105,"es5-ext/global":48}],103:[function(require,module,exports){
-'use strict';
-
-module.exports = function () {
-	var weakMap, x;
-	if (typeof WeakMap !== 'function') return false;
-	try {
-		// WebKit doesn't support arguments and crashes
-		weakMap = new WeakMap([[x = {}, 'one'], [{}, 'two'], [{}, 'three']]);
-	} catch (e) {
-		return false;
-	}
-	if (String(weakMap) !== '[object WeakMap]') return false;
-	if (typeof weakMap.set !== 'function') return false;
-	if (weakMap.set({}, 1) !== weakMap) return false;
-	if (typeof weakMap.delete !== 'function') return false;
-	if (typeof weakMap.has !== 'function') return false;
-	if (weakMap.get(x) !== 'one') return false;
-
-	return true;
-};
-
-},{}],104:[function(require,module,exports){
-// Exports true if environment provides native `WeakMap` implementation, whatever that is.
-
-'use strict';
-
-module.exports = (function () {
-	if (typeof WeakMap !== 'function') return false;
-	return (Object.prototype.toString.call(new WeakMap()) === '[object WeakMap]');
-}());
-
-},{}],105:[function(require,module,exports){
-'use strict';
-
-var setPrototypeOf    = require('es5-ext/object/set-prototype-of')
-  , object            = require('es5-ext/object/valid-object')
-  , value             = require('es5-ext/object/valid-value')
-  , randomUniq        = require('es5-ext/string/random-uniq')
-  , d                 = require('d')
-  , getIterator       = require('es6-iterator/get')
-  , forOf             = require('es6-iterator/for-of')
-  , toStringTagSymbol = require('es6-symbol').toStringTag
-  , isNative          = require('./is-native-implemented')
-
-  , isArray = Array.isArray, defineProperty = Object.defineProperty
-  , hasOwnProperty = Object.prototype.hasOwnProperty, getPrototypeOf = Object.getPrototypeOf
-  , WeakMapPoly;
-
-module.exports = WeakMapPoly = function (/*iterable*/) {
-	var iterable = arguments[0], self;
-	if (!(this instanceof WeakMapPoly)) throw new TypeError('Constructor requires \'new\'');
-	if (isNative && setPrototypeOf && (WeakMap !== WeakMapPoly)) {
-		self = setPrototypeOf(new WeakMap(), getPrototypeOf(this));
-	} else {
-		self = this;
-	}
-	if (iterable != null) {
-		if (!isArray(iterable)) iterable = getIterator(iterable);
-	}
-	defineProperty(self, '__weakMapData__', d('c', '$weakMap$' + randomUniq()));
-	if (!iterable) return self;
-	forOf(iterable, function (val) {
-		value(val);
-		self.set(val[0], val[1]);
-	});
-	return self;
-};
-
-if (isNative) {
-	if (setPrototypeOf) setPrototypeOf(WeakMapPoly, WeakMap);
-	WeakMapPoly.prototype = Object.create(WeakMap.prototype, {
-		constructor: d(WeakMapPoly)
-	});
-}
-
-Object.defineProperties(WeakMapPoly.prototype, {
-	delete: d(function (key) {
-		if (hasOwnProperty.call(object(key), this.__weakMapData__)) {
-			delete key[this.__weakMapData__];
-			return true;
-		}
-		return false;
-	}),
-	get: d(function (key) {
-		if (hasOwnProperty.call(object(key), this.__weakMapData__)) {
-			return key[this.__weakMapData__];
-		}
-	}),
-	has: d(function (key) {
-		return hasOwnProperty.call(object(key), this.__weakMapData__);
-	}),
-	set: d(function (key, value) {
-		defineProperty(object(key), this.__weakMapData__, d('c', value));
-		return this;
-	}),
-	toString: d(function () { return '[object WeakMap]'; })
-});
-defineProperty(WeakMapPoly.prototype, toStringTagSymbol, d('c', 'WeakMap'));
-
-},{"./is-native-implemented":104,"d":23,"es5-ext/object/set-prototype-of":73,"es5-ext/object/valid-object":77,"es5-ext/object/valid-value":78,"es5-ext/string/random-uniq":83,"es6-iterator/for-of":85,"es6-iterator/get":86,"es6-symbol":97}],106:[function(require,module,exports){
-'use strict';
-
-var d        = require('d')
-  , callable = require('es5-ext/object/valid-callable')
-
-  , apply = Function.prototype.apply, call = Function.prototype.call
-  , create = Object.create, defineProperty = Object.defineProperty
-  , defineProperties = Object.defineProperties
-  , hasOwnProperty = Object.prototype.hasOwnProperty
-  , descriptor = { configurable: true, enumerable: false, writable: true }
-
-  , on, once, off, emit, methods, descriptors, base;
-
-on = function (type, listener) {
-	var data;
-
-	callable(listener);
-
-	if (!hasOwnProperty.call(this, '__ee__')) {
-		data = descriptor.value = create(null);
-		defineProperty(this, '__ee__', descriptor);
-		descriptor.value = null;
-	} else {
-		data = this.__ee__;
-	}
-	if (!data[type]) data[type] = listener;
-	else if (typeof data[type] === 'object') data[type].push(listener);
-	else data[type] = [data[type], listener];
-
-	return this;
-};
-
-once = function (type, listener) {
-	var once, self;
-
-	callable(listener);
-	self = this;
-	on.call(this, type, once = function () {
-		off.call(self, type, once);
-		apply.call(listener, this, arguments);
-	});
-
-	once.__eeOnceListener__ = listener;
-	return this;
-};
-
-off = function (type, listener) {
-	var data, listeners, candidate, i;
-
-	callable(listener);
-
-	if (!hasOwnProperty.call(this, '__ee__')) return this;
-	data = this.__ee__;
-	if (!data[type]) return this;
-	listeners = data[type];
-
-	if (typeof listeners === 'object') {
-		for (i = 0; (candidate = listeners[i]); ++i) {
-			if ((candidate === listener) ||
-					(candidate.__eeOnceListener__ === listener)) {
-				if (listeners.length === 2) data[type] = listeners[i ? 0 : 1];
-				else listeners.splice(i, 1);
-			}
-		}
-	} else {
-		if ((listeners === listener) ||
-				(listeners.__eeOnceListener__ === listener)) {
-			delete data[type];
-		}
-	}
-
-	return this;
-};
-
-emit = function (type) {
-	var i, l, listener, listeners, args;
-
-	if (!hasOwnProperty.call(this, '__ee__')) return;
-	listeners = this.__ee__[type];
-	if (!listeners) return;
-
-	if (typeof listeners === 'object') {
-		l = arguments.length;
-		args = new Array(l - 1);
-		for (i = 1; i < l; ++i) args[i - 1] = arguments[i];
-
-		listeners = listeners.slice();
-		for (i = 0; (listener = listeners[i]); ++i) {
-			apply.call(listener, this, args);
-		}
-	} else {
-		switch (arguments.length) {
-		case 1:
-			call.call(listeners, this);
-			break;
-		case 2:
-			call.call(listeners, this, arguments[1]);
-			break;
-		case 3:
-			call.call(listeners, this, arguments[1], arguments[2]);
-			break;
-		default:
-			l = arguments.length;
-			args = new Array(l - 1);
-			for (i = 1; i < l; ++i) {
-				args[i - 1] = arguments[i];
-			}
-			apply.call(listeners, this, args);
-		}
-	}
-};
-
-methods = {
-	on: on,
-	once: once,
-	off: off,
-	emit: emit
-};
-
-descriptors = {
-	on: d(on),
-	once: d(once),
-	off: d(off),
-	emit: d(emit)
-};
-
-base = defineProperties({}, descriptors);
-
-module.exports = exports = function (o) {
-	return (o == null) ? create(base) : defineProperties(Object(o), descriptors);
-};
-exports.methods = methods;
-
-},{"d":23,"es5-ext/object/valid-callable":76}],107:[function(require,module,exports){
-'use strict';
-
-/* eslint no-invalid-this: 1 */
-
-var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
-var slice = Array.prototype.slice;
-var toStr = Object.prototype.toString;
-var funcType = '[object Function]';
-
-module.exports = function bind(that) {
-    var target = this;
-    if (typeof target !== 'function' || toStr.call(target) !== funcType) {
-        throw new TypeError(ERROR_MESSAGE + target);
-    }
-    var args = slice.call(arguments, 1);
-
-    var bound;
-    var binder = function () {
-        if (this instanceof bound) {
-            var result = target.apply(
-                this,
-                args.concat(slice.call(arguments))
-            );
-            if (Object(result) === result) {
-                return result;
+function initUa(uaInstanceId, email, imsi) {
+    return __awaiter(this, void 0, void 0, function () {
+        var _a, userSim, ua;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    connection.connect({
+                        "requestTurnCred": true,
+                        uaInstanceId: uaInstanceId
+                    });
+                    //NOTE: UA does not receive the live update on sim online state.
+                    localApiHandler.evtSimIsOnlineStatusChange.attachOnce(function (isOnline) { return !isOnline; }, function () { return androidEventHandlers.onCallTerminated("Socket disconnected"); });
+                    return [4 /*yield*/, Promise.all([
+                            remoteApiCaller.getUsableUserSims(false)
+                                .then(function (userSims) { return userSims.find(function (_a) {
+                                var sim = _a.sim;
+                                return sim.imsi === imsi;
+                            }); })
+                        ])];
+                case 1:
+                    _a = __read.apply(void 0, [_b.sent(), 1]), userSim = _a[0];
+                    Ua_1.Ua.setUaInstanceId(uaInstanceId, email);
+                    if (!!userSim.isOnline) return [3 /*break*/, 3];
+                    androidEventHandlers.onCallTerminated("Sim is offline");
+                    return [4 /*yield*/, new Promise(function (_resolve) { })];
+                case 2:
+                    _b.sent();
+                    _b.label = 3;
+                case 3:
+                    ua = new Ua_1.Ua(userSim.sim.imsi, userSim.password, "DISABLE MESSAGES");
+                    ua.register();
+                    ua.evtRegistrationStateChanged.attachOnce(function (isRegistered) { return !isRegistered; }, function () { return androidEventHandlers.onCallTerminated("UA unregistered"); });
+                    ua.evtRegistrationStateChanged.waitFor(6000)
+                        .catch(function () { return androidEventHandlers.onCallTerminated("UA failed to register"); });
+                    return [2 /*return*/, ua];
             }
-            return this;
-        } else {
-            return target.apply(
-                that,
-                args.concat(slice.call(arguments))
-            );
-        }
-    };
-
-    var boundLength = Math.max(0, target.length - args.length);
-    var boundArgs = [];
-    for (var i = 0; i < boundLength; i++) {
-        boundArgs.push('$' + i);
-    }
-
-    bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this,arguments); }')(binder);
-
-    if (target.prototype) {
-        var Empty = function Empty() {};
-        Empty.prototype = target.prototype;
-        bound.prototype = new Empty();
-        Empty.prototype = null;
-    }
-
-    return bound;
-};
-
-},{}],108:[function(require,module,exports){
-'use strict';
-
-var implementation = require('./implementation');
-
-module.exports = Function.prototype.bind || implementation;
-
-},{"./implementation":107}],109:[function(require,module,exports){
-(function (global){
-'use strict';
-
-var origSymbol = global.Symbol;
-var hasSymbolSham = require('./shams');
-
-module.exports = function hasNativeSymbols() {
-	if (typeof origSymbol !== 'function') { return false; }
-	if (typeof Symbol !== 'function') { return false; }
-	if (typeof origSymbol('foo') !== 'symbol') { return false; }
-	if (typeof Symbol('bar') !== 'symbol') { return false; }
-
-	return hasSymbolSham();
-};
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./shams":110}],110:[function(require,module,exports){
-'use strict';
-
-/* eslint complexity: [2, 17], max-statements: [2, 33] */
-module.exports = function hasSymbols() {
-	if (typeof Symbol !== 'function' || typeof Object.getOwnPropertySymbols !== 'function') { return false; }
-	if (typeof Symbol.iterator === 'symbol') { return true; }
-
-	var obj = {};
-	var sym = Symbol('test');
-	var symObj = Object(sym);
-	if (typeof sym === 'string') { return false; }
-
-	if (Object.prototype.toString.call(sym) !== '[object Symbol]') { return false; }
-	if (Object.prototype.toString.call(symObj) !== '[object Symbol]') { return false; }
-
-	// temp disabled per https://github.com/ljharb/object.assign/issues/17
-	// if (sym instanceof Symbol) { return false; }
-	// temp disabled per https://github.com/WebReflection/get-own-property-symbols/issues/4
-	// if (!(symObj instanceof Symbol)) { return false; }
-
-	// if (typeof Symbol.prototype.toString !== 'function') { return false; }
-	// if (String(sym) !== Symbol.prototype.toString.call(sym)) { return false; }
-
-	var symVal = 42;
-	obj[sym] = symVal;
-	for (sym in obj) { return false; } // eslint-disable-line no-restricted-syntax
-	if (typeof Object.keys === 'function' && Object.keys(obj).length !== 0) { return false; }
-
-	if (typeof Object.getOwnPropertyNames === 'function' && Object.getOwnPropertyNames(obj).length !== 0) { return false; }
-
-	var syms = Object.getOwnPropertySymbols(obj);
-	if (syms.length !== 1 || syms[0] !== sym) { return false; }
-
-	if (!Object.prototype.propertyIsEnumerable.call(obj, sym)) { return false; }
-
-	if (typeof Object.getOwnPropertyDescriptor === 'function') {
-		var descriptor = Object.getOwnPropertyDescriptor(obj, sym);
-		if (descriptor.value !== symVal || descriptor.enumerable !== true) { return false; }
-	}
-
-	return true;
-};
-
-},{}],111:[function(require,module,exports){
-'use strict';
-
-var bind = require('function-bind');
-
-module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
-
-},{"function-bind":108}],112:[function(require,module,exports){
-'use strict';
-
-var fnToStr = Function.prototype.toString;
-
-var constructorRegex = /^\s*class\b/;
-var isES6ClassFn = function isES6ClassFunction(value) {
-	try {
-		var fnStr = fnToStr.call(value);
-		return constructorRegex.test(fnStr);
-	} catch (e) {
-		return false; // not a function
-	}
-};
-
-var tryFunctionObject = function tryFunctionToStr(value) {
-	try {
-		if (isES6ClassFn(value)) { return false; }
-		fnToStr.call(value);
-		return true;
-	} catch (e) {
-		return false;
-	}
-};
-var toStr = Object.prototype.toString;
-var fnClass = '[object Function]';
-var genClass = '[object GeneratorFunction]';
-var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
-
-module.exports = function isCallable(value) {
-	if (!value) { return false; }
-	if (typeof value !== 'function' && typeof value !== 'object') { return false; }
-	if (typeof value === 'function' && !value.prototype) { return true; }
-	if (hasToStringTag) { return tryFunctionObject(value); }
-	if (isES6ClassFn(value)) { return false; }
-	var strClass = toStr.call(value);
-	return strClass === fnClass || strClass === genClass;
-};
-
-},{}],113:[function(require,module,exports){
-'use strict';
-
-var getDay = Date.prototype.getDay;
-var tryDateObject = function tryDateObject(value) {
-	try {
-		getDay.call(value);
-		return true;
-	} catch (e) {
-		return false;
-	}
-};
-
-var toStr = Object.prototype.toString;
-var dateClass = '[object Date]';
-var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
-
-module.exports = function isDateObject(value) {
-	if (typeof value !== 'object' || value === null) { return false; }
-	return hasToStringTag ? tryDateObject(value) : toStr.call(value) === dateClass;
-};
-
-},{}],114:[function(require,module,exports){
-'use strict';
-
-var has = require('has');
-var regexExec = RegExp.prototype.exec;
-var gOPD = Object.getOwnPropertyDescriptor;
-
-var tryRegexExecCall = function tryRegexExec(value) {
-	try {
-		var lastIndex = value.lastIndex;
-		value.lastIndex = 0;
-
-		regexExec.call(value);
-		return true;
-	} catch (e) {
-		return false;
-	} finally {
-		value.lastIndex = lastIndex;
-	}
-};
-var toStr = Object.prototype.toString;
-var regexClass = '[object RegExp]';
-var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
-
-module.exports = function isRegex(value) {
-	if (!value || typeof value !== 'object') {
-		return false;
-	}
-	if (!hasToStringTag) {
-		return toStr.call(value) === regexClass;
-	}
-
-	var descriptor = gOPD(value, 'lastIndex');
-	var hasLastIndexDataProperty = descriptor && has(descriptor, 'value');
-	if (!hasLastIndexDataProperty) {
-		return false;
-	}
-
-	return tryRegexExecCall(value);
-};
-
-},{"has":111}],115:[function(require,module,exports){
-'use strict';
-
-var toStr = Object.prototype.toString;
-var hasSymbols = require('has-symbols')();
-
-if (hasSymbols) {
-	var symToStr = Symbol.prototype.toString;
-	var symStringRegex = /^Symbol\(.*\)$/;
-	var isSymbolObject = function isRealSymbolObject(value) {
-		if (typeof value.valueOf() !== 'symbol') {
-			return false;
-		}
-		return symStringRegex.test(symToStr.call(value));
-	};
-
-	module.exports = function isSymbol(value) {
-		if (typeof value === 'symbol') {
-			return true;
-		}
-		if (toStr.call(value) !== '[object Symbol]') {
-			return false;
-		}
-		try {
-			return isSymbolObject(value);
-		} catch (e) {
-			return false;
-		}
-	};
-} else {
-
-	module.exports = function isSymbol(value) {
-		// this environment does not support Symbols.
-		return false && value;
-	};
-}
-
-},{"has-symbols":109}],116:[function(require,module,exports){
-module.exports = require('cssify');
-
-},{"cssify":21}],117:[function(require,module,exports){
-'use strict';
-
-var keysShim;
-if (!Object.keys) {
-	// modified from https://github.com/es-shims/es5-shim
-	var has = Object.prototype.hasOwnProperty;
-	var toStr = Object.prototype.toString;
-	var isArgs = require('./isArguments'); // eslint-disable-line global-require
-	var isEnumerable = Object.prototype.propertyIsEnumerable;
-	var hasDontEnumBug = !isEnumerable.call({ toString: null }, 'toString');
-	var hasProtoEnumBug = isEnumerable.call(function () {}, 'prototype');
-	var dontEnums = [
-		'toString',
-		'toLocaleString',
-		'valueOf',
-		'hasOwnProperty',
-		'isPrototypeOf',
-		'propertyIsEnumerable',
-		'constructor'
-	];
-	var equalsConstructorPrototype = function (o) {
-		var ctor = o.constructor;
-		return ctor && ctor.prototype === o;
-	};
-	var excludedKeys = {
-		$applicationCache: true,
-		$console: true,
-		$external: true,
-		$frame: true,
-		$frameElement: true,
-		$frames: true,
-		$innerHeight: true,
-		$innerWidth: true,
-		$outerHeight: true,
-		$outerWidth: true,
-		$pageXOffset: true,
-		$pageYOffset: true,
-		$parent: true,
-		$scrollLeft: true,
-		$scrollTop: true,
-		$scrollX: true,
-		$scrollY: true,
-		$self: true,
-		$webkitIndexedDB: true,
-		$webkitStorageInfo: true,
-		$window: true
-	};
-	var hasAutomationEqualityBug = (function () {
-		/* global window */
-		if (typeof window === 'undefined') { return false; }
-		for (var k in window) {
-			try {
-				if (!excludedKeys['$' + k] && has.call(window, k) && window[k] !== null && typeof window[k] === 'object') {
-					try {
-						equalsConstructorPrototype(window[k]);
-					} catch (e) {
-						return true;
-					}
-				}
-			} catch (e) {
-				return true;
-			}
-		}
-		return false;
-	}());
-	var equalsConstructorPrototypeIfNotBuggy = function (o) {
-		/* global window */
-		if (typeof window === 'undefined' || !hasAutomationEqualityBug) {
-			return equalsConstructorPrototype(o);
-		}
-		try {
-			return equalsConstructorPrototype(o);
-		} catch (e) {
-			return false;
-		}
-	};
-
-	keysShim = function keys(object) {
-		var isObject = object !== null && typeof object === 'object';
-		var isFunction = toStr.call(object) === '[object Function]';
-		var isArguments = isArgs(object);
-		var isString = isObject && toStr.call(object) === '[object String]';
-		var theKeys = [];
-
-		if (!isObject && !isFunction && !isArguments) {
-			throw new TypeError('Object.keys called on a non-object');
-		}
-
-		var skipProto = hasProtoEnumBug && isFunction;
-		if (isString && object.length > 0 && !has.call(object, 0)) {
-			for (var i = 0; i < object.length; ++i) {
-				theKeys.push(String(i));
-			}
-		}
-
-		if (isArguments && object.length > 0) {
-			for (var j = 0; j < object.length; ++j) {
-				theKeys.push(String(j));
-			}
-		} else {
-			for (var name in object) {
-				if (!(skipProto && name === 'prototype') && has.call(object, name)) {
-					theKeys.push(String(name));
-				}
-			}
-		}
-
-		if (hasDontEnumBug) {
-			var skipConstructor = equalsConstructorPrototypeIfNotBuggy(object);
-
-			for (var k = 0; k < dontEnums.length; ++k) {
-				if (!(skipConstructor && dontEnums[k] === 'constructor') && has.call(object, dontEnums[k])) {
-					theKeys.push(dontEnums[k]);
-				}
-			}
-		}
-		return theKeys;
-	};
-}
-module.exports = keysShim;
-
-},{"./isArguments":119}],118:[function(require,module,exports){
-'use strict';
-
-var slice = Array.prototype.slice;
-var isArgs = require('./isArguments');
-
-var origKeys = Object.keys;
-var keysShim = origKeys ? function keys(o) { return origKeys(o); } : require('./implementation');
-
-var originalKeys = Object.keys;
-
-keysShim.shim = function shimObjectKeys() {
-	if (Object.keys) {
-		var keysWorksWithArguments = (function () {
-			// Safari 5.0 bug
-			var args = Object.keys(arguments);
-			return args && args.length === arguments.length;
-		}(1, 2));
-		if (!keysWorksWithArguments) {
-			Object.keys = function keys(object) { // eslint-disable-line func-name-matching
-				if (isArgs(object)) {
-					return originalKeys(slice.call(object));
-				}
-				return originalKeys(object);
-			};
-		}
-	} else {
-		Object.keys = keysShim;
-	}
-	return Object.keys || keysShim;
-};
-
-module.exports = keysShim;
-
-},{"./implementation":117,"./isArguments":119}],119:[function(require,module,exports){
-'use strict';
-
-var toStr = Object.prototype.toString;
-
-module.exports = function isArguments(value) {
-	var str = toStr.call(value);
-	var isArgs = str === '[object Arguments]';
-	if (!isArgs) {
-		isArgs = str !== '[object Array]' &&
-			value !== null &&
-			typeof value === 'object' &&
-			typeof value.length === 'number' &&
-			value.length >= 0 &&
-			toStr.call(value.callee) === '[object Function]';
-	}
-	return isArgs;
-};
-
-},{}],120:[function(require,module,exports){
-(function (process,global){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var phoneNumber;
-(function (phoneNumber_1) {
-    function syncLoadUtilIfNode() {
-        var is_intlTelInputUtils_defined = (function () {
-            try {
-                intlTelInputUtils;
-            }
-            catch (_a) {
-                return false;
-            }
-            return intlTelInputUtils !== undefined;
-        })();
-        if (is_intlTelInputUtils_defined) {
-            return;
-        }
-        if (typeof process !== "undefined" &&
-            typeof process.release === "object" &&
-            process.release.name === "node") {
-            //Trick browserify so it does not bundle.
-            var path = "../../res/utils";
-            require(path);
-        }
-        else {
-            throw new Error([
-                "Util script should be loaded, include it in the HTML",
-                "page or run async function remoteLoadUtil before use"
-            ].join(" "));
-        }
-    }
-    function remoteLoadUtil(src) {
-        if (src === void 0) { src = "//github.com/garronej/phone-number/releases/download/intlTelInputUtils/utils.js"; }
-        return new Promise(function (resolve) {
-            return (function (d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0];
-                if (d.getElementById(id)) {
-                    resolve();
-                    return;
-                }
-                js = d.createElement(s);
-                js.id = id;
-                js.onload = function () {
-                    resolve();
-                };
-                js.src = src;
-                fjs.parentNode.insertBefore(js, fjs);
-            }(document, "script", "intlTelInputUtils"));
         });
-    }
-    phoneNumber_1.remoteLoadUtil = remoteLoadUtil;
-    /**
-     * This function will try to convert a raw string as a E164 formated phone number.
-     *
-     * If the rawInput is already a E164 it will remain untouched regardless of the iso
-     * ex: +33636786385, it => +33636786385
-     *
-     * In case the number can not be converted to E164:
-     * -If the number contain any character that is not a digit or ( ) [space] - # * +
-     * then the number will be considered not dialable and remain untouched.
-     * e.g: SFR => SFR | Error
-     *
-     * -If the number contain only digits ( ) [space] - # * or +
-     * then ( ) [space] and - will be removed.
-     * e.g: +00 (111) 222-333 => +00111222333
-     * (if after the number is "" we return rawInput and it's not dialable )
-     * e.g: ()()-=> ()()- | Error
-     * e.g: [""] => | Error
-     *
-     * @param rawInput raw string provided as phone number by Dongle or intlInput
-     * @param iso
-     * country of the number ( lowercase ) e.g: fr, it...
-     * - If we use intlInput the iso is provided.
-     * - If it's a incoming SMS/Call from Dongle the iso to provide is the one of the SIM
-     * as we will ether have an E164 formated number not affected by the iso
-     * or if we have a locally formated number it's formated it mean that the number is from the same
-     * country of the sim card.
-     * @param mustBeDialable: throw if the number is not dialable.
-     *
-     */
-    function build(rawInput, iso, mustBeDialable) {
-        if (mustBeDialable === void 0) { mustBeDialable = undefined; }
-        syncLoadUtilIfNode();
-        var shouldFormatToE164 = (function () {
-            if (!iso) {
-                return false;
+    });
+}
+var exposedToAndroid = {
+    /** Assume androidEventHandles.onReady() have been called  */
+    "placeOutgoingCall": function (uaInstanceId, imsi, number) { return __awaiter(_this, void 0, void 0, function () {
+        var ua, _a, terminate, prTerminated, prNextState;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, initUa(uaInstanceId, readEmailFromUrl(), imsi)];
+                case 1:
+                    ua = _b.sent();
+                    ua.evtIncomingCall.attach(function (_a) {
+                        var terminate = _a.terminate;
+                        return terminate();
+                    });
+                    return [4 /*yield*/, ua.evtRegistrationStateChanged.waitFor()];
+                case 2:
+                    _b.sent();
+                    return [4 /*yield*/, ua.placeOutgoingCall(number)];
+                case 3:
+                    _a = _b.sent(), terminate = _a.terminate, prTerminated = _a.prTerminated, prNextState = _a.prNextState;
+                    exposedToAndroid.terminateCall = function () { return terminate(); };
+                    prTerminated.then(function () { return androidEventHandlers.onCallTerminated(null); });
+                    prNextState.then(function (_a) {
+                        var prNextState = _a.prNextState;
+                        androidEventHandlers.onRingback();
+                        prNextState.then(function (_a) {
+                            var sendDtmf = _a.sendDtmf;
+                            exposedToAndroid.sendDtmf = function (signal, duration) { return sendDtmf(signal, duration); };
+                            androidEventHandlers.onEstablished();
+                        });
+                    });
+                    return [2 /*return*/];
             }
-            var numberType = intlTelInputUtils.getNumberType(rawInput, iso);
-            switch (numberType) {
-                case intlTelInputUtils.numberType.FIXED_LINE:
-                case intlTelInputUtils.numberType.FIXED_LINE_OR_MOBILE:
-                case intlTelInputUtils.numberType.MOBILE:
-                    return true;
-                default:
-                    return false;
-            }
-        })();
-        if (shouldFormatToE164) {
-            return intlTelInputUtils.formatNumber(rawInput, iso, intlTelInputUtils.numberFormat.E164);
-        }
-        else {
-            /** If any char other than *+# () and number is present => match  */
-            if (rawInput.match(/[^*+#\ \-\(\)0-9]/)) {
-                if (mustBeDialable) {
-                    throw new Error("unauthorized char, not dialable");
-                }
-                return rawInput;
-            }
-            else {
-                /** 0 (111) 222-333 => 0111222333 */
-                var phoneNumber_2 = rawInput.replace(/[\ \-\(\)]/g, "");
-                if (!phoneNumber_2.length) {
-                    if (mustBeDialable) {
-                        throw new Error("void, not dialable");
+        });
+    }); },
+    /** Assume androidEventHandles.onReady() have been called  */
+    "getReadyToAcceptIncomingCall": function (uaInstanceId, imsi, number) { return __awaiter(_this, void 0, void 0, function () {
+        var ua, wrap, terminate, prTerminated, onAccepted, sendDtmf;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, initUa(uaInstanceId, readEmailFromUrl(), imsi)];
+                case 1:
+                    ua = _a.sent();
+                    return [4 /*yield*/, ua.evtIncomingCall.waitFor(function (_a) {
+                            var fromNumber = _a.fromNumber;
+                            return fromNumber === number;
+                        }, 7000).catch(function () { return undefined; })];
+                case 2:
+                    wrap = _a.sent();
+                    if (wrap === undefined) {
+                        androidEventHandlers.onCallTerminated("Call missed");
+                        return [2 /*return*/];
                     }
-                    return rawInput;
-                }
-                return phoneNumber_2;
+                    terminate = wrap.terminate, prTerminated = wrap.prTerminated, onAccepted = wrap.onAccepted;
+                    exposedToAndroid.terminateCall = function () { return terminate(); };
+                    prTerminated.then(function () { return androidEventHandlers.onCallTerminated(null); });
+                    if (!(evtAcceptIncomingCall.postCount === 0)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, evtAcceptIncomingCall.waitFor()];
+                case 3:
+                    _a.sent();
+                    _a.label = 4;
+                case 4: return [4 /*yield*/, onAccepted()];
+                case 5:
+                    sendDtmf = (_a.sent()).sendDtmf;
+                    exposedToAndroid.sendDtmf = function (signal, duration) { return sendDtmf(signal, duration); };
+                    androidEventHandlers.onEstablished();
+                    return [2 /*return*/];
             }
-        }
-    }
-    phoneNumber_1.build = build;
-    /** let us test if we should allow the number to be dialed */
-    function isDialable(phoneNumber) {
-        try {
-            build(phoneNumber, undefined, "MUST BE DIALABLE");
-        }
-        catch (_a) {
-            return false;
-        }
-        return true;
-    }
-    phoneNumber_1.isDialable = isDialable;
-    function isValidE164(phoneNumber) {
-        syncLoadUtilIfNode();
-        return (phoneNumber[0] === "+" &&
-            intlTelInputUtils.isValidNumber(phoneNumber));
-    }
-    /**
-     * Pretty print (format) the phone number:
-     * In national format if the iso of the number and the provided iso matches.
-     * In international format if no iso is provided or
-     * the iso of the number and the provided iso mismatch.
-     * Do nothing if it's not dialable.
-     */
-    function prettyPrint(phoneNumber, simIso) {
-        syncLoadUtilIfNode();
-        if (!isValidE164(phoneNumber)) {
-            return phoneNumber;
-        }
-        if (!simIso) {
-            return intlTelInputUtils.formatNumber(phoneNumber, undefined, intlTelInputUtils.numberFormat.INTERNATIONAL);
-        }
-        var pnNational = intlTelInputUtils.formatNumber(phoneNumber, null, intlTelInputUtils.numberFormat.NATIONAL);
-        var pnBackToE164 = intlTelInputUtils.formatNumber(pnNational, simIso, intlTelInputUtils.numberFormat.E164);
-        if (pnBackToE164 === phoneNumber) {
-            return pnNational;
-        }
-        else {
-            return intlTelInputUtils.formatNumber(phoneNumber, simIso, intlTelInputUtils.numberFormat.INTERNATIONAL);
-        }
-    }
-    phoneNumber_1.prettyPrint = prettyPrint;
-    function areSame(phoneNumber, rawInput) {
-        syncLoadUtilIfNode();
-        if (phoneNumber === rawInput) {
-            return true;
-        }
-        var rawInputDry = rawInput.replace(/[^*#+0-9]/g, "");
-        if (rawInputDry === phoneNumber) {
-            return true;
-        }
-        if (isValidE164(phoneNumber)) {
-            if (rawInputDry.startsWith("00") &&
-                rawInputDry.replace(/^00/, "+") === phoneNumber) {
-                return true;
-            }
-            var pnNationalDry = intlTelInputUtils.formatNumber(phoneNumber, null, intlTelInputUtils.numberFormat.NATIONAL).replace(/[^*#+0-9]/g, "");
-            if (rawInputDry === pnNationalDry) {
-                return true;
-            }
-        }
-        return false;
-    }
-    phoneNumber_1.areSame = areSame;
-    global["phoneNumber"] = phoneNumber;
-})(phoneNumber = exports.phoneNumber || (exports.phoneNumber = {}));
+        });
+    }); },
+    "sendDtmf": function (signal, duration) { return androidEventHandlers.onCallTerminated("never"); },
+    "terminateCall": function () { return androidEventHandlers.onCallTerminated(null); },
+    "acceptIncomingCall": function () { return evtAcceptIncomingCall.post(); }
+};
+window["exposedToAndroid"] = exposedToAndroid;
 
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":6}],121:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../../../shared/dist/lib/Ua":18,"../../../shared/dist/lib/toBackend/connection":19,"../../../shared/dist/lib/toBackend/localApiHandlers":20,"../../../shared/dist/lib/toBackend/remoteApiCaller":21,"../../../shared/dist/lib/tools/getURLParameter":23,"buffer":2,"ts-events-extended":16}],10:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -9045,7 +3366,7 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{}],122:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict'
 /* eslint no-proto: 0 */
 module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
@@ -9064,7 +3385,7 @@ function mixinProperties (obj, proto) {
   return obj
 }
 
-},{}],123:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -9105,7 +3426,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":124}],124:[function(require,module,exports){
+},{"./SyncEventBase":13}],13:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -9323,7 +3644,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":125}],125:[function(require,module,exports){
+},{"./SyncEventBaseProtected":14}],14:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -9608,7 +3929,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":126,"run-exclusive":121}],126:[function(require,module,exports){
+},{"./defs":15,"run-exclusive":10}],15:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -9649,7 +3970,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{"setprototypeof":122}],127:[function(require,module,exports){
+},{"setprototypeof":11}],16:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -9658,35 +3979,633 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":123,"./defs":126}],128:[function(require,module,exports){
-module.exports = "<style>\r\n    .id_UiButtonBar .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiButtonBar .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n    @media (min-width: 768px) {\r\n        .id_UiButtonBar .id_g1 {\r\n            padding-right: 0px !important;\r\n        }\r\n        .id_UiButtonBar .id_g2 {\r\n            padding-left: 0px !important;\r\n        }\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiButtonBar col-xs-12 mb10\">\r\n\r\n    <div class=\"row\">\r\n\r\n        <div class=\"id_g1 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-default\">Details</button>\r\n                <button type=\"button\" class=\"btn btn-default\"> <i class=\"fa fa-arrow-left\"></i> </button>\r\n                <button type=\"button\" class=\"btn btn-danger\">Delete</button>\r\n                <button type=\"button\" class=\"btn btn-primary\">Contacts</button>\r\n            </div>\r\n        </div>\r\n        <div class=\"id_g2 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-success\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Make SIM usable by other Semasim users\">Share</button>\r\n                <button type=\"button\" class=\"btn btn-default\">Rename</button>\r\n                <button type=\"button\" class=\"btn btn-default\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Restart the GSM dongle that hold the SIM\">Reboot</button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n    \r\n</div>\r\n";
-},{}],129:[function(require,module,exports){
-module.exports = "\r\n<div class=\"id_UiController container-fluid panel-body row\">\r\n\r\n\r\n</div>";
-},{}],130:[function(require,module,exports){
-module.exports = "<style>\r\n\r\n    .id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    .id_UiPhonebook ul li > div .id_number {\r\n        cursor: text;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.selected > div {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n</style>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_number \"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>\r\n\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiPhonebook modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Sim Phonebook</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body p0\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row\">\r\n\r\n                                <div class=\"col-xd-12 pt15 pr15 pl15 pb5\">\r\n\r\n                                    <div style=\"float: right\">\r\n\r\n                                        <button class=\"id_edit btn btn-primary\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                        </button>\r\n                                        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n                                            <i class=\"glyphicon glyphicon-trash\"></i>\r\n                                            <span></span>\r\n                                        </button>\r\n                                        <button class=\"id_createContact btn btn-success btn-sm\" type=\"button\" >\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-add_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                        </button>\r\n\r\n                                    </div>\r\n                                    <div style=\"overflow: hidden; padding-right: .5em;\">\r\n                                        <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search\"  style=\"width: 100%;\"/>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                                <div class=\"col-xs-12 pb15 bl15 pr15\">\r\n\r\n                                    <ul class=\"nav \">\r\n                                    </ul>\r\n\r\n                                </div>\r\n\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n";
-},{}],131:[function(require,module,exports){
-module.exports = "<style>\r\n</style>\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiShareSim modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Share SIM card</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row _toHideIfNotShared\">\r\n\r\n                                <div class=\"col-md-12\">\r\n\r\n                                    <label class=\"pt5\">Allowed users:</label>\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"id_stopSharing btn btn-danger btn-sm\" type=\"button\">\r\n                                            <span>Stop sharing</span>\r\n                                        </button>\r\n                                    </div>\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n                            <div class=\"id_list row b mt10 _toHideIfNotShared\">\r\n\r\n                            </div>\r\n\r\n                            <div class=\"row mt10\">\r\n\r\n                                <label class=\"col-md-12 pt5\">Invite users:</label>\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10\">\r\n                                    <input type=\"text\" class=\"id_emails\" name=\"email\">\r\n                                </div>\r\n\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10 id_message\">\r\n                                    <textarea class=\"form-control\" rows=\"2\">I would like to share SIM Free (06 34 39 39 99 ) with you.</textarea>\r\n                                    <i class=\"fa fa-comments textarea-icon s16\"></i>\r\n                                </div>\r\n\r\n                                <div class=\"col-md-12 mt10\">\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"btn btn-success id_submit\" type=\"button\">\r\n                                            <span>Submit share request</span>\r\n                                        </button>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_row col-md-12 pt10 pb10\">\r\n        <i class=\"glyphicon glyphicon-user mr10\"></i>\r\n        <span class=\"mr10 strong id_email\"></span>\r\n        <span class=\"mr10 text-nowrap id_isConfirmed\"></span>\r\n    </div>\r\n\r\n</div>";
-},{}],132:[function(require,module,exports){
-var css = ".id_UiShareSim .id_row {\n  cursor: pointer;\n}\n.id_UiShareSim .selected {\n  background-color: #e2e0db;\n}\n.id_UiShareSim .id_message textarea {\n  padding-left: 32px;\n}\n.id_UiShareSim .id_message i {\n  position: absolute;\n  top: 7px;\n  left: 8px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":116}],133:[function(require,module,exports){
-module.exports = "<div class=\"id_UiSimRow col-xs-12\">\r\n    <div class=\"id_row  bb p10\">\r\n        <i>\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <span class=\"id_simId strong mr10\">---My sim1 (0654996385)---</span>\r\n        <span class=\"id_connectivity mr10\">---Online---</span>\r\n        <span class=\"id_ownership hidden-xs\">---Owned---</span>\r\n    </div>\r\n    <div class=\"id_details pr0 pl0 pt15\">\r\n        <p>\r\n            <span class=\"strong p10\">Physical location:</span>\r\n            <span class=\"id_gw_location\">---Montpellier, Languedoc Rousillong, FR ( 82.302.102.2 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Owner:</span>\r\n            <span class=\"id_owner\">---foo@gmail.com---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Phone number:</span>\r\n            <span class=\"id_number\">---0636786385 ( +33636786385 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Service provider:</span>\r\n            <span class=\"id_serviceProvider\">---Free Mobile ( France )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle model:</span>\r\n            <span class=\"id_dongle_model\">---Huawei E160X</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle firmware:</span>\r\n            <span class=\"id_dongle_firm\">---10.12222---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle imei:</span>\r\n            <span class=\"id_dongle_imei\">---111111111111111---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle voice support:</span>\r\n            <span class=\"id_voice_support\">---yes---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM IMSI:</span>\r\n            <span class=\"id_imsi\">---332344242344---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM ICCID:</span>\r\n            <span class=\"id_iccid\">---2343334340342343---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM Phonebook memory usage:</span>\r\n            <span class=\"id_phonebook\">--12/123---</span>\r\n        </p>\r\n    </div>\r\n</div>";
-},{}],134:[function(require,module,exports){
-var css = ".id_UiSimRow .id_row {\n  cursor: pointer;\n}\n.id_UiSimRow .selected {\n  background-color: #e2e0db;\n}\n.id_UiSimRow .offline {\n  opacity: 0.6;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":116}],135:[function(require,module,exports){
+},{"./SyncEvent":12,"./defs":15}],17:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-/** Assert jQuery is loaded on the page. */
-function loadUiClassHtml(html, widgetClassName) {
-    var wrap = $("<div>").html(html);
-    $("head").append(wrap.find("style"));
-    return {
-        "structure": wrap.find(".id_" + widgetClassName),
-        "templates": wrap.find(".templates")
+var types = require("../../../gateway/dist/lib/types");
+exports.types = types;
+var sipRouting_1 = require("../../../gateway/dist/lib/misc/sipRouting");
+exports.readImsi = sipRouting_1.readImsi;
+var bundledData_1 = require("../../../gateway/dist/lib/misc/bundledData");
+exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
+exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
+exports.urlSafeB64 = bundledData_1.urlSafeB64;
+
+},{"../../../gateway/dist/lib/misc/bundledData":71,"../../../gateway/dist/lib/misc/sipRouting":72,"../../../gateway/dist/lib/types":73}],18:[function(require,module,exports){
+(function (Buffer){
+"use strict";
+//NOTE: Require jssip_compat loaded on the page.
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var ts_events_extended_1 = require("ts-events-extended");
+var gateway_1 = require("../gateway");
+var sip = require("ts-sip");
+var runExclusive = require("run-exclusive");
+var connection = require("./toBackend/connection");
+var localApiHandlers = require("./toBackend/localApiHandlers");
+//JsSIP.debug.enable("JsSIP:*");
+JsSIP.debug.disable("JsSIP:*");
+var Ua = /** @class */ (function () {
+    function Ua(imsi, sipPassword, disabledMessage) {
+        var _this = this;
+        if (disabledMessage === void 0) { disabledMessage = false; }
+        /** post isRegistered */
+        this.evtRegistrationStateChanged = new ts_events_extended_1.SyncEvent();
+        this.evtRingback = new ts_events_extended_1.SyncEvent();
+        this.isRegistered = false;
+        this.evtIncomingMessage = new ts_events_extended_1.SyncEvent();
+        this.postEvtIncomingMessage = runExclusive.buildMethod(function (evtData) {
+            var onProcessed;
+            var pr = new Promise(function (resolve) { return onProcessed = resolve; });
+            _this.evtIncomingMessage.post(__assign({}, evtData, { "onProcessed": onProcessed }));
+            return pr;
+        });
+        /** return exactSendDate to match with sendReport and statusReport */
+        this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
+        var uri = "sip:" + imsi + "-webRTC@" + connection.baseDomain;
+        this.jsSipSocket = new JsSipSocket(imsi, uri);
+        this.jsSipUa = new JsSIP.UA({
+            "sockets": this.jsSipSocket,
+            uri: uri,
+            "authorization_user": imsi,
+            "password": sipPassword,
+            "instance_id": Ua.instanceId.match(/"<urn:([^>]+)>"$/)[1],
+            "register": false,
+            "contact_uri": uri + ";enc_email=" + gateway_1.urlSafeB64.enc(Ua.email) + (!disabledMessage ? "" : ";no_messages"),
+            "register_expires": 345600
+        });
+        /*
+        evt 'registered' is posted only when register change
+        so we use this instead.
+        */
+        this.jsSipSocket.evtSipPacket.attach(function (sipPacket) { return (!sip.matchRequest(sipPacket) &&
+            sipPacket.headers.cseq.method === "REGISTER" &&
+            sipPacket.status === 200); }, function () {
+            _this.isRegistered = true;
+            _this.evtRegistrationStateChanged.post(true);
+        });
+        this.jsSipUa.on("unregistered", function () {
+            _this.isRegistered = false;
+            _this.evtRegistrationStateChanged.post(false);
+        });
+        this.jsSipUa.on("newMessage", function (_a) {
+            var originator = _a.originator, request = _a.request;
+            if (originator === "remote") {
+                _this.onMessage(request);
+            }
+        });
+        this.jsSipUa.on("newRTCSession", function (_a) {
+            var originator = _a.originator, session = _a.session, request = _a.request;
+            if (originator === "remote") {
+                _this.onIncomingCall(session, request);
+            }
+        });
+        this.jsSipUa.start();
+    }
+    /** Must be called in webphone.ts */
+    Ua.setUaInstanceId = function (uaInstanceId, email) {
+        this.email = email;
+        this.instanceId = uaInstanceId;
+    };
+    //TODO: If no response to register do something
+    Ua.prototype.register = function () {
+        this.jsSipUa.register();
+    };
+    /**
+     * Do not actually send a REGISTER expire=0.
+     * Assert no packet will arrive to this UA until next register.
+     * */
+    Ua.prototype.unregister = function () {
+        this.jsSipUa.emit("unregistered");
+    };
+    Ua.prototype.onMessage = function (request) {
+        var bundledData = gateway_1.extractBundledDataFromHeaders((function () {
+            var out = {};
+            for (var key in request.headers) {
+                out[key] = request.headers[key][0].raw;
+            }
+            return out;
+        })());
+        var fromNumber = request.from.uri.user;
+        if (bundledData.type === "RINGBACK") {
+            this.evtRingback.post(bundledData.callId);
+            return;
+        }
+        var pr = this.postEvtIncomingMessage({
+            fromNumber: fromNumber,
+            bundledData: bundledData,
+            "text": request.body,
+        });
+        this.jsSipSocket.setMessageOkDelay(request, pr);
+    };
+    Ua.prototype.sendMessage = function (number, text, exactSendDate, appendPromotionalMessage) {
+        var _this = this;
+        var extraHeaders = (function () {
+            var headers = gateway_1.smuggleBundledDataInHeaders((function () {
+                var bundledData = {
+                    "type": "MESSAGE",
+                    exactSendDate: exactSendDate,
+                };
+                if (appendPromotionalMessage) {
+                    bundledData.appendPromotionalMessage = true;
+                }
+                return bundledData;
+            })());
+            var out = [];
+            for (var key in headers) {
+                out.push(key + ": " + headers[key]);
+            }
+            return out;
+        })();
+        return new Promise(function (resolve, reject) { return _this.jsSipUa.sendMessage("sip:" + number + "@" + connection.baseDomain, text, {
+            "contentType": "text/plain; charset=UTF-8",
+            extraHeaders: extraHeaders,
+            "eventHandlers": {
+                "succeeded": function () { return resolve(); },
+                "failed": function (_a) {
+                    var cause = _a.cause;
+                    return reject(new Error("Send message failed " + cause));
+                }
+            }
+        }); });
+    };
+    Ua.prototype.onIncomingCall = function (jsSipRtcSession, request) {
+        var _this = this;
+        var evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
+        var evtAccepted = new ts_events_extended_1.VoidSyncEvent();
+        var evtTerminated = new ts_events_extended_1.VoidSyncEvent();
+        var evtDtmf = new ts_events_extended_1.SyncEvent();
+        var evtEstablished = new ts_events_extended_1.VoidSyncEvent();
+        evtRequestTerminate.attachOnce(function () { return jsSipRtcSession.terminate(); });
+        evtDtmf.attach(function (_a) {
+            var signal = _a.signal, duration = _a.duration;
+            return jsSipRtcSession.sendDTMF(signal, { duration: duration });
+        });
+        evtAccepted.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
+            var rtcIceServer;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, localApiHandlers.getRTCIceServer()];
+                    case 1:
+                        rtcIceServer = _a.sent();
+                        jsSipRtcSession.on("icecandidate", newIceCandidateHandler(rtcIceServer));
+                        jsSipRtcSession.answer({
+                            "mediaConstraints": { "audio": true, "video": false },
+                            "pcConfig": { "iceServers": [rtcIceServer] }
+                        });
+                        jsSipRtcSession.connection.ontrack =
+                            function (_a) {
+                                var _b = __read(_a.streams, 1), stream = _b[0];
+                                return playAudioStream(stream);
+                            };
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        jsSipRtcSession.once("confirmed", function () { return evtEstablished.post(); });
+        jsSipRtcSession.once("ended", function () { return evtTerminated.post(); });
+        jsSipRtcSession.once("failed", function () { return evtTerminated.post(); });
+        this.evtIncomingCall.post({
+            "fromNumber": request.from.uri.user,
+            "terminate": function () { return evtRequestTerminate.post(); },
+            "prTerminated": Promise.race([
+                evtRequestTerminate.waitFor(),
+                evtTerminated.waitFor()
+            ]),
+            "onAccepted": function () { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            evtAccepted.post();
+                            return [4 /*yield*/, evtEstablished.waitFor()];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/, {
+                                    "state": "ESTABLISHED",
+                                    "sendDtmf": function (signal, duration) { return evtDtmf.post({ signal: signal, duration: duration }); }
+                                }];
+                    }
+                });
+            }); }
+        });
+    };
+    Ua.prototype.placeOutgoingCall = function (number) {
+        return __awaiter(this, void 0, void 0, function () {
+            var evtEstablished, evtTerminated, evtDtmf, evtRequestTerminate, evtRingback, rtcICEServer;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        evtEstablished = new ts_events_extended_1.VoidSyncEvent();
+                        evtTerminated = new ts_events_extended_1.VoidSyncEvent();
+                        evtDtmf = new ts_events_extended_1.SyncEvent();
+                        evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
+                        evtRingback = new ts_events_extended_1.VoidSyncEvent();
+                        return [4 /*yield*/, localApiHandlers.getRTCIceServer()];
+                    case 1:
+                        rtcICEServer = _a.sent();
+                        this.jsSipUa.call("sip:" + number + "@" + connection.baseDomain, {
+                            "mediaConstraints": { "audio": true, "video": false },
+                            "pcConfig": {
+                                "iceServers": [rtcICEServer],
+                                "gatheringTimeoutAfterRelay": 700
+                            },
+                            "eventHandlers": {
+                                "icecandidate": newIceCandidateHandler(rtcICEServer),
+                                "connecting": function () {
+                                    var jsSipRtcSession = this;
+                                    if (!!evtRequestTerminate.postCount) {
+                                        jsSipRtcSession.terminate();
+                                        return;
+                                    }
+                                    evtRequestTerminate.attachOnce(function () { return jsSipRtcSession.terminate(); });
+                                    evtDtmf.attach(function (_a) {
+                                        var signal = _a.signal, duration = _a.duration;
+                                        return jsSipRtcSession.sendDTMF(signal, { duration: duration });
+                                    });
+                                    jsSipRtcSession.connection.ontrack =
+                                        function (_a) {
+                                            var _b = __read(_a.streams, 1), stream = _b[0];
+                                            return playAudioStream(stream);
+                                        };
+                                },
+                                "confirmed": function () { return evtEstablished.post(); },
+                                "ended": function () { return evtTerminated.post(); },
+                                "failed": function () { return evtTerminated.post(); },
+                                "sending": function (_a) {
+                                    var request = _a.request;
+                                    return _this.evtRingback.waitFor(function (callId) { return callId === request.call_id; }, 30000)
+                                        .then(function () { return evtRingback.post(); })
+                                        .catch(function () { });
+                                }
+                            }
+                        });
+                        return [2 /*return*/, {
+                                "prNextState": new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                                    var _this = this;
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0: return [4 /*yield*/, Promise.race([
+                                                    evtRingback.waitFor(),
+                                                    evtEstablished.waitFor()
+                                                ])];
+                                            case 1:
+                                                _a.sent();
+                                                resolve({
+                                                    "state": "RINGBACK",
+                                                    "prNextState": new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                                                        return __generator(this, function (_a) {
+                                                            switch (_a.label) {
+                                                                case 0:
+                                                                    if (!!evtEstablished.postCount) return [3 /*break*/, 2];
+                                                                    return [4 /*yield*/, evtEstablished.waitFor()];
+                                                                case 1:
+                                                                    _a.sent();
+                                                                    _a.label = 2;
+                                                                case 2:
+                                                                    resolve({
+                                                                        "state": "ESTABLISHED",
+                                                                        "sendDtmf": function (signal, duration) {
+                                                                            return evtDtmf.post({ signal: signal, duration: duration });
+                                                                        }
+                                                                    });
+                                                                    return [2 /*return*/];
+                                                            }
+                                                        });
+                                                    }); })
+                                                });
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); }),
+                                "prTerminated": Promise.race([
+                                    evtRequestTerminate.waitFor(),
+                                    evtTerminated.waitFor()
+                                ]),
+                                "terminate": function () { return evtRequestTerminate.post(); }
+                            }];
+                }
+            });
+        });
+    };
+    return Ua;
+}());
+exports.Ua = Ua;
+function playAudioStream(stream) {
+    var audio = document.createElement("audio");
+    audio.autoplay = true;
+    audio.srcObject = stream;
+}
+var JsSipSocket = /** @class */ (function () {
+    function JsSipSocket(imsi, sip_uri) {
+        var _this = this;
+        this.sip_uri = sip_uri;
+        this.evtSipPacket = new ts_events_extended_1.SyncEvent();
+        this.via_transport = "WSS";
+        this.url = connection.url;
+        this.messageOkDelays = new Map();
+        var onBackedSocketConnect = function (backendSocket) {
+            var onSipPacket = function (sipPacket) {
+                if (gateway_1.readImsi(sipPacket) !== imsi) {
+                    return;
+                }
+                sipPacket = _this.sdpHacks(sipPacket);
+                _this.evtSipPacket.post(sipPacket);
+                _this.ondata(sip.toData(sipPacket).toString("utf8"));
+            };
+            backendSocket.evtRequest.attach(onSipPacket);
+            backendSocket.evtResponse.attach(onSipPacket);
+        };
+        connection.evtConnect.attach(function (socket) { return onBackedSocketConnect(socket); });
+        var socket = connection.get();
+        if (!(socket instanceof Promise)) {
+            onBackedSocketConnect(socket);
+        }
+    }
+    JsSipSocket.prototype.sdpHacks = function (sipPacket) {
+        if (sipPacket.headers["content-type"] !== "application/sdp") {
+            return sipPacket;
+        }
+        //NOTE: Sdp Hack for Mozilla
+        if (/firefox/i.test(navigator.userAgent)) {
+            console.log("Firefox SDP hack !");
+            var parsedSdp = sip.parseSdp(sip.getPacketContent(sipPacket).toString("utf8"));
+            var a = parsedSdp["m"][0]["a"];
+            if (!!a.find(function (v) { return /^mid:/i.test(v); })) {
+                return sipPacket;
+            }
+            parsedSdp["m"][0]["a"] = __spread(a, ["mid:0"]);
+            var modifiedSipPacket = sip.clonePacket(sipPacket);
+            sip.setPacketContent(modifiedSipPacket, sip.stringifySdp(parsedSdp));
+            return modifiedSipPacket;
+        }
+        return sipPacket;
+    };
+    JsSipSocket.prototype.connect = function () {
+        this.onconnect();
+    };
+    JsSipSocket.prototype.disconnect = function () {
+        throw new Error("JsSip should not call disconnect");
+    };
+    /**
+     * To call when receiving as SIP MESSAGE
+     * to prevent directly sending the 200 OK
+     * response immediately but rather wait
+     * until some action have been completed.
+     *
+     * @param request the request prop of the
+     * eventData emitted by JsSIP UA for the
+     * "newMessage" event. ( when originator === remote )
+     * @param pr The response to the SIP MESSAGE
+     * will not be sent until this promise resolve.
+     */
+    JsSipSocket.prototype.setMessageOkDelay = function (request, pr) {
+        this.messageOkDelays.set(request.getHeader("Call-ID"), pr);
+    };
+    JsSipSocket.prototype.send = function (data) {
+        var _this = this;
+        (function () { return __awaiter(_this, void 0, void 0, function () {
+            var sipPacket, sipResponse, callId, pr, socketOrPrSocket, socket, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        sipPacket = sip.parse(Buffer.from(data, "utf8"));
+                        if (!!sip.matchRequest(sipPacket)) return [3 /*break*/, 2];
+                        sipResponse = sipPacket;
+                        if (!(sipResponse.headers.cseq.method === "MESSAGE")) return [3 /*break*/, 2];
+                        callId = sipResponse.headers["call-id"];
+                        pr = this.messageOkDelays.get(callId);
+                        if (!!!pr) return [3 /*break*/, 2];
+                        return [4 /*yield*/, pr];
+                    case 1:
+                        _b.sent();
+                        this.messageOkDelays.delete(callId);
+                        _b.label = 2;
+                    case 2:
+                        socketOrPrSocket = connection.get();
+                        if (!(socketOrPrSocket instanceof Promise)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, socketOrPrSocket];
+                    case 3:
+                        _a = (_b.sent());
+                        return [3 /*break*/, 5];
+                    case 4:
+                        _a = socketOrPrSocket;
+                        _b.label = 5;
+                    case 5:
+                        socket = _a;
+                        socket.write(sip.parse(Buffer.from(data, "utf8")));
+                        return [2 /*return*/];
+                }
+            });
+        }); })();
+        return true;
+    };
+    JsSipSocket.prototype.onconnect = function () {
+        throw new Error("Missing impl");
+    };
+    JsSipSocket.prototype.ondisconnect = function (error, code, reason) {
+        throw new Error("Missing impl");
+    };
+    JsSipSocket.prototype.ondata = function (data) {
+        throw new Error("Missing impl");
+    };
+    return JsSipSocket;
+}());
+/** Let end gathering ICE candidates as quickly as possible. */
+function newIceCandidateHandler(rtcICEServer) {
+    var isReady = newIceCandidateHandler.isReadyFactory(rtcICEServer);
+    var readyTimer = undefined;
+    return function (data) {
+        var candidate = data.candidate, ready = data.ready;
+        //console.log(candidate);
+        var readyState = isReady(candidate.candidate);
+        console.log(readyState);
+        switch (readyState) {
+            case "NOT READY": return;
+            case "AT LEAST ONE RELAY CANDIDATE READY":
+                if (readyTimer === undefined) {
+                    readyTimer = setTimeout(function () {
+                        console.log("Timing out ice candidates gathering");
+                        ready();
+                    }, 300);
+                }
+                return;
+            case "ALL CANDIDATES READY":
+                clearTimeout(readyTimer);
+                ready();
+                return;
+        }
     };
 }
-exports.loadUiClassHtml = loadUiClassHtml;
+(function (newIceCandidateHandler) {
+    function isReadyFactory(rtcICEServer) {
+        //console.log(JSON.stringify(rtcICEServer, null, 2));
+        var p = (function () {
+            var urls = typeof rtcICEServer.urls === "string" ?
+                [rtcICEServer.urls] : rtcICEServer.urls;
+            ;
+            return {
+                "isSrflxCandidateExpected": !!urls.find(function (url) { return !!url.match(/^stun/i); }),
+                "isRelayCandidateExpected": !!urls.find(function (url) { return !!url.match(/^turn:/i); }),
+                "isEncryptedRelayCandidateExpected": !!urls.find(function (url) { return !!url.match(/^turns:/i); }),
+                "lines": new Array()
+            };
+        })();
+        //console.log(JSON.stringify(p, null, 2));
+        return function (line) {
+            p.lines.push(line);
+            var isRtcpExcepted = !!p.lines
+                .map(function (line) { return parseLine(line); })
+                .find(function (_a) {
+                var component = _a.component;
+                return component === "RTCP";
+            });
+            if (isFullyReady(__assign({}, p, { isRtcpExcepted: isRtcpExcepted }))) {
+                return "ALL CANDIDATES READY";
+            }
+            return countRelayCandidatesReady(p.lines, isRtcpExcepted) >= 1 ?
+                "AT LEAST ONE RELAY CANDIDATE READY" : "NOT READY";
+        };
+    }
+    newIceCandidateHandler.isReadyFactory = isReadyFactory;
+    function parseLine(line) {
+        var match = line.match(/(1|2)\s+(?:udp|tcp)\s+([0-9]+)\s/i);
+        return {
+            "component": match[1] === "1" ? "RTP" : "RTCP",
+            "priority": parseInt(match[2])
+        };
+    }
+    function countRelayCandidatesReady(lines, isRtcpExcepted) {
+        var parsedLines = lines
+            .filter(function (line) { return !!line.match(/udp.+relay/i); })
+            .map(parseLine);
+        var parsedRtpLines = parsedLines
+            .filter(function (_a) {
+            var component = _a.component;
+            return component === "RTP";
+        });
+        if (!isRtcpExcepted) {
+            return parsedRtpLines.length;
+        }
+        var parsedRtcpLines = parsedLines
+            .filter(function (_a) {
+            var component = _a.component;
+            return component === "RTCP";
+        });
+        return parsedRtpLines
+            .filter(function (_a) {
+            var rtpPriority = _a.priority;
+            return !!parsedRtcpLines.find(function (_a) {
+                var priority = _a.priority;
+                return Math.abs(priority - rtpPriority) === 1;
+            });
+        })
+            .length;
+    }
+    function isSrflxCandidateReady(lines, isRtcpExcepted) {
+        var parsedLines = lines
+            .filter(function (line) { return !!line.match(/udp.+srflx/i); })
+            .map(parseLine);
+        var parsedRtpLines = parsedLines
+            .filter(function (_a) {
+            var component = _a.component;
+            return component === "RTP";
+        });
+        if (!isRtcpExcepted) {
+            return parsedRtpLines.length !== 0;
+        }
+        var parsedRtcpLines = parsedLines
+            .filter(function (_a) {
+            var component = _a.component;
+            return component === "RTCP";
+        });
+        return !!parsedRtpLines
+            .find(function (_a) {
+            var rtpPriority = _a.priority;
+            return !!parsedRtcpLines.find(function (_a) {
+                var priority = _a.priority;
+                return Math.abs(priority - rtpPriority) === 1;
+            });
+        });
+    }
+    function isFullyReady(p) {
+        return (!p.isSrflxCandidateExpected ?
+            true :
+            isSrflxCandidateReady(p.lines, p.isRtcpExcepted)) && ((p.isRelayCandidateExpected ? 1 : 0)
+            +
+                (p.isEncryptedRelayCandidateExpected ? 1 : 0)
+            <=
+                countRelayCandidatesReady(p.lines, p.isRtcpExcepted));
+    }
+})(newIceCandidateHandler || (newIceCandidateHandler = {}));
 
-},{}],136:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../gateway":17,"./toBackend/connection":19,"./toBackend/localApiHandlers":20,"buffer":2,"run-exclusive":47,"ts-events-extended":59,"ts-sip":67}],19:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9925,7 +4844,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../tools/bootbox_custom":139,"./localApiHandlers":137,"./remoteApiCaller":138,"js-cookie":164,"ts-events-extended":178,"ts-sip":186}],137:[function(require,module,exports){
+},{"../tools/bootbox_custom":22,"./localApiHandlers":20,"./remoteApiCaller":21,"js-cookie":45,"ts-events-extended":59,"ts-sip":67}],20:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10546,7 +5465,7 @@ exports.getRTCIceServer = (function () {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":146,"../tools/bootbox_custom":139,"./remoteApiCaller":138,"chan-dongle-extended-client/dist/lib/types":148,"ts-events-extended":178}],138:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":28,"../tools/bootbox_custom":22,"./remoteApiCaller":21,"chan-dongle-extended-client/dist/lib/types":29,"ts-events-extended":59}],21:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -11420,7 +6339,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":145,"../types":143,"./connection":136,"phone-number":165,"ts-events-extended":178,"ts-sip":186}],139:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":27,"../types":26,"./connection":19,"phone-number":46,"ts-events-extended":59,"ts-sip":67}],22:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11528,7 +6447,22 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":141}],140:[function(require,module,exports){
+},{"./modal_stack":25}],23:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function getURLParameter(sParam) {
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split("&");
+    for (var i = 0; i < sURLVariables.length; i++) {
+        var sParameterName = sURLVariables[i].split("=");
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1];
+        }
+    }
+}
+exports.getURLParameter = getURLParameter;
+
+},{}],24:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -11551,7 +6485,7 @@ function isAscendingAlphabeticalOrder(a, b) {
 }
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
 
-},{}],141:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -11670,17 +6604,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],142:[function(require,module,exports){
-if (typeof ArrayBuffer.isView !== "function") {
-    Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
-}
-if (typeof String.prototype.startsWith !== "function") {
-    String.prototype.startsWith = function startsWith(str) {
-        return this.indexOf(str) === 0;
-    };
-}
-
-},{}],143:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -11877,162 +6801,7 @@ var webphoneData;
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
 
-},{"./tools/isAscendingAlphabeticalOrder":140}],144:[function(require,module,exports){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var apiDeclaration = require("../web_api_declaration");
-var ttJC = require("transfer-tools/dist/lib/JSON_CUSTOM");
-//NOTE: Assert jQuery loaded on the page
-var JSON_CUSTOM = ttJC.get();
-function sendRequest(methodName, params) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve) { return window["$"].ajax({
-                    "url": "/" + apiDeclaration.apiPath + "/" + methodName,
-                    "method": "POST",
-                    "contentType": "application/json; charset=UTF-8",
-                    "data": JSON_CUSTOM.stringify(params),
-                    "dataType": "text",
-                    "statusCode": {
-                        "400": function () { return alert("Bad request ( bug in the client )"); },
-                        "401": function () { return window.location.reload(); },
-                        "500": function () { return alert("Bug on the server, sorry :("); },
-                        "200": function (data) { return resolve(JSON_CUSTOM.parse(data)); }
-                    }
-                }); })];
-        });
-    });
-}
-function registerUser(email, password) {
-    var methodName = apiDeclaration.registerUser.methodName;
-    return sendRequest(methodName, { email: email, password: password });
-}
-exports.registerUser = registerUser;
-function validateEmail(email, activationCode) {
-    var methodName = apiDeclaration.validateEmail.methodName;
-    return sendRequest(methodName, { email: email, activationCode: activationCode });
-}
-exports.validateEmail = validateEmail;
-function loginUser(email, password) {
-    var methodName = apiDeclaration.loginUser.methodName;
-    return sendRequest(methodName, { email: email, password: password });
-}
-exports.loginUser = loginUser;
-function logoutUser() {
-    var methodName = apiDeclaration.logoutUser.methodName;
-    return sendRequest(methodName, undefined);
-}
-exports.logoutUser = logoutUser;
-/** Return true if email has account */
-function sendRenewPasswordEmail(email) {
-    var methodName = apiDeclaration.sendRenewPasswordEmail.methodName;
-    return sendRequest(methodName, { email: email });
-}
-exports.sendRenewPasswordEmail = sendRenewPasswordEmail;
-function renewPassword(email, newPassword, token) {
-    var methodName = apiDeclaration.renewPassword.methodName;
-    return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
-}
-exports.renewPassword = renewPassword;
-function getSubscriptionInfos() {
-    var methodName = apiDeclaration.getSubscriptionInfos.methodName;
-    return sendRequest(methodName, undefined);
-}
-exports.getSubscriptionInfos = getSubscriptionInfos;
-function subscribeOrUpdateSource(sourceId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var methodName;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    methodName = apiDeclaration.subscribeOrUpdateSource.methodName;
-                    return [4 /*yield*/, sendRequest(methodName, { sourceId: sourceId })];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.subscribeOrUpdateSource = subscribeOrUpdateSource;
-function unsubscribe() {
-    return __awaiter(this, void 0, void 0, function () {
-        var methodName;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    methodName = apiDeclaration.unsubscribe.methodName;
-                    return [4 /*yield*/, sendRequest(methodName, undefined)];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.unsubscribe = unsubscribe;
-/*
-function buildUrl(
-    methodName: string,
-    params: Record<string, string | undefined>
-): string {
-
-    let query: string[] = [];
-
-    for (let key of Object.keys(params)) {
-
-        let value = params[key];
-
-        if (value === undefined) continue;
-
-        query[query.length] = `${key}=${params[key]}`;
-
-    }
-
-    let url = `https://${c.backendHostname}:${c.webApiPort}/${c.webApiPath}/${methodName}?${query.join("&")}`;
-
-    console.log(`GET ${url}`);
-
-    return url;
-}
-*/ 
-
-},{"../web_api_declaration":147,"transfer-tools/dist/lib/JSON_CUSTOM":169}],145:[function(require,module,exports){
+},{"./tools/isAscendingAlphabeticalOrder":24}],27:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -12131,7 +6900,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],146:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -12184,48 +6953,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],147:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.apiPath = "api";
-var registerUser;
-(function (registerUser) {
-    registerUser.methodName = "register-user";
-})(registerUser = exports.registerUser || (exports.registerUser = {}));
-var validateEmail;
-(function (validateEmail) {
-    validateEmail.methodName = "validate-email";
-})(validateEmail = exports.validateEmail || (exports.validateEmail = {}));
-var loginUser;
-(function (loginUser) {
-    loginUser.methodName = "login-user";
-})(loginUser = exports.loginUser || (exports.loginUser = {}));
-var logoutUser;
-(function (logoutUser) {
-    logoutUser.methodName = "logout-user";
-})(logoutUser = exports.logoutUser || (exports.logoutUser = {}));
-var sendRenewPasswordEmail;
-(function (sendRenewPasswordEmail) {
-    sendRenewPasswordEmail.methodName = "send-renew-password-email";
-})(sendRenewPasswordEmail = exports.sendRenewPasswordEmail || (exports.sendRenewPasswordEmail = {}));
-var renewPassword;
-(function (renewPassword) {
-    renewPassword.methodName = "renew-password";
-})(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
-var getSubscriptionInfos;
-(function (getSubscriptionInfos) {
-    getSubscriptionInfos.methodName = "get-subscription-infos";
-})(getSubscriptionInfos = exports.getSubscriptionInfos || (exports.getSubscriptionInfos = {}));
-var subscribeOrUpdateSource;
-(function (subscribeOrUpdateSource) {
-    subscribeOrUpdateSource.methodName = "subscribe-or-update-source";
-})(subscribeOrUpdateSource = exports.subscribeOrUpdateSource || (exports.subscribeOrUpdateSource = {}));
-var unsubscribe;
-(function (unsubscribe) {
-    unsubscribe.methodName = "unsubscribe";
-})(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
-
-},{}],148:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -12246,7 +6974,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],149:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -12449,7 +7177,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":150,"./custom/zalgo":151,"./maps/america":154,"./maps/rainbow":155,"./maps/random":156,"./maps/zebra":157,"./styles":158,"./system/supports-colors":160,"util":8}],150:[function(require,module,exports){
+},{"./custom/trap":31,"./custom/zalgo":32,"./maps/america":35,"./maps/rainbow":36,"./maps/random":37,"./maps/zebra":38,"./styles":39,"./system/supports-colors":41,"util":8}],31:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -12497,7 +7225,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],151:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -12609,7 +7337,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],152:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -12721,7 +7449,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":149}],153:[function(require,module,exports){
+},{"./colors":30}],34:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -12736,7 +7464,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":149,"./extendStringPrototype":152}],154:[function(require,module,exports){
+},{"./colors":30,"./extendStringPrototype":33}],35:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -12748,7 +7476,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],155:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -12762,7 +7490,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],156:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -12774,14 +7502,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],157:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],158:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -12860,7 +7588,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],159:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -12899,7 +7627,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],160:[function(require,module,exports){
+},{"_process":6}],41:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -13054,13 +7782,75 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":159,"_process":6,"os":5}],161:[function(require,module,exports){
-arguments[4][107][0].apply(exports,arguments)
-},{"dup":107}],162:[function(require,module,exports){
-arguments[4][108][0].apply(exports,arguments)
-},{"./implementation":161,"dup":108}],163:[function(require,module,exports){
-arguments[4][111][0].apply(exports,arguments)
-},{"dup":111,"function-bind":162}],164:[function(require,module,exports){
+},{"./has-flag.js":40,"_process":6,"os":5}],42:[function(require,module,exports){
+'use strict';
+
+/* eslint no-invalid-this: 1 */
+
+var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
+var slice = Array.prototype.slice;
+var toStr = Object.prototype.toString;
+var funcType = '[object Function]';
+
+module.exports = function bind(that) {
+    var target = this;
+    if (typeof target !== 'function' || toStr.call(target) !== funcType) {
+        throw new TypeError(ERROR_MESSAGE + target);
+    }
+    var args = slice.call(arguments, 1);
+
+    var bound;
+    var binder = function () {
+        if (this instanceof bound) {
+            var result = target.apply(
+                this,
+                args.concat(slice.call(arguments))
+            );
+            if (Object(result) === result) {
+                return result;
+            }
+            return this;
+        } else {
+            return target.apply(
+                that,
+                args.concat(slice.call(arguments))
+            );
+        }
+    };
+
+    var boundLength = Math.max(0, target.length - args.length);
+    var boundArgs = [];
+    for (var i = 0; i < boundLength; i++) {
+        boundArgs.push('$' + i);
+    }
+
+    bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this,arguments); }')(binder);
+
+    if (target.prototype) {
+        var Empty = function Empty() {};
+        Empty.prototype = target.prototype;
+        bound.prototype = new Empty();
+        Empty.prototype = null;
+    }
+
+    return bound;
+};
+
+},{}],43:[function(require,module,exports){
+'use strict';
+
+var implementation = require('./implementation');
+
+module.exports = Function.prototype.bind || implementation;
+
+},{"./implementation":42}],44:[function(require,module,exports){
+'use strict';
+
+var bind = require('function-bind');
+
+module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
+
+},{"function-bind":43}],45:[function(require,module,exports){
 /*!
  * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
@@ -13227,13 +8017,202 @@ arguments[4][111][0].apply(exports,arguments)
 	return init(function () {});
 }));
 
-},{}],165:[function(require,module,exports){
-arguments[4][120][0].apply(exports,arguments)
-},{"_process":6,"dup":120}],166:[function(require,module,exports){
-arguments[4][121][0].apply(exports,arguments)
-},{"dup":121}],167:[function(require,module,exports){
-arguments[4][122][0].apply(exports,arguments)
-},{"dup":122}],168:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
+(function (process,global){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var phoneNumber;
+(function (phoneNumber_1) {
+    function syncLoadUtilIfNode() {
+        var is_intlTelInputUtils_defined = (function () {
+            try {
+                intlTelInputUtils;
+            }
+            catch (_a) {
+                return false;
+            }
+            return intlTelInputUtils !== undefined;
+        })();
+        if (is_intlTelInputUtils_defined) {
+            return;
+        }
+        if (typeof process !== "undefined" &&
+            typeof process.release === "object" &&
+            process.release.name === "node") {
+            //Trick browserify so it does not bundle.
+            var path = "../../res/utils";
+            require(path);
+        }
+        else {
+            throw new Error([
+                "Util script should be loaded, include it in the HTML",
+                "page or run async function remoteLoadUtil before use"
+            ].join(" "));
+        }
+    }
+    function remoteLoadUtil(src) {
+        if (src === void 0) { src = "//github.com/garronej/phone-number/releases/download/intlTelInputUtils/utils.js"; }
+        return new Promise(function (resolve) {
+            return (function (d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) {
+                    resolve();
+                    return;
+                }
+                js = d.createElement(s);
+                js.id = id;
+                js.onload = function () {
+                    resolve();
+                };
+                js.src = src;
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, "script", "intlTelInputUtils"));
+        });
+    }
+    phoneNumber_1.remoteLoadUtil = remoteLoadUtil;
+    /**
+     * This function will try to convert a raw string as a E164 formated phone number.
+     *
+     * If the rawInput is already a E164 it will remain untouched regardless of the iso
+     * ex: +33636786385, it => +33636786385
+     *
+     * In case the number can not be converted to E164:
+     * -If the number contain any character that is not a digit or ( ) [space] - # * +
+     * then the number will be considered not dialable and remain untouched.
+     * e.g: SFR => SFR | Error
+     *
+     * -If the number contain only digits ( ) [space] - # * or +
+     * then ( ) [space] and - will be removed.
+     * e.g: +00 (111) 222-333 => +00111222333
+     * (if after the number is "" we return rawInput and it's not dialable )
+     * e.g: ()()-=> ()()- | Error
+     * e.g: [""] => | Error
+     *
+     * @param rawInput raw string provided as phone number by Dongle or intlInput
+     * @param iso
+     * country of the number ( lowercase ) e.g: fr, it...
+     * - If we use intlInput the iso is provided.
+     * - If it's a incoming SMS/Call from Dongle the iso to provide is the one of the SIM
+     * as we will ether have an E164 formated number not affected by the iso
+     * or if we have a locally formated number it's formated it mean that the number is from the same
+     * country of the sim card.
+     * @param mustBeDialable: throw if the number is not dialable.
+     *
+     */
+    function build(rawInput, iso, mustBeDialable) {
+        if (mustBeDialable === void 0) { mustBeDialable = undefined; }
+        syncLoadUtilIfNode();
+        var shouldFormatToE164 = (function () {
+            if (!iso) {
+                return false;
+            }
+            var numberType = intlTelInputUtils.getNumberType(rawInput, iso);
+            switch (numberType) {
+                case intlTelInputUtils.numberType.FIXED_LINE:
+                case intlTelInputUtils.numberType.FIXED_LINE_OR_MOBILE:
+                case intlTelInputUtils.numberType.MOBILE:
+                    return true;
+                default:
+                    return false;
+            }
+        })();
+        if (shouldFormatToE164) {
+            return intlTelInputUtils.formatNumber(rawInput, iso, intlTelInputUtils.numberFormat.E164);
+        }
+        else {
+            /** If any char other than *+# () and number is present => match  */
+            if (rawInput.match(/[^*+#\ \-\(\)0-9]/)) {
+                if (mustBeDialable) {
+                    throw new Error("unauthorized char, not dialable");
+                }
+                return rawInput;
+            }
+            else {
+                /** 0 (111) 222-333 => 0111222333 */
+                var phoneNumber_2 = rawInput.replace(/[\ \-\(\)]/g, "");
+                if (!phoneNumber_2.length) {
+                    if (mustBeDialable) {
+                        throw new Error("void, not dialable");
+                    }
+                    return rawInput;
+                }
+                return phoneNumber_2;
+            }
+        }
+    }
+    phoneNumber_1.build = build;
+    /** let us test if we should allow the number to be dialed */
+    function isDialable(phoneNumber) {
+        try {
+            build(phoneNumber, undefined, "MUST BE DIALABLE");
+        }
+        catch (_a) {
+            return false;
+        }
+        return true;
+    }
+    phoneNumber_1.isDialable = isDialable;
+    function isValidE164(phoneNumber) {
+        syncLoadUtilIfNode();
+        return (phoneNumber[0] === "+" &&
+            intlTelInputUtils.isValidNumber(phoneNumber));
+    }
+    /**
+     * Pretty print (format) the phone number:
+     * In national format if the iso of the number and the provided iso matches.
+     * In international format if no iso is provided or
+     * the iso of the number and the provided iso mismatch.
+     * Do nothing if it's not dialable.
+     */
+    function prettyPrint(phoneNumber, simIso) {
+        syncLoadUtilIfNode();
+        if (!isValidE164(phoneNumber)) {
+            return phoneNumber;
+        }
+        if (!simIso) {
+            return intlTelInputUtils.formatNumber(phoneNumber, undefined, intlTelInputUtils.numberFormat.INTERNATIONAL);
+        }
+        var pnNational = intlTelInputUtils.formatNumber(phoneNumber, null, intlTelInputUtils.numberFormat.NATIONAL);
+        var pnBackToE164 = intlTelInputUtils.formatNumber(pnNational, simIso, intlTelInputUtils.numberFormat.E164);
+        if (pnBackToE164 === phoneNumber) {
+            return pnNational;
+        }
+        else {
+            return intlTelInputUtils.formatNumber(phoneNumber, simIso, intlTelInputUtils.numberFormat.INTERNATIONAL);
+        }
+    }
+    phoneNumber_1.prettyPrint = prettyPrint;
+    function areSame(phoneNumber, rawInput) {
+        syncLoadUtilIfNode();
+        if (phoneNumber === rawInput) {
+            return true;
+        }
+        var rawInputDry = rawInput.replace(/[^*#+0-9]/g, "");
+        if (rawInputDry === phoneNumber) {
+            return true;
+        }
+        if (isValidE164(phoneNumber)) {
+            if (rawInputDry.startsWith("00") &&
+                rawInputDry.replace(/^00/, "+") === phoneNumber) {
+                return true;
+            }
+            var pnNationalDry = intlTelInputUtils.formatNumber(phoneNumber, null, intlTelInputUtils.numberFormat.NATIONAL).replace(/[^*#+0-9]/g, "");
+            if (rawInputDry === pnNationalDry) {
+                return true;
+            }
+        }
+        return false;
+    }
+    phoneNumber_1.areSame = areSame;
+    global["phoneNumber"] = phoneNumber;
+})(phoneNumber = exports.phoneNumber || (exports.phoneNumber = {}));
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"_process":6}],47:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"dup":10}],48:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],49:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -13568,7 +8547,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":163}],169:[function(require,module,exports){
+},{"has":44}],50:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -13618,7 +8597,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":168}],170:[function(require,module,exports){
+},{"super-json":49}],51:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -13630,7 +8609,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":169,"./stringTransform":171,"./stringTransformExt":172,"./testing":173}],171:[function(require,module,exports){
+},{"./JSON_CUSTOM":50,"./stringTransform":52,"./stringTransformExt":53,"./testing":54}],52:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -13692,7 +8671,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],172:[function(require,module,exports){
+},{"buffer":2}],53:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -13760,7 +8739,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":171}],173:[function(require,module,exports){
+},{"./stringTransform":52}],54:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -14029,17 +9008,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":171}],174:[function(require,module,exports){
-arguments[4][123][0].apply(exports,arguments)
-},{"./SyncEventBase":175,"dup":123}],175:[function(require,module,exports){
-arguments[4][124][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":176,"dup":124}],176:[function(require,module,exports){
-arguments[4][125][0].apply(exports,arguments)
-},{"./defs":177,"dup":125,"run-exclusive":166}],177:[function(require,module,exports){
-arguments[4][126][0].apply(exports,arguments)
-},{"dup":126,"setprototypeof":167}],178:[function(require,module,exports){
-arguments[4][127][0].apply(exports,arguments)
-},{"./SyncEvent":174,"./defs":177,"dup":127}],179:[function(require,module,exports){
+},{"./stringTransform":52}],55:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"./SyncEventBase":56,"dup":12}],56:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"./SyncEventBaseProtected":57,"dup":13}],57:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"./defs":58,"dup":14,"run-exclusive":47}],58:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15,"setprototypeof":48}],59:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"./SyncEvent":55,"./defs":58,"dup":16}],60:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14211,7 +9190,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":178}],180:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":59}],61:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -14523,7 +9502,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":179,"./api/ApiMessage":181,"./core":185,"./misc":189,"colors":153,"ts-events-extended":178}],181:[function(require,module,exports){
+},{"./IConnection":60,"./api/ApiMessage":62,"./core":66,"./misc":70,"colors":34,"ts-events-extended":59}],62:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14604,7 +9583,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":185,"../misc":189,"buffer":2,"transfer-tools":170}],182:[function(require,module,exports){
+},{"../core":66,"../misc":70,"buffer":2,"transfer-tools":51}],63:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14786,7 +9765,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":189,"./ApiMessage":181,"colors":153,"util":8}],183:[function(require,module,exports){
+},{"../misc":70,"./ApiMessage":62,"colors":34,"util":8}],64:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -15005,7 +9984,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":189,"./ApiMessage":181,"setprototypeof":167}],184:[function(require,module,exports){
+},{"../misc":70,"./ApiMessage":62,"setprototypeof":48}],65:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -15013,7 +9992,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":182,"./client":183}],185:[function(require,module,exports){
+},{"./Server":63,"./client":64}],66:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -15097,7 +10076,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":187,"./legacy/sip":188,"buffer":2,"setprototypeof":167}],186:[function(require,module,exports){
+},{"./legacy/sdp":68,"./legacy/sip":69,"buffer":2,"setprototypeof":48}],67:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -15109,7 +10088,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":180,"./api":184,"./core":185,"./misc":189}],187:[function(require,module,exports){
+},{"./Socket":61,"./api":65,"./core":66,"./misc":70}],68:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -15225,7 +10204,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],188:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -15616,7 +10595,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],189:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -15914,4 +10893,238 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":185,"buffer":2}]},{},[14]);
+},{"./core":66,"buffer":2}],71:[function(require,module,exports){
+"use strict";
+/* NOTE: Used in the browser. */
+Object.defineProperty(exports, "__esModule", { value: true });
+//NOTE: Transpiled to ES3.
+var stringTransform = require("transfer-tools/dist/lib/stringTransform");
+exports.urlSafeB64 = stringTransform.transcode("base64", { "=": "_" });
+var header = function (i) { return "Bundled-Data-" + i; };
+/**
+ *
+ * In order to ease the cross implementation in Java and Objective C
+ * we use this function to serialize Date instead of JSON_CUSTOM.
+ * We serialize by converting date into timestamp.
+ *
+ * We enforce that any date property must have as name a string
+ * that end with Date or date otherwise an error will be thrown.
+ *
+ * Date are allowed to be null.
+ *
+ */
+function replacer_reviver(isReplacer, key, value) {
+    if (value === null) {
+        return value;
+    }
+    var cKey = !!key.match(/[Dd]ate$/);
+    var cVal = isReplacer ? (typeof value === "string" &&
+        !!value.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/)) : typeof value === "number";
+    if (isReplacer ? (cKey !== cVal) : (cKey && !cVal)) {
+        throw new Error("Bundled data design error");
+    }
+    if (!cKey) {
+        return value;
+    }
+    var date = new Date(value);
+    return isReplacer ? date.getTime() : date;
+}
+;
+function smuggleBundledDataInHeaders(data, headers) {
+    if (headers === void 0) { headers = {}; }
+    var split = stringTransform.textSplit(125, exports.urlSafeB64.enc(JSON.stringify(data, function (key, value) { return replacer_reviver(true, key, value); })));
+    for (var i = 0; i < split.length; i++) {
+        headers[header(i)] = split[i];
+    }
+    return headers;
+}
+exports.smuggleBundledDataInHeaders = smuggleBundledDataInHeaders;
+/** assert there is data */
+function extractBundledDataFromHeaders(headers) {
+    var split = [];
+    var i = 0;
+    while (true) {
+        var key = header(i++);
+        var part = headers[key] || headers[key.toLowerCase()];
+        if (!!part) {
+            split.push(part);
+        }
+        else {
+            break;
+        }
+    }
+    if (!split.length) {
+        throw new Error("No bundled data in header");
+    }
+    return JSON.parse(exports.urlSafeB64.dec(split.join("")), function (key, value) { return replacer_reviver(false, key, value); });
+}
+exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
+
+},{"transfer-tools/dist/lib/stringTransform":94}],72:[function(require,module,exports){
+"use strict";
+/* NOTE: Used in the browser. */
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+//NOTE: Transpiled to ES3.
+var stringTransform = require("transfer-tools/dist/lib/stringTransform");
+//NOTE: Transpiled to ES5
+var sipLibrary = require("ts-sip");
+/**
+ * Return true if it's a sipRequest originated of UA
+ * or if it's a sipResponse of a request originated by UA.
+ * */
+function isRequestFromClient(sipPacket) {
+    return sipPacket.headers.via[sipPacket.headers.via.length - 1].protocol !== "TCP";
+}
+function readImsi(sipPacket) {
+    return sipLibrary.parseUri(sipPacket.headers[isRequestFromClient(sipPacket) ? "from" : "to"].uri).user.match(/^([0-9]{15})/)[1];
+}
+exports.readImsi = readImsi;
+/**
+ *
+ * connectionId:
+ *
+ * An uniq id of every UA connection to the backend
+ * Should be included in every sip packet.
+ * The token enclose a timestamp of when the
+ * UA connection to the backend was established,
+ * the public address of the UA and the source
+ * port the UA used to connect.
+ *
+ * */
+var cid;
+(function (cid) {
+    var _a = stringTransform.transcode("base64", { "=": "_" }), enc = _a.enc, dec = _a.dec;
+    /** on backend when ua connect */
+    function generate(uaSocket, timestamp) {
+        if (timestamp === void 0) { timestamp = Date.now(); }
+        return enc(timestamp + ":" + uaSocket.remoteAddress + ":" + uaSocket.remotePort);
+    }
+    cid.generate = generate;
+    function parse(connectionId) {
+        var _a = __read(dec(connectionId).split(":"), 3), a = _a[0], b = _a[1], c = _a[2];
+        return {
+            "timestamp": parseInt(a),
+            "uaSocket": {
+                "remoteAddress": b,
+                "remotePort": parseInt(c)
+            }
+        };
+    }
+    cid.parse = parse;
+    var key = "connection_id";
+    /**
+     * Include a connection id in a sipRequest.
+     * This must be applied to every new sip request.
+     * ( No need to include the connection id on sip response
+     * as it is already present )
+     */
+    function set(sipRequestNextHop, connectionId) {
+        sipRequestNextHop.headers[isRequestFromClient(sipRequestNextHop) ? "from" : "to"].params[key] = connectionId;
+    }
+    cid.set = set;
+    /** Read the connection id */
+    function read(sipPacket) {
+        return sipPacket.headers[isRequestFromClient(sipPacket) ? "from" : "to"].params[key];
+    }
+    cid.read = read;
+})(cid = exports.cid || (exports.cid = {}));
+
+},{"transfer-tools/dist/lib/stringTransform":94,"ts-sip":109}],73:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+
+},{}],74:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./custom/trap":75,"./custom/zalgo":76,"./maps/america":79,"./maps/rainbow":80,"./maps/random":81,"./maps/zebra":82,"./styles":83,"./system/supports-colors":85,"dup":30,"util":8}],75:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],76:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"dup":32}],77:[function(require,module,exports){
+arguments[4][33][0].apply(exports,arguments)
+},{"./colors":74,"dup":33}],78:[function(require,module,exports){
+arguments[4][34][0].apply(exports,arguments)
+},{"./colors":74,"./extendStringPrototype":77,"dup":34}],79:[function(require,module,exports){
+arguments[4][35][0].apply(exports,arguments)
+},{"dup":35}],80:[function(require,module,exports){
+arguments[4][36][0].apply(exports,arguments)
+},{"dup":36}],81:[function(require,module,exports){
+arguments[4][37][0].apply(exports,arguments)
+},{"dup":37}],82:[function(require,module,exports){
+arguments[4][38][0].apply(exports,arguments)
+},{"dup":38}],83:[function(require,module,exports){
+arguments[4][39][0].apply(exports,arguments)
+},{"dup":39}],84:[function(require,module,exports){
+arguments[4][40][0].apply(exports,arguments)
+},{"_process":6,"dup":40}],85:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"./has-flag.js":84,"_process":6,"dup":41,"os":5}],86:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"dup":42}],87:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"./implementation":86,"dup":43}],88:[function(require,module,exports){
+arguments[4][44][0].apply(exports,arguments)
+},{"dup":44,"function-bind":87}],89:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"dup":10}],90:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],91:[function(require,module,exports){
+arguments[4][49][0].apply(exports,arguments)
+},{"dup":49,"has":88}],92:[function(require,module,exports){
+arguments[4][50][0].apply(exports,arguments)
+},{"dup":50,"super-json":91}],93:[function(require,module,exports){
+arguments[4][51][0].apply(exports,arguments)
+},{"./JSON_CUSTOM":92,"./stringTransform":94,"./stringTransformExt":95,"./testing":96,"dup":51}],94:[function(require,module,exports){
+arguments[4][52][0].apply(exports,arguments)
+},{"buffer":2,"dup":52}],95:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"./stringTransform":94,"dup":53}],96:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"./stringTransform":94,"dup":54}],97:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"./SyncEventBase":98,"dup":12}],98:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"./SyncEventBaseProtected":99,"dup":13}],99:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"./defs":100,"dup":14,"run-exclusive":89}],100:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15,"setprototypeof":90}],101:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"./SyncEvent":97,"./defs":100,"dup":16}],102:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"buffer":2,"dup":60,"ts-events-extended":101}],103:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"./IConnection":102,"./api/ApiMessage":104,"./core":108,"./misc":112,"colors":78,"dup":61,"ts-events-extended":101}],104:[function(require,module,exports){
+arguments[4][62][0].apply(exports,arguments)
+},{"../core":108,"../misc":112,"buffer":2,"dup":62,"transfer-tools":93}],105:[function(require,module,exports){
+arguments[4][63][0].apply(exports,arguments)
+},{"../misc":112,"./ApiMessage":104,"colors":78,"dup":63,"util":8}],106:[function(require,module,exports){
+arguments[4][64][0].apply(exports,arguments)
+},{"../misc":112,"./ApiMessage":104,"dup":64,"setprototypeof":90}],107:[function(require,module,exports){
+arguments[4][65][0].apply(exports,arguments)
+},{"./Server":105,"./client":106,"dup":65}],108:[function(require,module,exports){
+arguments[4][66][0].apply(exports,arguments)
+},{"./legacy/sdp":110,"./legacy/sip":111,"buffer":2,"dup":66,"setprototypeof":90}],109:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"./Socket":103,"./api":107,"./core":108,"./misc":112,"dup":67}],110:[function(require,module,exports){
+arguments[4][68][0].apply(exports,arguments)
+},{"dup":68}],111:[function(require,module,exports){
+arguments[4][69][0].apply(exports,arguments)
+},{"dup":69}],112:[function(require,module,exports){
+arguments[4][70][0].apply(exports,arguments)
+},{"./core":108,"buffer":2,"dup":70}]},{},[9]);

@@ -10400,6 +10400,7 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
                     return [4 /*yield*/, remoteApiCaller.rejectSharingRequest(userSim)];
                 case 2:
                     _a.sent();
+                    bootbox_custom.dismissLoading();
                     return [2 /*return*/, undefined];
                 case 3: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
                         "title": "Friendly name for this sim?",

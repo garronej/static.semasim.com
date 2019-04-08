@@ -2061,22 +2061,7 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
 var requestRenewPassword_1 = require("./requestRenewPassword");
-if (!ArrayBuffer.isView) {
-    Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
-}
-if (typeof androidEventHandlers !== "undefined") {
-    window.onerror = function (msg, url, lineNumber) {
-        console.log(msg + "\n'" + url + ":" + lineNumber);
-        androidEventHandlers.onDone(msg + "\n'" + url + ":" + lineNumber);
-        return false;
-    };
-    if ("onPossiblyUnhandledRejection" in Promise) {
-        Promise.onPossiblyUnhandledRejection(function (error) {
-            console.log(error);
-            androidEventHandlers.onDone(error.message + " " + error.stack);
-        });
-    }
-}
+require("../../../shared/dist/lib/tools/standalonePolyfills");
 function setHandlers() {
     /* Start import from theme */
     $("#login-form").validate({
@@ -2138,7 +2123,7 @@ function setHandlers() {
                             case "SUCCESS":
                                 Cookies.set("email", email);
                                 if (typeof androidEventHandlers !== "undefined") {
-                                    androidEventHandlers.onDone(null, email, password);
+                                    androidEventHandlers.onDone(email, password);
                                 }
                                 else {
                                     window.location.href = "/manager";
@@ -2299,7 +2284,7 @@ $(document).ready(function () {
 });
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/tools/bootbox_custom":6,"../../../shared/dist/lib/tools/getURLParameter":7,"../../../shared/dist/lib/webApiCaller":9,"./requestRenewPassword":5,"buffer":2}],5:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":6,"../../../shared/dist/lib/tools/getURLParameter":7,"../../../shared/dist/lib/tools/standalonePolyfills":9,"../../../shared/dist/lib/webApiCaller":10,"./requestRenewPassword":5,"buffer":2}],5:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -2403,7 +2388,7 @@ function requestRenewPassword() {
 exports.requestRenewPassword = requestRenewPassword;
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/tools/bootbox_custom":6,"../../../shared/dist/lib/webApiCaller":9,"buffer":2}],6:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":6,"../../../shared/dist/lib/webApiCaller":10,"buffer":2}],6:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -2646,6 +2631,16 @@ function add(modal, options) {
 exports.add = add;
 
 },{}],9:[function(require,module,exports){
+if (typeof ArrayBuffer.isView !== "function") {
+    Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
+}
+if (typeof String.prototype.startsWith !== "function") {
+    String.prototype.startsWith = function startsWith(str) {
+        return this.indexOf(str) === 0;
+    };
+}
+
+},{}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2800,7 +2795,7 @@ function buildUrl(
 }
 */ 
 
-},{"../web_api_declaration":10,"transfer-tools/dist/lib/JSON_CUSTOM":15}],10:[function(require,module,exports){
+},{"../web_api_declaration":11,"transfer-tools/dist/lib/JSON_CUSTOM":16}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -2841,7 +2836,7 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -2895,21 +2890,21 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":11}],13:[function(require,module,exports){
+},{"./implementation":12}],14:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":12}],14:[function(require,module,exports){
+},{"function-bind":13}],15:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -3244,7 +3239,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":13}],15:[function(require,module,exports){
+},{"has":14}],16:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -3294,4 +3289,4 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":14}]},{},[4]);
+},{"super-json":15}]},{},[4]);
