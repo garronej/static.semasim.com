@@ -137,11 +137,8 @@
 
 }
 
-/* -----------------------------------------
-   Most phones
------------------------------------------ */
+/* Fix for vertical split bug */
 @media all and (max-width: 767px) {
-
 	/* ------------------ Navbar --------------------*/
 	.page-navbar .navbar-brand {
 		width: @sidebar-collapse-width;
@@ -149,6 +146,14 @@
 		img {display: inline-block;}
 	}
 
+}
+
+/* -----------------------------------------
+   Most phones
+----------------------------------------- */
+@media all and (max-width: 768px) {
+
+	/* ------------------ Navbar --------------------*/
 	#header .navbar-nav {
 		margin: 0;
 		height: 50px;
