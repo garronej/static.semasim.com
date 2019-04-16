@@ -204,10 +204,11 @@ var currencyLib = require("../../../shared/dist/lib/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiCurrency.html"), "UiCurrency");
 require("../templates/UiCurrency.less");
 var UiCurrency = /** @class */ (function () {
-    function UiCurrency(currency) {
+    function UiCurrency(defaultCurrency) {
         var _this = this;
         this.structure = html.structure.clone();
         this.evtChange = new ts_events_extended_1.SyncEvent();
+        this.evt$select_on_change = new ts_events_extended_1.VoidSyncEvent();
         this.structure.one("show.bs.dropdown", function () {
             var $select = _this.structure.find("select");
             var sortedCurrencies = Object.keys(currencyLib.data)
@@ -218,23 +219,32 @@ var UiCurrency = /** @class */ (function () {
                 return currency;
             });
             for (var _i = 0, sortedCurrencies_1 = sortedCurrencies; _i < sortedCurrencies_1.length; _i++) {
-                var currency_1 = sortedCurrencies_1[_i];
+                var currency = sortedCurrencies_1[_i];
                 var $option = html.templates.find("option").clone();
-                $option.attr("value", currency_1);
-                var _a = currencyLib.data[currency_1], symbol = _a.symbol, name_1 = _a.name;
+                $option.attr("value", currency);
+                var _a = currencyLib.data[currency], symbol = _a.symbol, name_1 = _a.name;
                 $option.html(symbol + " - " + name_1);
                 $select.append($option);
             }
             $select["select2"]();
-            $select.on("change", function () {
+            $select.on("change", function () { return _this.evt$select_on_change.post(); });
+            _this.evt$select_on_change.attach(function () {
                 _this.structure.find("a").trigger("click");
                 _this.change($select.val());
             });
         });
+        this.structure.on("shown.bs.dropdown", function () {
+            var $select = _this.structure.find("select");
+            if ($select.val() === _this.currency) {
+                return;
+            }
+            _this.evt$select_on_change.attachOnceExtract(function () { });
+            $select.val(_this.currency).trigger("change");
+        });
         //NOTE: Preventing dropdown to close.
         {
             var target_1;
-            $("body").on("click", function (e) { return target_1 = e.target; });
+            $("body").on("click", function (e) { target_1 = e.target; });
             this.structure.on('hide.bs.dropdown', function () {
                 if (_this.structure.find("a").is(target_1)) {
                     return true;
@@ -248,9 +258,10 @@ var UiCurrency = /** @class */ (function () {
                 return true;
             });
         }
-        this.change(currency);
+        this.change(defaultCurrency);
     }
     UiCurrency.prototype.change = function (currency) {
+        this.currency = currency;
         this.structure.find(".id_currency").text(currencyLib.data[currency].symbol);
         this.evtChange.post(currency);
     };
