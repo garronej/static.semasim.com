@@ -205,14 +205,53 @@ var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiCurrency.ht
 require("../templates/UiCurrency.less");
 var UiCurrency = /** @class */ (function () {
     function UiCurrency(currency) {
+        var _this = this;
         this.structure = html.structure.clone();
         this.evtChange = new ts_events_extended_1.SyncEvent();
-        this.structure.find("select")["select2"]();
+        this.structure.one("show.bs.dropdown", function () {
+            var $select = _this.structure.find("select");
+            var sortedCurrencies = Object.keys(currencyLib.data)
+                .map(function (currency) { return ({ currency: currency, "count": currencyLib.data[currency].countriesIso.length }); })
+                .sort(function (a, b) { return b.count - a.count; })
+                .map(function (_a) {
+                var currency = _a.currency;
+                return currency;
+            });
+            for (var _i = 0, sortedCurrencies_1 = sortedCurrencies; _i < sortedCurrencies_1.length; _i++) {
+                var currency_1 = sortedCurrencies_1[_i];
+                var $option = html.templates.find("option").clone();
+                $option.attr("value", currency_1);
+                var _a = currencyLib.data[currency_1], symbol = _a.symbol, name_1 = _a.name;
+                $option.html(symbol + " - " + name_1);
+                $select.append($option);
+            }
+            $select["select2"]();
+            $select.on("change", function () {
+                _this.structure.find("a").trigger("click");
+                _this.change($select.val());
+            });
+        });
+        //NOTE: Preventing dropdown to close.
+        {
+            var target_1;
+            $("body").on("click", function (e) { return target_1 = e.target; });
+            this.structure.on('hide.bs.dropdown', function () {
+                if (_this.structure.find("a").is(target_1)) {
+                    return true;
+                }
+                if (_this.structure.has(target_1).length !== 0) {
+                    return false;
+                }
+                if ($(".select2-dropdown").has(target_1).length !== 0) {
+                    return false;
+                }
+                return true;
+            });
+        }
         this.change(currency);
     }
     UiCurrency.prototype.change = function (currency) {
-        var _a = currencyLib.data[currency], symbol = _a.symbol, name = _a.name;
-        this.structure.find(".id_currency").text(symbol + " ( " + name + " )");
+        this.structure.find(".id_currency").text(currencyLib.data[currency].symbol);
         this.evtChange.post(currency);
     };
     return UiCurrency;
@@ -316,6 +355,9 @@ var UiShipTo = /** @class */ (function () {
         this.structure = html.structure.clone();
         this.evtChange = new ts_events_extended_1.SyncEvent();
         this.shipToCountryIso = undefined;
+        this.structure.one("show.bs.dropdown", function () {
+            return (new window["NiceCountryInput"]($countrySelector)).init();
+        });
         var $countrySelector = this.structure.find(".id_countrySelector");
         var cbName = "UiShipTo_onChangeCallback_" + UiShipTo.getCounter();
         $countrySelector
@@ -324,19 +366,14 @@ var UiShipTo = /** @class */ (function () {
         window[cbName] = function (iso) {
             //NOTE: To close the dropdown
             $("body").trigger("click");
-            _this.update(iso.toLowerCase());
+            _this.change(iso.toLowerCase());
             _this.evtChange.post(_this.shipToCountryIso);
         };
-        this.update(shipToCountryIso);
+        this.change(shipToCountryIso);
         //NOTE: Prevent dropdown from closing when select country is clicked.
         this.structure.find(".dropdown-menu").on("click", function () { return false; });
-        //NOTE: NiceCountryInput should be initialized only once the structure
-        //have been inserted in the DOM
-        setTimeout(function () {
-            return (new window["NiceCountryInput"]($countrySelector)).init();
-        }, 0);
     }
-    UiShipTo.prototype.update = function (shipToCountryIso) {
+    UiShipTo.prototype.change = function (shipToCountryIso) {
         var $divFlag = this.structure.find(".id_flag");
         if (this.shipToCountryIso !== undefined) {
             $divFlag.removeClass(this.shipToCountryIso);
@@ -5386,9 +5423,9 @@ var css = "div.id_UiCart {\n  /* Responsive */\n}\ndiv.id_UiCart .shopping-cart 
 },{"lessify":109}],122:[function(require,module,exports){
 module.exports = "<div class=\"id_UiController\">\r\n\r\n    <div class=\"row id_container pt5\">\r\n\r\n    </div>\r\n\r\n</div>";
 },{}],123:[function(require,module,exports){
-module.exports = "<li class=\"id_UiCurrency dropdown\">\r\n\r\n    <a href=\"#\" data-toggle=\"dropdown\" aria-expanded=\"false\">\r\n        <span class=\"id_currency\"></span>\r\n    </a>\r\n\r\n    <div class=\"dropdown-menu dropdown-form dynamic-settings right animated fadeIn\" role=\"menu\">\r\n\r\n        <select>\r\n          <option value=\"AL\">Alabama</option>\r\n          <option value=\"WY\">Wyoming</option>\r\n        </select>\r\n\r\n    </div>\r\n\r\n</li>";
+module.exports = "<li class=\"id_UiCurrency dropdown\">\r\n\r\n  <a href=\"#\" data-toggle=\"dropdown\" aria-expanded=\"false\">\r\n    <span class=\"id_currency\"></span>\r\n  </a>\r\n\r\n  <div class=\"dropdown-menu dropdown-form dynamic-settings right animated fadeIn\" role=\"menu\">\r\n\r\n    <select>\r\n    </select>\r\n\r\n  </div>\r\n\r\n</li>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n  <option></option>\r\n\r\n</div>";
 },{}],124:[function(require,module,exports){
-var css = ".id_UiCurrency {\n  /*@media all and (max-width: 767px) {*/\n}\n@media all and (max-width: 768px) {\n  .id_UiCurrency {\n    top: -21px;\n  }\n}\n.id_UiCurrency .dropdown-menu.dynamic-settings {\n  min-width: unset !important;\n}\n.id_UiCurrency .dropdown-menu {\n  border-bottom-width: 0px;\n  border-left-width: 0px;\n  border-right-width: 0px;\n}\n";(require('lessify'))(css); module.exports = css;
+var css = ".id_UiCurrency {\n  /*@media all and (max-width: 767px) {*/\n}\n@media all and (max-width: 768px) {\n  .id_UiCurrency {\n    top: -21px;\n  }\n}\n.id_UiCurrency select {\n  width: 200px;\n}\n.id_UiCurrency .dropdown-menu.dynamic-settings {\n  min-width: unset !important;\n}\n.id_UiCurrency .dropdown-menu {\n  border-bottom-width: 0px;\n  border-left-width: 0px;\n  border-right-width: 0px;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":109}],125:[function(require,module,exports){
 module.exports = "<!--TODO: col-sm-12 should be externalized -->\r\n<div class=\"id_UiProduct panel plain col-sm-12 col-lg-10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"left-column\">\r\n\r\n            <div class=\"carousel slide\">\r\n                <ol class=\"carousel-indicators dotstyle center\">\r\n                </ol>\r\n                <div class=\"carousel-inner\">\r\n                </div>\r\n                <a class=\"left carousel-control\" data-slide=\"prev\">\r\n                    <i class=\"fa fa-angle-left\"></i>\r\n                </a>\r\n                <a class=\"right carousel-control\" data-slide=\"next\">\r\n                    <i class=\"fa fa-angle-right\"></i>\r\n                </a>\r\n            </div>\r\n\r\n\r\n\r\n        </div>\r\n\r\n        <div class=\"right-column\">\r\n\r\n            <div class=\"product-description\">\r\n                <span class=\"id_short_description\"></span>\r\n                <h1 class=\"id_product_name\"></h1>\r\n                <p class=\"id_product_description\"></p>\r\n            </div>\r\n\r\n            <div class=\"product-price\">\r\n                <span class=\"id_product_price\"></span>\r\n                <span style=\"font-style: italic;\">free shipping to</span>\r\n                &nbsp;&nbsp;\r\n                <div class=\"id_flag iti-flag\"></div>\r\n            </div>\r\n\r\n            <div class=\"pull-right mt10\">\r\n                <button type=\"button\" class=\"id_add_to_cart btn btn-success\">Add to cart</button>\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"item\">\r\n        <img src=\"\">\r\n    </div>\r\n\r\n    <li>\r\n        <a href=\"#\"></a>\r\n    </li>\r\n\r\n</div>";
 },{}],126:[function(require,module,exports){
