@@ -6,7 +6,7 @@ var ts_events_extended_1 = require("ts-events-extended");
 var types = require("./types");
 var env_1 = require("../../../shared/dist/lib/env");
 var shipping_1 = require("./shipping");
-var changeRates_1 = require("../../../shared/dist/lib/tools/changeRates");
+var currency_1 = require("../../../shared/dist/lib/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiCart.html"), "UiCart");
 require("../templates/UiCart.less");
 var UiCart = /** @class */ (function () {
@@ -50,11 +50,11 @@ var UiCart = /** @class */ (function () {
         }
         //TODO: Do something with shipping, offer extra
         var shipping = shipping_1.estimateShipping(this.shipToCountryIso, types.Cart.getOverallFootprint(cart));
-        var displayedCartPrice = types.Price.addition(types.Cart.getPrice(cart, changeRates_1.convertFromEuro), { "eur": shipping.eurAmount }, changeRates_1.convertFromEuro);
+        var displayedCartPrice = types.Price.addition(types.Cart.getPrice(cart, currency_1.convertFromEuro), { "eur": shipping.eurAmount }, currency_1.convertFromEuro);
         var displayedShippingPrice = { "eur": 0 };
-        this.structure.find(".id_goods_price").text(types.Price.prettyPrint(displayedCartPrice, this.currency, changeRates_1.convertFromEuro));
-        this.structure.find(".id_delivery_price").text(types.Price.prettyPrint(displayedShippingPrice, this.currency, changeRates_1.convertFromEuro));
-        this.structure.find(".id_cart_total").text(types.Price.prettyPrint(types.Price.addition(displayedCartPrice, displayedShippingPrice, changeRates_1.convertFromEuro), this.currency, changeRates_1.convertFromEuro));
+        this.structure.find(".id_goods_price").text(types.Price.prettyPrint(displayedCartPrice, this.currency, currency_1.convertFromEuro));
+        this.structure.find(".id_delivery_price").text(types.Price.prettyPrint(displayedShippingPrice, this.currency, currency_1.convertFromEuro));
+        this.structure.find(".id_cart_total").text(types.Price.prettyPrint(types.Price.addition(displayedCartPrice, displayedShippingPrice, currency_1.convertFromEuro), this.currency, currency_1.convertFromEuro));
     };
     UiCart.prototype.addProduct = function (product) {
         var _this = this;
@@ -139,12 +139,12 @@ var UiCartEntry = /** @class */ (function () {
         var _this = this;
         this.structure.find(".total-price").html(types.Price.prettyPrint(types.Price.addition(types.Price.operation(this.cartEntry.product.price, function (amount) { return amount * _this.cartEntry.quantity; }), {
             "eur": shipping_1.estimateShipping(this.shipToCountryIso, this.cartEntry.product.footprint).eurAmount
-        }, changeRates_1.convertFromEuro), this.currency, changeRates_1.convertFromEuro));
+        }, currency_1.convertFromEuro), this.currency, currency_1.convertFromEuro));
     };
     return UiCartEntry;
 }());
 
-},{"../../../shared/dist/lib/env":126,"../../../shared/dist/lib/loadUiClassHtml":127,"../../../shared/dist/lib/tools/changeRates":128,"../templates/UiCart.html":119,"../templates/UiCart.less":120,"./shipping":7,"./types":8,"ts-events-extended":118}],2:[function(require,module,exports){
+},{"../../../shared/dist/lib/env":129,"../../../shared/dist/lib/loadUiClassHtml":130,"../../../shared/dist/lib/tools/currency":131,"../templates/UiCart.html":120,"../templates/UiCart.less":121,"./shipping":8,"./types":9,"ts-events-extended":119}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
@@ -152,20 +152,30 @@ var UiCart_1 = require("./UiCart");
 var UiProduct_1 = require("./UiProduct");
 var productListing_1 = require("./productListing");
 var UiShipTo_1 = require("./UiShipTo");
+var currency_1 = require("../../../shared/dist/lib/tools/currency");
+var UiCurrency_1 = require("./UiCurrency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
 var UiController = /** @class */ (function () {
-    function UiController() {
+    function UiController(guessedCountryIso) {
         this.structure = html.structure.clone();
-        var currency = "eur";
-        var shipToCountryIso = "fr";
-        var uiShipTo = new UiShipTo_1.UiShipTo(shipToCountryIso);
+        if (guessedCountryIso === undefined) {
+            //TODO: change to "fr"
+            guessedCountryIso = "us";
+        }
+        var currency = currency_1.getCountryCurrency(guessedCountryIso);
+        var uiCurrency = new UiCurrency_1.UiCurrency(currency);
+        $(".navbar-right").prepend(uiCurrency.structure);
+        var uiShipTo = new UiShipTo_1.UiShipTo(guessedCountryIso);
+        uiShipTo.evtChange.attach(function (shipToCountryIso) { return uiCurrency.change(currency_1.getCountryCurrency(shipToCountryIso)); });
         //We break the rules of our framework here by inserting outside of the ui structure...
         $(".navbar-right").prepend(uiShipTo.structure);
-        var uiShoppingBag = new UiCart_1.UiCart(currency, shipToCountryIso);
+        var uiShoppingBag = new UiCart_1.UiCart(currency, guessedCountryIso);
+        uiCurrency.evtChange.attach(function (currency) { return uiShoppingBag.updateLocals({ currency: currency }); });
         uiShipTo.evtChange.attach(function (shipToCountryIso) { return uiShoppingBag.updateLocals({ shipToCountryIso: shipToCountryIso }); });
         this.structure.find(".id_container").append(uiShoppingBag.structure);
         var _loop_1 = function (product) {
-            var uiProduct = new UiProduct_1.UiProduct(product, currency, shipToCountryIso);
+            var uiProduct = new UiProduct_1.UiProduct(product, currency, guessedCountryIso);
+            uiCurrency.evtChange.attach(function (currency) { return uiProduct.updateLocals({ currency: currency }); });
             uiShipTo.evtChange.attach(function (shipToCountryIso) { return uiProduct.updateLocals({ shipToCountryIso: shipToCountryIso }); });
             uiProduct.evtUserClickAddToCart.attach(function () {
                 uiShoppingBag.addProduct(product);
@@ -184,14 +194,39 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":127,"../templates/UiController.html":121,"./UiCart":1,"./UiProduct":3,"./UiShipTo":4,"./productListing":6}],3:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":130,"../../../shared/dist/lib/tools/currency":131,"../templates/UiController.html":122,"./UiCart":1,"./UiCurrency":3,"./UiProduct":4,"./UiShipTo":5,"./productListing":7}],3:[function(require,module,exports){
+"use strict";
+//NOTE: Assert Select2 v4.0.6-rc.0 loaded.
+Object.defineProperty(exports, "__esModule", { value: true });
+var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
+var ts_events_extended_1 = require("ts-events-extended");
+var currencyLib = require("../../../shared/dist/lib/tools/currency");
+var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiCurrency.html"), "UiCurrency");
+require("../templates/UiCurrency.less");
+var UiCurrency = /** @class */ (function () {
+    function UiCurrency(currency) {
+        this.structure = html.structure.clone();
+        this.evtChange = new ts_events_extended_1.SyncEvent();
+        this.structure.find("select")["select2"]();
+        this.change(currency);
+    }
+    UiCurrency.prototype.change = function (currency) {
+        var _a = currencyLib.data[currency], symbol = _a.symbol, name = _a.name;
+        this.structure.find(".id_currency").text(symbol + " ( " + name + " )");
+        this.evtChange.post(currency);
+    };
+    return UiCurrency;
+}());
+exports.UiCurrency = UiCurrency;
+
+},{"../../../shared/dist/lib/loadUiClassHtml":130,"../../../shared/dist/lib/tools/currency":131,"../templates/UiCurrency.html":123,"../templates/UiCurrency.less":124,"ts-events-extended":119}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var ts_events_extended_1 = require("ts-events-extended");
 var types = require("./types");
 var shipping_1 = require("./shipping");
-var changeRates_1 = require("../../../shared/dist/lib/tools/changeRates");
+var currency_1 = require("../../../shared/dist/lib/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiProduct.html"), "UiProduct");
 require("../templates/UiProduct.less");
 var UiProduct = /** @class */ (function () {
@@ -258,7 +293,7 @@ var UiProduct = /** @class */ (function () {
     UiProduct.prototype.updatePrice = function () {
         this.structure.find(".id_product_price").text(types.Price.prettyPrint(types.Price.addition(this.product.price, {
             "eur": shipping_1.estimateShipping(this.shipToCountryIso, this.product.footprint).eurAmount
-        }, changeRates_1.convertFromEuro), this.currency, changeRates_1.convertFromEuro));
+        }, currency_1.convertFromEuro), this.currency, currency_1.convertFromEuro));
     };
     UiProduct.getCounter = (function () {
         var counter = 0;
@@ -268,7 +303,7 @@ var UiProduct = /** @class */ (function () {
 }());
 exports.UiProduct = UiProduct;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":127,"../../../shared/dist/lib/tools/changeRates":128,"../templates/UiProduct.html":122,"../templates/UiProduct.less":123,"./shipping":7,"./types":8,"ts-events-extended":118}],4:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":130,"../../../shared/dist/lib/tools/currency":131,"../templates/UiProduct.html":125,"../templates/UiProduct.less":126,"./shipping":8,"./types":9,"ts-events-extended":119}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
@@ -317,7 +352,7 @@ var UiShipTo = /** @class */ (function () {
 }());
 exports.UiShipTo = UiShipTo;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":127,"../templates/UiShipTo.html":124,"../templates/UiShipTo.less":125,"ts-events-extended":118}],5:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":130,"../templates/UiShipTo.html":127,"../templates/UiShipTo.less":128,"ts-events-extended":119}],6:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -362,12 +397,12 @@ require("array.prototype.find").shim();
 require("../../../shared/dist/lib/tools/standalonePolyfills");
 var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var UiController_1 = require("./UiController");
-var changeRates_1 = require("../../../shared/dist/lib/tools/changeRates");
+var currency_1 = require("../../../shared/dist/lib/tools/currency");
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var uiController;
+    var _a, changesRates, guessedCountryIso, uiController;
     var _this = this;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
                 $("#logout").click(function () { return __awaiter(_this, void 0, void 0, function () {
                     return __generator(this, function (_a) {
@@ -376,17 +411,21 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                         return [2 /*return*/];
                     });
                 }); });
-                return [4 /*yield*/, changeRates_1.convertFromEuro.fetchChangesRates()];
+                return [4 /*yield*/, Promise.all([
+                        webApiCaller.getChangesRates(),
+                        webApiCaller.guessCountryIso()
+                    ])];
             case 1:
-                _a.sent();
-                uiController = new UiController_1.UiController();
+                _a = _b.sent(), changesRates = _a[0], guessedCountryIso = _a[1];
+                currency_1.convertFromEuro.changeRates = changesRates;
+                uiController = new UiController_1.UiController(guessedCountryIso);
                 $("#page-payload").html("").append(uiController.structure);
                 return [2 /*return*/];
         }
     });
 }); });
 
-},{"../../../shared/dist/lib/tools/changeRates":128,"../../../shared/dist/lib/tools/standalonePolyfills":129,"../../../shared/dist/lib/webApiCaller":130,"./UiController":2,"array.prototype.find":10,"es6-map/implement":83,"es6-weak-map/implement":94}],6:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/currency":131,"../../../shared/dist/lib/tools/standalonePolyfills":132,"../../../shared/dist/lib/webApiCaller":133,"./UiController":2,"array.prototype.find":11,"es6-map/implement":84,"es6-weak-map/implement":95}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("../../../shared/dist/lib/env");
@@ -437,7 +476,7 @@ exports.products = [
     }
 ];
 
-},{"../../../shared/dist/lib/env":126}],7:[function(require,module,exports){
+},{"../../../shared/dist/lib/env":129}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //TODO: move
@@ -539,7 +578,7 @@ function estimateShipping(destinationCountryIso, footprint) {
 }
 exports.estimateShipping = estimateShipping;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -553,6 +592,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var currencyLib = require("../../../shared/dist/lib/tools/currency");
 var Cart;
 (function (Cart) {
     function getPrice(cart, convertFromEuro) {
@@ -576,27 +616,6 @@ var Cart;
 })(Cart = exports.Cart || (exports.Cart = {}));
 var Price;
 (function (Price) {
-    /*
-    export const getZero: () => Price = (() => {
-
-        const zero: Price = (() => {
-
-            const out: Price = { "eur": 0 };
-
-            for (const iso in currencyByCountry) {
-
-                out[currencyByCountry[iso]] = 0;
-
-            }
-
-            return out;
-
-        })();
-
-        return () => ({ ...zero });
-
-    })();
-    */
     /**
      * Out of place.
      * If the amount for a currency is defined in one object
@@ -649,16 +668,13 @@ var Price;
     }
     Price.getAmountInCurrency = getAmountInCurrency;
     function prettyPrint(price, currency, convertFromEuro) {
-        return (getAmountInCurrency(price, currency, convertFromEuro) / 100).toLocaleString(undefined, {
-            "style": "currency",
-            currency: currency
-        });
+        return currencyLib.prettyPrint(getAmountInCurrency(price, currency, convertFromEuro), currency);
     }
     Price.prettyPrint = prettyPrint;
 })(Price = exports.Price || (exports.Price = {}));
 ;
 
-},{}],9:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/currency":131}],10:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -682,7 +698,7 @@ module.exports = function find(predicate) {
 	return undefined;
 };
 
-},{"es-abstract/es6":20}],10:[function(require,module,exports){
+},{"es-abstract/es6":21}],11:[function(require,module,exports){
 'use strict';
 
 var define = require('define-properties');
@@ -710,7 +726,7 @@ define(boundFindShim, {
 
 module.exports = boundFindShim;
 
-},{"./implementation":9,"./polyfill":11,"./shim":12,"define-properties":16,"es-abstract/es6":20}],11:[function(require,module,exports){
+},{"./implementation":10,"./polyfill":12,"./shim":13,"define-properties":17,"es-abstract/es6":21}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = function getPolyfill() {
@@ -725,7 +741,7 @@ module.exports = function getPolyfill() {
 	return implemented ? Array.prototype.find : require('./implementation');
 };
 
-},{"./implementation":9}],12:[function(require,module,exports){
+},{"./implementation":10}],13:[function(require,module,exports){
 'use strict';
 
 var define = require('define-properties');
@@ -743,7 +759,7 @@ module.exports = function shimArrayPrototypeFind() {
 	return polyfill;
 };
 
-},{"./polyfill":11,"define-properties":16}],13:[function(require,module,exports){
+},{"./polyfill":12,"define-properties":17}],14:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -782,7 +798,7 @@ module.exports.byUrl = function(url) {
   }
 };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 var copy             = require('es5-ext/object/copy')
@@ -816,7 +832,7 @@ module.exports = function (props/*, options*/) {
 	return map(props, function (desc, name) { return define(name, desc, options); });
 };
 
-},{"es5-ext/object/copy":53,"es5-ext/object/map":62,"es5-ext/object/normalize-options":63,"es5-ext/object/valid-callable":68,"es5-ext/object/valid-value":70}],15:[function(require,module,exports){
+},{"es5-ext/object/copy":54,"es5-ext/object/map":63,"es5-ext/object/normalize-options":64,"es5-ext/object/valid-callable":69,"es5-ext/object/valid-value":71}],16:[function(require,module,exports){
 'use strict';
 
 var assign        = require('es5-ext/object/assign')
@@ -881,7 +897,7 @@ d.gs = function (dscr, get, set/*, options*/) {
 	return !options ? desc : assign(normalizeOpts(options), desc);
 };
 
-},{"es5-ext/object/assign":50,"es5-ext/object/is-callable":56,"es5-ext/object/normalize-options":63,"es5-ext/string/#/contains":71}],16:[function(require,module,exports){
+},{"es5-ext/object/assign":51,"es5-ext/object/is-callable":57,"es5-ext/object/normalize-options":64,"es5-ext/string/#/contains":72}],17:[function(require,module,exports){
 'use strict';
 
 var keys = require('object-keys');
@@ -941,7 +957,7 @@ defineProperties.supportsDescriptors = !!supportsDescriptors;
 
 module.exports = defineProperties;
 
-},{"object-keys":110}],17:[function(require,module,exports){
+},{"object-keys":111}],18:[function(require,module,exports){
 'use strict';
 
 /* globals
@@ -1120,7 +1136,7 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 	return INTRINSICS[key];
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var has = require('has');
@@ -1912,7 +1928,7 @@ delete ES6.CheckObjectCoercible; // renamed in ES6 to RequireObjectCoercible
 
 module.exports = ES6;
 
-},{"./GetIntrinsic":17,"./es5":19,"./helpers/assertRecord":21,"./helpers/assign":22,"./helpers/isFinite":23,"./helpers/isNaN":24,"./helpers/isPrimitive":25,"./helpers/mod":26,"./helpers/sign":27,"es-to-primitive/es6":30,"function-bind":100,"has":103,"is-regex":106,"object-keys":110}],19:[function(require,module,exports){
+},{"./GetIntrinsic":18,"./es5":20,"./helpers/assertRecord":22,"./helpers/assign":23,"./helpers/isFinite":24,"./helpers/isNaN":25,"./helpers/isPrimitive":26,"./helpers/mod":27,"./helpers/sign":28,"es-to-primitive/es6":31,"function-bind":101,"has":104,"is-regex":107,"object-keys":111}],20:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('./GetIntrinsic');
@@ -2149,12 +2165,12 @@ var ES5 = {
 
 module.exports = ES5;
 
-},{"./GetIntrinsic":17,"./helpers/assertRecord":21,"./helpers/isFinite":23,"./helpers/isNaN":24,"./helpers/mod":26,"./helpers/sign":27,"es-to-primitive/es5":29,"has":103,"is-callable":104}],20:[function(require,module,exports){
+},{"./GetIntrinsic":18,"./helpers/assertRecord":22,"./helpers/isFinite":24,"./helpers/isNaN":25,"./helpers/mod":27,"./helpers/sign":28,"es-to-primitive/es5":30,"has":104,"is-callable":105}],21:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./es2015');
 
-},{"./es2015":18}],21:[function(require,module,exports){
+},{"./es2015":19}],22:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('../GetIntrinsic');
@@ -2205,7 +2221,7 @@ module.exports = function assertRecord(ES, recordType, argumentName, value) {
   console.log(predicate(ES, value), value);
 };
 
-},{"../GetIntrinsic":17,"has":103}],22:[function(require,module,exports){
+},{"../GetIntrinsic":18,"has":104}],23:[function(require,module,exports){
 var bind = require('function-bind');
 var has = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
@@ -2224,33 +2240,33 @@ module.exports = function assign(target, source) {
 	return target;
 };
 
-},{"function-bind":100}],23:[function(require,module,exports){
+},{"function-bind":101}],24:[function(require,module,exports){
 var $isNaN = Number.isNaN || function (a) { return a !== a; };
 
 module.exports = Number.isFinite || function (x) { return typeof x === 'number' && !$isNaN(x) && x !== Infinity && x !== -Infinity; };
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 module.exports = Number.isNaN || function isNaN(a) {
 	return a !== a;
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 module.exports = function isPrimitive(value) {
 	return value === null || (typeof value !== 'function' && typeof value !== 'object');
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 module.exports = function mod(number, modulo) {
 	var remain = number % modulo;
 	return Math.floor(remain >= 0 ? remain : remain + modulo);
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 module.exports = function sign(number) {
 	return number >= 0 ? 1 : -1;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 var hasSymbols = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol';
@@ -2327,7 +2343,7 @@ module.exports = function ToPrimitive(input) {
 	return ordinaryToPrimitive(input, hint === 'default' ? 'number' : hint);
 };
 
-},{"./helpers/isPrimitive":31,"is-callable":104,"is-date-object":105,"is-symbol":107}],29:[function(require,module,exports){
+},{"./helpers/isPrimitive":32,"is-callable":105,"is-date-object":106,"is-symbol":108}],30:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -2374,11 +2390,11 @@ module.exports = function ToPrimitive(input) {
 	return ES5internalSlots['[[DefaultValue]]'](input);
 };
 
-},{"./helpers/isPrimitive":31,"is-callable":104}],30:[function(require,module,exports){
-arguments[4][20][0].apply(exports,arguments)
-},{"./es2015":28,"dup":20}],31:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],32:[function(require,module,exports){
+},{"./helpers/isPrimitive":32,"is-callable":105}],31:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"./es2015":29,"dup":21}],32:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],33:[function(require,module,exports){
 // Inspired by Google Closure:
 // http://closure-library.googlecode.com/svn/docs/
 // closure_goog_array_array.js.html#goog.array.clear
@@ -2392,7 +2408,7 @@ module.exports = function () {
 	return this;
 };
 
-},{"../../object/valid-value":70}],33:[function(require,module,exports){
+},{"../../object/valid-value":71}],34:[function(require,module,exports){
 "use strict";
 
 var numberIsNaN       = require("../../number/is-nan")
@@ -2422,14 +2438,14 @@ module.exports = function (searchElement /*, fromIndex*/) {
 	return -1;
 };
 
-},{"../../number/is-nan":44,"../../number/to-pos-integer":48,"../../object/valid-value":70}],34:[function(require,module,exports){
+},{"../../number/is-nan":45,"../../number/to-pos-integer":49,"../../object/valid-value":71}],35:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Array.from
 	: require("./shim");
 
-},{"./is-implemented":35,"./shim":36}],35:[function(require,module,exports){
+},{"./is-implemented":36,"./shim":37}],36:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -2440,7 +2456,7 @@ module.exports = function () {
 	return Boolean(result && (result !== arr) && (result[1] === "dwa"));
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 "use strict";
 
 var iteratorSymbol = require("es6-symbol").iterator
@@ -2561,7 +2577,7 @@ module.exports = function (arrayLike /*, mapFn, thisArg*/) {
 	return arr;
 };
 
-},{"../../function/is-arguments":37,"../../function/is-function":38,"../../number/to-pos-integer":48,"../../object/is-value":58,"../../object/valid-callable":68,"../../object/valid-value":70,"../../string/is-string":74,"es6-symbol":89}],37:[function(require,module,exports){
+},{"../../function/is-arguments":38,"../../function/is-function":39,"../../number/to-pos-integer":49,"../../object/is-value":59,"../../object/valid-callable":69,"../../object/valid-value":71,"../../string/is-string":75,"es6-symbol":90}],38:[function(require,module,exports){
 "use strict";
 
 var objToString = Object.prototype.toString
@@ -2575,7 +2591,7 @@ module.exports = function (value) {
 	return objToString.call(value) === id;
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 "use strict";
 
 var objToString = Object.prototype.toString, id = objToString.call(require("./noop"));
@@ -2584,27 +2600,27 @@ module.exports = function (value) {
 	return typeof value === "function" && objToString.call(value) === id;
 };
 
-},{"./noop":39}],39:[function(require,module,exports){
+},{"./noop":40}],40:[function(require,module,exports){
 "use strict";
 
 // eslint-disable-next-line no-empty-function
 module.exports = function () {};
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /* eslint strict: "off" */
 
 module.exports = (function () {
 	return this;
 }());
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Math.sign
 	: require("./shim");
 
-},{"./is-implemented":42,"./shim":43}],42:[function(require,module,exports){
+},{"./is-implemented":43,"./shim":44}],43:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -2613,7 +2629,7 @@ module.exports = function () {
 	return (sign(10) === 1) && (sign(-20) === -1);
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 "use strict";
 
 module.exports = function (value) {
@@ -2622,14 +2638,14 @@ module.exports = function (value) {
 	return value > 0 ? 1 : -1;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Number.isNaN
 	: require("./shim");
 
-},{"./is-implemented":45,"./shim":46}],45:[function(require,module,exports){
+},{"./is-implemented":46,"./shim":47}],46:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -2638,7 +2654,7 @@ module.exports = function () {
 	return !numberIsNaN({}) && numberIsNaN(NaN) && !numberIsNaN(34);
 };
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 "use strict";
 
 module.exports = function (value) {
@@ -2646,7 +2662,7 @@ module.exports = function (value) {
 	return value !== value;
 };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 "use strict";
 
 var sign = require("../math/sign")
@@ -2660,7 +2676,7 @@ module.exports = function (value) {
 	return sign(value) * floor(abs(value));
 };
 
-},{"../math/sign":41}],48:[function(require,module,exports){
+},{"../math/sign":42}],49:[function(require,module,exports){
 "use strict";
 
 var toInteger = require("./to-integer")
@@ -2671,7 +2687,7 @@ module.exports = function (value) {
  return max(0, toInteger(value));
 };
 
-},{"./to-integer":47}],49:[function(require,module,exports){
+},{"./to-integer":48}],50:[function(require,module,exports){
 // Internal method, used by iteration functions.
 // Calls a function for each key-value pair found in object
 // Optionally takes compareFn to iterate object in specific order
@@ -2703,14 +2719,14 @@ module.exports = function (method, defVal) {
 	};
 };
 
-},{"./valid-callable":68,"./valid-value":70}],50:[function(require,module,exports){
+},{"./valid-callable":69,"./valid-value":71}],51:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Object.assign
 	: require("./shim");
 
-},{"./is-implemented":51,"./shim":52}],51:[function(require,module,exports){
+},{"./is-implemented":52,"./shim":53}],52:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -2721,7 +2737,7 @@ module.exports = function () {
 	return (obj.foo + obj.bar + obj.trzy) === "razdwatrzy";
 };
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 "use strict";
 
 var keys  = require("../keys")
@@ -2746,7 +2762,7 @@ module.exports = function (dest, src /*, …srcn*/) {
 	return dest;
 };
 
-},{"../keys":59,"../valid-value":70}],53:[function(require,module,exports){
+},{"../keys":60,"../valid-value":71}],54:[function(require,module,exports){
 "use strict";
 
 var aFrom  = require("../array/from")
@@ -2767,7 +2783,7 @@ module.exports = function (obj/*, propertyNames, options*/) {
 	return result;
 };
 
-},{"../array/from":34,"./assign":50,"./valid-value":70}],54:[function(require,module,exports){
+},{"../array/from":35,"./assign":51,"./valid-value":71}],55:[function(require,module,exports){
 // Workaround for http://code.google.com/p/v8/issues/detail?id=2804
 
 "use strict";
@@ -2817,12 +2833,12 @@ module.exports = (function () {
 	};
 }());
 
-},{"./set-prototype-of/is-implemented":66,"./set-prototype-of/shim":67}],55:[function(require,module,exports){
+},{"./set-prototype-of/is-implemented":67,"./set-prototype-of/shim":68}],56:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./_iterate")("forEach");
 
-},{"./_iterate":49}],56:[function(require,module,exports){
+},{"./_iterate":50}],57:[function(require,module,exports){
 // Deprecated
 
 "use strict";
@@ -2831,7 +2847,7 @@ module.exports = function (obj) {
  return typeof obj === "function";
 };
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 "use strict";
 
 var isValue = require("./is-value");
@@ -2842,7 +2858,7 @@ module.exports = function (value) {
 	return (isValue(value) && map[typeof value]) || false;
 };
 
-},{"./is-value":58}],58:[function(require,module,exports){
+},{"./is-value":59}],59:[function(require,module,exports){
 "use strict";
 
 var _undefined = require("../function/noop")(); // Support ES3 engines
@@ -2851,12 +2867,12 @@ module.exports = function (val) {
  return (val !== _undefined) && (val !== null);
 };
 
-},{"../function/noop":39}],59:[function(require,module,exports){
+},{"../function/noop":40}],60:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")() ? Object.keys : require("./shim");
 
-},{"./is-implemented":60,"./shim":61}],60:[function(require,module,exports){
+},{"./is-implemented":61,"./shim":62}],61:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -2868,7 +2884,7 @@ module.exports = function () {
 	}
 };
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 var isValue = require("../is-value");
@@ -2877,7 +2893,7 @@ var keys = Object.keys;
 
 module.exports = function (object) { return keys(isValue(object) ? Object(object) : object); };
 
-},{"../is-value":58}],62:[function(require,module,exports){
+},{"../is-value":59}],63:[function(require,module,exports){
 "use strict";
 
 var callable = require("./valid-callable")
@@ -2893,7 +2909,7 @@ module.exports = function (obj, cb /*, thisArg*/) {
 	return result;
 };
 
-},{"./for-each":55,"./valid-callable":68}],63:[function(require,module,exports){
+},{"./for-each":56,"./valid-callable":69}],64:[function(require,module,exports){
 "use strict";
 
 var isValue = require("./is-value");
@@ -2915,7 +2931,7 @@ module.exports = function (opts1 /*, …options*/) {
 	return result;
 };
 
-},{"./is-value":58}],64:[function(require,module,exports){
+},{"./is-value":59}],65:[function(require,module,exports){
 "use strict";
 
 var forEach = Array.prototype.forEach, create = Object.create;
@@ -2929,14 +2945,14 @@ module.exports = function (arg /*, …args*/) {
 	return set;
 };
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? Object.setPrototypeOf
 	: require("./shim");
 
-},{"./is-implemented":66,"./shim":67}],66:[function(require,module,exports){
+},{"./is-implemented":67,"./shim":68}],67:[function(require,module,exports){
 "use strict";
 
 var create = Object.create, getPrototypeOf = Object.getPrototypeOf, plainObject = {};
@@ -2947,7 +2963,7 @@ module.exports = function (/* CustomCreate*/) {
 	return getPrototypeOf(setPrototypeOf(customCreate(null), plainObject)) === plainObject;
 };
 
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /* eslint no-proto: "off" */
 
 // Big thanks to @WebReflection for sorting this out
@@ -3035,7 +3051,7 @@ module.exports = (function (status) {
 
 require("../create");
 
-},{"../create":54,"../is-object":57,"../valid-value":70}],68:[function(require,module,exports){
+},{"../create":55,"../is-object":58,"../valid-value":71}],69:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -3043,7 +3059,7 @@ module.exports = function (fn) {
 	return fn;
 };
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 "use strict";
 
 var isObject = require("./is-object");
@@ -3053,7 +3069,7 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-object":57}],70:[function(require,module,exports){
+},{"./is-object":58}],71:[function(require,module,exports){
 "use strict";
 
 var isValue = require("./is-value");
@@ -3063,14 +3079,14 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-value":58}],71:[function(require,module,exports){
+},{"./is-value":59}],72:[function(require,module,exports){
 "use strict";
 
 module.exports = require("./is-implemented")()
 	? String.prototype.contains
 	: require("./shim");
 
-},{"./is-implemented":72,"./shim":73}],72:[function(require,module,exports){
+},{"./is-implemented":73,"./shim":74}],73:[function(require,module,exports){
 "use strict";
 
 var str = "razdwatrzy";
@@ -3080,7 +3096,7 @@ module.exports = function () {
 	return (str.contains("dwa") === true) && (str.contains("foo") === false);
 };
 
-},{}],73:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 "use strict";
 
 var indexOf = String.prototype.indexOf;
@@ -3089,7 +3105,7 @@ module.exports = function (searchString/*, position*/) {
 	return indexOf.call(this, searchString, arguments[1]) > -1;
 };
 
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 "use strict";
 
 var objToString = Object.prototype.toString, id = objToString.call("");
@@ -3104,7 +3120,7 @@ module.exports = function (value) {
 	);
 };
 
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 "use strict";
 
 var generated = Object.create(null), random = Math.random;
@@ -3119,7 +3135,7 @@ module.exports = function () {
 	return str;
 };
 
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 "use strict";
 
 var setPrototypeOf = require("es5-ext/object/set-prototype-of")
@@ -3153,7 +3169,7 @@ ArrayIterator.prototype = Object.create(Iterator.prototype, {
 });
 defineProperty(ArrayIterator.prototype, Symbol.toStringTag, d("c", "Array Iterator"));
 
-},{"./":79,"d":15,"es5-ext/object/set-prototype-of":65,"es5-ext/string/#/contains":71,"es6-symbol":89}],77:[function(require,module,exports){
+},{"./":80,"d":16,"es5-ext/object/set-prototype-of":66,"es5-ext/string/#/contains":72,"es6-symbol":90}],78:[function(require,module,exports){
 "use strict";
 
 var isArguments = require("es5-ext/function/is-arguments")
@@ -3202,7 +3218,7 @@ module.exports = function (iterable, cb /*, thisArg*/) {
 	}
 };
 
-},{"./get":78,"es5-ext/function/is-arguments":37,"es5-ext/object/valid-callable":68,"es5-ext/string/is-string":74}],78:[function(require,module,exports){
+},{"./get":79,"es5-ext/function/is-arguments":38,"es5-ext/object/valid-callable":69,"es5-ext/string/is-string":75}],79:[function(require,module,exports){
 "use strict";
 
 var isArguments    = require("es5-ext/function/is-arguments")
@@ -3219,7 +3235,7 @@ module.exports = function (obj) {
 	return new ArrayIterator(obj);
 };
 
-},{"./array":76,"./string":81,"./valid-iterable":82,"es5-ext/function/is-arguments":37,"es5-ext/string/is-string":74,"es6-symbol":89}],79:[function(require,module,exports){
+},{"./array":77,"./string":82,"./valid-iterable":83,"es5-ext/function/is-arguments":38,"es5-ext/string/is-string":75,"es6-symbol":90}],80:[function(require,module,exports){
 "use strict";
 
 var clear    = require("es5-ext/array/#/clear")
@@ -3327,7 +3343,7 @@ defineProperty(
 	})
 );
 
-},{"d":15,"d/auto-bind":14,"es5-ext/array/#/clear":32,"es5-ext/object/assign":50,"es5-ext/object/valid-callable":68,"es5-ext/object/valid-value":70,"es6-symbol":89}],80:[function(require,module,exports){
+},{"d":16,"d/auto-bind":15,"es5-ext/array/#/clear":33,"es5-ext/object/assign":51,"es5-ext/object/valid-callable":69,"es5-ext/object/valid-value":71,"es6-symbol":90}],81:[function(require,module,exports){
 "use strict";
 
 var isArguments = require("es5-ext/function/is-arguments")
@@ -3345,7 +3361,7 @@ module.exports = function (value) {
 	return typeof value[iteratorSymbol] === "function";
 };
 
-},{"es5-ext/function/is-arguments":37,"es5-ext/object/is-value":58,"es5-ext/string/is-string":74,"es6-symbol":89}],81:[function(require,module,exports){
+},{"es5-ext/function/is-arguments":38,"es5-ext/object/is-value":59,"es5-ext/string/is-string":75,"es6-symbol":90}],82:[function(require,module,exports){
 // Thanks @mathiasbynens
 // http://mathiasbynens.be/notes/javascript-unicode#iterating-over-symbols
 
@@ -3386,7 +3402,7 @@ StringIterator.prototype = Object.create(Iterator.prototype, {
 });
 defineProperty(StringIterator.prototype, Symbol.toStringTag, d("c", "String Iterator"));
 
-},{"./":79,"d":15,"es5-ext/object/set-prototype-of":65,"es6-symbol":89}],82:[function(require,module,exports){
+},{"./":80,"d":16,"es5-ext/object/set-prototype-of":66,"es6-symbol":90}],83:[function(require,module,exports){
 "use strict";
 
 var isIterable = require("./is-iterable");
@@ -3396,7 +3412,7 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-iterable":80}],83:[function(require,module,exports){
+},{"./is-iterable":81}],84:[function(require,module,exports){
 'use strict';
 
 if (!require('./is-implemented')()) {
@@ -3405,7 +3421,7 @@ if (!require('./is-implemented')()) {
 			writable: true });
 }
 
-},{"./is-implemented":84,"./polyfill":88,"es5-ext/global":40}],84:[function(require,module,exports){
+},{"./is-implemented":85,"./polyfill":89,"es5-ext/global":41}],85:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -3439,7 +3455,7 @@ module.exports = function () {
 	return true;
 };
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 // Exports true if environment provides native `Map` implementation,
 // whatever that is.
 
@@ -3450,13 +3466,13 @@ module.exports = (function () {
 	return (Object.prototype.toString.call(new Map()) === '[object Map]');
 }());
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 'use strict';
 
 module.exports = require('es5-ext/object/primitive-set')('key',
 	'value', 'key+value');
 
-},{"es5-ext/object/primitive-set":64}],87:[function(require,module,exports){
+},{"es5-ext/object/primitive-set":65}],88:[function(require,module,exports){
 'use strict';
 
 var setPrototypeOf    = require('es5-ext/object/set-prototype-of')
@@ -3496,7 +3512,7 @@ MapIterator.prototype = Object.create(Iterator.prototype, {
 Object.defineProperty(MapIterator.prototype, toStringTagSymbol,
 	d('c', 'Map Iterator'));
 
-},{"./iterator-kinds":86,"d":15,"es5-ext/object/set-prototype-of":65,"es6-iterator":79,"es6-symbol":89}],88:[function(require,module,exports){
+},{"./iterator-kinds":87,"d":16,"es5-ext/object/set-prototype-of":66,"es6-iterator":80,"es6-symbol":90}],89:[function(require,module,exports){
 'use strict';
 
 var clear          = require('es5-ext/array/#/clear')
@@ -3602,12 +3618,12 @@ Object.defineProperty(MapPoly.prototype, Symbol.iterator, d(function () {
 }));
 Object.defineProperty(MapPoly.prototype, Symbol.toStringTag, d('c', 'Map'));
 
-},{"./is-native-implemented":85,"./lib/iterator":87,"d":15,"es5-ext/array/#/clear":32,"es5-ext/array/#/e-index-of":33,"es5-ext/object/set-prototype-of":65,"es5-ext/object/valid-callable":68,"es5-ext/object/valid-value":70,"es6-iterator/for-of":77,"es6-iterator/valid-iterable":82,"es6-symbol":89,"event-emitter":98}],89:[function(require,module,exports){
+},{"./is-native-implemented":86,"./lib/iterator":88,"d":16,"es5-ext/array/#/clear":33,"es5-ext/array/#/e-index-of":34,"es5-ext/object/set-prototype-of":66,"es5-ext/object/valid-callable":69,"es5-ext/object/valid-value":71,"es6-iterator/for-of":78,"es6-iterator/valid-iterable":83,"es6-symbol":90,"event-emitter":99}],90:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./is-implemented')() ? Symbol : require('./polyfill');
 
-},{"./is-implemented":90,"./polyfill":92}],90:[function(require,module,exports){
+},{"./is-implemented":91,"./polyfill":93}],91:[function(require,module,exports){
 'use strict';
 
 var validTypes = { object: true, symbol: true };
@@ -3626,7 +3642,7 @@ module.exports = function () {
 	return true;
 };
 
-},{}],91:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 'use strict';
 
 module.exports = function (x) {
@@ -3637,7 +3653,7 @@ module.exports = function (x) {
 	return (x[x.constructor.toStringTag] === 'Symbol');
 };
 
-},{}],92:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 // ES2015 Symbol polyfill for environments that do not (or partially) support it
 
 'use strict';
@@ -3757,7 +3773,7 @@ defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toStringTag,
 defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toPrimitive,
 	d('c', SymbolPolyfill.prototype[SymbolPolyfill.toPrimitive]));
 
-},{"./validate-symbol":93,"d":15}],93:[function(require,module,exports){
+},{"./validate-symbol":94,"d":16}],94:[function(require,module,exports){
 'use strict';
 
 var isSymbol = require('./is-symbol');
@@ -3767,7 +3783,7 @@ module.exports = function (value) {
 	return value;
 };
 
-},{"./is-symbol":91}],94:[function(require,module,exports){
+},{"./is-symbol":92}],95:[function(require,module,exports){
 'use strict';
 
 if (!require('./is-implemented')()) {
@@ -3776,7 +3792,7 @@ if (!require('./is-implemented')()) {
 			writable: true });
 }
 
-},{"./is-implemented":95,"./polyfill":97,"es5-ext/global":40}],95:[function(require,module,exports){
+},{"./is-implemented":96,"./polyfill":98,"es5-ext/global":41}],96:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -3798,7 +3814,7 @@ module.exports = function () {
 	return true;
 };
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 // Exports true if environment provides native `WeakMap` implementation, whatever that is.
 
 'use strict';
@@ -3808,7 +3824,7 @@ module.exports = (function () {
 	return (Object.prototype.toString.call(new WeakMap()) === '[object WeakMap]');
 }());
 
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 'use strict';
 
 var setPrototypeOf    = require('es5-ext/object/set-prototype-of')
@@ -3876,7 +3892,7 @@ Object.defineProperties(WeakMapPoly.prototype, {
 });
 defineProperty(WeakMapPoly.prototype, toStringTagSymbol, d('c', 'WeakMap'));
 
-},{"./is-native-implemented":96,"d":15,"es5-ext/object/set-prototype-of":65,"es5-ext/object/valid-object":69,"es5-ext/object/valid-value":70,"es5-ext/string/random-uniq":75,"es6-iterator/for-of":77,"es6-iterator/get":78,"es6-symbol":89}],98:[function(require,module,exports){
+},{"./is-native-implemented":97,"d":16,"es5-ext/object/set-prototype-of":66,"es5-ext/object/valid-object":70,"es5-ext/object/valid-value":71,"es5-ext/string/random-uniq":76,"es6-iterator/for-of":78,"es6-iterator/get":79,"es6-symbol":90}],99:[function(require,module,exports){
 'use strict';
 
 var d        = require('d')
@@ -4010,7 +4026,7 @@ module.exports = exports = function (o) {
 };
 exports.methods = methods;
 
-},{"d":15,"es5-ext/object/valid-callable":68}],99:[function(require,module,exports){
+},{"d":16,"es5-ext/object/valid-callable":69}],100:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -4064,14 +4080,14 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":99}],101:[function(require,module,exports){
+},{"./implementation":100}],102:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4088,7 +4104,7 @@ module.exports = function hasNativeSymbols() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./shams":102}],102:[function(require,module,exports){
+},{"./shams":103}],103:[function(require,module,exports){
 'use strict';
 
 /* eslint complexity: [2, 17], max-statements: [2, 33] */
@@ -4132,14 +4148,14 @@ module.exports = function hasSymbols() {
 	return true;
 };
 
-},{}],103:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":100}],104:[function(require,module,exports){
+},{"function-bind":101}],105:[function(require,module,exports){
 'use strict';
 
 var fnToStr = Function.prototype.toString;
@@ -4178,7 +4194,7 @@ module.exports = function isCallable(value) {
 	return strClass === fnClass || strClass === genClass;
 };
 
-},{}],105:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 'use strict';
 
 var getDay = Date.prototype.getDay;
@@ -4200,7 +4216,7 @@ module.exports = function isDateObject(value) {
 	return hasToStringTag ? tryDateObject(value) : toStr.call(value) === dateClass;
 };
 
-},{}],106:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 'use strict';
 
 var has = require('has');
@@ -4241,7 +4257,7 @@ module.exports = function isRegex(value) {
 	return tryRegexExecCall(value);
 };
 
-},{"has":103}],107:[function(require,module,exports){
+},{"has":104}],108:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -4278,10 +4294,10 @@ if (hasSymbols) {
 	};
 }
 
-},{"has-symbols":101}],108:[function(require,module,exports){
+},{"has-symbols":102}],109:[function(require,module,exports){
 module.exports = require('cssify');
 
-},{"cssify":13}],109:[function(require,module,exports){
+},{"cssify":14}],110:[function(require,module,exports){
 'use strict';
 
 var keysShim;
@@ -4405,7 +4421,7 @@ if (!Object.keys) {
 }
 module.exports = keysShim;
 
-},{"./isArguments":111}],110:[function(require,module,exports){
+},{"./isArguments":112}],111:[function(require,module,exports){
 'use strict';
 
 var slice = Array.prototype.slice;
@@ -4439,7 +4455,7 @@ keysShim.shim = function shimObjectKeys() {
 
 module.exports = keysShim;
 
-},{"./implementation":109,"./isArguments":111}],111:[function(require,module,exports){
+},{"./implementation":110,"./isArguments":112}],112:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -4458,7 +4474,7 @@ module.exports = function isArguments(value) {
 	return isArgs;
 };
 
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -4750,7 +4766,7 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{}],113:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 'use strict'
 /* eslint no-proto: 0 */
 module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
@@ -4769,7 +4785,7 @@ function mixinProperties (obj, proto) {
   return obj
 }
 
-},{}],114:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -4810,7 +4826,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":115}],115:[function(require,module,exports){
+},{"./SyncEventBase":116}],116:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -5028,7 +5044,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":116}],116:[function(require,module,exports){
+},{"./SyncEventBaseProtected":117}],117:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -5313,7 +5329,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":117,"run-exclusive":112}],117:[function(require,module,exports){
+},{"./defs":118,"run-exclusive":113}],118:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -5354,7 +5370,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{"setprototypeof":113}],118:[function(require,module,exports){
+},{"setprototypeof":114}],119:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -5363,21 +5379,25 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":114,"./defs":117}],119:[function(require,module,exports){
+},{"./SyncEvent":115,"./defs":118}],120:[function(require,module,exports){
 module.exports = "\r\n\r\n<!--TODO: col-sm-12 should be externalized -->\r\n<div class=\"id_UiCart panel plain col-sm-12 col-lg-10\">\r\n\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\"><i class=\"glyphicon glyphicon-shopping-cart\"></i> Shopping bag</h4>\r\n    </div>\r\n\r\n    <div class=\"panel-body\">\r\n\r\n      <div class=\"shopping-cart\">\r\n\r\n      </div>\r\n\r\n      <div class=\"pull-right mt15\">\r\n\r\n        <span class=\"id_goods_price\"></span>\r\n        &nbsp;\r\n        <span>+</span>\r\n        &nbsp;\r\n        <span class=\"id_delivery_price\"></span>\r\n        <span>delivery fees,</span>\r\n        &nbsp;\r\n        &nbsp;\r\n        <span>Total: </span><span class=\"id_cart_total\"> 270,00 €</span>\r\n        &nbsp;\r\n        <button type=\"button\" class=\"id_checkout btn btn-default\">Checkout</button>\r\n\r\n      </div>\r\n\r\n    </div>\r\n\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n  <div class=\"item id_UiCartEntry\">\r\n    <div class=\"buttons\">\r\n      <span class=\"delete-btn\"></span>\r\n    </div>\r\n\r\n    <div class=\"image\">\r\n      <img src=\"\" alt=\"\" />\r\n    </div>\r\n\r\n    <div class=\"description\">\r\n      <span class=\"id_item_name\">Common Projects</span>\r\n      <span class=\"id_short_description\" >White</span>\r\n    </div>\r\n\r\n    <div class=\"quantity\">\r\n      <button class=\"plus-btn\" type=\"button\" name=\"button\">\r\n        <img  alt=\"\" /><!-- src=\"/svg/plus.svg\" -->\r\n      </button>\r\n      <input type=\"text\" name=\"name\" value=\"1\">\r\n      <button class=\"minus-btn\" type=\"button\" name=\"button\">\r\n        <img src=\"\" alt=\"\" /><!-- src=\"/svg/minus.svg\" -->\r\n      </button>\r\n    </div>\r\n\r\n    <div class=\"total-price\">$549</div>\r\n  </div>\r\n\r\n\r\n</div>\r\n\r\n\r\n\r\n";
-},{}],120:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 var css = "div.id_UiCart {\n  /* Responsive */\n}\ndiv.id_UiCart .shopping-cart {\n  box-shadow: 1px 2px 3px 0px rgba(0, 0, 0, 0.1);\n  border-radius: 6px;\n  display: flex;\n  flex-direction: column;\n  border-top: 1px solid #E1E8EE;\n  border-left: 1px solid #E1E8EE;\n  border-right: 1px solid #E1E8EE;\n  /* Buttons -  Delete and Like */\n  /* Product Image */\n  /* Product Description */\n  /* Product Quantity */\n  /* Total Price */\n}\ndiv.id_UiCart .shopping-cart .item {\n  padding: 20px 30px;\n  height: 120px;\n  display: flex;\n  border-bottom: 1px solid #E1E8EE;\n}\ndiv.id_UiCart .shopping-cart .buttons {\n  position: relative;\n  padding-top: 30px;\n  margin-right: 60px;\n}\ndiv.id_UiCart .shopping-cart .delete-btn {\n  display: inline-block;\n  cursor: pointer;\n  width: 18px;\n  height: 17px;\n  margin-right: 20px;\n}\ndiv.id_UiCart .shopping-cart .is-active {\n  animation-name: animate;\n  animation-duration: .8s;\n  animation-iteration-count: 1;\n  animation-timing-function: steps(28);\n  animation-fill-mode: forwards;\n}\n@keyframes animate {\n  0% {\n    background-position: left;\n  }\n  50% {\n    background-position: right;\n  }\n  100% {\n    background-position: right;\n  }\n}\ndiv.id_UiCart .shopping-cart .image {\n  margin-right: 50px;\n}\ndiv.id_UiCart .shopping-cart .image img {\n  height: 80px;\n}\ndiv.id_UiCart .shopping-cart .description {\n  padding-top: 10px;\n  margin-right: 60px;\n  width: 115px;\n}\ndiv.id_UiCart .shopping-cart .description span {\n  display: block;\n  font-size: 14px;\n  color: #43484D;\n  font-weight: 400;\n}\ndiv.id_UiCart .shopping-cart .description span.id_item_name {\n  margin-bottom: 5px;\n}\ndiv.id_UiCart .shopping-cart .description span.id_short_description {\n  font-weight: 300;\n  margin-top: 8px;\n  color: #86939E;\n}\ndiv.id_UiCart .shopping-cart .quantity {\n  padding-top: 20px;\n  margin-right: 60px;\n}\ndiv.id_UiCart .shopping-cart .quantity input {\n  -webkit-appearance: none;\n  border: none;\n  text-align: center;\n  width: 32px;\n  font-size: 16px;\n  color: #43484D;\n  font-weight: 300;\n}\ndiv.id_UiCart .shopping-cart button[class*=btn] {\n  width: 30px;\n  height: 30px;\n  background-color: #E1E8EE;\n  border-radius: 6px;\n  border: none;\n  cursor: pointer;\n}\ndiv.id_UiCart .shopping-cart .minus-btn img {\n  margin-bottom: 3px;\n}\ndiv.id_UiCart .shopping-cart .plus-btn img {\n  margin-top: 2px;\n}\ndiv.id_UiCart .shopping-cart button:focus,\ndiv.id_UiCart .shopping-cart input:focus {\n  outline: 0;\n}\ndiv.id_UiCart .shopping-cart .total-price {\n  width: 83px;\n  padding-top: 27px;\n  text-align: center;\n  font-size: 16px;\n  color: #43484D;\n  font-weight: 300;\n}\n@media (max-width: 800px) {\n  div.id_UiCart .shopping-cart {\n    width: 100%;\n    height: auto;\n    overflow: hidden;\n  }\n  div.id_UiCart .shopping-cart .item {\n    height: auto;\n    flex-wrap: wrap;\n    justify-content: center;\n  }\n  div.id_UiCart .shopping-cart .image,\n  div.id_UiCart .shopping-cart .quantity,\n  div.id_UiCart .shopping-cart .description {\n    width: 100%;\n    text-align: center;\n    margin: 6px 0;\n  }\n  div.id_UiCart .shopping-cart .buttons {\n    margin-right: 20px;\n  }\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":108}],121:[function(require,module,exports){
+},{"lessify":109}],122:[function(require,module,exports){
 module.exports = "<div class=\"id_UiController\">\r\n\r\n    <div class=\"row id_container pt5\">\r\n\r\n    </div>\r\n\r\n</div>";
-},{}],122:[function(require,module,exports){
-module.exports = "<!--TODO: col-sm-12 should be externalized -->\r\n<div class=\"id_UiProduct panel plain col-sm-12 col-lg-10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"left-column\">\r\n\r\n            <div class=\"carousel slide\">\r\n                <ol class=\"carousel-indicators dotstyle center\">\r\n                </ol>\r\n                <div class=\"carousel-inner\">\r\n                </div>\r\n                <a class=\"left carousel-control\" data-slide=\"prev\">\r\n                    <i class=\"fa fa-angle-left\"></i>\r\n                </a>\r\n                <a class=\"right carousel-control\" data-slide=\"next\">\r\n                    <i class=\"fa fa-angle-right\"></i>\r\n                </a>\r\n            </div>\r\n\r\n\r\n\r\n        </div>\r\n\r\n        <div class=\"right-column\">\r\n\r\n            <div class=\"product-description\">\r\n                <span class=\"id_short_description\"></span>\r\n                <h1 class=\"id_product_name\"></h1>\r\n                <p class=\"id_product_description\"></p>\r\n            </div>\r\n\r\n            <div class=\"product-price\">\r\n                <span class=\"id_product_price\"></span>\r\n                <span style=\"font-style: italic;\">free shipping to</span>\r\n                &nbsp;&nbsp;\r\n                <div class=\"id_flag iti-flag\"></div>\r\n            </div>\r\n\r\n            <div class=\"pull-right mt10\">\r\n                <button type=\"button\" class=\"id_add_to_cart btn btn-success\">Add to cart</button>\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"item\">\r\n        <img src=\"\">\r\n    </div>\r\n\r\n    <li>\r\n        <a href=\"#\"></a>\r\n    </li>\r\n\r\n</div>";
 },{}],123:[function(require,module,exports){
+module.exports = "<li class=\"id_UiCurrency dropdown\">\r\n\r\n    <a href=\"#\" data-toggle=\"dropdown\" aria-expanded=\"false\">\r\n        <span class=\"id_currency\"></span>\r\n    </a>\r\n\r\n    <div class=\"dropdown-menu dropdown-form dynamic-settings right animated fadeIn\" role=\"menu\">\r\n\r\n        <select>\r\n          <option value=\"AL\">Alabama</option>\r\n          <option value=\"WY\">Wyoming</option>\r\n        </select>\r\n\r\n    </div>\r\n\r\n</li>";
+},{}],124:[function(require,module,exports){
+var css = ".id_UiCurrency {\n  /*@media all and (max-width: 767px) {*/\n}\n@media all and (max-width: 768px) {\n  .id_UiCurrency {\n    top: -21px;\n  }\n}\n.id_UiCurrency .dropdown-menu.dynamic-settings {\n  min-width: unset !important;\n}\n.id_UiCurrency .dropdown-menu {\n  border-bottom-width: 0px;\n  border-left-width: 0px;\n  border-right-width: 0px;\n}\n";(require('lessify'))(css); module.exports = css;
+},{"lessify":109}],125:[function(require,module,exports){
+module.exports = "<!--TODO: col-sm-12 should be externalized -->\r\n<div class=\"id_UiProduct panel plain col-sm-12 col-lg-10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"left-column\">\r\n\r\n            <div class=\"carousel slide\">\r\n                <ol class=\"carousel-indicators dotstyle center\">\r\n                </ol>\r\n                <div class=\"carousel-inner\">\r\n                </div>\r\n                <a class=\"left carousel-control\" data-slide=\"prev\">\r\n                    <i class=\"fa fa-angle-left\"></i>\r\n                </a>\r\n                <a class=\"right carousel-control\" data-slide=\"next\">\r\n                    <i class=\"fa fa-angle-right\"></i>\r\n                </a>\r\n            </div>\r\n\r\n\r\n\r\n        </div>\r\n\r\n        <div class=\"right-column\">\r\n\r\n            <div class=\"product-description\">\r\n                <span class=\"id_short_description\"></span>\r\n                <h1 class=\"id_product_name\"></h1>\r\n                <p class=\"id_product_description\"></p>\r\n            </div>\r\n\r\n            <div class=\"product-price\">\r\n                <span class=\"id_product_price\"></span>\r\n                <span style=\"font-style: italic;\">free shipping to</span>\r\n                &nbsp;&nbsp;\r\n                <div class=\"id_flag iti-flag\"></div>\r\n            </div>\r\n\r\n            <div class=\"pull-right mt10\">\r\n                <button type=\"button\" class=\"id_add_to_cart btn btn-success\">Add to cart</button>\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"item\">\r\n        <img src=\"\">\r\n    </div>\r\n\r\n    <li>\r\n        <a href=\"#\"></a>\r\n    </li>\r\n\r\n</div>";
+},{}],126:[function(require,module,exports){
 var css = "div.id_UiProduct .panel-body {\n  max-width: 1200px;\n  margin: 0 auto;\n  padding: 15px;\n  display: flex;\n}\ndiv.id_UiProduct .panel-body .left-column {\n  width: 35%;\n  padding-right: 4%;\n}\ndiv.id_UiProduct .panel-body .right-column {\n  width: 65%;\n}\ndiv.id_UiProduct .panel-body .carousel-control {\n  background-image: none !important;\n}\ndiv.id_UiProduct .panel-body .product-description {\n  border-bottom: 1px solid #E1E8EE;\n  margin-bottom: 20px;\n}\ndiv.id_UiProduct .panel-body .product-description span {\n  font-size: 12px;\n  color: #358ED7;\n  letter-spacing: 1px;\n  text-transform: uppercase;\n  text-decoration: none;\n}\ndiv.id_UiProduct .panel-body .product-description h1 {\n  font-weight: 300;\n  font-size: 52px;\n  color: #43484D;\n  letter-spacing: -2px;\n}\ndiv.id_UiProduct .panel-body .product-description p {\n  font-size: 16px;\n  font-weight: 300;\n  color: #86939E;\n  line-height: 24px;\n}\ndiv.id_UiProduct .panel-body .product-price {\n  display: flex;\n  align-items: center;\n}\ndiv.id_UiProduct .panel-body .product-price .id_product_price {\n  font-size: 26px;\n  font-weight: 300;\n  color: #43474D;\n  margin-right: 20px;\n}\n@media (max-width: 940px) {\n  div.id_UiProduct .panel-body {\n    flex-direction: column;\n    /*margin-top    : 60px;*/\n  }\n  div.id_UiProduct .panel-body .left-column,\n  div.id_UiProduct .panel-body .right-column {\n    width: 100%;\n  }\n  div.id_UiProduct .panel-body .carousel {\n    max-width: 445px;\n    margin: auto;\n  }\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":108}],124:[function(require,module,exports){
+},{"lessify":109}],127:[function(require,module,exports){
 module.exports = "<li class=\"id_UiShipTo dropdown\">\r\n\r\n    <a href=\"#\" data-toggle=\"dropdown\" aria-expanded=\"false\">\r\n        <span>Ship to</span>\r\n        <div class=\"id_flag iti-flag\"></div>\r\n    </a>\r\n\r\n    <div class=\"dropdown-menu dropdown-form dynamic-settings right animated fadeIn\" role=\"menu\">\r\n\r\n        <div class=\"id_countrySelector\" data-showspecial=\"false\" data-showflags=\"true\" data-i18nall=\"All selected\"\r\n            data-i18nnofilter=\"No selection\" data-i18nfilter=\"Filter\">\r\n        </div>\r\n\r\n    </div>\r\n\r\n</li>";
-},{}],125:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 var css = ".id_UiShipTo {\n  /*@media all and (max-width: 767px) {*/\n}\n@media all and (max-width: 768px) {\n  .id_UiShipTo {\n    top: -21px;\n  }\n}\n.id_UiShipTo .id_countrySelector {\n  width: 200px;\n}\n.id_UiShipTo .dropdown-menu.dynamic-settings {\n  min-width: unset !important;\n}\n.id_UiShipTo .dropdown-menu {\n  border-bottom-width: 0px;\n  border-left-width: 0px;\n  border-right-width: 0px;\n}\n.id_UiShipTo .iti-flag {\n  display: inline-block;\n  position: relative;\n  top: 2px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":108}],126:[function(require,module,exports){
+},{"lessify":109}],129:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** semasim.com or dev.semasim.com */
@@ -5385,7 +5405,7 @@ exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
 exports.assetsRoot = window["assets_root"];
 exports.isProd = exports.assetsRoot !== "/";
 
-},{}],127:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -5399,88 +5419,123 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],128:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 "use strict";
-//NOTE: Assert jQuery loaded on the page
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-function convertFromEuro(euroAmount, currencyTo) {
-    var rates = convertFromEuro.rates;
-    if (rates === undefined) {
-        throw new Error("fetch rate changes first");
+exports.data = require("../../../res/currency.json");
+function isValidCountryIso(countryIso) {
+    //NOTE: Avoid loading if we do not need
+    if (isValidCountryIso.countryIsoRecord === undefined) {
+        isValidCountryIso.countryIsoRecord = (function () {
+            var e_1, _a, e_2, _b;
+            var out = {};
+            try {
+                for (var _c = __values(Object.keys(exports.data)), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var currency = _d.value;
+                    try {
+                        for (var _e = __values(exports.data[currency].countriesIso), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var countryIso_1 = _f.value;
+                            out[countryIso_1] = true;
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return out;
+        })();
+        return isValidCountryIso(countryIso);
     }
-    return euroAmount * rates[currencyTo];
+    if (typeof countryIso !== "string" || !/^[a-z]{2}$/.test(countryIso)) {
+        return false;
+    }
+    return !!isValidCountryIso.countryIsoRecord[countryIso];
+}
+exports.isValidCountryIso = isValidCountryIso;
+(function (isValidCountryIso) {
+    isValidCountryIso.countryIsoRecord = undefined;
+})(isValidCountryIso = exports.isValidCountryIso || (exports.isValidCountryIso = {}));
+function getCountryCurrency(countryIso) {
+    var cache = getCountryCurrency.cache;
+    {
+        var currency = cache[countryIso];
+        if (currency !== undefined) {
+            return currency;
+        }
+    }
+    cache[countryIso] = Object.keys(exports.data)
+        .map(function (currency) { return ({ currency: currency, "countriesIso": exports.data[currency].countriesIso }); })
+        .find(function (_a) {
+        var countriesIso = _a.countriesIso;
+        return !!countriesIso.find(function (_countryIso) { return _countryIso === countryIso; });
+    })
+        .currency;
+    return getCountryCurrency(countryIso);
+}
+exports.getCountryCurrency = getCountryCurrency;
+(function (getCountryCurrency) {
+    getCountryCurrency.cache = {};
+})(getCountryCurrency = exports.getCountryCurrency || (exports.getCountryCurrency = {}));
+function convertFromEuro(euroAmount, currencyTo) {
+    var changeRates = convertFromEuro.changeRates;
+    if (changeRates === undefined) {
+        throw new Error("Changes rates have not been defined");
+    }
+    return euroAmount * changeRates[currencyTo];
 }
 exports.convertFromEuro = convertFromEuro;
 (function (convertFromEuro) {
-    convertFromEuro.rates = undefined;
-    function fetchChangesRates() {
-        return __awaiter(this, void 0, void 0, function () {
-            var _rates, upperCaseCurrency;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (convertFromEuro.rates !== undefined) {
-                            return [2 /*return*/];
-                        }
-                        return [4 /*yield*/, new Promise(function (resolve, reject) { return window["$"].ajax({
-                                "url": "https://api.exchangeratesapi.io/latest",
-                                "method": "GET",
-                                "dataType": "text",
-                                "error": function (_jqXHR, textStatus, errorThrown) { return reject(new Error(textStatus + " " + errorThrown)); },
-                                "statusCode": {
-                                    "200": function (data) { return resolve(JSON.parse(data)); }
-                                }
-                            }); })];
-                    case 1:
-                        _rates = (_a.sent()).rates;
-                        convertFromEuro.rates = {};
-                        for (upperCaseCurrency in _rates) {
-                            convertFromEuro.rates[upperCaseCurrency.toLowerCase()] = _rates[upperCaseCurrency] * 100;
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    }
-    convertFromEuro.fetchChangesRates = fetchChangesRates;
+    convertFromEuro.changeRates = undefined;
 })(convertFromEuro = exports.convertFromEuro || (exports.convertFromEuro = {}));
+/**
+ * get currency of stripe card,
+ * if there is no special pricing for the currency
+ * "eur" will be returned.
+ *
+ * NOTE: This function does seems to come out of left field
+ * but this operation is done on the frontend and the backend
+ * so we export it.
+ *
+ */
+function getCardCurrency(stripeCard, pricingByCurrency) {
+    var currency = getCountryCurrency(stripeCard.country.toLowerCase());
+    if (!(currency in pricingByCurrency)) {
+        currency = "eur";
+    }
+    return currency;
+}
+exports.getCardCurrency = getCardCurrency;
+function prettyPrint(amount, currency) {
+    return (amount / 100).toLocaleString(undefined, {
+        "style": "currency",
+        currency: currency
+    });
+}
+exports.prettyPrint = prettyPrint;
 
-},{}],129:[function(require,module,exports){
+},{"../../../res/currency.json":140}],132:[function(require,module,exports){
 if (typeof ArrayBuffer.isView !== "function") {
     Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
 }
@@ -5490,7 +5545,7 @@ if (typeof String.prototype.startsWith !== "function") {
     };
 }
 
-},{}],130:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -5582,6 +5637,19 @@ function renewPassword(email, newPassword, token) {
     return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
 }
 exports.renewPassword = renewPassword;
+function guessCountryIso() {
+    var methodName = apiDeclaration.guessCountryIso.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.guessCountryIso = guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.cacheOut = undefined;
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+function getChangesRates() {
+    var methodName = apiDeclaration.getChangesRates.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.getChangesRates = getChangesRates;
 function getSubscriptionInfos() {
     var methodName = apiDeclaration.getSubscriptionInfos.methodName;
     return sendRequest(methodName, undefined);
@@ -5619,33 +5687,8 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
-/*
-function buildUrl(
-    methodName: string,
-    params: Record<string, string | undefined>
-): string {
 
-    let query: string[] = [];
-
-    for (let key of Object.keys(params)) {
-
-        let value = params[key];
-
-        if (value === undefined) continue;
-
-        query[query.length] = `${key}=${params[key]}`;
-
-    }
-
-    let url = `https://${c.backendHostname}:${c.webApiPort}/${c.webApiPath}/${methodName}?${query.join("&")}`;
-
-    console.log(`GET ${url}`);
-
-    return url;
-}
-*/ 
-
-},{"../web_api_declaration":131,"transfer-tools/dist/lib/JSON_CUSTOM":136}],131:[function(require,module,exports){
+},{"../web_api_declaration":134,"transfer-tools/dist/lib/JSON_CUSTOM":139}],134:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -5673,6 +5716,14 @@ var renewPassword;
 (function (renewPassword) {
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
+var guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.methodName = "guess-country-iso";
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+var getChangesRates;
+(function (getChangesRates) {
+    getChangesRates.methodName = "get-changes-rates";
+})(getChangesRates = exports.getChangesRates || (exports.getChangesRates = {}));
 var getSubscriptionInfos;
 (function (getSubscriptionInfos) {
     getSubscriptionInfos.methodName = "get-subscription-infos";
@@ -5686,13 +5737,13 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],132:[function(require,module,exports){
-arguments[4][99][0].apply(exports,arguments)
-},{"dup":99}],133:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 arguments[4][100][0].apply(exports,arguments)
-},{"./implementation":132,"dup":100}],134:[function(require,module,exports){
-arguments[4][103][0].apply(exports,arguments)
-},{"dup":103,"function-bind":133}],135:[function(require,module,exports){
+},{"dup":100}],136:[function(require,module,exports){
+arguments[4][101][0].apply(exports,arguments)
+},{"./implementation":135,"dup":101}],137:[function(require,module,exports){
+arguments[4][104][0].apply(exports,arguments)
+},{"dup":104,"function-bind":136}],138:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -6027,7 +6078,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":134}],136:[function(require,module,exports){
+},{"has":137}],139:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -6077,4 +6128,913 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":135}]},{},[5]);
+},{"super-json":138}],140:[function(require,module,exports){
+module.exports={
+  "usd": {
+    "symbol": "$",
+    "name": "US Dollar",
+    "countriesIso": [
+      "bq",
+      "tl",
+      "gu",
+      "sv",
+      "pr",
+      "pw",
+      "ec",
+      "mh",
+      "mp",
+      "io",
+      "fm",
+      "vg",
+      "us",
+      "um",
+      "tc",
+      "vi",
+      "as"
+    ]
+  },
+  "cad": {
+    "symbol": "CA$",
+    "name": "Canadian Dollar",
+    "countriesIso": [
+      "ca"
+    ]
+  },
+  "eur": {
+    "symbol": "€",
+    "name": "Euro",
+    "countriesIso": [
+      "be",
+      "bl",
+      "re",
+      "gr",
+      "gp",
+      "gf",
+      "pt",
+      "pm",
+      "ee",
+      "it",
+      "es",
+      "me",
+      "mf",
+      "mc",
+      "mt",
+      "mq",
+      "fr",
+      "fi",
+      "nl",
+      "xk",
+      "cy",
+      "sk",
+      "si",
+      "sm",
+      "de",
+      "yt",
+      "lv",
+      "lu",
+      "tf",
+      "va",
+      "ad",
+      "at",
+      "ax",
+      "ie"
+    ]
+  },
+  "aed": {
+    "symbol": "AED",
+    "name": "United Arab Emirates Dirham",
+    "countriesIso": [
+      "ae"
+    ]
+  },
+  "afn": {
+    "symbol": "Af",
+    "name": "Afghan Afghani",
+    "countriesIso": [
+      "af"
+    ]
+  },
+  "all": {
+    "symbol": "ALL",
+    "name": "Albanian Lek",
+    "countriesIso": [
+      "al"
+    ]
+  },
+  "amd": {
+    "symbol": "AMD",
+    "name": "Armenian Dram",
+    "countriesIso": [
+      "am"
+    ]
+  },
+  "ars": {
+    "symbol": "AR$",
+    "name": "Argentine Peso",
+    "countriesIso": [
+      "ar"
+    ]
+  },
+  "aud": {
+    "symbol": "AU$",
+    "name": "Australian Dollar",
+    "countriesIso": [
+      "hm",
+      "nf",
+      "nr",
+      "cc",
+      "cx",
+      "ki",
+      "tv",
+      "au"
+    ]
+  },
+  "azn": {
+    "symbol": "man.",
+    "name": "Azerbaijani Manat",
+    "countriesIso": [
+      "az"
+    ]
+  },
+  "bam": {
+    "symbol": "KM",
+    "name": "Bosnia-Herzegovina Convertible Mark",
+    "countriesIso": [
+      "ba"
+    ]
+  },
+  "bdt": {
+    "symbol": "Tk",
+    "name": "Bangladeshi Taka",
+    "countriesIso": [
+      "bd"
+    ]
+  },
+  "bgn": {
+    "symbol": "BGN",
+    "name": "Bulgarian Lev",
+    "countriesIso": [
+      "bg"
+    ]
+  },
+  "bhd": {
+    "symbol": "BD",
+    "name": "Bahraini Dinar",
+    "countriesIso": [
+      "bh"
+    ]
+  },
+  "bif": {
+    "symbol": "FBu",
+    "name": "Burundian Franc",
+    "countriesIso": [
+      "bi"
+    ]
+  },
+  "bnd": {
+    "symbol": "BN$",
+    "name": "Brunei Dollar",
+    "countriesIso": [
+      "bn"
+    ]
+  },
+  "bob": {
+    "symbol": "Bs",
+    "name": "Bolivian Boliviano",
+    "countriesIso": [
+      "bo"
+    ]
+  },
+  "brl": {
+    "symbol": "R$",
+    "name": "Brazilian Real",
+    "countriesIso": [
+      "br"
+    ]
+  },
+  "bwp": {
+    "symbol": "BWP",
+    "name": "Botswanan Pula",
+    "countriesIso": [
+      "bw"
+    ]
+  },
+  "byr": {
+    "symbol": "BYR",
+    "name": "Belarusian Ruble",
+    "countriesIso": [
+      "by"
+    ]
+  },
+  "bzd": {
+    "symbol": "BZ$",
+    "name": "Belize Dollar",
+    "countriesIso": [
+      "bz"
+    ]
+  },
+  "cdf": {
+    "symbol": "CDF",
+    "name": "Congolese Franc",
+    "countriesIso": [
+      "cd"
+    ]
+  },
+  "chf": {
+    "symbol": "CHF",
+    "name": "Swiss Franc",
+    "countriesIso": [
+      "ch",
+      "li"
+    ]
+  },
+  "clp": {
+    "symbol": "CL$",
+    "name": "Chilean Peso",
+    "countriesIso": [
+      "cl"
+    ]
+  },
+  "cny": {
+    "symbol": "CN¥",
+    "name": "Chinese Yuan",
+    "countriesIso": [
+      "cn"
+    ]
+  },
+  "cop": {
+    "symbol": "CO$",
+    "name": "Colombian Peso",
+    "countriesIso": [
+      "co"
+    ]
+  },
+  "crc": {
+    "symbol": "₡",
+    "name": "Costa Rican Colón",
+    "countriesIso": [
+      "cr"
+    ]
+  },
+  "cve": {
+    "symbol": "CV$",
+    "name": "Cape Verdean Escudo",
+    "countriesIso": [
+      "cv"
+    ]
+  },
+  "czk": {
+    "symbol": "Kč",
+    "name": "Czech Republic Koruna",
+    "countriesIso": [
+      "cz"
+    ]
+  },
+  "djf": {
+    "symbol": "Fdj",
+    "name": "Djiboutian Franc",
+    "countriesIso": [
+      "dj"
+    ]
+  },
+  "dkk": {
+    "symbol": "Dkr",
+    "name": "Danish Krone",
+    "countriesIso": [
+      "gl",
+      "fo",
+      "dk"
+    ]
+  },
+  "dop": {
+    "symbol": "RD$",
+    "name": "Dominican Peso",
+    "countriesIso": [
+      "do"
+    ]
+  },
+  "dzd": {
+    "symbol": "DA",
+    "name": "Algerian Dinar",
+    "countriesIso": [
+      "dz"
+    ]
+  },
+  "eek": {
+    "symbol": "Ekr",
+    "name": "Estonian Kroon",
+    "countriesIso": []
+  },
+  "egp": {
+    "symbol": "EGP",
+    "name": "Egyptian Pound",
+    "countriesIso": [
+      "eg"
+    ]
+  },
+  "ern": {
+    "symbol": "Nfk",
+    "name": "Eritrean Nakfa",
+    "countriesIso": [
+      "er"
+    ]
+  },
+  "etb": {
+    "symbol": "Br",
+    "name": "Ethiopian Birr",
+    "countriesIso": [
+      "et"
+    ]
+  },
+  "gbp": {
+    "symbol": "£",
+    "name": "British Pound Sterling",
+    "countriesIso": [
+      "je",
+      "gs",
+      "gg",
+      "gb",
+      "im"
+    ]
+  },
+  "gel": {
+    "symbol": "GEL",
+    "name": "Georgian Lari",
+    "countriesIso": [
+      "ge"
+    ]
+  },
+  "ghs": {
+    "symbol": "GH₵",
+    "name": "Ghanaian Cedi",
+    "countriesIso": [
+      "gh"
+    ]
+  },
+  "gnf": {
+    "symbol": "FG",
+    "name": "Guinean Franc",
+    "countriesIso": [
+      "gn"
+    ]
+  },
+  "gtq": {
+    "symbol": "GTQ",
+    "name": "Guatemalan Quetzal",
+    "countriesIso": [
+      "gt"
+    ]
+  },
+  "hkd": {
+    "symbol": "HK$",
+    "name": "Hong Kong Dollar",
+    "countriesIso": [
+      "hk"
+    ]
+  },
+  "hnl": {
+    "symbol": "HNL",
+    "name": "Honduran Lempira",
+    "countriesIso": [
+      "hn"
+    ]
+  },
+  "hrk": {
+    "symbol": "kn",
+    "name": "Croatian Kuna",
+    "countriesIso": [
+      "hr"
+    ]
+  },
+  "huf": {
+    "symbol": "Ft",
+    "name": "Hungarian Forint",
+    "countriesIso": [
+      "hu"
+    ]
+  },
+  "idr": {
+    "symbol": "Rp",
+    "name": "Indonesian Rupiah",
+    "countriesIso": [
+      "id"
+    ]
+  },
+  "ils": {
+    "symbol": "₪",
+    "name": "Israeli New Sheqel",
+    "countriesIso": [
+      "ps",
+      "il"
+    ]
+  },
+  "inr": {
+    "symbol": "Rs",
+    "name": "Indian Rupee",
+    "countriesIso": [
+      "in"
+    ]
+  },
+  "iqd": {
+    "symbol": "IQD",
+    "name": "Iraqi Dinar",
+    "countriesIso": [
+      "iq"
+    ]
+  },
+  "irr": {
+    "symbol": "IRR",
+    "name": "Iranian Rial",
+    "countriesIso": [
+      "ir"
+    ]
+  },
+  "isk": {
+    "symbol": "Ikr",
+    "name": "Icelandic Króna",
+    "countriesIso": [
+      "is"
+    ]
+  },
+  "jmd": {
+    "symbol": "J$",
+    "name": "Jamaican Dollar",
+    "countriesIso": [
+      "jm"
+    ]
+  },
+  "jod": {
+    "symbol": "JD",
+    "name": "Jordanian Dinar",
+    "countriesIso": [
+      "jo"
+    ]
+  },
+  "jpy": {
+    "symbol": "¥",
+    "name": "Japanese Yen",
+    "countriesIso": [
+      "jp"
+    ]
+  },
+  "kes": {
+    "symbol": "Ksh",
+    "name": "Kenyan Shilling",
+    "countriesIso": [
+      "ke"
+    ]
+  },
+  "khr": {
+    "symbol": "KHR",
+    "name": "Cambodian Riel",
+    "countriesIso": [
+      "kh"
+    ]
+  },
+  "kmf": {
+    "symbol": "CF",
+    "name": "Comorian Franc",
+    "countriesIso": [
+      "km"
+    ]
+  },
+  "krw": {
+    "symbol": "₩",
+    "name": "South Korean Won",
+    "countriesIso": [
+      "kr"
+    ]
+  },
+  "kwd": {
+    "symbol": "KD",
+    "name": "Kuwaiti Dinar",
+    "countriesIso": [
+      "kw"
+    ]
+  },
+  "kzt": {
+    "symbol": "KZT",
+    "name": "Kazakhstani Tenge",
+    "countriesIso": [
+      "kz"
+    ]
+  },
+  "lbp": {
+    "symbol": "LB£",
+    "name": "Lebanese Pound",
+    "countriesIso": [
+      "lb"
+    ]
+  },
+  "lkr": {
+    "symbol": "SLRs",
+    "name": "Sri Lankan Rupee",
+    "countriesIso": [
+      "lk"
+    ]
+  },
+  "ltl": {
+    "symbol": "Lt",
+    "name": "Lithuanian Litas",
+    "countriesIso": [
+      "lt"
+    ]
+  },
+  "lvl": {
+    "symbol": "Ls",
+    "name": "Latvian Lats",
+    "countriesIso": []
+  },
+  "lyd": {
+    "symbol": "LD",
+    "name": "Libyan Dinar",
+    "countriesIso": [
+      "ly"
+    ]
+  },
+  "mad": {
+    "symbol": "MAD",
+    "name": "Moroccan Dirham",
+    "countriesIso": [
+      "eh",
+      "ma"
+    ]
+  },
+  "mdl": {
+    "symbol": "MDL",
+    "name": "Moldovan Leu",
+    "countriesIso": [
+      "md"
+    ]
+  },
+  "mga": {
+    "symbol": "MGA",
+    "name": "Malagasy Ariary",
+    "countriesIso": [
+      "mg"
+    ]
+  },
+  "mkd": {
+    "symbol": "MKD",
+    "name": "Macedonian Denar",
+    "countriesIso": [
+      "mk"
+    ]
+  },
+  "mmk": {
+    "symbol": "MMK",
+    "name": "Myanma Kyat",
+    "countriesIso": [
+      "mm"
+    ]
+  },
+  "mop": {
+    "symbol": "MOP$",
+    "name": "Macanese Pataca",
+    "countriesIso": [
+      "mo"
+    ]
+  },
+  "mur": {
+    "symbol": "MURs",
+    "name": "Mauritian Rupee",
+    "countriesIso": [
+      "mu"
+    ]
+  },
+  "mxn": {
+    "symbol": "MX$",
+    "name": "Mexican Peso",
+    "countriesIso": [
+      "mx"
+    ]
+  },
+  "myr": {
+    "symbol": "RM",
+    "name": "Malaysian Ringgit",
+    "countriesIso": [
+      "my"
+    ]
+  },
+  "mzn": {
+    "symbol": "MTn",
+    "name": "Mozambican Metical",
+    "countriesIso": [
+      "mz"
+    ]
+  },
+  "nad": {
+    "symbol": "N$",
+    "name": "Namibian Dollar",
+    "countriesIso": [
+      "na"
+    ]
+  },
+  "ngn": {
+    "symbol": "₦",
+    "name": "Nigerian Naira",
+    "countriesIso": [
+      "ng"
+    ]
+  },
+  "nio": {
+    "symbol": "C$",
+    "name": "Nicaraguan Córdoba",
+    "countriesIso": [
+      "ni"
+    ]
+  },
+  "nok": {
+    "symbol": "Nkr",
+    "name": "Norwegian Krone",
+    "countriesIso": [
+      "bv",
+      "sj",
+      "no"
+    ]
+  },
+  "npr": {
+    "symbol": "NPRs",
+    "name": "Nepalese Rupee",
+    "countriesIso": [
+      "np"
+    ]
+  },
+  "nzd": {
+    "symbol": "NZ$",
+    "name": "New Zealand Dollar",
+    "countriesIso": [
+      "tk",
+      "pn",
+      "nz",
+      "nu",
+      "ck"
+    ]
+  },
+  "omr": {
+    "symbol": "OMR",
+    "name": "Omani Rial",
+    "countriesIso": [
+      "om"
+    ]
+  },
+  "pab": {
+    "symbol": "B/.",
+    "name": "Panamanian Balboa",
+    "countriesIso": [
+      "pa"
+    ]
+  },
+  "pen": {
+    "symbol": "S/.",
+    "name": "Peruvian Nuevo Sol",
+    "countriesIso": [
+      "pe"
+    ]
+  },
+  "php": {
+    "symbol": "₱",
+    "name": "Philippine Peso",
+    "countriesIso": [
+      "ph"
+    ]
+  },
+  "pkr": {
+    "symbol": "PKRs",
+    "name": "Pakistani Rupee",
+    "countriesIso": [
+      "pk"
+    ]
+  },
+  "pln": {
+    "symbol": "zł",
+    "name": "Polish Zloty",
+    "countriesIso": [
+      "pl"
+    ]
+  },
+  "pyg": {
+    "symbol": "₲",
+    "name": "Paraguayan Guarani",
+    "countriesIso": [
+      "py"
+    ]
+  },
+  "qar": {
+    "symbol": "QR",
+    "name": "Qatari Rial",
+    "countriesIso": [
+      "qa"
+    ]
+  },
+  "ron": {
+    "symbol": "RON",
+    "name": "Romanian Leu",
+    "countriesIso": [
+      "ro"
+    ]
+  },
+  "rsd": {
+    "symbol": "din.",
+    "name": "Serbian Dinar",
+    "countriesIso": [
+      "rs"
+    ]
+  },
+  "rub": {
+    "symbol": "RUB",
+    "name": "Russian Ruble",
+    "countriesIso": [
+      "ru"
+    ]
+  },
+  "rwf": {
+    "symbol": "RWF",
+    "name": "Rwandan Franc",
+    "countriesIso": [
+      "rw"
+    ]
+  },
+  "sar": {
+    "symbol": "SR",
+    "name": "Saudi Riyal",
+    "countriesIso": [
+      "sa"
+    ]
+  },
+  "sdg": {
+    "symbol": "SDG",
+    "name": "Sudanese Pound",
+    "countriesIso": [
+      "sd"
+    ]
+  },
+  "sek": {
+    "symbol": "Skr",
+    "name": "Swedish Krona",
+    "countriesIso": [
+      "se"
+    ]
+  },
+  "sgd": {
+    "symbol": "S$",
+    "name": "Singapore Dollar",
+    "countriesIso": [
+      "sg"
+    ]
+  },
+  "sos": {
+    "symbol": "Ssh",
+    "name": "Somali Shilling",
+    "countriesIso": [
+      "so"
+    ]
+  },
+  "syp": {
+    "symbol": "SY£",
+    "name": "Syrian Pound",
+    "countriesIso": [
+      "sy"
+    ]
+  },
+  "thb": {
+    "symbol": "฿",
+    "name": "Thai Baht",
+    "countriesIso": [
+      "th"
+    ]
+  },
+  "tnd": {
+    "symbol": "DT",
+    "name": "Tunisian Dinar",
+    "countriesIso": [
+      "tn"
+    ]
+  },
+  "top": {
+    "symbol": "T$",
+    "name": "Tongan Paʻanga",
+    "countriesIso": [
+      "to"
+    ]
+  },
+  "try": {
+    "symbol": "TL",
+    "name": "Turkish Lira",
+    "countriesIso": [
+      "tr"
+    ]
+  },
+  "ttd": {
+    "symbol": "TT$",
+    "name": "Trinidad and Tobago Dollar",
+    "countriesIso": [
+      "tt"
+    ]
+  },
+  "twd": {
+    "symbol": "NT$",
+    "name": "New Taiwan Dollar",
+    "countriesIso": [
+      "tw"
+    ]
+  },
+  "tzs": {
+    "symbol": "TSh",
+    "name": "Tanzanian Shilling",
+    "countriesIso": [
+      "tz"
+    ]
+  },
+  "uah": {
+    "symbol": "₴",
+    "name": "Ukrainian Hryvnia",
+    "countriesIso": [
+      "ua"
+    ]
+  },
+  "ugx": {
+    "symbol": "USh",
+    "name": "Ugandan Shilling",
+    "countriesIso": [
+      "ug"
+    ]
+  },
+  "uyu": {
+    "symbol": "$U",
+    "name": "Uruguayan Peso",
+    "countriesIso": [
+      "uy"
+    ]
+  },
+  "uzs": {
+    "symbol": "UZS",
+    "name": "Uzbekistan Som",
+    "countriesIso": [
+      "uz"
+    ]
+  },
+  "vef": {
+    "symbol": "Bs.F.",
+    "name": "Venezuelan Bolívar",
+    "countriesIso": [
+      "ve"
+    ]
+  },
+  "vnd": {
+    "symbol": "₫",
+    "name": "Vietnamese Dong",
+    "countriesIso": [
+      "vn"
+    ]
+  },
+  "xaf": {
+    "symbol": "FCFA",
+    "name": "CFA Franc BEAC",
+    "countriesIso": [
+      "gq",
+      "ga",
+      "cm",
+      "cg",
+      "cf",
+      "td"
+    ]
+  },
+  "xof": {
+    "symbol": "CFA",
+    "name": "CFA Franc BCEAO",
+    "countriesIso": [
+      "bf",
+      "bj",
+      "gw",
+      "ml",
+      "ne",
+      "ci",
+      "sn",
+      "tg"
+    ]
+  },
+  "yer": {
+    "symbol": "YR",
+    "name": "Yemeni Rial",
+    "countriesIso": [
+      "ye"
+    ]
+  },
+  "zar": {
+    "symbol": "R",
+    "name": "South African Rand",
+    "countriesIso": [
+      "za"
+    ]
+  },
+  "zmk": {
+    "symbol": "ZK",
+    "name": "Zambian Kwacha",
+    "countriesIso": [
+      "zm"
+    ]
+  }
+}
+
+},{}]},{},[6]);

@@ -2061,8 +2061,9 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var ts_events_extended_1 = require("ts-events-extended");
-var currencyByCountry_1 = require("../../../shared/dist/lib/currencyByCountry");
+var currencyLib = require("../../../shared/dist/lib/tools/currency");
 var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
+var env_1 = require("../../../shared/dist/lib/env");
 var UiMySubscription_1 = require("./UiMySubscription");
 var UiSubscribe_1 = require("./UiSubscribe");
 var UiPaymentMethod_1 = require("./UiPaymentMethod");
@@ -2071,11 +2072,10 @@ var UiNegativeBalanceWarning_1 = require("./UiNegativeBalanceWarning");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
 require("../templates/UiController.less");
 var UiController = /** @class */ (function () {
-    //TODO: Refactor using the event emitter design pattern.
-    function UiController(subscriptionInfos, onDone) {
+    function UiController(subscriptionInfos, guessedCountryIso) {
         var _this = this;
-        this.onDone = onDone;
         this.structure = html.structure.clone();
+        this.evtDone = new ts_events_extended_1.VoidSyncEvent();
         var uiDownloadButton = new UiDownloadButtons_1.UiDownloadButtons();
         this.structure.find(".id_placeholder_UiDownloadButtons")
             .append(uiDownloadButton.structure);
@@ -2088,7 +2088,7 @@ var UiController = /** @class */ (function () {
             var evtSourceId = new ts_events_extended_1.SyncEvent();
             var handler = StripeCheckout.configure({
                 "key": subscriptionInfos.stripePublicApiKey,
-                "image": "/img/shop.png",
+                "image": env_1.assetsRoot + "img/shop.png",
                 "locale": "auto",
                 "allowRememberMe": false,
                 "name": 'Semasim',
@@ -2097,13 +2097,10 @@ var UiController = /** @class */ (function () {
                 "description": "Android app access",
                 "zipCode": true,
                 "panelLabel": "ok",
-                "source": function (source) {
-                    var currency = currencyByCountry_1.currencyByCountry[source.card.country.toLowerCase()];
-                    if (!(currency in pricingByCurrency)) {
-                        currency = "usd";
-                    }
-                    evtSourceId.post({ "id": source.id, currency: currency });
-                },
+                "source": function (source) { return evtSourceId.post({
+                    "id": source.id,
+                    "currency": currencyLib.getCardCurrency(source.card, pricingByCurrency)
+                }); },
                 "closed": function () { return evtSourceId.post(undefined); }
             });
             // Close Checkout on page navigation:
@@ -2147,7 +2144,7 @@ var UiController = /** @class */ (function () {
                         case 1:
                             _a.sent();
                             bootbox_custom.dismissLoading();
-                            this.onDone();
+                            this.evtDone.post();
                             return [2 /*return*/];
                     }
                 });
@@ -2157,7 +2154,13 @@ var UiController = /** @class */ (function () {
         }
         else {
             uiDownloadButton.structure.hide();
-            var uiSubscribe = new UiSubscribe_1.UiSubscribe(subscriptionInfos.defaultCurrency, pricingByCurrency[subscriptionInfos.defaultCurrency]);
+            var defaultCurrency = guessedCountryIso !== undefined ?
+                currencyLib.getCountryCurrency(guessedCountryIso) :
+                "eur";
+            if (!(defaultCurrency in pricingByCurrency)) {
+                defaultCurrency = "eur";
+            }
+            var uiSubscribe = new UiSubscribe_1.UiSubscribe(defaultCurrency, pricingByCurrency[defaultCurrency]);
             uiSubscribe.evtRequestSubscribe.attach(function () { return __awaiter(_this, void 0, void 0, function () {
                 var newSourceId, currency, newSource, shouldProceed;
                 return __generator(this, function (_a) {
@@ -2181,7 +2184,7 @@ var UiController = /** @class */ (function () {
                                 "title": "Enable subscription",
                                 "message": [
                                     "Confirm subscription for ",
-                                    (pricingByCurrency[currency] / 100).toLocaleString(undefined, { "style": "currency", "currency": currency }),
+                                    currencyLib.prettyPrint(pricingByCurrency[currency], currency),
                                     "/Month"
                                 ].join(""),
                                 "callback": function (result) { return resolve(result); }
@@ -2196,7 +2199,7 @@ var UiController = /** @class */ (function () {
                         case 5:
                             _a.sent();
                             bootbox_custom.dismissLoading();
-                            this.onDone();
+                            this.evtDone.post();
                             return [2 /*return*/];
                     }
                 });
@@ -2235,7 +2238,7 @@ var UiController = /** @class */ (function () {
 exports.UiController = UiController;
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/currencyByCountry":131,"../../../shared/dist/lib/loadUiClassHtml":132,"../../../shared/dist/lib/tools/bootbox_custom":133,"../../../shared/dist/lib/tools/getURLParameter":134,"../../../shared/dist/lib/webApiCaller":137,"../templates/UiController.html":122,"../templates/UiController.less":123,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"buffer":2,"ts-events-extended":121}],5:[function(require,module,exports){
+},{"../../../shared/dist/lib/env":131,"../../../shared/dist/lib/loadUiClassHtml":132,"../../../shared/dist/lib/tools/bootbox_custom":133,"../../../shared/dist/lib/tools/currency":134,"../../../shared/dist/lib/tools/getURLParameter":135,"../../../shared/dist/lib/webApiCaller":138,"../templates/UiController.html":122,"../templates/UiController.less":123,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"buffer":2,"ts-events-extended":121}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
@@ -2254,6 +2257,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var ts_events_extended_1 = require("ts-events-extended");
 var moment = require("moment");
+var currencyLib = require("../../../shared/dist/lib/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiMySubscription.html"), "UiMySubscription");
 require("../templates/UiMySubscription.less");
 var UiMySubscription = /** @class */ (function () {
@@ -2277,7 +2281,7 @@ var UiMySubscription = /** @class */ (function () {
         else {
             this.structure.find(".id_days_left").parent().hide();
             this.structure.find(".payment-next").show();
-            this.structure.find(".id_amount").text((amount / 100).toLocaleString(undefined, { "style": "currency", "currency": s.currency }));
+            this.structure.find(".id_amount").text(currencyLib.prettyPrint(amount, s.currency));
             this.structure.find(".id_nextBillDate").html(formatDate(s.current_period_end));
             this.structure.find("button").html("Cancel subscription");
             this.structure.find("button").on("click", function () { return _this.evtScheduleCancel.post(); });
@@ -2287,22 +2291,23 @@ var UiMySubscription = /** @class */ (function () {
 }());
 exports.UiMySubscription = UiMySubscription;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":132,"../templates/UiMySubscription.html":125,"../templates/UiMySubscription.less":126,"moment":111,"ts-events-extended":121}],7:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":132,"../../../shared/dist/lib/tools/currency":134,"../templates/UiMySubscription.html":125,"../templates/UiMySubscription.less":126,"moment":111,"ts-events-extended":121}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
+var currencyLib = require("../../../shared/dist/lib/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiNegativeBalanceWarning.html"), "UiNegativeBalanceWarning");
 var UiNegativeBalanceWarning = /** @class */ (function () {
     function UiNegativeBalanceWarning(due) {
         this.structure = html.structure.clone();
         this.structure.find(".id_val")
-            .text((due.value / 100).toLocaleString(undefined, { "style": "currency", "currency": due.currency }));
+            .text(currencyLib.prettyPrint(due.value, due.currency));
     }
     return UiNegativeBalanceWarning;
 }());
 exports.UiNegativeBalanceWarning = UiNegativeBalanceWarning;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":132,"../templates/UiNegativeBalanceWarning.html":127}],8:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":132,"../../../shared/dist/lib/tools/currency":134,"../templates/UiNegativeBalanceWarning.html":127}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
@@ -2329,13 +2334,14 @@ exports.UiPaymentMethod = UiPaymentMethod;
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var ts_events_extended_1 = require("ts-events-extended");
+var currencyLib = require("../../../shared/dist/lib/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiSubscribe.html"), "UiSubscribe");
 var UiSubscribe = /** @class */ (function () {
     function UiSubscribe(currency, amount) {
         var _this = this;
         this.structure = html.structure.clone();
         this.evtRequestSubscribe = new ts_events_extended_1.VoidSyncEvent();
-        this.structure.find(".id_amount").text((amount / 100).toLocaleString(undefined, { "style": "currency", currency: currency }));
+        this.structure.find(".id_amount").text(currencyLib.prettyPrint(amount, currency));
         this.structure.find("button")
             .on("click", function () { return _this.evtRequestSubscribe.post(); });
     }
@@ -2343,7 +2349,7 @@ var UiSubscribe = /** @class */ (function () {
 }());
 exports.UiSubscribe = UiSubscribe;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":132,"../templates/UiSubscribe.html":130,"ts-events-extended":121}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":132,"../../../shared/dist/lib/tools/currency":134,"../templates/UiSubscribe.html":130,"ts-events-extended":121}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2390,10 +2396,10 @@ var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var UiController_1 = require("./UiController");
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var subscriptionInfos, uiController;
+    var _a, subscriptionInfos, guessedCountryIso, uiController;
     var _this = this;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
                 $("#logout").click(function () { return __awaiter(_this, void 0, void 0, function () {
                     return __generator(this, function (_a) {
@@ -2403,16 +2409,20 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                     });
                 }); });
                 bootbox_custom.loading("Loading subscription infos");
-                return [4 /*yield*/, webApiCaller.getSubscriptionInfos()];
+                return [4 /*yield*/, Promise.all([
+                        webApiCaller.getSubscriptionInfos(),
+                        webApiCaller.guessCountryIso()
+                    ])];
             case 1:
-                subscriptionInfos = _a.sent();
+                _a = _b.sent(), subscriptionInfos = _a[0], guessedCountryIso = _a[1];
                 if (typeof androidEventHandlers !== "undefined" &&
                     (subscriptionInfos.customerStatus === "EXEMPTED" || !!subscriptionInfos.subscription)) {
                     androidEventHandlers.onDone();
                     return [2 /*return*/];
                 }
                 bootbox_custom.dismissLoading();
-                uiController = new UiController_1.UiController(subscriptionInfos, function () {
+                uiController = new UiController_1.UiController(subscriptionInfos, guessedCountryIso);
+                uiController.evtDone.attachOnce(function () {
                     if (typeof androidEventHandlers !== "undefined") {
                         androidEventHandlers.onDone();
                     }
@@ -2426,7 +2436,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/tools/bootbox_custom":133,"../../../shared/dist/lib/tools/standalonePolyfills":136,"../../../shared/dist/lib/webApiCaller":137,"./UiController":4,"array.prototype.find":12,"es6-map/implement":85,"es6-weak-map/implement":96}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/tools/bootbox_custom":133,"../../../shared/dist/lib/tools/standalonePolyfills":137,"../../../shared/dist/lib/webApiCaller":138,"./UiController":4,"array.prototype.find":12,"es6-map/implement":85,"es6-weak-map/implement":96}],11:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -11754,9 +11764,12 @@ module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div cl
 },{}],131:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.currencyByCountry = require("../../res/currency.json");
+/** semasim.com or dev.semasim.com */
+exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
+exports.assetsRoot = window["assets_root"];
+exports.isProd = exports.assetsRoot !== "/";
 
-},{"../../res/currency.json":144}],132:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -11878,7 +11891,123 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":135}],134:[function(require,module,exports){
+},{"./modal_stack":136}],134:[function(require,module,exports){
+"use strict";
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.data = require("../../../res/currency.json");
+function isValidCountryIso(countryIso) {
+    //NOTE: Avoid loading if we do not need
+    if (isValidCountryIso.countryIsoRecord === undefined) {
+        isValidCountryIso.countryIsoRecord = (function () {
+            var e_1, _a, e_2, _b;
+            var out = {};
+            try {
+                for (var _c = __values(Object.keys(exports.data)), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var currency = _d.value;
+                    try {
+                        for (var _e = __values(exports.data[currency].countriesIso), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var countryIso_1 = _f.value;
+                            out[countryIso_1] = true;
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return out;
+        })();
+        return isValidCountryIso(countryIso);
+    }
+    if (typeof countryIso !== "string" || !/^[a-z]{2}$/.test(countryIso)) {
+        return false;
+    }
+    return !!isValidCountryIso.countryIsoRecord[countryIso];
+}
+exports.isValidCountryIso = isValidCountryIso;
+(function (isValidCountryIso) {
+    isValidCountryIso.countryIsoRecord = undefined;
+})(isValidCountryIso = exports.isValidCountryIso || (exports.isValidCountryIso = {}));
+function getCountryCurrency(countryIso) {
+    var cache = getCountryCurrency.cache;
+    {
+        var currency = cache[countryIso];
+        if (currency !== undefined) {
+            return currency;
+        }
+    }
+    cache[countryIso] = Object.keys(exports.data)
+        .map(function (currency) { return ({ currency: currency, "countriesIso": exports.data[currency].countriesIso }); })
+        .find(function (_a) {
+        var countriesIso = _a.countriesIso;
+        return !!countriesIso.find(function (_countryIso) { return _countryIso === countryIso; });
+    })
+        .currency;
+    return getCountryCurrency(countryIso);
+}
+exports.getCountryCurrency = getCountryCurrency;
+(function (getCountryCurrency) {
+    getCountryCurrency.cache = {};
+})(getCountryCurrency = exports.getCountryCurrency || (exports.getCountryCurrency = {}));
+function convertFromEuro(euroAmount, currencyTo) {
+    var changeRates = convertFromEuro.changeRates;
+    if (changeRates === undefined) {
+        throw new Error("Changes rates have not been defined");
+    }
+    return euroAmount * changeRates[currencyTo];
+}
+exports.convertFromEuro = convertFromEuro;
+(function (convertFromEuro) {
+    convertFromEuro.changeRates = undefined;
+})(convertFromEuro = exports.convertFromEuro || (exports.convertFromEuro = {}));
+/**
+ * get currency of stripe card,
+ * if there is no special pricing for the currency
+ * "eur" will be returned.
+ *
+ * NOTE: This function does seems to come out of left field
+ * but this operation is done on the frontend and the backend
+ * so we export it.
+ *
+ */
+function getCardCurrency(stripeCard, pricingByCurrency) {
+    var currency = getCountryCurrency(stripeCard.country.toLowerCase());
+    if (!(currency in pricingByCurrency)) {
+        currency = "eur";
+    }
+    return currency;
+}
+exports.getCardCurrency = getCardCurrency;
+function prettyPrint(amount, currency) {
+    return (amount / 100).toLocaleString(undefined, {
+        "style": "currency",
+        currency: currency
+    });
+}
+exports.prettyPrint = prettyPrint;
+
+},{"../../../res/currency.json":145}],135:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getURLParameter(sParam) {
@@ -11893,7 +12022,7 @@ function getURLParameter(sParam) {
 }
 exports.getURLParameter = getURLParameter;
 
-},{}],135:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -12012,7 +12141,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],136:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 if (typeof ArrayBuffer.isView !== "function") {
     Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
 }
@@ -12022,7 +12151,7 @@ if (typeof String.prototype.startsWith !== "function") {
     };
 }
 
-},{}],137:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12114,6 +12243,19 @@ function renewPassword(email, newPassword, token) {
     return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
 }
 exports.renewPassword = renewPassword;
+function guessCountryIso() {
+    var methodName = apiDeclaration.guessCountryIso.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.guessCountryIso = guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.cacheOut = undefined;
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+function getChangesRates() {
+    var methodName = apiDeclaration.getChangesRates.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.getChangesRates = getChangesRates;
 function getSubscriptionInfos() {
     var methodName = apiDeclaration.getSubscriptionInfos.methodName;
     return sendRequest(methodName, undefined);
@@ -12151,33 +12293,8 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
-/*
-function buildUrl(
-    methodName: string,
-    params: Record<string, string | undefined>
-): string {
 
-    let query: string[] = [];
-
-    for (let key of Object.keys(params)) {
-
-        let value = params[key];
-
-        if (value === undefined) continue;
-
-        query[query.length] = `${key}=${params[key]}`;
-
-    }
-
-    let url = `https://${c.backendHostname}:${c.webApiPort}/${c.webApiPath}/${methodName}?${query.join("&")}`;
-
-    console.log(`GET ${url}`);
-
-    return url;
-}
-*/ 
-
-},{"../web_api_declaration":138,"transfer-tools/dist/lib/JSON_CUSTOM":143}],138:[function(require,module,exports){
+},{"../web_api_declaration":139,"transfer-tools/dist/lib/JSON_CUSTOM":144}],139:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -12205,6 +12322,14 @@ var renewPassword;
 (function (renewPassword) {
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
+var guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.methodName = "guess-country-iso";
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+var getChangesRates;
+(function (getChangesRates) {
+    getChangesRates.methodName = "get-changes-rates";
+})(getChangesRates = exports.getChangesRates || (exports.getChangesRates = {}));
 var getSubscriptionInfos;
 (function (getSubscriptionInfos) {
     getSubscriptionInfos.methodName = "get-subscription-infos";
@@ -12218,13 +12343,13 @@ var unsubscribe;
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
 
-},{}],139:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 arguments[4][101][0].apply(exports,arguments)
-},{"dup":101}],140:[function(require,module,exports){
+},{"dup":101}],141:[function(require,module,exports){
 arguments[4][102][0].apply(exports,arguments)
-},{"./implementation":139,"dup":102}],141:[function(require,module,exports){
+},{"./implementation":140,"dup":102}],142:[function(require,module,exports){
 arguments[4][105][0].apply(exports,arguments)
-},{"dup":105,"function-bind":140}],142:[function(require,module,exports){
+},{"dup":105,"function-bind":141}],143:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -12559,7 +12684,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":141}],143:[function(require,module,exports){
+},{"has":142}],144:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -12609,256 +12734,913 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":142}],144:[function(require,module,exports){
+},{"super-json":143}],145:[function(require,module,exports){
 module.exports={
-  "bd": "bdt",
-  "be": "eur",
-  "bf": "xof",
-  "bg": "bgn",
-  "ba": "bam",
-  "bb": "bbd",
-  "wf": "xpf",
-  "bl": "eur",
-  "bm": "bmd",
-  "bn": "bnd",
-  "bo": "bob",
-  "bh": "bhd",
-  "bi": "bif",
-  "bj": "xof",
-  "bt": "btn",
-  "jm": "jmd",
-  "bv": "nok",
-  "bw": "bwp",
-  "ws": "wst",
-  "bq": "usd",
-  "br": "brl",
-  "bs": "bsd",
-  "je": "gbp",
-  "by": "byr",
-  "bz": "bzd",
-  "ru": "rub",
-  "rw": "rwf",
-  "rs": "rsd",
-  "tl": "usd",
-  "re": "eur",
-  "tm": "tmt",
-  "tj": "tjs",
-  "ro": "ron",
-  "tk": "nzd",
-  "gw": "xof",
-  "gu": "usd",
-  "gt": "gtq",
-  "gs": "gbp",
-  "gr": "eur",
-  "gq": "xaf",
-  "gp": "eur",
-  "jp": "jpy",
-  "gy": "gyd",
-  "gg": "gbp",
-  "gf": "eur",
-  "ge": "gel",
-  "gd": "xcd",
-  "gb": "gbp",
-  "ga": "xaf",
-  "sv": "usd",
-  "gn": "gnf",
-  "gm": "gmd",
-  "gl": "dkk",
-  "gi": "gip",
-  "gh": "ghs",
-  "om": "omr",
-  "tn": "tnd",
-  "jo": "jod",
-  "hr": "hrk",
-  "ht": "htg",
-  "hu": "huf",
-  "hk": "hkd",
-  "hn": "hnl",
-  "hm": "aud",
-  "ve": "vef",
-  "pr": "usd",
-  "ps": "ils",
-  "pw": "usd",
-  "pt": "eur",
-  "sj": "nok",
-  "py": "pyg",
-  "iq": "iqd",
-  "pa": "pab",
-  "pf": "xpf",
-  "pg": "pgk",
-  "pe": "pen",
-  "pk": "pkr",
-  "ph": "php",
-  "pn": "nzd",
-  "pl": "pln",
-  "pm": "eur",
-  "zm": "zmk",
-  "eh": "mad",
-  "ee": "eur",
-  "eg": "egp",
-  "za": "zar",
-  "ec": "usd",
-  "it": "eur",
-  "vn": "vnd",
-  "sb": "sbd",
-  "et": "etb",
-  "so": "sos",
-  "zw": "zwl",
-  "sa": "sar",
-  "es": "eur",
-  "er": "ern",
-  "me": "eur",
-  "md": "mdl",
-  "mg": "mga",
-  "mf": "eur",
-  "ma": "mad",
-  "mc": "eur",
-  "uz": "uzs",
-  "mm": "mmk",
-  "ml": "xof",
-  "mo": "mop",
-  "mn": "mnt",
-  "mh": "usd",
-  "mk": "mkd",
-  "mu": "mur",
-  "mt": "eur",
-  "mw": "mwk",
-  "mv": "mvr",
-  "mq": "eur",
-  "mp": "usd",
-  "ms": "xcd",
-  "mr": "mro",
-  "im": "gbp",
-  "ug": "ugx",
-  "tz": "tzs",
-  "my": "myr",
-  "mx": "mxn",
-  "il": "ils",
-  "fr": "eur",
-  "io": "usd",
-  "sh": "shp",
-  "fi": "eur",
-  "fj": "fjd",
-  "fk": "fkp",
-  "fm": "usd",
-  "fo": "dkk",
-  "ni": "nio",
-  "nl": "eur",
-  "no": "nok",
-  "na": "nad",
-  "vu": "vuv",
-  "nc": "xpf",
-  "ne": "xof",
-  "nf": "aud",
-  "ng": "ngn",
-  "nz": "nzd",
-  "np": "npr",
-  "nr": "aud",
-  "nu": "nzd",
-  "ck": "nzd",
-  "xk": "eur",
-  "ci": "xof",
-  "ch": "chf",
-  "co": "cop",
-  "cn": "cny",
-  "cm": "xaf",
-  "cl": "clp",
-  "cc": "aud",
-  "ca": "cad",
-  "cg": "xaf",
-  "cf": "xaf",
-  "cd": "cdf",
-  "cz": "czk",
-  "cy": "eur",
-  "cx": "aud",
-  "cr": "crc",
-  "cw": "ang",
-  "cv": "cve",
-  "cu": "cup",
-  "sz": "szl",
-  "sy": "syp",
-  "sx": "ang",
-  "kg": "kgs",
-  "ke": "kes",
-  "ss": "ssp",
-  "sr": "srd",
-  "ki": "aud",
-  "kh": "khr",
-  "kn": "xcd",
-  "km": "kmf",
-  "st": "std",
-  "sk": "eur",
-  "kr": "krw",
-  "si": "eur",
-  "kp": "kpw",
-  "kw": "kwd",
-  "sn": "xof",
-  "sm": "eur",
-  "sl": "sll",
-  "sc": "scr",
-  "kz": "kzt",
-  "ky": "kyd",
-  "sg": "sgd",
-  "se": "sek",
-  "sd": "sdg",
-  "do": "dop",
-  "dm": "xcd",
-  "dj": "djf",
-  "dk": "dkk",
-  "vg": "usd",
-  "de": "eur",
-  "ye": "yer",
-  "dz": "dzd",
-  "us": "usd",
-  "uy": "uyu",
-  "yt": "eur",
-  "um": "usd",
-  "lb": "lbp",
-  "lc": "xcd",
-  "la": "lak",
-  "tv": "aud",
-  "tw": "twd",
-  "tt": "ttd",
-  "tr": "try",
-  "lk": "lkr",
-  "li": "chf",
-  "lv": "eur",
-  "to": "top",
-  "lt": "ltl",
-  "lu": "eur",
-  "lr": "lrd",
-  "ls": "lsl",
-  "th": "thb",
-  "tf": "eur",
-  "tg": "xof",
-  "td": "xaf",
-  "tc": "usd",
-  "ly": "lyd",
-  "va": "eur",
-  "vc": "xcd",
-  "ae": "aed",
-  "ad": "eur",
-  "ag": "xcd",
-  "af": "afn",
-  "ai": "xcd",
-  "vi": "usd",
-  "is": "isk",
-  "ir": "irr",
-  "am": "amd",
-  "al": "all",
-  "ao": "aoa",
-  "as": "usd",
-  "ar": "ars",
-  "au": "aud",
-  "at": "eur",
-  "aw": "awg",
-  "in": "inr",
-  "ax": "eur",
-  "az": "azn",
-  "ie": "eur",
-  "id": "idr",
-  "ua": "uah",
-  "qa": "qar",
-  "mz": "mzn"
+  "usd": {
+    "symbol": "$",
+    "name": "US Dollar",
+    "countriesIso": [
+      "bq",
+      "tl",
+      "gu",
+      "sv",
+      "pr",
+      "pw",
+      "ec",
+      "mh",
+      "mp",
+      "io",
+      "fm",
+      "vg",
+      "us",
+      "um",
+      "tc",
+      "vi",
+      "as"
+    ]
+  },
+  "cad": {
+    "symbol": "CA$",
+    "name": "Canadian Dollar",
+    "countriesIso": [
+      "ca"
+    ]
+  },
+  "eur": {
+    "symbol": "€",
+    "name": "Euro",
+    "countriesIso": [
+      "be",
+      "bl",
+      "re",
+      "gr",
+      "gp",
+      "gf",
+      "pt",
+      "pm",
+      "ee",
+      "it",
+      "es",
+      "me",
+      "mf",
+      "mc",
+      "mt",
+      "mq",
+      "fr",
+      "fi",
+      "nl",
+      "xk",
+      "cy",
+      "sk",
+      "si",
+      "sm",
+      "de",
+      "yt",
+      "lv",
+      "lu",
+      "tf",
+      "va",
+      "ad",
+      "at",
+      "ax",
+      "ie"
+    ]
+  },
+  "aed": {
+    "symbol": "AED",
+    "name": "United Arab Emirates Dirham",
+    "countriesIso": [
+      "ae"
+    ]
+  },
+  "afn": {
+    "symbol": "Af",
+    "name": "Afghan Afghani",
+    "countriesIso": [
+      "af"
+    ]
+  },
+  "all": {
+    "symbol": "ALL",
+    "name": "Albanian Lek",
+    "countriesIso": [
+      "al"
+    ]
+  },
+  "amd": {
+    "symbol": "AMD",
+    "name": "Armenian Dram",
+    "countriesIso": [
+      "am"
+    ]
+  },
+  "ars": {
+    "symbol": "AR$",
+    "name": "Argentine Peso",
+    "countriesIso": [
+      "ar"
+    ]
+  },
+  "aud": {
+    "symbol": "AU$",
+    "name": "Australian Dollar",
+    "countriesIso": [
+      "hm",
+      "nf",
+      "nr",
+      "cc",
+      "cx",
+      "ki",
+      "tv",
+      "au"
+    ]
+  },
+  "azn": {
+    "symbol": "man.",
+    "name": "Azerbaijani Manat",
+    "countriesIso": [
+      "az"
+    ]
+  },
+  "bam": {
+    "symbol": "KM",
+    "name": "Bosnia-Herzegovina Convertible Mark",
+    "countriesIso": [
+      "ba"
+    ]
+  },
+  "bdt": {
+    "symbol": "Tk",
+    "name": "Bangladeshi Taka",
+    "countriesIso": [
+      "bd"
+    ]
+  },
+  "bgn": {
+    "symbol": "BGN",
+    "name": "Bulgarian Lev",
+    "countriesIso": [
+      "bg"
+    ]
+  },
+  "bhd": {
+    "symbol": "BD",
+    "name": "Bahraini Dinar",
+    "countriesIso": [
+      "bh"
+    ]
+  },
+  "bif": {
+    "symbol": "FBu",
+    "name": "Burundian Franc",
+    "countriesIso": [
+      "bi"
+    ]
+  },
+  "bnd": {
+    "symbol": "BN$",
+    "name": "Brunei Dollar",
+    "countriesIso": [
+      "bn"
+    ]
+  },
+  "bob": {
+    "symbol": "Bs",
+    "name": "Bolivian Boliviano",
+    "countriesIso": [
+      "bo"
+    ]
+  },
+  "brl": {
+    "symbol": "R$",
+    "name": "Brazilian Real",
+    "countriesIso": [
+      "br"
+    ]
+  },
+  "bwp": {
+    "symbol": "BWP",
+    "name": "Botswanan Pula",
+    "countriesIso": [
+      "bw"
+    ]
+  },
+  "byr": {
+    "symbol": "BYR",
+    "name": "Belarusian Ruble",
+    "countriesIso": [
+      "by"
+    ]
+  },
+  "bzd": {
+    "symbol": "BZ$",
+    "name": "Belize Dollar",
+    "countriesIso": [
+      "bz"
+    ]
+  },
+  "cdf": {
+    "symbol": "CDF",
+    "name": "Congolese Franc",
+    "countriesIso": [
+      "cd"
+    ]
+  },
+  "chf": {
+    "symbol": "CHF",
+    "name": "Swiss Franc",
+    "countriesIso": [
+      "ch",
+      "li"
+    ]
+  },
+  "clp": {
+    "symbol": "CL$",
+    "name": "Chilean Peso",
+    "countriesIso": [
+      "cl"
+    ]
+  },
+  "cny": {
+    "symbol": "CN¥",
+    "name": "Chinese Yuan",
+    "countriesIso": [
+      "cn"
+    ]
+  },
+  "cop": {
+    "symbol": "CO$",
+    "name": "Colombian Peso",
+    "countriesIso": [
+      "co"
+    ]
+  },
+  "crc": {
+    "symbol": "₡",
+    "name": "Costa Rican Colón",
+    "countriesIso": [
+      "cr"
+    ]
+  },
+  "cve": {
+    "symbol": "CV$",
+    "name": "Cape Verdean Escudo",
+    "countriesIso": [
+      "cv"
+    ]
+  },
+  "czk": {
+    "symbol": "Kč",
+    "name": "Czech Republic Koruna",
+    "countriesIso": [
+      "cz"
+    ]
+  },
+  "djf": {
+    "symbol": "Fdj",
+    "name": "Djiboutian Franc",
+    "countriesIso": [
+      "dj"
+    ]
+  },
+  "dkk": {
+    "symbol": "Dkr",
+    "name": "Danish Krone",
+    "countriesIso": [
+      "gl",
+      "fo",
+      "dk"
+    ]
+  },
+  "dop": {
+    "symbol": "RD$",
+    "name": "Dominican Peso",
+    "countriesIso": [
+      "do"
+    ]
+  },
+  "dzd": {
+    "symbol": "DA",
+    "name": "Algerian Dinar",
+    "countriesIso": [
+      "dz"
+    ]
+  },
+  "eek": {
+    "symbol": "Ekr",
+    "name": "Estonian Kroon",
+    "countriesIso": []
+  },
+  "egp": {
+    "symbol": "EGP",
+    "name": "Egyptian Pound",
+    "countriesIso": [
+      "eg"
+    ]
+  },
+  "ern": {
+    "symbol": "Nfk",
+    "name": "Eritrean Nakfa",
+    "countriesIso": [
+      "er"
+    ]
+  },
+  "etb": {
+    "symbol": "Br",
+    "name": "Ethiopian Birr",
+    "countriesIso": [
+      "et"
+    ]
+  },
+  "gbp": {
+    "symbol": "£",
+    "name": "British Pound Sterling",
+    "countriesIso": [
+      "je",
+      "gs",
+      "gg",
+      "gb",
+      "im"
+    ]
+  },
+  "gel": {
+    "symbol": "GEL",
+    "name": "Georgian Lari",
+    "countriesIso": [
+      "ge"
+    ]
+  },
+  "ghs": {
+    "symbol": "GH₵",
+    "name": "Ghanaian Cedi",
+    "countriesIso": [
+      "gh"
+    ]
+  },
+  "gnf": {
+    "symbol": "FG",
+    "name": "Guinean Franc",
+    "countriesIso": [
+      "gn"
+    ]
+  },
+  "gtq": {
+    "symbol": "GTQ",
+    "name": "Guatemalan Quetzal",
+    "countriesIso": [
+      "gt"
+    ]
+  },
+  "hkd": {
+    "symbol": "HK$",
+    "name": "Hong Kong Dollar",
+    "countriesIso": [
+      "hk"
+    ]
+  },
+  "hnl": {
+    "symbol": "HNL",
+    "name": "Honduran Lempira",
+    "countriesIso": [
+      "hn"
+    ]
+  },
+  "hrk": {
+    "symbol": "kn",
+    "name": "Croatian Kuna",
+    "countriesIso": [
+      "hr"
+    ]
+  },
+  "huf": {
+    "symbol": "Ft",
+    "name": "Hungarian Forint",
+    "countriesIso": [
+      "hu"
+    ]
+  },
+  "idr": {
+    "symbol": "Rp",
+    "name": "Indonesian Rupiah",
+    "countriesIso": [
+      "id"
+    ]
+  },
+  "ils": {
+    "symbol": "₪",
+    "name": "Israeli New Sheqel",
+    "countriesIso": [
+      "ps",
+      "il"
+    ]
+  },
+  "inr": {
+    "symbol": "Rs",
+    "name": "Indian Rupee",
+    "countriesIso": [
+      "in"
+    ]
+  },
+  "iqd": {
+    "symbol": "IQD",
+    "name": "Iraqi Dinar",
+    "countriesIso": [
+      "iq"
+    ]
+  },
+  "irr": {
+    "symbol": "IRR",
+    "name": "Iranian Rial",
+    "countriesIso": [
+      "ir"
+    ]
+  },
+  "isk": {
+    "symbol": "Ikr",
+    "name": "Icelandic Króna",
+    "countriesIso": [
+      "is"
+    ]
+  },
+  "jmd": {
+    "symbol": "J$",
+    "name": "Jamaican Dollar",
+    "countriesIso": [
+      "jm"
+    ]
+  },
+  "jod": {
+    "symbol": "JD",
+    "name": "Jordanian Dinar",
+    "countriesIso": [
+      "jo"
+    ]
+  },
+  "jpy": {
+    "symbol": "¥",
+    "name": "Japanese Yen",
+    "countriesIso": [
+      "jp"
+    ]
+  },
+  "kes": {
+    "symbol": "Ksh",
+    "name": "Kenyan Shilling",
+    "countriesIso": [
+      "ke"
+    ]
+  },
+  "khr": {
+    "symbol": "KHR",
+    "name": "Cambodian Riel",
+    "countriesIso": [
+      "kh"
+    ]
+  },
+  "kmf": {
+    "symbol": "CF",
+    "name": "Comorian Franc",
+    "countriesIso": [
+      "km"
+    ]
+  },
+  "krw": {
+    "symbol": "₩",
+    "name": "South Korean Won",
+    "countriesIso": [
+      "kr"
+    ]
+  },
+  "kwd": {
+    "symbol": "KD",
+    "name": "Kuwaiti Dinar",
+    "countriesIso": [
+      "kw"
+    ]
+  },
+  "kzt": {
+    "symbol": "KZT",
+    "name": "Kazakhstani Tenge",
+    "countriesIso": [
+      "kz"
+    ]
+  },
+  "lbp": {
+    "symbol": "LB£",
+    "name": "Lebanese Pound",
+    "countriesIso": [
+      "lb"
+    ]
+  },
+  "lkr": {
+    "symbol": "SLRs",
+    "name": "Sri Lankan Rupee",
+    "countriesIso": [
+      "lk"
+    ]
+  },
+  "ltl": {
+    "symbol": "Lt",
+    "name": "Lithuanian Litas",
+    "countriesIso": [
+      "lt"
+    ]
+  },
+  "lvl": {
+    "symbol": "Ls",
+    "name": "Latvian Lats",
+    "countriesIso": []
+  },
+  "lyd": {
+    "symbol": "LD",
+    "name": "Libyan Dinar",
+    "countriesIso": [
+      "ly"
+    ]
+  },
+  "mad": {
+    "symbol": "MAD",
+    "name": "Moroccan Dirham",
+    "countriesIso": [
+      "eh",
+      "ma"
+    ]
+  },
+  "mdl": {
+    "symbol": "MDL",
+    "name": "Moldovan Leu",
+    "countriesIso": [
+      "md"
+    ]
+  },
+  "mga": {
+    "symbol": "MGA",
+    "name": "Malagasy Ariary",
+    "countriesIso": [
+      "mg"
+    ]
+  },
+  "mkd": {
+    "symbol": "MKD",
+    "name": "Macedonian Denar",
+    "countriesIso": [
+      "mk"
+    ]
+  },
+  "mmk": {
+    "symbol": "MMK",
+    "name": "Myanma Kyat",
+    "countriesIso": [
+      "mm"
+    ]
+  },
+  "mop": {
+    "symbol": "MOP$",
+    "name": "Macanese Pataca",
+    "countriesIso": [
+      "mo"
+    ]
+  },
+  "mur": {
+    "symbol": "MURs",
+    "name": "Mauritian Rupee",
+    "countriesIso": [
+      "mu"
+    ]
+  },
+  "mxn": {
+    "symbol": "MX$",
+    "name": "Mexican Peso",
+    "countriesIso": [
+      "mx"
+    ]
+  },
+  "myr": {
+    "symbol": "RM",
+    "name": "Malaysian Ringgit",
+    "countriesIso": [
+      "my"
+    ]
+  },
+  "mzn": {
+    "symbol": "MTn",
+    "name": "Mozambican Metical",
+    "countriesIso": [
+      "mz"
+    ]
+  },
+  "nad": {
+    "symbol": "N$",
+    "name": "Namibian Dollar",
+    "countriesIso": [
+      "na"
+    ]
+  },
+  "ngn": {
+    "symbol": "₦",
+    "name": "Nigerian Naira",
+    "countriesIso": [
+      "ng"
+    ]
+  },
+  "nio": {
+    "symbol": "C$",
+    "name": "Nicaraguan Córdoba",
+    "countriesIso": [
+      "ni"
+    ]
+  },
+  "nok": {
+    "symbol": "Nkr",
+    "name": "Norwegian Krone",
+    "countriesIso": [
+      "bv",
+      "sj",
+      "no"
+    ]
+  },
+  "npr": {
+    "symbol": "NPRs",
+    "name": "Nepalese Rupee",
+    "countriesIso": [
+      "np"
+    ]
+  },
+  "nzd": {
+    "symbol": "NZ$",
+    "name": "New Zealand Dollar",
+    "countriesIso": [
+      "tk",
+      "pn",
+      "nz",
+      "nu",
+      "ck"
+    ]
+  },
+  "omr": {
+    "symbol": "OMR",
+    "name": "Omani Rial",
+    "countriesIso": [
+      "om"
+    ]
+  },
+  "pab": {
+    "symbol": "B/.",
+    "name": "Panamanian Balboa",
+    "countriesIso": [
+      "pa"
+    ]
+  },
+  "pen": {
+    "symbol": "S/.",
+    "name": "Peruvian Nuevo Sol",
+    "countriesIso": [
+      "pe"
+    ]
+  },
+  "php": {
+    "symbol": "₱",
+    "name": "Philippine Peso",
+    "countriesIso": [
+      "ph"
+    ]
+  },
+  "pkr": {
+    "symbol": "PKRs",
+    "name": "Pakistani Rupee",
+    "countriesIso": [
+      "pk"
+    ]
+  },
+  "pln": {
+    "symbol": "zł",
+    "name": "Polish Zloty",
+    "countriesIso": [
+      "pl"
+    ]
+  },
+  "pyg": {
+    "symbol": "₲",
+    "name": "Paraguayan Guarani",
+    "countriesIso": [
+      "py"
+    ]
+  },
+  "qar": {
+    "symbol": "QR",
+    "name": "Qatari Rial",
+    "countriesIso": [
+      "qa"
+    ]
+  },
+  "ron": {
+    "symbol": "RON",
+    "name": "Romanian Leu",
+    "countriesIso": [
+      "ro"
+    ]
+  },
+  "rsd": {
+    "symbol": "din.",
+    "name": "Serbian Dinar",
+    "countriesIso": [
+      "rs"
+    ]
+  },
+  "rub": {
+    "symbol": "RUB",
+    "name": "Russian Ruble",
+    "countriesIso": [
+      "ru"
+    ]
+  },
+  "rwf": {
+    "symbol": "RWF",
+    "name": "Rwandan Franc",
+    "countriesIso": [
+      "rw"
+    ]
+  },
+  "sar": {
+    "symbol": "SR",
+    "name": "Saudi Riyal",
+    "countriesIso": [
+      "sa"
+    ]
+  },
+  "sdg": {
+    "symbol": "SDG",
+    "name": "Sudanese Pound",
+    "countriesIso": [
+      "sd"
+    ]
+  },
+  "sek": {
+    "symbol": "Skr",
+    "name": "Swedish Krona",
+    "countriesIso": [
+      "se"
+    ]
+  },
+  "sgd": {
+    "symbol": "S$",
+    "name": "Singapore Dollar",
+    "countriesIso": [
+      "sg"
+    ]
+  },
+  "sos": {
+    "symbol": "Ssh",
+    "name": "Somali Shilling",
+    "countriesIso": [
+      "so"
+    ]
+  },
+  "syp": {
+    "symbol": "SY£",
+    "name": "Syrian Pound",
+    "countriesIso": [
+      "sy"
+    ]
+  },
+  "thb": {
+    "symbol": "฿",
+    "name": "Thai Baht",
+    "countriesIso": [
+      "th"
+    ]
+  },
+  "tnd": {
+    "symbol": "DT",
+    "name": "Tunisian Dinar",
+    "countriesIso": [
+      "tn"
+    ]
+  },
+  "top": {
+    "symbol": "T$",
+    "name": "Tongan Paʻanga",
+    "countriesIso": [
+      "to"
+    ]
+  },
+  "try": {
+    "symbol": "TL",
+    "name": "Turkish Lira",
+    "countriesIso": [
+      "tr"
+    ]
+  },
+  "ttd": {
+    "symbol": "TT$",
+    "name": "Trinidad and Tobago Dollar",
+    "countriesIso": [
+      "tt"
+    ]
+  },
+  "twd": {
+    "symbol": "NT$",
+    "name": "New Taiwan Dollar",
+    "countriesIso": [
+      "tw"
+    ]
+  },
+  "tzs": {
+    "symbol": "TSh",
+    "name": "Tanzanian Shilling",
+    "countriesIso": [
+      "tz"
+    ]
+  },
+  "uah": {
+    "symbol": "₴",
+    "name": "Ukrainian Hryvnia",
+    "countriesIso": [
+      "ua"
+    ]
+  },
+  "ugx": {
+    "symbol": "USh",
+    "name": "Ugandan Shilling",
+    "countriesIso": [
+      "ug"
+    ]
+  },
+  "uyu": {
+    "symbol": "$U",
+    "name": "Uruguayan Peso",
+    "countriesIso": [
+      "uy"
+    ]
+  },
+  "uzs": {
+    "symbol": "UZS",
+    "name": "Uzbekistan Som",
+    "countriesIso": [
+      "uz"
+    ]
+  },
+  "vef": {
+    "symbol": "Bs.F.",
+    "name": "Venezuelan Bolívar",
+    "countriesIso": [
+      "ve"
+    ]
+  },
+  "vnd": {
+    "symbol": "₫",
+    "name": "Vietnamese Dong",
+    "countriesIso": [
+      "vn"
+    ]
+  },
+  "xaf": {
+    "symbol": "FCFA",
+    "name": "CFA Franc BEAC",
+    "countriesIso": [
+      "gq",
+      "ga",
+      "cm",
+      "cg",
+      "cf",
+      "td"
+    ]
+  },
+  "xof": {
+    "symbol": "CFA",
+    "name": "CFA Franc BCEAO",
+    "countriesIso": [
+      "bf",
+      "bj",
+      "gw",
+      "ml",
+      "ne",
+      "ci",
+      "sn",
+      "tg"
+    ]
+  },
+  "yer": {
+    "symbol": "YR",
+    "name": "Yemeni Rial",
+    "countriesIso": [
+      "ye"
+    ]
+  },
+  "zar": {
+    "symbol": "R",
+    "name": "South African Rand",
+    "countriesIso": [
+      "za"
+    ]
+  },
+  "zmk": {
+    "symbol": "ZK",
+    "name": "Zambian Kwacha",
+    "countriesIso": [
+      "zm"
+    ]
+  }
 }
+
 },{}]},{},[10]);
