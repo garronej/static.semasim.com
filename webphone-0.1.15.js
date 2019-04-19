@@ -3218,7 +3218,7 @@ var UiBubble = /** @class */ (function () {
 })(UiBubble || (UiBubble = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/loadUiClassHtml":138,"../../../shared/dist/lib/types":146,"../templates/UiConversation.html":128,"../templates/UiConversation.less":129,"buffer":2,"moment":116,"phone-number":120,"ts-events-extended":127}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":138,"../../../shared/dist/lib/types":147,"../templates/UiConversation.html":128,"../templates/UiConversation.less":129,"buffer":2,"moment":116,"phone-number":120,"ts-events-extended":127}],10:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -3541,7 +3541,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/loadUiClassHtml":138,"../../../shared/dist/lib/types":146,"../templates/UiPhonebook.html":131,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":138,"../../../shared/dist/lib/types":147,"../templates/UiPhonebook.html":131,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -3875,7 +3875,7 @@ var UiVoiceCall = /** @class */ (function () {
 }());
 exports.UiVoiceCall = UiVoiceCall;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":138,"../../../shared/dist/lib/tools/modal_stack":144,"../templates/UiVoiceCall.html":133,"phone-number":120,"ts-events-extended":127}],14:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":138,"../../../shared/dist/lib/tools/modal_stack":145,"../templates/UiVoiceCall.html":133,"phone-number":120,"ts-events-extended":127}],14:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4596,7 +4596,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/Ua":136,"../../../shared/dist/lib/toBackend/connection":139,"../../../shared/dist/lib/toBackend/localApiHandlers":140,"../../../shared/dist/lib/toBackend/remoteApiCaller":141,"../../../shared/dist/lib/tools/bootbox_custom":142,"../../../shared/dist/lib/tools/standalonePolyfills":145,"../../../shared/dist/lib/types":146,"../../../shared/dist/lib/webApiCaller":147,"./UiWebphoneController":14,"array.prototype.find":17,"es6-map/implement":90,"es6-weak-map/implement":101}],16:[function(require,module,exports){
+},{"../../../shared/dist/lib/Ua":136,"../../../shared/dist/lib/toBackend/connection":139,"../../../shared/dist/lib/toBackend/localApiHandlers":140,"../../../shared/dist/lib/toBackend/remoteApiCaller":141,"../../../shared/dist/lib/tools/bootbox_custom":142,"../../../shared/dist/lib/tools/standalonePolyfills":146,"../../../shared/dist/lib/types":147,"../../../shared/dist/lib/webApiCaller":148,"./UiWebphoneController":14,"array.prototype.find":17,"es6-map/implement":90,"es6-weak-map/implement":101}],16:[function(require,module,exports){
 'use strict';
 
 var ES = require('es-abstract/es6');
@@ -14120,7 +14120,7 @@ exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 exports.urlSafeB64 = bundledData_1.urlSafeB64;
 
-},{"../../../gateway/dist/lib/misc/bundledData":193,"../../../gateway/dist/lib/misc/sipRouting":194,"../../../gateway/dist/lib/types":195}],136:[function(require,module,exports){
+},{"../../../gateway/dist/lib/misc/bundledData":195,"../../../gateway/dist/lib/misc/sipRouting":196,"../../../gateway/dist/lib/types":197}],136:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 //NOTE: Require jssip_compat loaded on the page.
@@ -14735,7 +14735,7 @@ function newIceCandidateHandler(rtcICEServer) {
 })(newIceCandidateHandler || (newIceCandidateHandler = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../gateway":135,"./env":137,"./toBackend/connection":139,"./toBackend/localApiHandlers":140,"buffer":2,"run-exclusive":169,"ts-events-extended":181,"ts-sip":189}],137:[function(require,module,exports){
+},{"../gateway":135,"./env":137,"./toBackend/connection":139,"./toBackend/localApiHandlers":140,"buffer":2,"run-exclusive":170,"ts-events-extended":182,"ts-sip":190}],137:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** semasim.com or dev.semasim.com */
@@ -14994,7 +14994,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../env":137,"../tools/bootbox_custom":142,"./localApiHandlers":140,"./remoteApiCaller":141,"js-cookie":167,"ts-events-extended":181,"ts-sip":189}],140:[function(require,module,exports){
+},{"../env":137,"../tools/bootbox_custom":142,"./localApiHandlers":140,"./remoteApiCaller":141,"js-cookie":168,"ts-events-extended":182,"ts-sip":190}],140:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15615,7 +15615,7 @@ exports.getRTCIceServer = (function () {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":149,"../tools/bootbox_custom":142,"./remoteApiCaller":141,"chan-dongle-extended-client/dist/lib/types":151,"ts-events-extended":181}],141:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":150,"../tools/bootbox_custom":142,"./remoteApiCaller":141,"chan-dongle-extended-client/dist/lib/types":152,"ts-events-extended":182}],141:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -16489,7 +16489,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":148,"../types":146,"./connection":139,"phone-number":168,"ts-events-extended":181,"ts-sip":189}],142:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":149,"../types":147,"./connection":139,"phone-number":169,"ts-events-extended":182,"ts-sip":190}],142:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -16597,7 +16597,123 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":144}],143:[function(require,module,exports){
+},{"./modal_stack":145}],143:[function(require,module,exports){
+"use strict";
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.data = require("../../../res/currency.json");
+function isValidCountryIso(countryIso) {
+    //NOTE: Avoid loading if we do not need
+    if (isValidCountryIso.countryIsoRecord === undefined) {
+        isValidCountryIso.countryIsoRecord = (function () {
+            var e_1, _a, e_2, _b;
+            var out = {};
+            try {
+                for (var _c = __values(Object.keys(exports.data)), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var currency = _d.value;
+                    try {
+                        for (var _e = __values(exports.data[currency].countriesIso), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var countryIso_1 = _f.value;
+                            out[countryIso_1] = true;
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return out;
+        })();
+        return isValidCountryIso(countryIso);
+    }
+    if (typeof countryIso !== "string" || !/^[a-z]{2}$/.test(countryIso)) {
+        return false;
+    }
+    return !!isValidCountryIso.countryIsoRecord[countryIso];
+}
+exports.isValidCountryIso = isValidCountryIso;
+(function (isValidCountryIso) {
+    isValidCountryIso.countryIsoRecord = undefined;
+})(isValidCountryIso = exports.isValidCountryIso || (exports.isValidCountryIso = {}));
+function getCountryCurrency(countryIso) {
+    var cache = getCountryCurrency.cache;
+    {
+        var currency = cache[countryIso];
+        if (currency !== undefined) {
+            return currency;
+        }
+    }
+    cache[countryIso] = Object.keys(exports.data)
+        .map(function (currency) { return ({ currency: currency, "countriesIso": exports.data[currency].countriesIso }); })
+        .find(function (_a) {
+        var countriesIso = _a.countriesIso;
+        return !!countriesIso.find(function (_countryIso) { return _countryIso === countryIso; });
+    })
+        .currency;
+    return getCountryCurrency(countryIso);
+}
+exports.getCountryCurrency = getCountryCurrency;
+(function (getCountryCurrency) {
+    getCountryCurrency.cache = {};
+})(getCountryCurrency = exports.getCountryCurrency || (exports.getCountryCurrency = {}));
+function convertFromEuro(euroAmount, currencyTo) {
+    var changeRates = convertFromEuro.changeRates;
+    if (changeRates === undefined) {
+        throw new Error("Changes rates have not been defined");
+    }
+    return euroAmount * changeRates[currencyTo];
+}
+exports.convertFromEuro = convertFromEuro;
+(function (convertFromEuro) {
+    convertFromEuro.changeRates = undefined;
+})(convertFromEuro = exports.convertFromEuro || (exports.convertFromEuro = {}));
+/**
+ * get currency of stripe card,
+ * if there is no special pricing for the currency
+ * "eur" will be returned.
+ *
+ * NOTE: This function does seems to come out of left field
+ * but this operation is done on the frontend and the backend
+ * so we export it.
+ *
+ */
+function getCardCurrency(stripeCard, pricingByCurrency) {
+    var currency = getCountryCurrency(stripeCard.country.toLowerCase());
+    if (!(currency in pricingByCurrency)) {
+        currency = "eur";
+    }
+    return currency;
+}
+exports.getCardCurrency = getCardCurrency;
+function prettyPrint(amount, currency) {
+    return (amount / 100).toLocaleString(undefined, {
+        "style": "currency",
+        currency: currency
+    });
+}
+exports.prettyPrint = prettyPrint;
+
+},{"../../../res/currency.json":194}],144:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -16620,7 +16736,7 @@ function isAscendingAlphabeticalOrder(a, b) {
 }
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
 
-},{}],144:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -16685,6 +16801,7 @@ function add(modal, options) {
                 switch (_a.label) {
                     case 0:
                         if (stack.indexOf(modal) >= 0) {
+                            resolve();
                             return [2 /*return*/];
                         }
                         stack.push(modal);
@@ -16722,14 +16839,15 @@ function add(modal, options) {
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        modal.modal("show");
                         modal.one("shown.bs.modal", function () { return resolve(); });
+                        modal.modal("show");
                         return [2 /*return*/];
                 }
             });
         }); }); },
         "hide": function () { return new Promise(function (resolve) {
             if (stack.indexOf(modal) < 0) {
+                resolve();
                 return;
             }
             modal.one("hidden.bs.modal", function () { return resolve(); });
@@ -16739,7 +16857,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],145:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 if (typeof ArrayBuffer.isView !== "function") {
     Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
 }
@@ -16749,8 +16867,19 @@ if (typeof String.prototype.startsWith !== "function") {
     };
 }
 
-},{}],146:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
@@ -16761,8 +16890,29 @@ var __values = (this && this.__values) || function (o) {
         }
     };
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var isAscendingAlphabeticalOrder_1 = require("./tools/isAscendingAlphabeticalOrder");
+var currencyLib = require("./tools/currency");
 var UserSim;
 (function (UserSim) {
     var Owned;
@@ -16945,8 +17095,110 @@ var webphoneData;
     }
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
+var shop;
+(function (shop) {
+    var Cart;
+    (function (Cart) {
+        function getPrice(cart, convertFromEuro) {
+            var out = cart
+                .map(function (_a) {
+                var price = _a.product.price, quantity = _a.quantity;
+                return Price.operation(price, function (amount) { return amount * quantity; });
+            })
+                .reduce(function (out, price) { return Price.addition(out, price, convertFromEuro); }, { "eur": 0 });
+            //console.log("Cart.getGoodsPrice: ", JSON.stringify({ cart, out }, null, 2));
+            return out;
+        }
+        Cart.getPrice = getPrice;
+        function getOverallFootprint(cart) {
+            return !!cart.find(function (_a) {
+                var product = _a.product;
+                return product.footprint === "VOLUME";
+            }) ? "VOLUME" : "FLAT";
+        }
+        Cart.getOverallFootprint = getOverallFootprint;
+    })(Cart = shop.Cart || (shop.Cart = {}));
+    var Price;
+    (function (Price) {
+        /**
+         * Out of place.
+         * If the amount for a currency is defined in one object
+         * but not in the other the undefined amount will be
+         * computed from the rateChange
+         *
+         */
+        function binaryOperation(price1, price2, op, convertFromEuro) {
+            var e_2, _a, e_3, _b;
+            price1 = __assign({}, price1);
+            price2 = __assign({}, price2);
+            try {
+                //NOTE: Ugly but does not involve map and less verbose.
+                for (var _c = __values(__spread(Object.keys(price1), Object.keys(price2))), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var currency = _d.value;
+                    try {
+                        for (var _e = __values([price1, price2]), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var price = _f.value;
+                            if (!(currency in price)) {
+                                price[currency] = convertFromEuro(price["eur"], currency);
+                            }
+                        }
+                    }
+                    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_3) throw e_3.error; }
+                    }
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+            var out = { "eur": 0 };
+            for (var currency in price1) {
+                out[currency] = op(price1[currency], price2[currency]);
+            }
+            return out;
+        }
+        Price.binaryOperation = binaryOperation;
+        function operation(price, op) {
+            var out = { "eur": 0 };
+            for (var currency in price) {
+                out[currency] = op(price[currency]);
+            }
+            return out;
+        }
+        Price.operation = operation;
+        function addition(price1, price2, convertFromEuro) {
+            return binaryOperation(price1, price2, function (amount1, amount2) { return amount1 + amount2; }, convertFromEuro);
+        }
+        Price.addition = addition;
+        /**
+         * return the amount of a price in a given currency.
+         * If the amount for the currency is not defined in
+         * the price object it will be computer from the
+         * euro amount.
+         * */
+        function getAmountInCurrency(price, currency, convertFromEuro) {
+            return currency in price ?
+                price[currency] :
+                convertFromEuro(price["eur"], currency);
+        }
+        Price.getAmountInCurrency = getAmountInCurrency;
+        function prettyPrint(price, currency, convertFromEuro) {
+            return currencyLib.prettyPrint(getAmountInCurrency(price, currency, convertFromEuro), currency);
+        }
+        Price.prettyPrint = prettyPrint;
+    })(Price = shop.Price || (shop.Price = {}));
+    ;
+})(shop = exports.shop || (exports.shop = {}));
 
-},{"./tools/isAscendingAlphabeticalOrder":143}],147:[function(require,module,exports){
+},{"./tools/currency":143,"./tools/isAscendingAlphabeticalOrder":144}],148:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -17038,6 +17290,19 @@ function renewPassword(email, newPassword, token) {
     return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
 }
 exports.renewPassword = renewPassword;
+function guessCountryIso() {
+    var methodName = apiDeclaration.guessCountryIso.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.guessCountryIso = guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.cacheOut = undefined;
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+function getChangesRates() {
+    var methodName = apiDeclaration.getChangesRates.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.getChangesRates = getChangesRates;
 function getSubscriptionInfos() {
     var methodName = apiDeclaration.getSubscriptionInfos.methodName;
     return sendRequest(methodName, undefined);
@@ -17075,33 +17340,13 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
-/*
-function buildUrl(
-    methodName: string,
-    params: Record<string, string | undefined>
-): string {
-
-    let query: string[] = [];
-
-    for (let key of Object.keys(params)) {
-
-        let value = params[key];
-
-        if (value === undefined) continue;
-
-        query[query.length] = `${key}=${params[key]}`;
-
-    }
-
-    let url = `https://${c.backendHostname}:${c.webApiPort}/${c.webApiPath}/${methodName}?${query.join("&")}`;
-
-    console.log(`GET ${url}`);
-
-    return url;
+function createStripeCheckoutSession(cart, shipToCountryIso, currency) {
+    var methodName = apiDeclaration.createStripeCheckoutSession.methodName;
+    return sendRequest(methodName, { cart: cart, shipToCountryIso: shipToCountryIso, currency: currency });
 }
-*/ 
+exports.createStripeCheckoutSession = createStripeCheckoutSession;
 
-},{"../web_api_declaration":150,"transfer-tools/dist/lib/JSON_CUSTOM":172}],148:[function(require,module,exports){
+},{"../web_api_declaration":151,"transfer-tools/dist/lib/JSON_CUSTOM":173}],149:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -17200,7 +17445,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],149:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -17253,7 +17498,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],150:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -17281,6 +17526,14 @@ var renewPassword;
 (function (renewPassword) {
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
+var guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.methodName = "guess-country-iso";
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+var getChangesRates;
+(function (getChangesRates) {
+    getChangesRates.methodName = "get-changes-rates";
+})(getChangesRates = exports.getChangesRates || (exports.getChangesRates = {}));
 var getSubscriptionInfos;
 (function (getSubscriptionInfos) {
     getSubscriptionInfos.methodName = "get-subscription-infos";
@@ -17293,8 +17546,12 @@ var unsubscribe;
 (function (unsubscribe) {
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
+var createStripeCheckoutSession;
+(function (createStripeCheckoutSession) {
+    createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
+})(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
 
-},{}],151:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -17315,7 +17572,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],152:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -17518,7 +17775,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":153,"./custom/zalgo":154,"./maps/america":157,"./maps/rainbow":158,"./maps/random":159,"./maps/zebra":160,"./styles":161,"./system/supports-colors":163,"util":8}],153:[function(require,module,exports){
+},{"./custom/trap":154,"./custom/zalgo":155,"./maps/america":158,"./maps/rainbow":159,"./maps/random":160,"./maps/zebra":161,"./styles":162,"./system/supports-colors":164,"util":8}],154:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -17566,7 +17823,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],154:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -17678,7 +17935,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],155:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -17790,7 +18047,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":152}],156:[function(require,module,exports){
+},{"./colors":153}],157:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -17805,7 +18062,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":152,"./extendStringPrototype":155}],157:[function(require,module,exports){
+},{"./colors":153,"./extendStringPrototype":156}],158:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -17817,7 +18074,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],158:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -17831,7 +18088,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],159:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -17843,14 +18100,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],160:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],161:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -17929,7 +18186,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],162:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -17968,7 +18225,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],163:[function(require,module,exports){
+},{"_process":6}],164:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -18123,13 +18380,13 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":162,"_process":6,"os":5}],164:[function(require,module,exports){
+},{"./has-flag.js":163,"_process":6,"os":5}],165:[function(require,module,exports){
 arguments[4][106][0].apply(exports,arguments)
-},{"dup":106}],165:[function(require,module,exports){
+},{"dup":106}],166:[function(require,module,exports){
 arguments[4][107][0].apply(exports,arguments)
-},{"./implementation":164,"dup":107}],166:[function(require,module,exports){
+},{"./implementation":165,"dup":107}],167:[function(require,module,exports){
 arguments[4][110][0].apply(exports,arguments)
-},{"dup":110,"function-bind":165}],167:[function(require,module,exports){
+},{"dup":110,"function-bind":166}],168:[function(require,module,exports){
 /*!
  * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
@@ -18296,13 +18553,13 @@ arguments[4][110][0].apply(exports,arguments)
 	return init(function () {});
 }));
 
-},{}],168:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"_process":6,"dup":120}],169:[function(require,module,exports){
+},{"_process":6,"dup":120}],170:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"dup":121}],170:[function(require,module,exports){
+},{"dup":121}],171:[function(require,module,exports){
 arguments[4][122][0].apply(exports,arguments)
-},{"dup":122}],171:[function(require,module,exports){
+},{"dup":122}],172:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -18637,7 +18894,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":166}],172:[function(require,module,exports){
+},{"has":167}],173:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -18687,7 +18944,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":171}],173:[function(require,module,exports){
+},{"super-json":172}],174:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -18699,7 +18956,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":172,"./stringTransform":174,"./stringTransformExt":175,"./testing":176}],174:[function(require,module,exports){
+},{"./JSON_CUSTOM":173,"./stringTransform":175,"./stringTransformExt":176,"./testing":177}],175:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -18761,7 +19018,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],175:[function(require,module,exports){
+},{"buffer":2}],176:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -18829,7 +19086,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":174}],176:[function(require,module,exports){
+},{"./stringTransform":175}],177:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -19098,17 +19355,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":174}],177:[function(require,module,exports){
+},{"./stringTransform":175}],178:[function(require,module,exports){
 arguments[4][123][0].apply(exports,arguments)
-},{"./SyncEventBase":178,"dup":123}],178:[function(require,module,exports){
+},{"./SyncEventBase":179,"dup":123}],179:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":179,"dup":124}],179:[function(require,module,exports){
+},{"./SyncEventBaseProtected":180,"dup":124}],180:[function(require,module,exports){
 arguments[4][125][0].apply(exports,arguments)
-},{"./defs":180,"dup":125,"run-exclusive":169}],180:[function(require,module,exports){
+},{"./defs":181,"dup":125,"run-exclusive":170}],181:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"dup":126,"setprototypeof":170}],181:[function(require,module,exports){
+},{"dup":126,"setprototypeof":171}],182:[function(require,module,exports){
 arguments[4][127][0].apply(exports,arguments)
-},{"./SyncEvent":177,"./defs":180,"dup":127}],182:[function(require,module,exports){
+},{"./SyncEvent":178,"./defs":181,"dup":127}],183:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -19280,7 +19537,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":181}],183:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":182}],184:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -19592,7 +19849,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":182,"./api/ApiMessage":184,"./core":188,"./misc":192,"colors":156,"ts-events-extended":181}],184:[function(require,module,exports){
+},{"./IConnection":183,"./api/ApiMessage":185,"./core":189,"./misc":193,"colors":157,"ts-events-extended":182}],185:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -19673,7 +19930,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":188,"../misc":192,"buffer":2,"transfer-tools":173}],185:[function(require,module,exports){
+},{"../core":189,"../misc":193,"buffer":2,"transfer-tools":174}],186:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -19855,7 +20112,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":192,"./ApiMessage":184,"colors":156,"util":8}],186:[function(require,module,exports){
+},{"../misc":193,"./ApiMessage":185,"colors":157,"util":8}],187:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -20074,7 +20331,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":192,"./ApiMessage":184,"setprototypeof":170}],187:[function(require,module,exports){
+},{"../misc":193,"./ApiMessage":185,"setprototypeof":171}],188:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -20082,7 +20339,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":185,"./client":186}],188:[function(require,module,exports){
+},{"./Server":186,"./client":187}],189:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -20166,7 +20423,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":190,"./legacy/sip":191,"buffer":2,"setprototypeof":170}],189:[function(require,module,exports){
+},{"./legacy/sdp":191,"./legacy/sip":192,"buffer":2,"setprototypeof":171}],190:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -20178,7 +20435,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":183,"./api":187,"./core":188,"./misc":192}],190:[function(require,module,exports){
+},{"./Socket":184,"./api":188,"./core":189,"./misc":193}],191:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -20294,7 +20551,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],191:[function(require,module,exports){
+},{}],192:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -20685,7 +20942,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],192:[function(require,module,exports){
+},{}],193:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -20983,7 +21240,916 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":188,"buffer":2}],193:[function(require,module,exports){
+},{"./core":189,"buffer":2}],194:[function(require,module,exports){
+module.exports={
+  "usd": {
+    "symbol": "$",
+    "name": "US Dollar",
+    "countriesIso": [
+      "bq",
+      "tl",
+      "gu",
+      "sv",
+      "pr",
+      "pw",
+      "ec",
+      "mh",
+      "mp",
+      "io",
+      "fm",
+      "vg",
+      "us",
+      "um",
+      "tc",
+      "vi",
+      "as"
+    ]
+  },
+  "cad": {
+    "symbol": "CA$",
+    "name": "Canadian Dollar",
+    "countriesIso": [
+      "ca"
+    ]
+  },
+  "eur": {
+    "symbol": "€",
+    "name": "Euro",
+    "countriesIso": [
+      "be",
+      "bl",
+      "re",
+      "gr",
+      "gp",
+      "gf",
+      "pt",
+      "pm",
+      "ee",
+      "it",
+      "es",
+      "me",
+      "mf",
+      "mc",
+      "mt",
+      "mq",
+      "fr",
+      "fi",
+      "nl",
+      "xk",
+      "cy",
+      "sk",
+      "si",
+      "sm",
+      "de",
+      "yt",
+      "lv",
+      "lu",
+      "tf",
+      "va",
+      "ad",
+      "at",
+      "ax",
+      "ie"
+    ]
+  },
+  "aed": {
+    "symbol": "AED",
+    "name": "United Arab Emirates Dirham",
+    "countriesIso": [
+      "ae"
+    ]
+  },
+  "afn": {
+    "symbol": "Af",
+    "name": "Afghan Afghani",
+    "countriesIso": [
+      "af"
+    ]
+  },
+  "all": {
+    "symbol": "ALL",
+    "name": "Albanian Lek",
+    "countriesIso": [
+      "al"
+    ]
+  },
+  "amd": {
+    "symbol": "AMD",
+    "name": "Armenian Dram",
+    "countriesIso": [
+      "am"
+    ]
+  },
+  "ars": {
+    "symbol": "AR$",
+    "name": "Argentine Peso",
+    "countriesIso": [
+      "ar"
+    ]
+  },
+  "aud": {
+    "symbol": "AU$",
+    "name": "Australian Dollar",
+    "countriesIso": [
+      "hm",
+      "nf",
+      "nr",
+      "cc",
+      "cx",
+      "ki",
+      "tv",
+      "au"
+    ]
+  },
+  "azn": {
+    "symbol": "man.",
+    "name": "Azerbaijani Manat",
+    "countriesIso": [
+      "az"
+    ]
+  },
+  "bam": {
+    "symbol": "KM",
+    "name": "Bosnia-Herzegovina Convertible Mark",
+    "countriesIso": [
+      "ba"
+    ]
+  },
+  "bdt": {
+    "symbol": "Tk",
+    "name": "Bangladeshi Taka",
+    "countriesIso": [
+      "bd"
+    ]
+  },
+  "bgn": {
+    "symbol": "BGN",
+    "name": "Bulgarian Lev",
+    "countriesIso": [
+      "bg"
+    ]
+  },
+  "bhd": {
+    "symbol": "BD",
+    "name": "Bahraini Dinar",
+    "countriesIso": [
+      "bh"
+    ]
+  },
+  "bif": {
+    "symbol": "FBu",
+    "name": "Burundian Franc",
+    "countriesIso": [
+      "bi"
+    ]
+  },
+  "bnd": {
+    "symbol": "BN$",
+    "name": "Brunei Dollar",
+    "countriesIso": [
+      "bn"
+    ]
+  },
+  "bob": {
+    "symbol": "Bs",
+    "name": "Bolivian Boliviano",
+    "countriesIso": [
+      "bo"
+    ]
+  },
+  "brl": {
+    "symbol": "R$",
+    "name": "Brazilian Real",
+    "countriesIso": [
+      "br"
+    ]
+  },
+  "bwp": {
+    "symbol": "BWP",
+    "name": "Botswanan Pula",
+    "countriesIso": [
+      "bw"
+    ]
+  },
+  "byr": {
+    "symbol": "BYR",
+    "name": "Belarusian Ruble",
+    "countriesIso": [
+      "by"
+    ]
+  },
+  "bzd": {
+    "symbol": "BZ$",
+    "name": "Belize Dollar",
+    "countriesIso": [
+      "bz"
+    ]
+  },
+  "cdf": {
+    "symbol": "CDF",
+    "name": "Congolese Franc",
+    "countriesIso": [
+      "cd"
+    ]
+  },
+  "chf": {
+    "symbol": "CHF",
+    "name": "Swiss Franc",
+    "countriesIso": [
+      "ch",
+      "li"
+    ]
+  },
+  "clp": {
+    "symbol": "CL$",
+    "name": "Chilean Peso",
+    "countriesIso": [
+      "cl"
+    ]
+  },
+  "cny": {
+    "symbol": "CN¥",
+    "name": "Chinese Yuan",
+    "countriesIso": [
+      "cn"
+    ]
+  },
+  "cop": {
+    "symbol": "CO$",
+    "name": "Colombian Peso",
+    "countriesIso": [
+      "co"
+    ]
+  },
+  "crc": {
+    "symbol": "₡",
+    "name": "Costa Rican Colón",
+    "countriesIso": [
+      "cr"
+    ]
+  },
+  "cve": {
+    "symbol": "CV$",
+    "name": "Cape Verdean Escudo",
+    "countriesIso": [
+      "cv"
+    ]
+  },
+  "czk": {
+    "symbol": "Kč",
+    "name": "Czech Republic Koruna",
+    "countriesIso": [
+      "cz"
+    ]
+  },
+  "djf": {
+    "symbol": "Fdj",
+    "name": "Djiboutian Franc",
+    "countriesIso": [
+      "dj"
+    ]
+  },
+  "dkk": {
+    "symbol": "Dkr",
+    "name": "Danish Krone",
+    "countriesIso": [
+      "gl",
+      "fo",
+      "dk"
+    ]
+  },
+  "dop": {
+    "symbol": "RD$",
+    "name": "Dominican Peso",
+    "countriesIso": [
+      "do"
+    ]
+  },
+  "dzd": {
+    "symbol": "DA",
+    "name": "Algerian Dinar",
+    "countriesIso": [
+      "dz"
+    ]
+  },
+  "eek": {
+    "symbol": "Ekr",
+    "name": "Estonian Kroon",
+    "countriesIso": []
+  },
+  "egp": {
+    "symbol": "EGP",
+    "name": "Egyptian Pound",
+    "countriesIso": [
+      "eg"
+    ]
+  },
+  "ern": {
+    "symbol": "Nfk",
+    "name": "Eritrean Nakfa",
+    "countriesIso": [
+      "er"
+    ]
+  },
+  "etb": {
+    "symbol": "Br",
+    "name": "Ethiopian Birr",
+    "countriesIso": [
+      "et"
+    ]
+  },
+  "gbp": {
+    "symbol": "£",
+    "name": "British Pound Sterling",
+    "countriesIso": [
+      "je",
+      "gs",
+      "gg",
+      "gb",
+      "im"
+    ]
+  },
+  "gel": {
+    "symbol": "GEL",
+    "name": "Georgian Lari",
+    "countriesIso": [
+      "ge"
+    ]
+  },
+  "ghs": {
+    "symbol": "GH₵",
+    "name": "Ghanaian Cedi",
+    "countriesIso": [
+      "gh"
+    ]
+  },
+  "gnf": {
+    "symbol": "FG",
+    "name": "Guinean Franc",
+    "countriesIso": [
+      "gn"
+    ]
+  },
+  "gtq": {
+    "symbol": "GTQ",
+    "name": "Guatemalan Quetzal",
+    "countriesIso": [
+      "gt"
+    ]
+  },
+  "hkd": {
+    "symbol": "HK$",
+    "name": "Hong Kong Dollar",
+    "countriesIso": [
+      "hk"
+    ]
+  },
+  "hnl": {
+    "symbol": "HNL",
+    "name": "Honduran Lempira",
+    "countriesIso": [
+      "hn"
+    ]
+  },
+  "hrk": {
+    "symbol": "kn",
+    "name": "Croatian Kuna",
+    "countriesIso": [
+      "hr"
+    ]
+  },
+  "huf": {
+    "symbol": "Ft",
+    "name": "Hungarian Forint",
+    "countriesIso": [
+      "hu"
+    ]
+  },
+  "idr": {
+    "symbol": "Rp",
+    "name": "Indonesian Rupiah",
+    "countriesIso": [
+      "id"
+    ]
+  },
+  "ils": {
+    "symbol": "₪",
+    "name": "Israeli New Sheqel",
+    "countriesIso": [
+      "ps",
+      "il"
+    ]
+  },
+  "inr": {
+    "symbol": "Rs",
+    "name": "Indian Rupee",
+    "countriesIso": [
+      "in"
+    ]
+  },
+  "iqd": {
+    "symbol": "IQD",
+    "name": "Iraqi Dinar",
+    "countriesIso": [
+      "iq"
+    ]
+  },
+  "irr": {
+    "symbol": "IRR",
+    "name": "Iranian Rial",
+    "countriesIso": [
+      "ir"
+    ]
+  },
+  "isk": {
+    "symbol": "Ikr",
+    "name": "Icelandic Króna",
+    "countriesIso": [
+      "is"
+    ]
+  },
+  "jmd": {
+    "symbol": "J$",
+    "name": "Jamaican Dollar",
+    "countriesIso": [
+      "jm"
+    ]
+  },
+  "jod": {
+    "symbol": "JD",
+    "name": "Jordanian Dinar",
+    "countriesIso": [
+      "jo"
+    ]
+  },
+  "jpy": {
+    "symbol": "¥",
+    "name": "Japanese Yen",
+    "countriesIso": [
+      "jp"
+    ]
+  },
+  "kes": {
+    "symbol": "Ksh",
+    "name": "Kenyan Shilling",
+    "countriesIso": [
+      "ke"
+    ]
+  },
+  "khr": {
+    "symbol": "KHR",
+    "name": "Cambodian Riel",
+    "countriesIso": [
+      "kh"
+    ]
+  },
+  "kmf": {
+    "symbol": "CF",
+    "name": "Comorian Franc",
+    "countriesIso": [
+      "km"
+    ]
+  },
+  "krw": {
+    "symbol": "₩",
+    "name": "South Korean Won",
+    "countriesIso": [
+      "kr"
+    ]
+  },
+  "kwd": {
+    "symbol": "KD",
+    "name": "Kuwaiti Dinar",
+    "countriesIso": [
+      "kw"
+    ]
+  },
+  "kzt": {
+    "symbol": "KZT",
+    "name": "Kazakhstani Tenge",
+    "countriesIso": [
+      "kz"
+    ]
+  },
+  "lbp": {
+    "symbol": "LB£",
+    "name": "Lebanese Pound",
+    "countriesIso": [
+      "lb"
+    ]
+  },
+  "lkr": {
+    "symbol": "SLRs",
+    "name": "Sri Lankan Rupee",
+    "countriesIso": [
+      "lk"
+    ]
+  },
+  "ltl": {
+    "symbol": "Lt",
+    "name": "Lithuanian Litas",
+    "countriesIso": [
+      "lt"
+    ]
+  },
+  "lvl": {
+    "symbol": "Ls",
+    "name": "Latvian Lats",
+    "countriesIso": []
+  },
+  "lyd": {
+    "symbol": "LD",
+    "name": "Libyan Dinar",
+    "countriesIso": [
+      "ly"
+    ]
+  },
+  "mad": {
+    "symbol": "MAD",
+    "name": "Moroccan Dirham",
+    "countriesIso": [
+      "eh",
+      "ma"
+    ]
+  },
+  "mdl": {
+    "symbol": "MDL",
+    "name": "Moldovan Leu",
+    "countriesIso": [
+      "md"
+    ]
+  },
+  "mga": {
+    "symbol": "MGA",
+    "name": "Malagasy Ariary",
+    "countriesIso": [
+      "mg"
+    ]
+  },
+  "mkd": {
+    "symbol": "MKD",
+    "name": "Macedonian Denar",
+    "countriesIso": [
+      "mk"
+    ]
+  },
+  "mmk": {
+    "symbol": "MMK",
+    "name": "Myanma Kyat",
+    "countriesIso": [
+      "mm"
+    ]
+  },
+  "mop": {
+    "symbol": "MOP$",
+    "name": "Macanese Pataca",
+    "countriesIso": [
+      "mo"
+    ]
+  },
+  "mur": {
+    "symbol": "MURs",
+    "name": "Mauritian Rupee",
+    "countriesIso": [
+      "mu"
+    ]
+  },
+  "mxn": {
+    "symbol": "MX$",
+    "name": "Mexican Peso",
+    "countriesIso": [
+      "mx"
+    ]
+  },
+  "myr": {
+    "symbol": "RM",
+    "name": "Malaysian Ringgit",
+    "countriesIso": [
+      "my"
+    ]
+  },
+  "mzn": {
+    "symbol": "MTn",
+    "name": "Mozambican Metical",
+    "countriesIso": [
+      "mz"
+    ]
+  },
+  "nad": {
+    "symbol": "N$",
+    "name": "Namibian Dollar",
+    "countriesIso": [
+      "na"
+    ]
+  },
+  "ngn": {
+    "symbol": "₦",
+    "name": "Nigerian Naira",
+    "countriesIso": [
+      "ng"
+    ]
+  },
+  "nio": {
+    "symbol": "C$",
+    "name": "Nicaraguan Córdoba",
+    "countriesIso": [
+      "ni"
+    ]
+  },
+  "nok": {
+    "symbol": "Nkr",
+    "name": "Norwegian Krone",
+    "countriesIso": [
+      "bv",
+      "sj",
+      "no"
+    ]
+  },
+  "npr": {
+    "symbol": "NPRs",
+    "name": "Nepalese Rupee",
+    "countriesIso": [
+      "np"
+    ]
+  },
+  "nzd": {
+    "symbol": "NZ$",
+    "name": "New Zealand Dollar",
+    "countriesIso": [
+      "tk",
+      "pn",
+      "nz",
+      "nu",
+      "ck"
+    ]
+  },
+  "omr": {
+    "symbol": "OMR",
+    "name": "Omani Rial",
+    "countriesIso": [
+      "om"
+    ]
+  },
+  "pab": {
+    "symbol": "B/.",
+    "name": "Panamanian Balboa",
+    "countriesIso": [
+      "pa"
+    ]
+  },
+  "pen": {
+    "symbol": "S/.",
+    "name": "Peruvian Nuevo Sol",
+    "countriesIso": [
+      "pe"
+    ]
+  },
+  "php": {
+    "symbol": "₱",
+    "name": "Philippine Peso",
+    "countriesIso": [
+      "ph"
+    ]
+  },
+  "pkr": {
+    "symbol": "PKRs",
+    "name": "Pakistani Rupee",
+    "countriesIso": [
+      "pk"
+    ]
+  },
+  "pln": {
+    "symbol": "zł",
+    "name": "Polish Zloty",
+    "countriesIso": [
+      "pl"
+    ]
+  },
+  "pyg": {
+    "symbol": "₲",
+    "name": "Paraguayan Guarani",
+    "countriesIso": [
+      "py"
+    ]
+  },
+  "qar": {
+    "symbol": "QR",
+    "name": "Qatari Rial",
+    "countriesIso": [
+      "qa"
+    ]
+  },
+  "ron": {
+    "symbol": "RON",
+    "name": "Romanian Leu",
+    "countriesIso": [
+      "ro"
+    ]
+  },
+  "rsd": {
+    "symbol": "din.",
+    "name": "Serbian Dinar",
+    "countriesIso": [
+      "rs"
+    ]
+  },
+  "rub": {
+    "symbol": "RUB",
+    "name": "Russian Ruble",
+    "countriesIso": [
+      "ru"
+    ]
+  },
+  "rwf": {
+    "symbol": "RWF",
+    "name": "Rwandan Franc",
+    "countriesIso": [
+      "rw"
+    ]
+  },
+  "sar": {
+    "symbol": "SR",
+    "name": "Saudi Riyal",
+    "countriesIso": [
+      "sa"
+    ]
+  },
+  "sdg": {
+    "symbol": "SDG",
+    "name": "Sudanese Pound",
+    "countriesIso": [
+      "sd"
+    ]
+  },
+  "sek": {
+    "symbol": "Skr",
+    "name": "Swedish Krona",
+    "countriesIso": [
+      "se"
+    ]
+  },
+  "sgd": {
+    "symbol": "S$",
+    "name": "Singapore Dollar",
+    "countriesIso": [
+      "sg"
+    ]
+  },
+  "sos": {
+    "symbol": "Ssh",
+    "name": "Somali Shilling",
+    "countriesIso": [
+      "so"
+    ]
+  },
+  "syp": {
+    "symbol": "SY£",
+    "name": "Syrian Pound",
+    "countriesIso": [
+      "sy"
+    ]
+  },
+  "thb": {
+    "symbol": "฿",
+    "name": "Thai Baht",
+    "countriesIso": [
+      "th"
+    ]
+  },
+  "tnd": {
+    "symbol": "DT",
+    "name": "Tunisian Dinar",
+    "countriesIso": [
+      "tn"
+    ]
+  },
+  "top": {
+    "symbol": "T$",
+    "name": "Tongan Paʻanga",
+    "countriesIso": [
+      "to"
+    ]
+  },
+  "try": {
+    "symbol": "TL",
+    "name": "Turkish Lira",
+    "countriesIso": [
+      "tr"
+    ]
+  },
+  "ttd": {
+    "symbol": "TT$",
+    "name": "Trinidad and Tobago Dollar",
+    "countriesIso": [
+      "tt"
+    ]
+  },
+  "twd": {
+    "symbol": "NT$",
+    "name": "New Taiwan Dollar",
+    "countriesIso": [
+      "tw"
+    ]
+  },
+  "tzs": {
+    "symbol": "TSh",
+    "name": "Tanzanian Shilling",
+    "countriesIso": [
+      "tz"
+    ]
+  },
+  "uah": {
+    "symbol": "₴",
+    "name": "Ukrainian Hryvnia",
+    "countriesIso": [
+      "ua"
+    ]
+  },
+  "ugx": {
+    "symbol": "USh",
+    "name": "Ugandan Shilling",
+    "countriesIso": [
+      "ug"
+    ]
+  },
+  "uyu": {
+    "symbol": "$U",
+    "name": "Uruguayan Peso",
+    "countriesIso": [
+      "uy"
+    ]
+  },
+  "uzs": {
+    "symbol": "UZS",
+    "name": "Uzbekistan Som",
+    "countriesIso": [
+      "uz"
+    ]
+  },
+  "vef": {
+    "symbol": "Bs.F.",
+    "name": "Venezuelan Bolívar",
+    "countriesIso": [
+      "ve"
+    ]
+  },
+  "vnd": {
+    "symbol": "₫",
+    "name": "Vietnamese Dong",
+    "countriesIso": [
+      "vn"
+    ]
+  },
+  "xaf": {
+    "symbol": "FCFA",
+    "name": "CFA Franc BEAC",
+    "countriesIso": [
+      "gq",
+      "ga",
+      "cm",
+      "cg",
+      "cf",
+      "td"
+    ]
+  },
+  "xof": {
+    "symbol": "CFA",
+    "name": "CFA Franc BCEAO",
+    "countriesIso": [
+      "bf",
+      "bj",
+      "gw",
+      "ml",
+      "ne",
+      "ci",
+      "sn",
+      "tg"
+    ]
+  },
+  "yer": {
+    "symbol": "YR",
+    "name": "Yemeni Rial",
+    "countriesIso": [
+      "ye"
+    ]
+  },
+  "zar": {
+    "symbol": "R",
+    "name": "South African Rand",
+    "countriesIso": [
+      "za"
+    ]
+  },
+  "zmk": {
+    "symbol": "ZK",
+    "name": "Zambian Kwacha",
+    "countriesIso": [
+      "zm"
+    ]
+  }
+}
+
+},{}],195:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -21050,7 +22216,7 @@ function extractBundledDataFromHeaders(headers) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"transfer-tools/dist/lib/stringTransform":216}],194:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":218}],196:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 var __read = (this && this.__read) || function (o, n) {
@@ -21135,86 +22301,86 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"transfer-tools/dist/lib/stringTransform":216,"ts-sip":231}],195:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":218,"ts-sip":233}],197:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],196:[function(require,module,exports){
-arguments[4][152][0].apply(exports,arguments)
-},{"./custom/trap":197,"./custom/zalgo":198,"./maps/america":201,"./maps/rainbow":202,"./maps/random":203,"./maps/zebra":204,"./styles":205,"./system/supports-colors":207,"dup":152,"util":8}],197:[function(require,module,exports){
+},{}],198:[function(require,module,exports){
 arguments[4][153][0].apply(exports,arguments)
-},{"dup":153}],198:[function(require,module,exports){
+},{"./custom/trap":199,"./custom/zalgo":200,"./maps/america":203,"./maps/rainbow":204,"./maps/random":205,"./maps/zebra":206,"./styles":207,"./system/supports-colors":209,"dup":153,"util":8}],199:[function(require,module,exports){
 arguments[4][154][0].apply(exports,arguments)
-},{"dup":154}],199:[function(require,module,exports){
+},{"dup":154}],200:[function(require,module,exports){
 arguments[4][155][0].apply(exports,arguments)
-},{"./colors":196,"dup":155}],200:[function(require,module,exports){
+},{"dup":155}],201:[function(require,module,exports){
 arguments[4][156][0].apply(exports,arguments)
-},{"./colors":196,"./extendStringPrototype":199,"dup":156}],201:[function(require,module,exports){
+},{"./colors":198,"dup":156}],202:[function(require,module,exports){
 arguments[4][157][0].apply(exports,arguments)
-},{"dup":157}],202:[function(require,module,exports){
+},{"./colors":198,"./extendStringPrototype":201,"dup":157}],203:[function(require,module,exports){
 arguments[4][158][0].apply(exports,arguments)
-},{"dup":158}],203:[function(require,module,exports){
+},{"dup":158}],204:[function(require,module,exports){
 arguments[4][159][0].apply(exports,arguments)
-},{"dup":159}],204:[function(require,module,exports){
+},{"dup":159}],205:[function(require,module,exports){
 arguments[4][160][0].apply(exports,arguments)
-},{"dup":160}],205:[function(require,module,exports){
+},{"dup":160}],206:[function(require,module,exports){
 arguments[4][161][0].apply(exports,arguments)
-},{"dup":161}],206:[function(require,module,exports){
+},{"dup":161}],207:[function(require,module,exports){
 arguments[4][162][0].apply(exports,arguments)
-},{"_process":6,"dup":162}],207:[function(require,module,exports){
+},{"dup":162}],208:[function(require,module,exports){
 arguments[4][163][0].apply(exports,arguments)
-},{"./has-flag.js":206,"_process":6,"dup":163,"os":5}],208:[function(require,module,exports){
+},{"_process":6,"dup":163}],209:[function(require,module,exports){
+arguments[4][164][0].apply(exports,arguments)
+},{"./has-flag.js":208,"_process":6,"dup":164,"os":5}],210:[function(require,module,exports){
 arguments[4][106][0].apply(exports,arguments)
-},{"dup":106}],209:[function(require,module,exports){
+},{"dup":106}],211:[function(require,module,exports){
 arguments[4][107][0].apply(exports,arguments)
-},{"./implementation":208,"dup":107}],210:[function(require,module,exports){
+},{"./implementation":210,"dup":107}],212:[function(require,module,exports){
 arguments[4][110][0].apply(exports,arguments)
-},{"dup":110,"function-bind":209}],211:[function(require,module,exports){
+},{"dup":110,"function-bind":211}],213:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"dup":121}],212:[function(require,module,exports){
+},{"dup":121}],214:[function(require,module,exports){
 arguments[4][122][0].apply(exports,arguments)
-},{"dup":122}],213:[function(require,module,exports){
-arguments[4][171][0].apply(exports,arguments)
-},{"dup":171,"has":210}],214:[function(require,module,exports){
+},{"dup":122}],215:[function(require,module,exports){
 arguments[4][172][0].apply(exports,arguments)
-},{"dup":172,"super-json":213}],215:[function(require,module,exports){
+},{"dup":172,"has":212}],216:[function(require,module,exports){
 arguments[4][173][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":214,"./stringTransform":216,"./stringTransformExt":217,"./testing":218,"dup":173}],216:[function(require,module,exports){
+},{"dup":173,"super-json":215}],217:[function(require,module,exports){
 arguments[4][174][0].apply(exports,arguments)
-},{"buffer":2,"dup":174}],217:[function(require,module,exports){
+},{"./JSON_CUSTOM":216,"./stringTransform":218,"./stringTransformExt":219,"./testing":220,"dup":174}],218:[function(require,module,exports){
 arguments[4][175][0].apply(exports,arguments)
-},{"./stringTransform":216,"dup":175}],218:[function(require,module,exports){
+},{"buffer":2,"dup":175}],219:[function(require,module,exports){
 arguments[4][176][0].apply(exports,arguments)
-},{"./stringTransform":216,"dup":176}],219:[function(require,module,exports){
+},{"./stringTransform":218,"dup":176}],220:[function(require,module,exports){
+arguments[4][177][0].apply(exports,arguments)
+},{"./stringTransform":218,"dup":177}],221:[function(require,module,exports){
 arguments[4][123][0].apply(exports,arguments)
-},{"./SyncEventBase":220,"dup":123}],220:[function(require,module,exports){
+},{"./SyncEventBase":222,"dup":123}],222:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":221,"dup":124}],221:[function(require,module,exports){
+},{"./SyncEventBaseProtected":223,"dup":124}],223:[function(require,module,exports){
 arguments[4][125][0].apply(exports,arguments)
-},{"./defs":222,"dup":125,"run-exclusive":211}],222:[function(require,module,exports){
+},{"./defs":224,"dup":125,"run-exclusive":213}],224:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"dup":126,"setprototypeof":212}],223:[function(require,module,exports){
+},{"dup":126,"setprototypeof":214}],225:[function(require,module,exports){
 arguments[4][127][0].apply(exports,arguments)
-},{"./SyncEvent":219,"./defs":222,"dup":127}],224:[function(require,module,exports){
-arguments[4][182][0].apply(exports,arguments)
-},{"buffer":2,"dup":182,"ts-events-extended":223}],225:[function(require,module,exports){
+},{"./SyncEvent":221,"./defs":224,"dup":127}],226:[function(require,module,exports){
 arguments[4][183][0].apply(exports,arguments)
-},{"./IConnection":224,"./api/ApiMessage":226,"./core":230,"./misc":234,"colors":200,"dup":183,"ts-events-extended":223}],226:[function(require,module,exports){
+},{"buffer":2,"dup":183,"ts-events-extended":225}],227:[function(require,module,exports){
 arguments[4][184][0].apply(exports,arguments)
-},{"../core":230,"../misc":234,"buffer":2,"dup":184,"transfer-tools":215}],227:[function(require,module,exports){
+},{"./IConnection":226,"./api/ApiMessage":228,"./core":232,"./misc":236,"colors":202,"dup":184,"ts-events-extended":225}],228:[function(require,module,exports){
 arguments[4][185][0].apply(exports,arguments)
-},{"../misc":234,"./ApiMessage":226,"colors":200,"dup":185,"util":8}],228:[function(require,module,exports){
+},{"../core":232,"../misc":236,"buffer":2,"dup":185,"transfer-tools":217}],229:[function(require,module,exports){
 arguments[4][186][0].apply(exports,arguments)
-},{"../misc":234,"./ApiMessage":226,"dup":186,"setprototypeof":212}],229:[function(require,module,exports){
+},{"../misc":236,"./ApiMessage":228,"colors":202,"dup":186,"util":8}],230:[function(require,module,exports){
 arguments[4][187][0].apply(exports,arguments)
-},{"./Server":227,"./client":228,"dup":187}],230:[function(require,module,exports){
+},{"../misc":236,"./ApiMessage":228,"dup":187,"setprototypeof":214}],231:[function(require,module,exports){
 arguments[4][188][0].apply(exports,arguments)
-},{"./legacy/sdp":232,"./legacy/sip":233,"buffer":2,"dup":188,"setprototypeof":212}],231:[function(require,module,exports){
+},{"./Server":229,"./client":230,"dup":188}],232:[function(require,module,exports){
 arguments[4][189][0].apply(exports,arguments)
-},{"./Socket":225,"./api":229,"./core":230,"./misc":234,"dup":189}],232:[function(require,module,exports){
+},{"./legacy/sdp":234,"./legacy/sip":235,"buffer":2,"dup":189,"setprototypeof":214}],233:[function(require,module,exports){
 arguments[4][190][0].apply(exports,arguments)
-},{"dup":190}],233:[function(require,module,exports){
+},{"./Socket":227,"./api":231,"./core":232,"./misc":236,"dup":190}],234:[function(require,module,exports){
 arguments[4][191][0].apply(exports,arguments)
-},{"dup":191}],234:[function(require,module,exports){
+},{"dup":191}],235:[function(require,module,exports){
 arguments[4][192][0].apply(exports,arguments)
-},{"./core":230,"buffer":2,"dup":192}]},{},[15]);
+},{"dup":192}],236:[function(require,module,exports){
+arguments[4][193][0].apply(exports,arguments)
+},{"./core":232,"buffer":2,"dup":193}]},{},[15]);

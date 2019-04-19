@@ -2021,6 +2021,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 },{}],4:[function(require,module,exports){
 (function (Buffer){
 "use strict";
+//NOTE: Imply Cookie manager and StripeCheckout loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12087,6 +12088,7 @@ function add(modal, options) {
                 switch (_a.label) {
                     case 0:
                         if (stack.indexOf(modal) >= 0) {
+                            resolve();
                             return [2 /*return*/];
                         }
                         stack.push(modal);
@@ -12124,14 +12126,15 @@ function add(modal, options) {
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        modal.modal("show");
                         modal.one("shown.bs.modal", function () { return resolve(); });
+                        modal.modal("show");
                         return [2 /*return*/];
                 }
             });
         }); }); },
         "hide": function () { return new Promise(function (resolve) {
             if (stack.indexOf(modal) < 0) {
+                resolve();
                 return;
             }
             modal.one("hidden.bs.modal", function () { return resolve(); });
@@ -12293,6 +12296,11 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
+function createStripeCheckoutSession(cart, shipToCountryIso, currency) {
+    var methodName = apiDeclaration.createStripeCheckoutSession.methodName;
+    return sendRequest(methodName, { cart: cart, shipToCountryIso: shipToCountryIso, currency: currency });
+}
+exports.createStripeCheckoutSession = createStripeCheckoutSession;
 
 },{"../web_api_declaration":139,"transfer-tools/dist/lib/JSON_CUSTOM":144}],139:[function(require,module,exports){
 "use strict";
@@ -12342,6 +12350,10 @@ var unsubscribe;
 (function (unsubscribe) {
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
+var createStripeCheckoutSession;
+(function (createStripeCheckoutSession) {
+    createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
+})(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
 
 },{}],140:[function(require,module,exports){
 arguments[4][101][0].apply(exports,arguments)

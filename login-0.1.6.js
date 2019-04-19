@@ -2576,6 +2576,7 @@ function add(modal, options) {
                 switch (_a.label) {
                     case 0:
                         if (stack.indexOf(modal) >= 0) {
+                            resolve();
                             return [2 /*return*/];
                         }
                         stack.push(modal);
@@ -2613,14 +2614,15 @@ function add(modal, options) {
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        modal.modal("show");
                         modal.one("shown.bs.modal", function () { return resolve(); });
+                        modal.modal("show");
                         return [2 /*return*/];
                 }
             });
         }); }); },
         "hide": function () { return new Promise(function (resolve) {
             if (stack.indexOf(modal) < 0) {
+                resolve();
                 return;
             }
             modal.one("hidden.bs.modal", function () { return resolve(); });
@@ -2732,6 +2734,19 @@ function renewPassword(email, newPassword, token) {
     return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
 }
 exports.renewPassword = renewPassword;
+function guessCountryIso() {
+    var methodName = apiDeclaration.guessCountryIso.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.guessCountryIso = guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.cacheOut = undefined;
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+function getChangesRates() {
+    var methodName = apiDeclaration.getChangesRates.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.getChangesRates = getChangesRates;
 function getSubscriptionInfos() {
     var methodName = apiDeclaration.getSubscriptionInfos.methodName;
     return sendRequest(methodName, undefined);
@@ -2769,31 +2784,11 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
-/*
-function buildUrl(
-    methodName: string,
-    params: Record<string, string | undefined>
-): string {
-
-    let query: string[] = [];
-
-    for (let key of Object.keys(params)) {
-
-        let value = params[key];
-
-        if (value === undefined) continue;
-
-        query[query.length] = `${key}=${params[key]}`;
-
-    }
-
-    let url = `https://${c.backendHostname}:${c.webApiPort}/${c.webApiPath}/${methodName}?${query.join("&")}`;
-
-    console.log(`GET ${url}`);
-
-    return url;
+function createStripeCheckoutSession(cart, shipToCountryIso, currency) {
+    var methodName = apiDeclaration.createStripeCheckoutSession.methodName;
+    return sendRequest(methodName, { cart: cart, shipToCountryIso: shipToCountryIso, currency: currency });
 }
-*/ 
+exports.createStripeCheckoutSession = createStripeCheckoutSession;
 
 },{"../web_api_declaration":11,"transfer-tools/dist/lib/JSON_CUSTOM":16}],11:[function(require,module,exports){
 "use strict";
@@ -2823,6 +2818,14 @@ var renewPassword;
 (function (renewPassword) {
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
+var guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.methodName = "guess-country-iso";
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+var getChangesRates;
+(function (getChangesRates) {
+    getChangesRates.methodName = "get-changes-rates";
+})(getChangesRates = exports.getChangesRates || (exports.getChangesRates = {}));
 var getSubscriptionInfos;
 (function (getSubscriptionInfos) {
     getSubscriptionInfos.methodName = "get-subscription-infos";
@@ -2835,6 +2838,10 @@ var unsubscribe;
 (function (unsubscribe) {
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
+var createStripeCheckoutSession;
+(function (createStripeCheckoutSession) {
+    createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
+})(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
 
 },{}],12:[function(require,module,exports){
 'use strict';

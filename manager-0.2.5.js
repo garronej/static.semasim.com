@@ -3001,7 +3001,6 @@ var types = require("../../../shared/dist/lib/types");
 var localApiHandlers = require("../../../shared/dist/lib/toBackend/localApiHandlers");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var backToAndroidAppUrl_1 = require("../../../shared/dist/lib/backToAndroidAppUrl");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var UiButtonBar_1 = require("./UiButtonBar");
 var UiPhonebook_1 = require("./UiPhonebook");
@@ -3010,10 +3009,9 @@ var UiShareSim_1 = require("./UiShareSim");
 var phone_number_1 = require("phone-number");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
 var UiController = /** @class */ (function () {
-    function UiController(userSims, action) {
+    function UiController(userSims) {
         var _this = this;
         this.userSims = userSims;
-        this.action = action;
         this.structure = html.structure.clone();
         this.uiButtonBar = new UiButtonBar_1.UiButtonBar();
         this.uiShareSim = new UiShareSim_1.UiShareSim((function () {
@@ -3039,7 +3037,6 @@ var UiController = /** @class */ (function () {
         }
         remoteApiCaller.evtUsableSim.attach(function (userSim) { return _this.addUserSim(userSim); });
         localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) { return _this.removeUserSim(userSim); });
-        this.handleAction();
     }
     UiController.prototype.setState = function (placeholder) {
         switch (placeholder) {
@@ -3132,107 +3129,6 @@ var UiController = /** @class */ (function () {
             });
         });
     };
-    UiController.prototype.handleAction = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var action, userSim, uiSimRow;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!this.action) {
-                            return [2 /*return*/];
-                        }
-                        action = this.action;
-                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
-                                var _a, userSims_1, prettyNumber_1, index;
-                                return __generator(this, function (_b) {
-                                    switch (_b.label) {
-                                        case 0:
-                                            _a = action.type;
-                                            switch (_a) {
-                                                case "UPDATE_CONTACT_NAME": return [3 /*break*/, 1];
-                                                case "DELETE_CONTACT": return [3 /*break*/, 1];
-                                                case "CREATE_CONTACT": return [3 /*break*/, 9];
-                                            }
-                                            return [3 /*break*/, 10];
-                                        case 1: return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
-                                        case 2:
-                                            _b.sent();
-                                            userSims_1 = this.userSims
-                                                .filter(function (_a) {
-                                                var phonebook = _a.phonebook;
-                                                return !!phonebook.find(function (_a) {
-                                                    var number_raw = _a.number_raw;
-                                                    return phone_number_1.phoneNumber.areSame(action.number, number_raw);
-                                                });
-                                            });
-                                            prettyNumber_1 = phone_number_1.phoneNumber.prettyPrint(action.number);
-                                            if (!(userSims_1.length === 0)) return [3 /*break*/, 4];
-                                            return [4 /*yield*/, new Promise(function (resolve) {
-                                                    return bootbox_custom.alert([
-                                                        prettyNumber_1 + " is not saved in any of your SIM phonebook.",
-                                                        "Use the android contacts native feature to edit contact stored in your phone."
-                                                    ].join("<br>"), function () { return resolve(); });
-                                                })];
-                                        case 3:
-                                            _b.sent();
-                                            return [2 /*return*/, undefined];
-                                        case 4:
-                                            if (userSims_1.length === 1) {
-                                                return [2 /*return*/, userSims_1.pop()];
-                                            }
-                                            _b.label = 5;
-                                        case 5: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
-                                                "title": prettyNumber_1 + " is present in " + userSims_1.length + ", select phonebook to edit.",
-                                                "inputType": "select",
-                                                "inputOptions": userSims_1.map(function (userSim) { return ({
-                                                    "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
-                                                    "value": userSims_1.indexOf(userSim)
-                                                }); }),
-                                                "callback": function (indexAsString) { return resolve(parseInt(indexAsString)); }
-                                            }); })];
-                                        case 6:
-                                            index = _b.sent();
-                                            if (!(index === null)) return [3 /*break*/, 8];
-                                            return [4 /*yield*/, new Promise(function (resolve) {
-                                                    return bootbox_custom.alert("No SIM selected, aborting.", function () { return resolve(); });
-                                                })];
-                                        case 7:
-                                            _b.sent();
-                                            return [2 /*return*/, undefined];
-                                        case 8: return [2 /*return*/, userSims_1[index]];
-                                        case 9: return [2 /*return*/, this.userSims.find(function (_a) {
-                                                var sim = _a.sim;
-                                                return sim.imsi === action.imsi;
-                                            })];
-                                        case 10: return [2 /*return*/];
-                                    }
-                                });
-                            }); })()];
-                    case 1:
-                        userSim = _a.sent();
-                        if (!userSim) {
-                            window.location.href = backToAndroidAppUrl_1.backToAppUrl;
-                            return [2 /*return*/];
-                        }
-                        if (!!userSim.isOnline) return [3 /*break*/, 3];
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert(userSim.friendlyName + " is not currently online. Can't edit phonebook", function () { return resolve(); });
-                            })];
-                    case 2:
-                        _a.sent();
-                        window.location.href = backToAndroidAppUrl_1.backToAppUrl;
-                        return [2 /*return*/];
-                    case 3:
-                        uiSimRow = this.uiSimRows.find(function (uiSimRow) { return uiSimRow.userSim === userSim; });
-                        uiSimRow.structure.click();
-                        //NOTE: Spaghetti code continue in evtClickContact handler....
-                        this.uiButtonBar.evtClickContacts.post();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
     UiController.prototype.getSelectedUiSimRow = function (notUiSimRow) {
         return this.uiSimRows.find(function (uiSimRow) { return uiSimRow !== notUiSimRow && uiSimRow.isSelected; });
     };
@@ -3305,50 +3201,21 @@ var UiController = /** @class */ (function () {
             }
         });
         this.uiButtonBar.evtClickContacts.attach(function () { return __awaiter(_this, void 0, void 0, function () {
-            var userSim, uiPhonebook, pr;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var userSim, uiPhonebook, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         userSim = this.getSelectedUiSimRow().userSim;
-                        uiPhonebook = this.uiPhonebooks.find(function (uiPhonebook) { return uiPhonebook.userSim === userSim; });
-                        if (!!uiPhonebook) return [3 /*break*/, 2];
+                        _a = this.uiPhonebooks.find(function (uiPhonebook) { return uiPhonebook.userSim === userSim; });
+                        if (_a) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.initUiPhonebook(userSim)];
                     case 1:
-                        uiPhonebook = _a.sent();
-                        _a.label = 2;
+                        _a = (_b.sent());
+                        _b.label = 2;
                     case 2:
-                        if (!!this.action) return [3 /*break*/, 3];
+                        uiPhonebook = _a;
                         uiPhonebook.showModal();
-                        return [3 /*break*/, 6];
-                    case 3:
-                        pr = void 0;
-                        switch (this.action.type) {
-                            case "CREATE_CONTACT":
-                                pr = uiPhonebook.interact_createContact(this.action.number);
-                                break;
-                            case "UPDATE_CONTACT_NAME":
-                                pr = uiPhonebook.interact_updateContact(this.action.number);
-                                break;
-                            case "DELETE_CONTACT":
-                                pr = uiPhonebook.interact_deleteContacts(this.action.number);
-                                break;
-                        }
-                        this.action = undefined;
-                        return [4 /*yield*/, pr];
-                    case 4:
-                        _a.sent();
-                        //NOTE: Do not remove this feedback as it leave the time 
-                        //to the push notification to land before we go back to app.
-                        return [4 /*yield*/, new Promise(function (resolve) {
-                                return bootbox_custom.alert("Success", function () { return resolve(); });
-                            })];
-                    case 5:
-                        //NOTE: Do not remove this feedback as it leave the time 
-                        //to the push notification to land before we go back to app.
-                        _a.sent();
-                        window.location.href = backToAndroidAppUrl_1.backToAppUrl;
-                        _a.label = 6;
-                    case 6: return [2 /*return*/];
+                        return [2 /*return*/];
                 }
             });
         }); });
@@ -3478,11 +3345,141 @@ var UiController = /** @class */ (function () {
             });
         });
     };
+    UiController.prototype.interact_updateContactName = function (number) {
+        return this.interact_({ "type": "UPDATE_CONTACT_NAME", number: number });
+    };
+    UiController.prototype.interact_deleteContact = function (number) {
+        return this.interact_({ "type": "DELETE_CONTACT", number: number });
+    };
+    UiController.prototype.interact_createContact = function (imsi, number) {
+        return this.interact_({ "type": "CREATE_CONTACT", imsi: imsi, number: number });
+    };
+    UiController.prototype.interact_ = function (action) {
+        return __awaiter(this, void 0, void 0, function () {
+            var userSim, _a, uiPhonebook, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        if (!("imsi" in action)) return [3 /*break*/, 1];
+                        _a = this.userSims.find(function (_a) {
+                            var sim = _a.sim;
+                            return sim.imsi === action.imsi;
+                        });
+                        return [3 /*break*/, 3];
+                    case 1: return [4 /*yield*/, interact_getUserSimContainingNumber(this.userSims, action.number)];
+                    case 2:
+                        _a = _d.sent();
+                        _d.label = 3;
+                    case 3:
+                        userSim = _a;
+                        if (!!userSim) return [3 /*break*/, 5];
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.alert("No SIM selected, aborting.", function () { return resolve(); });
+                            })];
+                    case 4:
+                        _d.sent();
+                        return [2 /*return*/];
+                    case 5:
+                        if (!!userSim.isOnline) return [3 /*break*/, 7];
+                        return [4 /*yield*/, new Promise(function (resolve) {
+                                return bootbox_custom.alert(userSim.friendlyName + " is not currently online. Can't edit phonebook", function () { return resolve(); });
+                            })];
+                    case 6:
+                        _d.sent();
+                        return [2 /*return*/];
+                    case 7:
+                        _b = this.uiPhonebooks.find(function (uiPhonebook) { return uiPhonebook.userSim === userSim; });
+                        if (_b) return [3 /*break*/, 9];
+                        return [4 /*yield*/, this.initUiPhonebook(userSim)];
+                    case 8:
+                        _b = (_d.sent());
+                        _d.label = 9;
+                    case 9:
+                        uiPhonebook = _b;
+                        _c = action.type;
+                        switch (_c) {
+                            case "CREATE_CONTACT": return [3 /*break*/, 10];
+                            case "DELETE_CONTACT": return [3 /*break*/, 12];
+                            case "UPDATE_CONTACT_NAME": return [3 /*break*/, 14];
+                        }
+                        return [3 /*break*/, 16];
+                    case 10: return [4 /*yield*/, uiPhonebook.interact_createContact(action.number)];
+                    case 11:
+                        _d.sent();
+                        return [3 /*break*/, 16];
+                    case 12: return [4 /*yield*/, uiPhonebook.interact_deleteContacts(action.number)];
+                    case 13:
+                        _d.sent();
+                        return [3 /*break*/, 16];
+                    case 14: return [4 /*yield*/, uiPhonebook.interact_updateContact(action.number)];
+                    case 15:
+                        _d.sent();
+                        return [3 /*break*/, 16];
+                    case 16: return [2 /*return*/];
+                }
+            });
+        });
+    };
     return UiController;
 }());
 exports.UiController = UiController;
+/** Interact only if more than one SIM holds the phone number */
+function interact_getUserSimContainingNumber(userSims, number) {
+    return __awaiter(this, void 0, void 0, function () {
+        var userSimsContainingNumber, index;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!!UiPhonebook_1.UiPhonebook.isPhoneNumberUtilityScriptLoaded) return [3 /*break*/, 2];
+                    return [4 /*yield*/, UiPhonebook_1.UiPhonebook.fetchPhoneNumberUtilityScript()];
+                case 1:
+                    _a.sent();
+                    _a.label = 2;
+                case 2:
+                    userSimsContainingNumber = userSims
+                        .filter(function (_a) {
+                        var phonebook = _a.phonebook;
+                        return !!phonebook.find(function (_a) {
+                            var number_raw = _a.number_raw;
+                            return phone_number_1.phoneNumber.areSame(number, number_raw);
+                        });
+                    });
+                    if (!(userSimsContainingNumber.length === 0)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, new Promise(function (resolve) {
+                            return bootbox_custom.alert([
+                                phone_number_1.phoneNumber.prettyPrint(number) + " is not saved in any of your SIM phonebook.",
+                                "Use the android contacts native feature to edit contact stored in your phone."
+                            ].join("<br>"), function () { return resolve(); });
+                        })];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/, undefined];
+                case 4:
+                    if (userSimsContainingNumber.length === 1) {
+                        return [2 /*return*/, userSimsContainingNumber.pop()];
+                    }
+                    _a.label = 5;
+                case 5: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
+                        "title": phone_number_1.phoneNumber.prettyPrint(number) + " is present in " + userSimsContainingNumber.length + ", select phonebook to edit.",
+                        "inputType": "select",
+                        "inputOptions": userSimsContainingNumber.map(function (userSim) { return ({
+                            "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
+                            "value": userSimsContainingNumber.indexOf(userSim)
+                        }); }),
+                        "callback": function (indexAsString) { return resolve(parseInt(indexAsString)); }
+                    }); })];
+                case 6:
+                    index = _a.sent();
+                    if (index === null) {
+                        return [2 /*return*/, undefined];
+                    }
+                    return [2 /*return*/, userSimsContainingNumber[index]];
+            }
+        });
+    });
+}
 
-},{"../../../shared/dist/lib/backToAndroidAppUrl":135,"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/toBackend/localApiHandlers":138,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/types":144,"../templates/UiController.html":129,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":120,"ts-events-extended":127}],11:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/toBackend/localApiHandlers":138,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/types":145,"../templates/UiController.html":129,"./UiButtonBar":9,"./UiPhonebook":11,"./UiShareSim":12,"./UiSimRow":13,"phone-number":120,"ts-events-extended":127}],11:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -3521,7 +3518,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var connection_1 = require("../../../shared/dist/lib/toBackend/connection");
+var env_1 = require("../../../shared/dist/lib/env");
 var ts_events_extended_1 = require("ts-events-extended");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var modal_stack = require("../../../shared/dist/lib/tools/modal_stack");
@@ -3579,7 +3576,7 @@ var UiPhonebook = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         console.assert(!this.isPhoneNumberUtilityScriptLoaded);
-                        return [4 /*yield*/, phone_number_1.phoneNumber.remoteLoadUtil("//web." + connection_1.baseDomain + "/plugins/ui/intl-tel-input/js/utils.js")];
+                        return [4 /*yield*/, phone_number_1.phoneNumber.remoteLoadUtil(env_1.assetsRoot + "plugins/ui/intl-tel-input/js/utils.js")];
                     case 1:
                         _a.sent();
                         this.isPhoneNumberUtilityScriptLoaded = true;
@@ -3971,7 +3968,7 @@ var UiContact = /** @class */ (function () {
             .on("click", function () {
             var selection = window.getSelection();
             //Do not trigger click if text selected.
-            if (selection.toString().length !== 0) {
+            if (selection !== null && selection.toString().length !== 0) {
                 return;
             }
             _this.evtClick.post();
@@ -3979,11 +3976,13 @@ var UiContact = /** @class */ (function () {
             .find(".id_number")
             .on("dblclick", function (e) {
             e.preventDefault(); //cancel system double-click event
-            var selection = window.getSelection();
             var range = document.createRange();
             range.selectNodeContents(e.currentTarget);
-            selection.removeAllRanges();
-            selection.addRange(range);
+            var selection = window.getSelection();
+            if (selection !== null) {
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
         });
         this.updateContactName();
         this.structure.find("span.id_notifications").hide();
@@ -4019,7 +4018,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/toBackend/connection":137,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder":142,"../../../shared/dist/lib/tools/modal_stack":143,"../templates/UiPhonebook.html":130,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
+},{"../../../shared/dist/lib/env":135,"../../../shared/dist/lib/loadUiClassHtml":136,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/isAscendingAlphabeticalOrder":142,"../../../shared/dist/lib/tools/modal_stack":143,"../templates/UiPhonebook.html":130,"phone-number":120,"ts-events-extended":127}],12:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4065,6 +4064,9 @@ var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiShareSim.ht
 require("../templates/UiShareSim.less");
 var UiShareSim = /** @class */ (function () {
     /**
+     *
+     * TODO: Refactor: use a method why using an event ??
+     *
      * The evt argument should post be posted whenever.
      * -An user accept a sharing request.
      * -An user reject a sharing request.
@@ -4407,7 +4409,6 @@ var UiSimRow = /** @class */ (function () {
 exports.UiSimRow = UiSimRow;
 
 },{"../../../shared/dist/lib/loadUiClassHtml":136,"../templates/UiSimRow.html":133,"../templates/UiSimRow.less":134,"ts-events-extended":127}],14:[function(require,module,exports){
-(function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4452,17 +4453,77 @@ require("es6-weak-map/implement");
 require("array.prototype.find").shim();
 if (!Array.from)
     Array.from = require('array-from');
-if (!ArrayBuffer.isView) {
-    Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
-}
+require("../../../shared/dist/lib/tools/standalonePolyfills");
 var connection = require("../../../shared/dist/lib/toBackend/connection");
 var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
 var UiController_1 = require("./UiController");
 var bootbox_custom = require("../../../shared/dist/lib/tools/bootbox_custom");
 var remoteApiCaller = require("../../../shared/dist/lib/toBackend/remoteApiCaller");
-var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
+//TODO: See if defined
+if (typeof androidEventHandlers !== "undefined") {
+    window.onerror = function (msg, url, lineNumber) {
+        androidEventHandlers.onDone(msg + "\n'" + url + ":" + lineNumber);
+        return false;
+    };
+    if ("onPossiblyUnhandledRejection" in Promise) {
+        Promise.onPossiblyUnhandledRejection(function (error) {
+            androidEventHandlers.onDone(error.message + " " + error.stack);
+        });
+    }
+}
+var resolvePrUiController;
+window["exposedToAndroid"] = (function () {
+    var prUiController = new Promise(function (resolve) { return resolvePrUiController = resolve; });
+    return {
+        "createContact": function (imsi, number) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, prUiController];
+                    case 1: return [4 /*yield*/, (_a.sent()).interact_createContact(imsi, number)];
+                    case 2:
+                        _a.sent();
+                        try {
+                            androidEventHandlers.onDone(null);
+                        }
+                        catch (_b) { }
+                        return [2 /*return*/];
+                }
+            });
+        }); },
+        "updateContactName": function (number) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, prUiController];
+                    case 1: return [4 /*yield*/, (_a.sent()).interact_updateContactName(number)];
+                    case 2:
+                        _a.sent();
+                        try {
+                            androidEventHandlers.onDone(null);
+                        }
+                        catch (_b) { }
+                        return [2 /*return*/];
+                }
+            });
+        }); },
+        "deleteContact": function (number) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, prUiController];
+                    case 1: return [4 /*yield*/, (_a.sent()).interact_deleteContact(number)];
+                    case 2:
+                        _a.sent();
+                        try {
+                            androidEventHandlers.onDone(null);
+                        }
+                        catch (_b) { }
+                        return [2 /*return*/];
+                }
+            });
+        }); }
+    };
+})();
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
-    var action, uiController, _a;
+    var uiController, _a;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -4471,31 +4532,11 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                     window.location.href = "/login";
                 });
                 connection.connect({ "requestTurnCred": false });
-                action = (function () {
-                    var type = getURLParameter_1.getURLParameter("action");
-                    if (!type) {
-                        return undefined;
-                    }
-                    var getNumber = function () { return Buffer.from(getURLParameter_1.getURLParameter("number_as_hex"), "hex").toString("utf8"); };
-                    switch (type) {
-                        case "UPDATE_CONTACT_NAME":
-                        case "DELETE_CONTACT":
-                            return {
-                                type: type,
-                                "number": getNumber()
-                            };
-                        case "CREATE_CONTACT": return {
-                            type: type,
-                            "number": getNumber(),
-                            "imsi": getURLParameter_1.getURLParameter("imsi")
-                        };
-                    }
-                })();
                 _a = UiController_1.UiController.bind;
                 return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
             case 1:
-                uiController = new (_a.apply(UiController_1.UiController, [void 0, _b.sent(),
-                    action]))();
+                uiController = new (_a.apply(UiController_1.UiController, [void 0, _b.sent()]))();
+                resolvePrUiController(uiController);
                 $("#page-payload").html("").append(uiController.structure);
                 $("#register-new-sim")
                     .removeClass("hidden")
@@ -4506,8 +4547,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-}).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/toBackend/connection":137,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/getURLParameter":141,"../../../shared/dist/lib/webApiCaller":145,"./UiController":10,"array-from":15,"array.prototype.find":18,"buffer":2,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
+},{"../../../shared/dist/lib/toBackend/connection":137,"../../../shared/dist/lib/toBackend/remoteApiCaller":139,"../../../shared/dist/lib/tools/bootbox_custom":140,"../../../shared/dist/lib/tools/standalonePolyfills":144,"../../../shared/dist/lib/webApiCaller":146,"./UiController":10,"array-from":15,"array.prototype.find":18,"es6-map/implement":91,"es6-weak-map/implement":102}],15:[function(require,module,exports){
 module.exports = (typeof Array.from === 'function' ?
   Array.from :
   require('./polyfill')
@@ -8545,6 +8585,7 @@ var phoneNumber;
             return;
         }
         if (typeof process !== "undefined" &&
+            typeof process.release === "object" &&
             process.release.name === "node") {
             //Trick browserify so it does not bundle.
             var path = "../../res/utils";
@@ -9637,7 +9678,10 @@ var css = ".id_UiSimRow .id_row {\n  cursor: pointer;\n}\n.id_UiSimRow .selected
 },{"lessify":116}],135:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.backToAppUrl = "semasim://main";
+/** semasim.com or dev.semasim.com */
+exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
+exports.assetsRoot = window["assets_root"];
+exports.isProd = exports.assetsRoot !== "/";
 
 },{}],136:[function(require,module,exports){
 "use strict";
@@ -9707,14 +9751,12 @@ var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller");
 var bootbox_custom = require("../tools/bootbox_custom");
 var Cookies = require("js-cookie");
-/** semasim.com or dev.semasim.com */
-exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
-exports.url = "wss://web." + exports.baseDomain;
+var env_1 = require("../env");
+exports.url = "wss://web." + env_1.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
-    "log": exports.baseDomain.substring(0, 3) === "dev" ?
-        console.log.bind(console) : (function () { }),
+    "log": env_1.isProd ? (function () { }) : console.log.bind(console),
     "hideKeepAlive": true
 }));
 var socketCurrent = undefined;
@@ -9746,12 +9788,16 @@ function connect(connectionParams, isReconnect) {
     Cookies.set("requestTurnCred", "" + connectionParams.requestTurnCred);
     {
         var uaInstanceId = connectionParams.uaInstanceId;
+        var key = "uaInstanceId";
         if (uaInstanceId !== undefined) {
-            Cookies.set("uaInstanceId", "" + uaInstanceId);
+            Cookies.set(key, uaInstanceId);
+        }
+        else {
+            Cookies.remove(key);
         }
     }
     var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
-        "remoteAddress": "web." + exports.baseDomain,
+        "remoteAddress": "web." + env_1.baseDomain,
         "remotePort": 443
     }, 20000);
     apiServer.startListening(socket);
@@ -9888,7 +9934,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../tools/bootbox_custom":140,"./localApiHandlers":138,"./remoteApiCaller":139,"js-cookie":165,"ts-events-extended":179,"ts-sip":187}],138:[function(require,module,exports){
+},{"../env":135,"../tools/bootbox_custom":140,"./localApiHandlers":138,"./remoteApiCaller":139,"js-cookie":166,"ts-events-extended":180,"ts-sip":188}],138:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10247,9 +10293,10 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
                         }); })];
                 case 5:
                     friendlyNameSubmitted = _a.sent();
-                    if (friendlyNameSubmitted) {
-                        friendlyName = friendlyNameSubmitted;
+                    if (!friendlyNameSubmitted) {
+                        return [2 /*return*/];
                     }
+                    friendlyName = friendlyNameSubmitted;
                     bootbox_custom.loading("Registering SIM...");
                     return [4 /*yield*/, remoteApiCaller.registerSim(dongle, friendlyName)];
                 case 6:
@@ -10356,6 +10403,7 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
                     return [4 /*yield*/, remoteApiCaller.rejectSharingRequest(userSim)];
                 case 2:
                     _a.sent();
+                    bootbox_custom.dismissLoading();
                     return [2 /*return*/, undefined];
                 case 3: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.prompt({
                         "title": "Friendly name for this sim?",
@@ -10364,12 +10412,18 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
                     }); })];
                 case 4:
                     friendlyNameSubmitted = _a.sent();
-                    if (friendlyNameSubmitted) {
-                        userSim.friendlyName = friendlyNameSubmitted;
-                    }
+                    if (!!friendlyNameSubmitted) return [3 /*break*/, 6];
+                    bootbox_custom.loading("Rejecting SIM sharing request...");
+                    return [4 /*yield*/, remoteApiCaller.rejectSharingRequest(userSim)];
+                case 5:
+                    _a.sent();
+                    bootbox_custom.dismissLoading();
+                    return [2 /*return*/, undefined];
+                case 6:
+                    userSim.friendlyName = friendlyNameSubmitted;
                     bootbox_custom.loading("Accepting SIM sharing request...");
                     return [4 /*yield*/, remoteApiCaller.acceptSharingRequest(userSim, userSim.friendlyName)];
-                case 5:
+                case 7:
                     _a.sent();
                     bootbox_custom.dismissLoading();
                     return [2 /*return*/];
@@ -10443,7 +10497,7 @@ exports.evtOpenElsewhere = new ts_events_extended_1.VoidSyncEvent();
         "handler": function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 exports.evtOpenElsewhere.post();
-                bootbox_custom.alert("This session is over, only one semasim web browser tab can be active.");
+                bootbox_custom.alert("You are connected somewhere else", function () { return location.reload(); });
                 return [2 /*return*/, undefined];
             });
         }); }
@@ -10501,7 +10555,7 @@ exports.getRTCIceServer = (function () {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":147,"../tools/bootbox_custom":140,"./remoteApiCaller":139,"chan-dongle-extended-client/dist/lib/types":149,"ts-events-extended":179}],139:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":148,"../tools/bootbox_custom":140,"./remoteApiCaller":139,"chan-dongle-extended-client/dist/lib/types":150,"ts-events-extended":180}],139:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -11375,7 +11429,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":146,"../types":144,"./connection":137,"phone-number":166,"ts-events-extended":179,"ts-sip":187}],140:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":147,"../types":145,"./connection":137,"phone-number":167,"ts-events-extended":180,"ts-sip":188}],140:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11485,20 +11539,121 @@ exports.confirm = confirm;
 
 },{"./modal_stack":143}],141:[function(require,module,exports){
 "use strict";
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-function getURLParameter(sParam) {
-    var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split("&");
-    for (var i = 0; i < sURLVariables.length; i++) {
-        var sParameterName = sURLVariables[i].split("=");
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1];
+exports.data = require("../../../res/currency.json");
+function isValidCountryIso(countryIso) {
+    //NOTE: Avoid loading if we do not need
+    if (isValidCountryIso.countryIsoRecord === undefined) {
+        isValidCountryIso.countryIsoRecord = (function () {
+            var e_1, _a, e_2, _b;
+            var out = {};
+            try {
+                for (var _c = __values(Object.keys(exports.data)), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var currency = _d.value;
+                    try {
+                        for (var _e = __values(exports.data[currency].countriesIso), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var countryIso_1 = _f.value;
+                            out[countryIso_1] = true;
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return out;
+        })();
+        return isValidCountryIso(countryIso);
+    }
+    if (typeof countryIso !== "string" || !/^[a-z]{2}$/.test(countryIso)) {
+        return false;
+    }
+    return !!isValidCountryIso.countryIsoRecord[countryIso];
+}
+exports.isValidCountryIso = isValidCountryIso;
+(function (isValidCountryIso) {
+    isValidCountryIso.countryIsoRecord = undefined;
+})(isValidCountryIso = exports.isValidCountryIso || (exports.isValidCountryIso = {}));
+function getCountryCurrency(countryIso) {
+    var cache = getCountryCurrency.cache;
+    {
+        var currency = cache[countryIso];
+        if (currency !== undefined) {
+            return currency;
         }
     }
+    cache[countryIso] = Object.keys(exports.data)
+        .map(function (currency) { return ({ currency: currency, "countriesIso": exports.data[currency].countriesIso }); })
+        .find(function (_a) {
+        var countriesIso = _a.countriesIso;
+        return !!countriesIso.find(function (_countryIso) { return _countryIso === countryIso; });
+    })
+        .currency;
+    return getCountryCurrency(countryIso);
 }
-exports.getURLParameter = getURLParameter;
+exports.getCountryCurrency = getCountryCurrency;
+(function (getCountryCurrency) {
+    getCountryCurrency.cache = {};
+})(getCountryCurrency = exports.getCountryCurrency || (exports.getCountryCurrency = {}));
+function convertFromEuro(euroAmount, currencyTo) {
+    var changeRates = convertFromEuro.changeRates;
+    if (changeRates === undefined) {
+        throw new Error("Changes rates have not been defined");
+    }
+    return euroAmount * changeRates[currencyTo];
+}
+exports.convertFromEuro = convertFromEuro;
+(function (convertFromEuro) {
+    convertFromEuro.changeRates = undefined;
+})(convertFromEuro = exports.convertFromEuro || (exports.convertFromEuro = {}));
+/**
+ * get currency of stripe card,
+ * if there is no special pricing for the currency
+ * "eur" will be returned.
+ *
+ * NOTE: This function does seems to come out of left field
+ * but this operation is done on the frontend and the backend
+ * so we export it.
+ *
+ */
+function getCardCurrency(stripeCard, pricingByCurrency) {
+    var currency = getCountryCurrency(stripeCard.country.toLowerCase());
+    if (!(currency in pricingByCurrency)) {
+        currency = "eur";
+    }
+    return currency;
+}
+exports.getCardCurrency = getCardCurrency;
+function prettyPrint(amount, currency) {
+    return (amount / 100).toLocaleString(undefined, {
+        "style": "currency",
+        currency: currency
+    });
+}
+exports.prettyPrint = prettyPrint;
 
-},{}],142:[function(require,module,exports){
+},{"../../../res/currency.json":192}],142:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -11586,6 +11741,7 @@ function add(modal, options) {
                 switch (_a.label) {
                     case 0:
                         if (stack.indexOf(modal) >= 0) {
+                            resolve();
                             return [2 /*return*/];
                         }
                         stack.push(modal);
@@ -11623,14 +11779,15 @@ function add(modal, options) {
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        modal.modal("show");
                         modal.one("shown.bs.modal", function () { return resolve(); });
+                        modal.modal("show");
                         return [2 /*return*/];
                 }
             });
         }); }); },
         "hide": function () { return new Promise(function (resolve) {
             if (stack.indexOf(modal) < 0) {
+                resolve();
                 return;
             }
             modal.one("hidden.bs.modal", function () { return resolve(); });
@@ -11641,7 +11798,28 @@ function add(modal, options) {
 exports.add = add;
 
 },{}],144:[function(require,module,exports){
+if (typeof ArrayBuffer.isView !== "function") {
+    Object.defineProperty(ArrayBuffer, "isView", { "value": function isView() { return false; } });
+}
+if (typeof String.prototype.startsWith !== "function") {
+    String.prototype.startsWith = function startsWith(str) {
+        return this.indexOf(str) === 0;
+    };
+}
+
+},{}],145:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
@@ -11652,8 +11830,29 @@ var __values = (this && this.__values) || function (o) {
         }
     };
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var isAscendingAlphabeticalOrder_1 = require("./tools/isAscendingAlphabeticalOrder");
+var currencyLib = require("./tools/currency");
 var UserSim;
 (function (UserSim) {
     var Owned;
@@ -11836,8 +12035,110 @@ var webphoneData;
     }
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
+var shop;
+(function (shop) {
+    var Cart;
+    (function (Cart) {
+        function getPrice(cart, convertFromEuro) {
+            var out = cart
+                .map(function (_a) {
+                var price = _a.product.price, quantity = _a.quantity;
+                return Price.operation(price, function (amount) { return amount * quantity; });
+            })
+                .reduce(function (out, price) { return Price.addition(out, price, convertFromEuro); }, { "eur": 0 });
+            //console.log("Cart.getGoodsPrice: ", JSON.stringify({ cart, out }, null, 2));
+            return out;
+        }
+        Cart.getPrice = getPrice;
+        function getOverallFootprint(cart) {
+            return !!cart.find(function (_a) {
+                var product = _a.product;
+                return product.footprint === "VOLUME";
+            }) ? "VOLUME" : "FLAT";
+        }
+        Cart.getOverallFootprint = getOverallFootprint;
+    })(Cart = shop.Cart || (shop.Cart = {}));
+    var Price;
+    (function (Price) {
+        /**
+         * Out of place.
+         * If the amount for a currency is defined in one object
+         * but not in the other the undefined amount will be
+         * computed from the rateChange
+         *
+         */
+        function binaryOperation(price1, price2, op, convertFromEuro) {
+            var e_2, _a, e_3, _b;
+            price1 = __assign({}, price1);
+            price2 = __assign({}, price2);
+            try {
+                //NOTE: Ugly but does not involve map and less verbose.
+                for (var _c = __values(__spread(Object.keys(price1), Object.keys(price2))), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var currency = _d.value;
+                    try {
+                        for (var _e = __values([price1, price2]), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var price = _f.value;
+                            if (!(currency in price)) {
+                                price[currency] = convertFromEuro(price["eur"], currency);
+                            }
+                        }
+                    }
+                    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_3) throw e_3.error; }
+                    }
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+            var out = { "eur": 0 };
+            for (var currency in price1) {
+                out[currency] = op(price1[currency], price2[currency]);
+            }
+            return out;
+        }
+        Price.binaryOperation = binaryOperation;
+        function operation(price, op) {
+            var out = { "eur": 0 };
+            for (var currency in price) {
+                out[currency] = op(price[currency]);
+            }
+            return out;
+        }
+        Price.operation = operation;
+        function addition(price1, price2, convertFromEuro) {
+            return binaryOperation(price1, price2, function (amount1, amount2) { return amount1 + amount2; }, convertFromEuro);
+        }
+        Price.addition = addition;
+        /**
+         * return the amount of a price in a given currency.
+         * If the amount for the currency is not defined in
+         * the price object it will be computer from the
+         * euro amount.
+         * */
+        function getAmountInCurrency(price, currency, convertFromEuro) {
+            return currency in price ?
+                price[currency] :
+                convertFromEuro(price["eur"], currency);
+        }
+        Price.getAmountInCurrency = getAmountInCurrency;
+        function prettyPrint(price, currency, convertFromEuro) {
+            return currencyLib.prettyPrint(getAmountInCurrency(price, currency, convertFromEuro), currency);
+        }
+        Price.prettyPrint = prettyPrint;
+    })(Price = shop.Price || (shop.Price = {}));
+    ;
+})(shop = exports.shop || (exports.shop = {}));
 
-},{"./tools/isAscendingAlphabeticalOrder":142}],145:[function(require,module,exports){
+},{"./tools/currency":141,"./tools/isAscendingAlphabeticalOrder":142}],146:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11929,6 +12230,19 @@ function renewPassword(email, newPassword, token) {
     return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
 }
 exports.renewPassword = renewPassword;
+function guessCountryIso() {
+    var methodName = apiDeclaration.guessCountryIso.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.guessCountryIso = guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.cacheOut = undefined;
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+function getChangesRates() {
+    var methodName = apiDeclaration.getChangesRates.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.getChangesRates = getChangesRates;
 function getSubscriptionInfos() {
     var methodName = apiDeclaration.getSubscriptionInfos.methodName;
     return sendRequest(methodName, undefined);
@@ -11966,33 +12280,13 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
-/*
-function buildUrl(
-    methodName: string,
-    params: Record<string, string | undefined>
-): string {
-
-    let query: string[] = [];
-
-    for (let key of Object.keys(params)) {
-
-        let value = params[key];
-
-        if (value === undefined) continue;
-
-        query[query.length] = `${key}=${params[key]}`;
-
-    }
-
-    let url = `https://${c.backendHostname}:${c.webApiPort}/${c.webApiPath}/${methodName}?${query.join("&")}`;
-
-    console.log(`GET ${url}`);
-
-    return url;
+function createStripeCheckoutSession(cart, shipToCountryIso, currency) {
+    var methodName = apiDeclaration.createStripeCheckoutSession.methodName;
+    return sendRequest(methodName, { cart: cart, shipToCountryIso: shipToCountryIso, currency: currency });
 }
-*/ 
+exports.createStripeCheckoutSession = createStripeCheckoutSession;
 
-},{"../web_api_declaration":148,"transfer-tools/dist/lib/JSON_CUSTOM":170}],146:[function(require,module,exports){
+},{"../web_api_declaration":149,"transfer-tools/dist/lib/JSON_CUSTOM":171}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -12091,7 +12385,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],147:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -12144,7 +12438,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],148:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "api";
@@ -12172,6 +12466,14 @@ var renewPassword;
 (function (renewPassword) {
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
+var guessCountryIso;
+(function (guessCountryIso) {
+    guessCountryIso.methodName = "guess-country-iso";
+})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+var getChangesRates;
+(function (getChangesRates) {
+    getChangesRates.methodName = "get-changes-rates";
+})(getChangesRates = exports.getChangesRates || (exports.getChangesRates = {}));
 var getSubscriptionInfos;
 (function (getSubscriptionInfos) {
     getSubscriptionInfos.methodName = "get-subscription-infos";
@@ -12184,8 +12486,12 @@ var unsubscribe;
 (function (unsubscribe) {
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
+var createStripeCheckoutSession;
+(function (createStripeCheckoutSession) {
+    createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
+})(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
 
-},{}],149:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -12206,7 +12512,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],150:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -12409,7 +12715,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":151,"./custom/zalgo":152,"./maps/america":155,"./maps/rainbow":156,"./maps/random":157,"./maps/zebra":158,"./styles":159,"./system/supports-colors":161,"util":8}],151:[function(require,module,exports){
+},{"./custom/trap":152,"./custom/zalgo":153,"./maps/america":156,"./maps/rainbow":157,"./maps/random":158,"./maps/zebra":159,"./styles":160,"./system/supports-colors":162,"util":8}],152:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -12457,7 +12763,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],152:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -12569,7 +12875,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],153:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -12681,7 +12987,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":150}],154:[function(require,module,exports){
+},{"./colors":151}],155:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -12696,7 +13002,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":150,"./extendStringPrototype":153}],155:[function(require,module,exports){
+},{"./colors":151,"./extendStringPrototype":154}],156:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -12708,7 +13014,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],156:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -12722,7 +13028,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],157:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -12734,14 +13040,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],158:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],159:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -12820,7 +13126,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],160:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -12859,7 +13165,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],161:[function(require,module,exports){
+},{"_process":6}],162:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -13014,13 +13320,13 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":160,"_process":6,"os":5}],162:[function(require,module,exports){
+},{"./has-flag.js":161,"_process":6,"os":5}],163:[function(require,module,exports){
 arguments[4][107][0].apply(exports,arguments)
-},{"dup":107}],163:[function(require,module,exports){
+},{"dup":107}],164:[function(require,module,exports){
 arguments[4][108][0].apply(exports,arguments)
-},{"./implementation":162,"dup":108}],164:[function(require,module,exports){
+},{"./implementation":163,"dup":108}],165:[function(require,module,exports){
 arguments[4][111][0].apply(exports,arguments)
-},{"dup":111,"function-bind":163}],165:[function(require,module,exports){
+},{"dup":111,"function-bind":164}],166:[function(require,module,exports){
 /*!
  * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
@@ -13187,13 +13493,13 @@ arguments[4][111][0].apply(exports,arguments)
 	return init(function () {});
 }));
 
-},{}],166:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"_process":6,"dup":120}],167:[function(require,module,exports){
+},{"_process":6,"dup":120}],168:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"dup":121}],168:[function(require,module,exports){
+},{"dup":121}],169:[function(require,module,exports){
 arguments[4][122][0].apply(exports,arguments)
-},{"dup":122}],169:[function(require,module,exports){
+},{"dup":122}],170:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -13528,7 +13834,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":164}],170:[function(require,module,exports){
+},{"has":165}],171:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -13578,7 +13884,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":169}],171:[function(require,module,exports){
+},{"super-json":170}],172:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -13590,7 +13896,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":170,"./stringTransform":172,"./stringTransformExt":173,"./testing":174}],172:[function(require,module,exports){
+},{"./JSON_CUSTOM":171,"./stringTransform":173,"./stringTransformExt":174,"./testing":175}],173:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -13652,7 +13958,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],173:[function(require,module,exports){
+},{"buffer":2}],174:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -13720,7 +14026,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":172}],174:[function(require,module,exports){
+},{"./stringTransform":173}],175:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -13989,17 +14295,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":172}],175:[function(require,module,exports){
+},{"./stringTransform":173}],176:[function(require,module,exports){
 arguments[4][123][0].apply(exports,arguments)
-},{"./SyncEventBase":176,"dup":123}],176:[function(require,module,exports){
+},{"./SyncEventBase":177,"dup":123}],177:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":177,"dup":124}],177:[function(require,module,exports){
+},{"./SyncEventBaseProtected":178,"dup":124}],178:[function(require,module,exports){
 arguments[4][125][0].apply(exports,arguments)
-},{"./defs":178,"dup":125,"run-exclusive":167}],178:[function(require,module,exports){
+},{"./defs":179,"dup":125,"run-exclusive":168}],179:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"dup":126,"setprototypeof":168}],179:[function(require,module,exports){
+},{"dup":126,"setprototypeof":169}],180:[function(require,module,exports){
 arguments[4][127][0].apply(exports,arguments)
-},{"./SyncEvent":175,"./defs":178,"dup":127}],180:[function(require,module,exports){
+},{"./SyncEvent":176,"./defs":179,"dup":127}],181:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14171,7 +14477,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":179}],181:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":180}],182:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -14483,7 +14789,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":180,"./api/ApiMessage":182,"./core":186,"./misc":190,"colors":154,"ts-events-extended":179}],182:[function(require,module,exports){
+},{"./IConnection":181,"./api/ApiMessage":183,"./core":187,"./misc":191,"colors":155,"ts-events-extended":180}],183:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -14564,7 +14870,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":186,"../misc":190,"buffer":2,"transfer-tools":171}],183:[function(require,module,exports){
+},{"../core":187,"../misc":191,"buffer":2,"transfer-tools":172}],184:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14746,7 +15052,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":190,"./ApiMessage":182,"colors":154,"util":8}],184:[function(require,module,exports){
+},{"../misc":191,"./ApiMessage":183,"colors":155,"util":8}],185:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -14965,7 +15271,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":190,"./ApiMessage":182,"setprototypeof":168}],185:[function(require,module,exports){
+},{"../misc":191,"./ApiMessage":183,"setprototypeof":169}],186:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -14973,7 +15279,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":183,"./client":184}],186:[function(require,module,exports){
+},{"./Server":184,"./client":185}],187:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -15057,7 +15363,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":188,"./legacy/sip":189,"buffer":2,"setprototypeof":168}],187:[function(require,module,exports){
+},{"./legacy/sdp":189,"./legacy/sip":190,"buffer":2,"setprototypeof":169}],188:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -15069,7 +15375,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":181,"./api":185,"./core":186,"./misc":190}],188:[function(require,module,exports){
+},{"./Socket":182,"./api":186,"./core":187,"./misc":191}],189:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -15185,7 +15491,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],189:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -15576,7 +15882,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],190:[function(require,module,exports){
+},{}],191:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -15874,4 +16180,913 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":186,"buffer":2}]},{},[14]);
+},{"./core":187,"buffer":2}],192:[function(require,module,exports){
+module.exports={
+  "usd": {
+    "symbol": "$",
+    "name": "US Dollar",
+    "countriesIso": [
+      "bq",
+      "tl",
+      "gu",
+      "sv",
+      "pr",
+      "pw",
+      "ec",
+      "mh",
+      "mp",
+      "io",
+      "fm",
+      "vg",
+      "us",
+      "um",
+      "tc",
+      "vi",
+      "as"
+    ]
+  },
+  "cad": {
+    "symbol": "CA$",
+    "name": "Canadian Dollar",
+    "countriesIso": [
+      "ca"
+    ]
+  },
+  "eur": {
+    "symbol": "€",
+    "name": "Euro",
+    "countriesIso": [
+      "be",
+      "bl",
+      "re",
+      "gr",
+      "gp",
+      "gf",
+      "pt",
+      "pm",
+      "ee",
+      "it",
+      "es",
+      "me",
+      "mf",
+      "mc",
+      "mt",
+      "mq",
+      "fr",
+      "fi",
+      "nl",
+      "xk",
+      "cy",
+      "sk",
+      "si",
+      "sm",
+      "de",
+      "yt",
+      "lv",
+      "lu",
+      "tf",
+      "va",
+      "ad",
+      "at",
+      "ax",
+      "ie"
+    ]
+  },
+  "aed": {
+    "symbol": "AED",
+    "name": "United Arab Emirates Dirham",
+    "countriesIso": [
+      "ae"
+    ]
+  },
+  "afn": {
+    "symbol": "Af",
+    "name": "Afghan Afghani",
+    "countriesIso": [
+      "af"
+    ]
+  },
+  "all": {
+    "symbol": "ALL",
+    "name": "Albanian Lek",
+    "countriesIso": [
+      "al"
+    ]
+  },
+  "amd": {
+    "symbol": "AMD",
+    "name": "Armenian Dram",
+    "countriesIso": [
+      "am"
+    ]
+  },
+  "ars": {
+    "symbol": "AR$",
+    "name": "Argentine Peso",
+    "countriesIso": [
+      "ar"
+    ]
+  },
+  "aud": {
+    "symbol": "AU$",
+    "name": "Australian Dollar",
+    "countriesIso": [
+      "hm",
+      "nf",
+      "nr",
+      "cc",
+      "cx",
+      "ki",
+      "tv",
+      "au"
+    ]
+  },
+  "azn": {
+    "symbol": "man.",
+    "name": "Azerbaijani Manat",
+    "countriesIso": [
+      "az"
+    ]
+  },
+  "bam": {
+    "symbol": "KM",
+    "name": "Bosnia-Herzegovina Convertible Mark",
+    "countriesIso": [
+      "ba"
+    ]
+  },
+  "bdt": {
+    "symbol": "Tk",
+    "name": "Bangladeshi Taka",
+    "countriesIso": [
+      "bd"
+    ]
+  },
+  "bgn": {
+    "symbol": "BGN",
+    "name": "Bulgarian Lev",
+    "countriesIso": [
+      "bg"
+    ]
+  },
+  "bhd": {
+    "symbol": "BD",
+    "name": "Bahraini Dinar",
+    "countriesIso": [
+      "bh"
+    ]
+  },
+  "bif": {
+    "symbol": "FBu",
+    "name": "Burundian Franc",
+    "countriesIso": [
+      "bi"
+    ]
+  },
+  "bnd": {
+    "symbol": "BN$",
+    "name": "Brunei Dollar",
+    "countriesIso": [
+      "bn"
+    ]
+  },
+  "bob": {
+    "symbol": "Bs",
+    "name": "Bolivian Boliviano",
+    "countriesIso": [
+      "bo"
+    ]
+  },
+  "brl": {
+    "symbol": "R$",
+    "name": "Brazilian Real",
+    "countriesIso": [
+      "br"
+    ]
+  },
+  "bwp": {
+    "symbol": "BWP",
+    "name": "Botswanan Pula",
+    "countriesIso": [
+      "bw"
+    ]
+  },
+  "byr": {
+    "symbol": "BYR",
+    "name": "Belarusian Ruble",
+    "countriesIso": [
+      "by"
+    ]
+  },
+  "bzd": {
+    "symbol": "BZ$",
+    "name": "Belize Dollar",
+    "countriesIso": [
+      "bz"
+    ]
+  },
+  "cdf": {
+    "symbol": "CDF",
+    "name": "Congolese Franc",
+    "countriesIso": [
+      "cd"
+    ]
+  },
+  "chf": {
+    "symbol": "CHF",
+    "name": "Swiss Franc",
+    "countriesIso": [
+      "ch",
+      "li"
+    ]
+  },
+  "clp": {
+    "symbol": "CL$",
+    "name": "Chilean Peso",
+    "countriesIso": [
+      "cl"
+    ]
+  },
+  "cny": {
+    "symbol": "CN¥",
+    "name": "Chinese Yuan",
+    "countriesIso": [
+      "cn"
+    ]
+  },
+  "cop": {
+    "symbol": "CO$",
+    "name": "Colombian Peso",
+    "countriesIso": [
+      "co"
+    ]
+  },
+  "crc": {
+    "symbol": "₡",
+    "name": "Costa Rican Colón",
+    "countriesIso": [
+      "cr"
+    ]
+  },
+  "cve": {
+    "symbol": "CV$",
+    "name": "Cape Verdean Escudo",
+    "countriesIso": [
+      "cv"
+    ]
+  },
+  "czk": {
+    "symbol": "Kč",
+    "name": "Czech Republic Koruna",
+    "countriesIso": [
+      "cz"
+    ]
+  },
+  "djf": {
+    "symbol": "Fdj",
+    "name": "Djiboutian Franc",
+    "countriesIso": [
+      "dj"
+    ]
+  },
+  "dkk": {
+    "symbol": "Dkr",
+    "name": "Danish Krone",
+    "countriesIso": [
+      "gl",
+      "fo",
+      "dk"
+    ]
+  },
+  "dop": {
+    "symbol": "RD$",
+    "name": "Dominican Peso",
+    "countriesIso": [
+      "do"
+    ]
+  },
+  "dzd": {
+    "symbol": "DA",
+    "name": "Algerian Dinar",
+    "countriesIso": [
+      "dz"
+    ]
+  },
+  "eek": {
+    "symbol": "Ekr",
+    "name": "Estonian Kroon",
+    "countriesIso": []
+  },
+  "egp": {
+    "symbol": "EGP",
+    "name": "Egyptian Pound",
+    "countriesIso": [
+      "eg"
+    ]
+  },
+  "ern": {
+    "symbol": "Nfk",
+    "name": "Eritrean Nakfa",
+    "countriesIso": [
+      "er"
+    ]
+  },
+  "etb": {
+    "symbol": "Br",
+    "name": "Ethiopian Birr",
+    "countriesIso": [
+      "et"
+    ]
+  },
+  "gbp": {
+    "symbol": "£",
+    "name": "British Pound Sterling",
+    "countriesIso": [
+      "je",
+      "gs",
+      "gg",
+      "gb",
+      "im"
+    ]
+  },
+  "gel": {
+    "symbol": "GEL",
+    "name": "Georgian Lari",
+    "countriesIso": [
+      "ge"
+    ]
+  },
+  "ghs": {
+    "symbol": "GH₵",
+    "name": "Ghanaian Cedi",
+    "countriesIso": [
+      "gh"
+    ]
+  },
+  "gnf": {
+    "symbol": "FG",
+    "name": "Guinean Franc",
+    "countriesIso": [
+      "gn"
+    ]
+  },
+  "gtq": {
+    "symbol": "GTQ",
+    "name": "Guatemalan Quetzal",
+    "countriesIso": [
+      "gt"
+    ]
+  },
+  "hkd": {
+    "symbol": "HK$",
+    "name": "Hong Kong Dollar",
+    "countriesIso": [
+      "hk"
+    ]
+  },
+  "hnl": {
+    "symbol": "HNL",
+    "name": "Honduran Lempira",
+    "countriesIso": [
+      "hn"
+    ]
+  },
+  "hrk": {
+    "symbol": "kn",
+    "name": "Croatian Kuna",
+    "countriesIso": [
+      "hr"
+    ]
+  },
+  "huf": {
+    "symbol": "Ft",
+    "name": "Hungarian Forint",
+    "countriesIso": [
+      "hu"
+    ]
+  },
+  "idr": {
+    "symbol": "Rp",
+    "name": "Indonesian Rupiah",
+    "countriesIso": [
+      "id"
+    ]
+  },
+  "ils": {
+    "symbol": "₪",
+    "name": "Israeli New Sheqel",
+    "countriesIso": [
+      "ps",
+      "il"
+    ]
+  },
+  "inr": {
+    "symbol": "Rs",
+    "name": "Indian Rupee",
+    "countriesIso": [
+      "in"
+    ]
+  },
+  "iqd": {
+    "symbol": "IQD",
+    "name": "Iraqi Dinar",
+    "countriesIso": [
+      "iq"
+    ]
+  },
+  "irr": {
+    "symbol": "IRR",
+    "name": "Iranian Rial",
+    "countriesIso": [
+      "ir"
+    ]
+  },
+  "isk": {
+    "symbol": "Ikr",
+    "name": "Icelandic Króna",
+    "countriesIso": [
+      "is"
+    ]
+  },
+  "jmd": {
+    "symbol": "J$",
+    "name": "Jamaican Dollar",
+    "countriesIso": [
+      "jm"
+    ]
+  },
+  "jod": {
+    "symbol": "JD",
+    "name": "Jordanian Dinar",
+    "countriesIso": [
+      "jo"
+    ]
+  },
+  "jpy": {
+    "symbol": "¥",
+    "name": "Japanese Yen",
+    "countriesIso": [
+      "jp"
+    ]
+  },
+  "kes": {
+    "symbol": "Ksh",
+    "name": "Kenyan Shilling",
+    "countriesIso": [
+      "ke"
+    ]
+  },
+  "khr": {
+    "symbol": "KHR",
+    "name": "Cambodian Riel",
+    "countriesIso": [
+      "kh"
+    ]
+  },
+  "kmf": {
+    "symbol": "CF",
+    "name": "Comorian Franc",
+    "countriesIso": [
+      "km"
+    ]
+  },
+  "krw": {
+    "symbol": "₩",
+    "name": "South Korean Won",
+    "countriesIso": [
+      "kr"
+    ]
+  },
+  "kwd": {
+    "symbol": "KD",
+    "name": "Kuwaiti Dinar",
+    "countriesIso": [
+      "kw"
+    ]
+  },
+  "kzt": {
+    "symbol": "KZT",
+    "name": "Kazakhstani Tenge",
+    "countriesIso": [
+      "kz"
+    ]
+  },
+  "lbp": {
+    "symbol": "LB£",
+    "name": "Lebanese Pound",
+    "countriesIso": [
+      "lb"
+    ]
+  },
+  "lkr": {
+    "symbol": "SLRs",
+    "name": "Sri Lankan Rupee",
+    "countriesIso": [
+      "lk"
+    ]
+  },
+  "ltl": {
+    "symbol": "Lt",
+    "name": "Lithuanian Litas",
+    "countriesIso": [
+      "lt"
+    ]
+  },
+  "lvl": {
+    "symbol": "Ls",
+    "name": "Latvian Lats",
+    "countriesIso": []
+  },
+  "lyd": {
+    "symbol": "LD",
+    "name": "Libyan Dinar",
+    "countriesIso": [
+      "ly"
+    ]
+  },
+  "mad": {
+    "symbol": "MAD",
+    "name": "Moroccan Dirham",
+    "countriesIso": [
+      "eh",
+      "ma"
+    ]
+  },
+  "mdl": {
+    "symbol": "MDL",
+    "name": "Moldovan Leu",
+    "countriesIso": [
+      "md"
+    ]
+  },
+  "mga": {
+    "symbol": "MGA",
+    "name": "Malagasy Ariary",
+    "countriesIso": [
+      "mg"
+    ]
+  },
+  "mkd": {
+    "symbol": "MKD",
+    "name": "Macedonian Denar",
+    "countriesIso": [
+      "mk"
+    ]
+  },
+  "mmk": {
+    "symbol": "MMK",
+    "name": "Myanma Kyat",
+    "countriesIso": [
+      "mm"
+    ]
+  },
+  "mop": {
+    "symbol": "MOP$",
+    "name": "Macanese Pataca",
+    "countriesIso": [
+      "mo"
+    ]
+  },
+  "mur": {
+    "symbol": "MURs",
+    "name": "Mauritian Rupee",
+    "countriesIso": [
+      "mu"
+    ]
+  },
+  "mxn": {
+    "symbol": "MX$",
+    "name": "Mexican Peso",
+    "countriesIso": [
+      "mx"
+    ]
+  },
+  "myr": {
+    "symbol": "RM",
+    "name": "Malaysian Ringgit",
+    "countriesIso": [
+      "my"
+    ]
+  },
+  "mzn": {
+    "symbol": "MTn",
+    "name": "Mozambican Metical",
+    "countriesIso": [
+      "mz"
+    ]
+  },
+  "nad": {
+    "symbol": "N$",
+    "name": "Namibian Dollar",
+    "countriesIso": [
+      "na"
+    ]
+  },
+  "ngn": {
+    "symbol": "₦",
+    "name": "Nigerian Naira",
+    "countriesIso": [
+      "ng"
+    ]
+  },
+  "nio": {
+    "symbol": "C$",
+    "name": "Nicaraguan Córdoba",
+    "countriesIso": [
+      "ni"
+    ]
+  },
+  "nok": {
+    "symbol": "Nkr",
+    "name": "Norwegian Krone",
+    "countriesIso": [
+      "bv",
+      "sj",
+      "no"
+    ]
+  },
+  "npr": {
+    "symbol": "NPRs",
+    "name": "Nepalese Rupee",
+    "countriesIso": [
+      "np"
+    ]
+  },
+  "nzd": {
+    "symbol": "NZ$",
+    "name": "New Zealand Dollar",
+    "countriesIso": [
+      "tk",
+      "pn",
+      "nz",
+      "nu",
+      "ck"
+    ]
+  },
+  "omr": {
+    "symbol": "OMR",
+    "name": "Omani Rial",
+    "countriesIso": [
+      "om"
+    ]
+  },
+  "pab": {
+    "symbol": "B/.",
+    "name": "Panamanian Balboa",
+    "countriesIso": [
+      "pa"
+    ]
+  },
+  "pen": {
+    "symbol": "S/.",
+    "name": "Peruvian Nuevo Sol",
+    "countriesIso": [
+      "pe"
+    ]
+  },
+  "php": {
+    "symbol": "₱",
+    "name": "Philippine Peso",
+    "countriesIso": [
+      "ph"
+    ]
+  },
+  "pkr": {
+    "symbol": "PKRs",
+    "name": "Pakistani Rupee",
+    "countriesIso": [
+      "pk"
+    ]
+  },
+  "pln": {
+    "symbol": "zł",
+    "name": "Polish Zloty",
+    "countriesIso": [
+      "pl"
+    ]
+  },
+  "pyg": {
+    "symbol": "₲",
+    "name": "Paraguayan Guarani",
+    "countriesIso": [
+      "py"
+    ]
+  },
+  "qar": {
+    "symbol": "QR",
+    "name": "Qatari Rial",
+    "countriesIso": [
+      "qa"
+    ]
+  },
+  "ron": {
+    "symbol": "RON",
+    "name": "Romanian Leu",
+    "countriesIso": [
+      "ro"
+    ]
+  },
+  "rsd": {
+    "symbol": "din.",
+    "name": "Serbian Dinar",
+    "countriesIso": [
+      "rs"
+    ]
+  },
+  "rub": {
+    "symbol": "RUB",
+    "name": "Russian Ruble",
+    "countriesIso": [
+      "ru"
+    ]
+  },
+  "rwf": {
+    "symbol": "RWF",
+    "name": "Rwandan Franc",
+    "countriesIso": [
+      "rw"
+    ]
+  },
+  "sar": {
+    "symbol": "SR",
+    "name": "Saudi Riyal",
+    "countriesIso": [
+      "sa"
+    ]
+  },
+  "sdg": {
+    "symbol": "SDG",
+    "name": "Sudanese Pound",
+    "countriesIso": [
+      "sd"
+    ]
+  },
+  "sek": {
+    "symbol": "Skr",
+    "name": "Swedish Krona",
+    "countriesIso": [
+      "se"
+    ]
+  },
+  "sgd": {
+    "symbol": "S$",
+    "name": "Singapore Dollar",
+    "countriesIso": [
+      "sg"
+    ]
+  },
+  "sos": {
+    "symbol": "Ssh",
+    "name": "Somali Shilling",
+    "countriesIso": [
+      "so"
+    ]
+  },
+  "syp": {
+    "symbol": "SY£",
+    "name": "Syrian Pound",
+    "countriesIso": [
+      "sy"
+    ]
+  },
+  "thb": {
+    "symbol": "฿",
+    "name": "Thai Baht",
+    "countriesIso": [
+      "th"
+    ]
+  },
+  "tnd": {
+    "symbol": "DT",
+    "name": "Tunisian Dinar",
+    "countriesIso": [
+      "tn"
+    ]
+  },
+  "top": {
+    "symbol": "T$",
+    "name": "Tongan Paʻanga",
+    "countriesIso": [
+      "to"
+    ]
+  },
+  "try": {
+    "symbol": "TL",
+    "name": "Turkish Lira",
+    "countriesIso": [
+      "tr"
+    ]
+  },
+  "ttd": {
+    "symbol": "TT$",
+    "name": "Trinidad and Tobago Dollar",
+    "countriesIso": [
+      "tt"
+    ]
+  },
+  "twd": {
+    "symbol": "NT$",
+    "name": "New Taiwan Dollar",
+    "countriesIso": [
+      "tw"
+    ]
+  },
+  "tzs": {
+    "symbol": "TSh",
+    "name": "Tanzanian Shilling",
+    "countriesIso": [
+      "tz"
+    ]
+  },
+  "uah": {
+    "symbol": "₴",
+    "name": "Ukrainian Hryvnia",
+    "countriesIso": [
+      "ua"
+    ]
+  },
+  "ugx": {
+    "symbol": "USh",
+    "name": "Ugandan Shilling",
+    "countriesIso": [
+      "ug"
+    ]
+  },
+  "uyu": {
+    "symbol": "$U",
+    "name": "Uruguayan Peso",
+    "countriesIso": [
+      "uy"
+    ]
+  },
+  "uzs": {
+    "symbol": "UZS",
+    "name": "Uzbekistan Som",
+    "countriesIso": [
+      "uz"
+    ]
+  },
+  "vef": {
+    "symbol": "Bs.F.",
+    "name": "Venezuelan Bolívar",
+    "countriesIso": [
+      "ve"
+    ]
+  },
+  "vnd": {
+    "symbol": "₫",
+    "name": "Vietnamese Dong",
+    "countriesIso": [
+      "vn"
+    ]
+  },
+  "xaf": {
+    "symbol": "FCFA",
+    "name": "CFA Franc BEAC",
+    "countriesIso": [
+      "gq",
+      "ga",
+      "cm",
+      "cg",
+      "cf",
+      "td"
+    ]
+  },
+  "xof": {
+    "symbol": "CFA",
+    "name": "CFA Franc BCEAO",
+    "countriesIso": [
+      "bf",
+      "bj",
+      "gw",
+      "ml",
+      "ne",
+      "ci",
+      "sn",
+      "tg"
+    ]
+  },
+  "yer": {
+    "symbol": "YR",
+    "name": "Yemeni Rial",
+    "countriesIso": [
+      "ye"
+    ]
+  },
+  "zar": {
+    "symbol": "R",
+    "name": "South African Rand",
+    "countriesIso": [
+      "za"
+    ]
+  },
+  "zmk": {
+    "symbol": "ZK",
+    "name": "Zambian Kwacha",
+    "countriesIso": [
+      "zm"
+    ]
+  }
+}
+
+},{}]},{},[14]);

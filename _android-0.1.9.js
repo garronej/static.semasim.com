@@ -3074,7 +3074,7 @@ var exposedToAndroid = {
 window["exposedToAndroid"] = exposedToAndroid;
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/Ua":18,"../../../shared/dist/lib/toBackend/connection":20,"../../../shared/dist/lib/toBackend/localApiHandlers":21,"../../../shared/dist/lib/toBackend/remoteApiCaller":22,"../../../shared/dist/lib/tools/getURLParameter":24,"buffer":2,"ts-events-extended":16}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/Ua":18,"../../../shared/dist/lib/toBackend/connection":20,"../../../shared/dist/lib/toBackend/localApiHandlers":21,"../../../shared/dist/lib/toBackend/remoteApiCaller":22,"../../../shared/dist/lib/tools/getURLParameter":25,"buffer":2,"ts-events-extended":16}],10:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -3991,7 +3991,7 @@ exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 exports.urlSafeB64 = bundledData_1.urlSafeB64;
 
-},{"../../../gateway/dist/lib/misc/bundledData":72,"../../../gateway/dist/lib/misc/sipRouting":73,"../../../gateway/dist/lib/types":74}],18:[function(require,module,exports){
+},{"../../../gateway/dist/lib/misc/bundledData":74,"../../../gateway/dist/lib/misc/sipRouting":75,"../../../gateway/dist/lib/types":76}],18:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 //NOTE: Require jssip_compat loaded on the page.
@@ -4606,7 +4606,7 @@ function newIceCandidateHandler(rtcICEServer) {
 })(newIceCandidateHandler || (newIceCandidateHandler = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../gateway":17,"./env":19,"./toBackend/connection":20,"./toBackend/localApiHandlers":21,"buffer":2,"run-exclusive":48,"ts-events-extended":60,"ts-sip":68}],19:[function(require,module,exports){
+},{"../gateway":17,"./env":19,"./toBackend/connection":20,"./toBackend/localApiHandlers":21,"buffer":2,"run-exclusive":49,"ts-events-extended":61,"ts-sip":69}],19:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** semasim.com or dev.semasim.com */
@@ -4851,7 +4851,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../env":19,"../tools/bootbox_custom":23,"./localApiHandlers":21,"./remoteApiCaller":22,"js-cookie":46,"ts-events-extended":60,"ts-sip":68}],21:[function(require,module,exports){
+},{"../env":19,"../tools/bootbox_custom":23,"./localApiHandlers":21,"./remoteApiCaller":22,"js-cookie":47,"ts-events-extended":61,"ts-sip":69}],21:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -5472,7 +5472,7 @@ exports.getRTCIceServer = (function () {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":29,"../tools/bootbox_custom":23,"./remoteApiCaller":22,"chan-dongle-extended-client/dist/lib/types":30,"ts-events-extended":60}],22:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":30,"../tools/bootbox_custom":23,"./remoteApiCaller":22,"chan-dongle-extended-client/dist/lib/types":31,"ts-events-extended":61}],22:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -6346,7 +6346,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":28,"../types":27,"./connection":20,"phone-number":47,"ts-events-extended":60,"ts-sip":68}],23:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":29,"../types":28,"./connection":20,"phone-number":48,"ts-events-extended":61,"ts-sip":69}],23:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -6454,7 +6454,123 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":26}],24:[function(require,module,exports){
+},{"./modal_stack":27}],24:[function(require,module,exports){
+"use strict";
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.data = require("../../../res/currency.json");
+function isValidCountryIso(countryIso) {
+    //NOTE: Avoid loading if we do not need
+    if (isValidCountryIso.countryIsoRecord === undefined) {
+        isValidCountryIso.countryIsoRecord = (function () {
+            var e_1, _a, e_2, _b;
+            var out = {};
+            try {
+                for (var _c = __values(Object.keys(exports.data)), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var currency = _d.value;
+                    try {
+                        for (var _e = __values(exports.data[currency].countriesIso), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var countryIso_1 = _f.value;
+                            out[countryIso_1] = true;
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return out;
+        })();
+        return isValidCountryIso(countryIso);
+    }
+    if (typeof countryIso !== "string" || !/^[a-z]{2}$/.test(countryIso)) {
+        return false;
+    }
+    return !!isValidCountryIso.countryIsoRecord[countryIso];
+}
+exports.isValidCountryIso = isValidCountryIso;
+(function (isValidCountryIso) {
+    isValidCountryIso.countryIsoRecord = undefined;
+})(isValidCountryIso = exports.isValidCountryIso || (exports.isValidCountryIso = {}));
+function getCountryCurrency(countryIso) {
+    var cache = getCountryCurrency.cache;
+    {
+        var currency = cache[countryIso];
+        if (currency !== undefined) {
+            return currency;
+        }
+    }
+    cache[countryIso] = Object.keys(exports.data)
+        .map(function (currency) { return ({ currency: currency, "countriesIso": exports.data[currency].countriesIso }); })
+        .find(function (_a) {
+        var countriesIso = _a.countriesIso;
+        return !!countriesIso.find(function (_countryIso) { return _countryIso === countryIso; });
+    })
+        .currency;
+    return getCountryCurrency(countryIso);
+}
+exports.getCountryCurrency = getCountryCurrency;
+(function (getCountryCurrency) {
+    getCountryCurrency.cache = {};
+})(getCountryCurrency = exports.getCountryCurrency || (exports.getCountryCurrency = {}));
+function convertFromEuro(euroAmount, currencyTo) {
+    var changeRates = convertFromEuro.changeRates;
+    if (changeRates === undefined) {
+        throw new Error("Changes rates have not been defined");
+    }
+    return euroAmount * changeRates[currencyTo];
+}
+exports.convertFromEuro = convertFromEuro;
+(function (convertFromEuro) {
+    convertFromEuro.changeRates = undefined;
+})(convertFromEuro = exports.convertFromEuro || (exports.convertFromEuro = {}));
+/**
+ * get currency of stripe card,
+ * if there is no special pricing for the currency
+ * "eur" will be returned.
+ *
+ * NOTE: This function does seems to come out of left field
+ * but this operation is done on the frontend and the backend
+ * so we export it.
+ *
+ */
+function getCardCurrency(stripeCard, pricingByCurrency) {
+    var currency = getCountryCurrency(stripeCard.country.toLowerCase());
+    if (!(currency in pricingByCurrency)) {
+        currency = "eur";
+    }
+    return currency;
+}
+exports.getCardCurrency = getCardCurrency;
+function prettyPrint(amount, currency) {
+    return (amount / 100).toLocaleString(undefined, {
+        "style": "currency",
+        currency: currency
+    });
+}
+exports.prettyPrint = prettyPrint;
+
+},{"../../../res/currency.json":73}],25:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getURLParameter(sParam) {
@@ -6469,7 +6585,7 @@ function getURLParameter(sParam) {
 }
 exports.getURLParameter = getURLParameter;
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -6492,7 +6608,7 @@ function isAscendingAlphabeticalOrder(a, b) {
 }
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -6557,6 +6673,7 @@ function add(modal, options) {
                 switch (_a.label) {
                     case 0:
                         if (stack.indexOf(modal) >= 0) {
+                            resolve();
                             return [2 /*return*/];
                         }
                         stack.push(modal);
@@ -6594,14 +6711,15 @@ function add(modal, options) {
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        modal.modal("show");
                         modal.one("shown.bs.modal", function () { return resolve(); });
+                        modal.modal("show");
                         return [2 /*return*/];
                 }
             });
         }); }); },
         "hide": function () { return new Promise(function (resolve) {
             if (stack.indexOf(modal) < 0) {
+                resolve();
                 return;
             }
             modal.one("hidden.bs.modal", function () { return resolve(); });
@@ -6611,8 +6729,19 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
@@ -6623,8 +6752,29 @@ var __values = (this && this.__values) || function (o) {
         }
     };
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var isAscendingAlphabeticalOrder_1 = require("./tools/isAscendingAlphabeticalOrder");
+var currencyLib = require("./tools/currency");
 var UserSim;
 (function (UserSim) {
     var Owned;
@@ -6807,8 +6957,110 @@ var webphoneData;
     }
     webphoneData.getUnreadMessagesCount = getUnreadMessagesCount;
 })(webphoneData = exports.webphoneData || (exports.webphoneData = {}));
+var shop;
+(function (shop) {
+    var Cart;
+    (function (Cart) {
+        function getPrice(cart, convertFromEuro) {
+            var out = cart
+                .map(function (_a) {
+                var price = _a.product.price, quantity = _a.quantity;
+                return Price.operation(price, function (amount) { return amount * quantity; });
+            })
+                .reduce(function (out, price) { return Price.addition(out, price, convertFromEuro); }, { "eur": 0 });
+            //console.log("Cart.getGoodsPrice: ", JSON.stringify({ cart, out }, null, 2));
+            return out;
+        }
+        Cart.getPrice = getPrice;
+        function getOverallFootprint(cart) {
+            return !!cart.find(function (_a) {
+                var product = _a.product;
+                return product.footprint === "VOLUME";
+            }) ? "VOLUME" : "FLAT";
+        }
+        Cart.getOverallFootprint = getOverallFootprint;
+    })(Cart = shop.Cart || (shop.Cart = {}));
+    var Price;
+    (function (Price) {
+        /**
+         * Out of place.
+         * If the amount for a currency is defined in one object
+         * but not in the other the undefined amount will be
+         * computed from the rateChange
+         *
+         */
+        function binaryOperation(price1, price2, op, convertFromEuro) {
+            var e_2, _a, e_3, _b;
+            price1 = __assign({}, price1);
+            price2 = __assign({}, price2);
+            try {
+                //NOTE: Ugly but does not involve map and less verbose.
+                for (var _c = __values(__spread(Object.keys(price1), Object.keys(price2))), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var currency = _d.value;
+                    try {
+                        for (var _e = __values([price1, price2]), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var price = _f.value;
+                            if (!(currency in price)) {
+                                price[currency] = convertFromEuro(price["eur"], currency);
+                            }
+                        }
+                    }
+                    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_3) throw e_3.error; }
+                    }
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+            var out = { "eur": 0 };
+            for (var currency in price1) {
+                out[currency] = op(price1[currency], price2[currency]);
+            }
+            return out;
+        }
+        Price.binaryOperation = binaryOperation;
+        function operation(price, op) {
+            var out = { "eur": 0 };
+            for (var currency in price) {
+                out[currency] = op(price[currency]);
+            }
+            return out;
+        }
+        Price.operation = operation;
+        function addition(price1, price2, convertFromEuro) {
+            return binaryOperation(price1, price2, function (amount1, amount2) { return amount1 + amount2; }, convertFromEuro);
+        }
+        Price.addition = addition;
+        /**
+         * return the amount of a price in a given currency.
+         * If the amount for the currency is not defined in
+         * the price object it will be computer from the
+         * euro amount.
+         * */
+        function getAmountInCurrency(price, currency, convertFromEuro) {
+            return currency in price ?
+                price[currency] :
+                convertFromEuro(price["eur"], currency);
+        }
+        Price.getAmountInCurrency = getAmountInCurrency;
+        function prettyPrint(price, currency, convertFromEuro) {
+            return currencyLib.prettyPrint(getAmountInCurrency(price, currency, convertFromEuro), currency);
+        }
+        Price.prettyPrint = prettyPrint;
+    })(Price = shop.Price || (shop.Price = {}));
+    ;
+})(shop = exports.shop || (exports.shop = {}));
 
-},{"./tools/isAscendingAlphabeticalOrder":25}],28:[function(require,module,exports){
+},{"./tools/currency":24,"./tools/isAscendingAlphabeticalOrder":26}],29:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -6907,7 +7159,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -6960,7 +7212,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -6981,7 +7233,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -7184,7 +7436,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":32,"./custom/zalgo":33,"./maps/america":36,"./maps/rainbow":37,"./maps/random":38,"./maps/zebra":39,"./styles":40,"./system/supports-colors":42,"util":8}],32:[function(require,module,exports){
+},{"./custom/trap":33,"./custom/zalgo":34,"./maps/america":37,"./maps/rainbow":38,"./maps/random":39,"./maps/zebra":40,"./styles":41,"./system/supports-colors":43,"util":8}],33:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -7232,7 +7484,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -7344,7 +7596,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -7456,7 +7708,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":31}],35:[function(require,module,exports){
+},{"./colors":32}],36:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -7471,7 +7723,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":31,"./extendStringPrototype":34}],36:[function(require,module,exports){
+},{"./colors":32,"./extendStringPrototype":35}],37:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -7483,7 +7735,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -7497,7 +7749,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -7509,14 +7761,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -7595,7 +7847,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -7634,7 +7886,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],42:[function(require,module,exports){
+},{"_process":6}],43:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -7789,7 +8041,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":41,"_process":6,"os":5}],43:[function(require,module,exports){
+},{"./has-flag.js":42,"_process":6,"os":5}],44:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -7843,21 +8095,21 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":43}],45:[function(require,module,exports){
+},{"./implementation":44}],46:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":44}],46:[function(require,module,exports){
+},{"function-bind":45}],47:[function(require,module,exports){
 /*!
  * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
@@ -8024,7 +8276,7 @@ module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 	return init(function () {});
 }));
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 (function (process,global){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -8215,11 +8467,11 @@ var phoneNumber;
 })(phoneNumber = exports.phoneNumber || (exports.phoneNumber = {}));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":6}],48:[function(require,module,exports){
+},{"_process":6}],49:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"dup":10}],49:[function(require,module,exports){
+},{"dup":10}],50:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],50:[function(require,module,exports){
+},{"dup":11}],51:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -8554,7 +8806,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":45}],51:[function(require,module,exports){
+},{"has":46}],52:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -8604,7 +8856,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":50}],52:[function(require,module,exports){
+},{"super-json":51}],53:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -8616,7 +8868,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":51,"./stringTransform":53,"./stringTransformExt":54,"./testing":55}],53:[function(require,module,exports){
+},{"./JSON_CUSTOM":52,"./stringTransform":54,"./stringTransformExt":55,"./testing":56}],54:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -8678,7 +8930,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],54:[function(require,module,exports){
+},{"buffer":2}],55:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -8746,7 +8998,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":53}],55:[function(require,module,exports){
+},{"./stringTransform":54}],56:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -9015,17 +9267,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":53}],56:[function(require,module,exports){
+},{"./stringTransform":54}],57:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"./SyncEventBase":57,"dup":12}],57:[function(require,module,exports){
+},{"./SyncEventBase":58,"dup":12}],58:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":58,"dup":13}],58:[function(require,module,exports){
+},{"./SyncEventBaseProtected":59,"dup":13}],59:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"./defs":59,"dup":14,"run-exclusive":48}],59:[function(require,module,exports){
+},{"./defs":60,"dup":14,"run-exclusive":49}],60:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15,"setprototypeof":49}],60:[function(require,module,exports){
+},{"dup":15,"setprototypeof":50}],61:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"./SyncEvent":56,"./defs":59,"dup":16}],61:[function(require,module,exports){
+},{"./SyncEvent":57,"./defs":60,"dup":16}],62:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -9197,7 +9449,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":60}],62:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":61}],63:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -9509,7 +9761,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":61,"./api/ApiMessage":63,"./core":67,"./misc":71,"colors":35,"ts-events-extended":60}],63:[function(require,module,exports){
+},{"./IConnection":62,"./api/ApiMessage":64,"./core":68,"./misc":72,"colors":36,"ts-events-extended":61}],64:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -9590,7 +9842,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":67,"../misc":71,"buffer":2,"transfer-tools":52}],64:[function(require,module,exports){
+},{"../core":68,"../misc":72,"buffer":2,"transfer-tools":53}],65:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9772,7 +10024,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":71,"./ApiMessage":63,"colors":35,"util":8}],65:[function(require,module,exports){
+},{"../misc":72,"./ApiMessage":64,"colors":36,"util":8}],66:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -9991,7 +10243,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":71,"./ApiMessage":63,"setprototypeof":49}],66:[function(require,module,exports){
+},{"../misc":72,"./ApiMessage":64,"setprototypeof":50}],67:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -9999,7 +10251,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":64,"./client":65}],67:[function(require,module,exports){
+},{"./Server":65,"./client":66}],68:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -10083,7 +10335,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":69,"./legacy/sip":70,"buffer":2,"setprototypeof":49}],68:[function(require,module,exports){
+},{"./legacy/sdp":70,"./legacy/sip":71,"buffer":2,"setprototypeof":50}],69:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -10095,7 +10347,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":62,"./api":66,"./core":67,"./misc":71}],69:[function(require,module,exports){
+},{"./Socket":63,"./api":67,"./core":68,"./misc":72}],70:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -10211,7 +10463,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -10602,7 +10854,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],71:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -10900,7 +11152,916 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":67,"buffer":2}],72:[function(require,module,exports){
+},{"./core":68,"buffer":2}],73:[function(require,module,exports){
+module.exports={
+  "usd": {
+    "symbol": "$",
+    "name": "US Dollar",
+    "countriesIso": [
+      "bq",
+      "tl",
+      "gu",
+      "sv",
+      "pr",
+      "pw",
+      "ec",
+      "mh",
+      "mp",
+      "io",
+      "fm",
+      "vg",
+      "us",
+      "um",
+      "tc",
+      "vi",
+      "as"
+    ]
+  },
+  "cad": {
+    "symbol": "CA$",
+    "name": "Canadian Dollar",
+    "countriesIso": [
+      "ca"
+    ]
+  },
+  "eur": {
+    "symbol": "€",
+    "name": "Euro",
+    "countriesIso": [
+      "be",
+      "bl",
+      "re",
+      "gr",
+      "gp",
+      "gf",
+      "pt",
+      "pm",
+      "ee",
+      "it",
+      "es",
+      "me",
+      "mf",
+      "mc",
+      "mt",
+      "mq",
+      "fr",
+      "fi",
+      "nl",
+      "xk",
+      "cy",
+      "sk",
+      "si",
+      "sm",
+      "de",
+      "yt",
+      "lv",
+      "lu",
+      "tf",
+      "va",
+      "ad",
+      "at",
+      "ax",
+      "ie"
+    ]
+  },
+  "aed": {
+    "symbol": "AED",
+    "name": "United Arab Emirates Dirham",
+    "countriesIso": [
+      "ae"
+    ]
+  },
+  "afn": {
+    "symbol": "Af",
+    "name": "Afghan Afghani",
+    "countriesIso": [
+      "af"
+    ]
+  },
+  "all": {
+    "symbol": "ALL",
+    "name": "Albanian Lek",
+    "countriesIso": [
+      "al"
+    ]
+  },
+  "amd": {
+    "symbol": "AMD",
+    "name": "Armenian Dram",
+    "countriesIso": [
+      "am"
+    ]
+  },
+  "ars": {
+    "symbol": "AR$",
+    "name": "Argentine Peso",
+    "countriesIso": [
+      "ar"
+    ]
+  },
+  "aud": {
+    "symbol": "AU$",
+    "name": "Australian Dollar",
+    "countriesIso": [
+      "hm",
+      "nf",
+      "nr",
+      "cc",
+      "cx",
+      "ki",
+      "tv",
+      "au"
+    ]
+  },
+  "azn": {
+    "symbol": "man.",
+    "name": "Azerbaijani Manat",
+    "countriesIso": [
+      "az"
+    ]
+  },
+  "bam": {
+    "symbol": "KM",
+    "name": "Bosnia-Herzegovina Convertible Mark",
+    "countriesIso": [
+      "ba"
+    ]
+  },
+  "bdt": {
+    "symbol": "Tk",
+    "name": "Bangladeshi Taka",
+    "countriesIso": [
+      "bd"
+    ]
+  },
+  "bgn": {
+    "symbol": "BGN",
+    "name": "Bulgarian Lev",
+    "countriesIso": [
+      "bg"
+    ]
+  },
+  "bhd": {
+    "symbol": "BD",
+    "name": "Bahraini Dinar",
+    "countriesIso": [
+      "bh"
+    ]
+  },
+  "bif": {
+    "symbol": "FBu",
+    "name": "Burundian Franc",
+    "countriesIso": [
+      "bi"
+    ]
+  },
+  "bnd": {
+    "symbol": "BN$",
+    "name": "Brunei Dollar",
+    "countriesIso": [
+      "bn"
+    ]
+  },
+  "bob": {
+    "symbol": "Bs",
+    "name": "Bolivian Boliviano",
+    "countriesIso": [
+      "bo"
+    ]
+  },
+  "brl": {
+    "symbol": "R$",
+    "name": "Brazilian Real",
+    "countriesIso": [
+      "br"
+    ]
+  },
+  "bwp": {
+    "symbol": "BWP",
+    "name": "Botswanan Pula",
+    "countriesIso": [
+      "bw"
+    ]
+  },
+  "byr": {
+    "symbol": "BYR",
+    "name": "Belarusian Ruble",
+    "countriesIso": [
+      "by"
+    ]
+  },
+  "bzd": {
+    "symbol": "BZ$",
+    "name": "Belize Dollar",
+    "countriesIso": [
+      "bz"
+    ]
+  },
+  "cdf": {
+    "symbol": "CDF",
+    "name": "Congolese Franc",
+    "countriesIso": [
+      "cd"
+    ]
+  },
+  "chf": {
+    "symbol": "CHF",
+    "name": "Swiss Franc",
+    "countriesIso": [
+      "ch",
+      "li"
+    ]
+  },
+  "clp": {
+    "symbol": "CL$",
+    "name": "Chilean Peso",
+    "countriesIso": [
+      "cl"
+    ]
+  },
+  "cny": {
+    "symbol": "CN¥",
+    "name": "Chinese Yuan",
+    "countriesIso": [
+      "cn"
+    ]
+  },
+  "cop": {
+    "symbol": "CO$",
+    "name": "Colombian Peso",
+    "countriesIso": [
+      "co"
+    ]
+  },
+  "crc": {
+    "symbol": "₡",
+    "name": "Costa Rican Colón",
+    "countriesIso": [
+      "cr"
+    ]
+  },
+  "cve": {
+    "symbol": "CV$",
+    "name": "Cape Verdean Escudo",
+    "countriesIso": [
+      "cv"
+    ]
+  },
+  "czk": {
+    "symbol": "Kč",
+    "name": "Czech Republic Koruna",
+    "countriesIso": [
+      "cz"
+    ]
+  },
+  "djf": {
+    "symbol": "Fdj",
+    "name": "Djiboutian Franc",
+    "countriesIso": [
+      "dj"
+    ]
+  },
+  "dkk": {
+    "symbol": "Dkr",
+    "name": "Danish Krone",
+    "countriesIso": [
+      "gl",
+      "fo",
+      "dk"
+    ]
+  },
+  "dop": {
+    "symbol": "RD$",
+    "name": "Dominican Peso",
+    "countriesIso": [
+      "do"
+    ]
+  },
+  "dzd": {
+    "symbol": "DA",
+    "name": "Algerian Dinar",
+    "countriesIso": [
+      "dz"
+    ]
+  },
+  "eek": {
+    "symbol": "Ekr",
+    "name": "Estonian Kroon",
+    "countriesIso": []
+  },
+  "egp": {
+    "symbol": "EGP",
+    "name": "Egyptian Pound",
+    "countriesIso": [
+      "eg"
+    ]
+  },
+  "ern": {
+    "symbol": "Nfk",
+    "name": "Eritrean Nakfa",
+    "countriesIso": [
+      "er"
+    ]
+  },
+  "etb": {
+    "symbol": "Br",
+    "name": "Ethiopian Birr",
+    "countriesIso": [
+      "et"
+    ]
+  },
+  "gbp": {
+    "symbol": "£",
+    "name": "British Pound Sterling",
+    "countriesIso": [
+      "je",
+      "gs",
+      "gg",
+      "gb",
+      "im"
+    ]
+  },
+  "gel": {
+    "symbol": "GEL",
+    "name": "Georgian Lari",
+    "countriesIso": [
+      "ge"
+    ]
+  },
+  "ghs": {
+    "symbol": "GH₵",
+    "name": "Ghanaian Cedi",
+    "countriesIso": [
+      "gh"
+    ]
+  },
+  "gnf": {
+    "symbol": "FG",
+    "name": "Guinean Franc",
+    "countriesIso": [
+      "gn"
+    ]
+  },
+  "gtq": {
+    "symbol": "GTQ",
+    "name": "Guatemalan Quetzal",
+    "countriesIso": [
+      "gt"
+    ]
+  },
+  "hkd": {
+    "symbol": "HK$",
+    "name": "Hong Kong Dollar",
+    "countriesIso": [
+      "hk"
+    ]
+  },
+  "hnl": {
+    "symbol": "HNL",
+    "name": "Honduran Lempira",
+    "countriesIso": [
+      "hn"
+    ]
+  },
+  "hrk": {
+    "symbol": "kn",
+    "name": "Croatian Kuna",
+    "countriesIso": [
+      "hr"
+    ]
+  },
+  "huf": {
+    "symbol": "Ft",
+    "name": "Hungarian Forint",
+    "countriesIso": [
+      "hu"
+    ]
+  },
+  "idr": {
+    "symbol": "Rp",
+    "name": "Indonesian Rupiah",
+    "countriesIso": [
+      "id"
+    ]
+  },
+  "ils": {
+    "symbol": "₪",
+    "name": "Israeli New Sheqel",
+    "countriesIso": [
+      "ps",
+      "il"
+    ]
+  },
+  "inr": {
+    "symbol": "Rs",
+    "name": "Indian Rupee",
+    "countriesIso": [
+      "in"
+    ]
+  },
+  "iqd": {
+    "symbol": "IQD",
+    "name": "Iraqi Dinar",
+    "countriesIso": [
+      "iq"
+    ]
+  },
+  "irr": {
+    "symbol": "IRR",
+    "name": "Iranian Rial",
+    "countriesIso": [
+      "ir"
+    ]
+  },
+  "isk": {
+    "symbol": "Ikr",
+    "name": "Icelandic Króna",
+    "countriesIso": [
+      "is"
+    ]
+  },
+  "jmd": {
+    "symbol": "J$",
+    "name": "Jamaican Dollar",
+    "countriesIso": [
+      "jm"
+    ]
+  },
+  "jod": {
+    "symbol": "JD",
+    "name": "Jordanian Dinar",
+    "countriesIso": [
+      "jo"
+    ]
+  },
+  "jpy": {
+    "symbol": "¥",
+    "name": "Japanese Yen",
+    "countriesIso": [
+      "jp"
+    ]
+  },
+  "kes": {
+    "symbol": "Ksh",
+    "name": "Kenyan Shilling",
+    "countriesIso": [
+      "ke"
+    ]
+  },
+  "khr": {
+    "symbol": "KHR",
+    "name": "Cambodian Riel",
+    "countriesIso": [
+      "kh"
+    ]
+  },
+  "kmf": {
+    "symbol": "CF",
+    "name": "Comorian Franc",
+    "countriesIso": [
+      "km"
+    ]
+  },
+  "krw": {
+    "symbol": "₩",
+    "name": "South Korean Won",
+    "countriesIso": [
+      "kr"
+    ]
+  },
+  "kwd": {
+    "symbol": "KD",
+    "name": "Kuwaiti Dinar",
+    "countriesIso": [
+      "kw"
+    ]
+  },
+  "kzt": {
+    "symbol": "KZT",
+    "name": "Kazakhstani Tenge",
+    "countriesIso": [
+      "kz"
+    ]
+  },
+  "lbp": {
+    "symbol": "LB£",
+    "name": "Lebanese Pound",
+    "countriesIso": [
+      "lb"
+    ]
+  },
+  "lkr": {
+    "symbol": "SLRs",
+    "name": "Sri Lankan Rupee",
+    "countriesIso": [
+      "lk"
+    ]
+  },
+  "ltl": {
+    "symbol": "Lt",
+    "name": "Lithuanian Litas",
+    "countriesIso": [
+      "lt"
+    ]
+  },
+  "lvl": {
+    "symbol": "Ls",
+    "name": "Latvian Lats",
+    "countriesIso": []
+  },
+  "lyd": {
+    "symbol": "LD",
+    "name": "Libyan Dinar",
+    "countriesIso": [
+      "ly"
+    ]
+  },
+  "mad": {
+    "symbol": "MAD",
+    "name": "Moroccan Dirham",
+    "countriesIso": [
+      "eh",
+      "ma"
+    ]
+  },
+  "mdl": {
+    "symbol": "MDL",
+    "name": "Moldovan Leu",
+    "countriesIso": [
+      "md"
+    ]
+  },
+  "mga": {
+    "symbol": "MGA",
+    "name": "Malagasy Ariary",
+    "countriesIso": [
+      "mg"
+    ]
+  },
+  "mkd": {
+    "symbol": "MKD",
+    "name": "Macedonian Denar",
+    "countriesIso": [
+      "mk"
+    ]
+  },
+  "mmk": {
+    "symbol": "MMK",
+    "name": "Myanma Kyat",
+    "countriesIso": [
+      "mm"
+    ]
+  },
+  "mop": {
+    "symbol": "MOP$",
+    "name": "Macanese Pataca",
+    "countriesIso": [
+      "mo"
+    ]
+  },
+  "mur": {
+    "symbol": "MURs",
+    "name": "Mauritian Rupee",
+    "countriesIso": [
+      "mu"
+    ]
+  },
+  "mxn": {
+    "symbol": "MX$",
+    "name": "Mexican Peso",
+    "countriesIso": [
+      "mx"
+    ]
+  },
+  "myr": {
+    "symbol": "RM",
+    "name": "Malaysian Ringgit",
+    "countriesIso": [
+      "my"
+    ]
+  },
+  "mzn": {
+    "symbol": "MTn",
+    "name": "Mozambican Metical",
+    "countriesIso": [
+      "mz"
+    ]
+  },
+  "nad": {
+    "symbol": "N$",
+    "name": "Namibian Dollar",
+    "countriesIso": [
+      "na"
+    ]
+  },
+  "ngn": {
+    "symbol": "₦",
+    "name": "Nigerian Naira",
+    "countriesIso": [
+      "ng"
+    ]
+  },
+  "nio": {
+    "symbol": "C$",
+    "name": "Nicaraguan Córdoba",
+    "countriesIso": [
+      "ni"
+    ]
+  },
+  "nok": {
+    "symbol": "Nkr",
+    "name": "Norwegian Krone",
+    "countriesIso": [
+      "bv",
+      "sj",
+      "no"
+    ]
+  },
+  "npr": {
+    "symbol": "NPRs",
+    "name": "Nepalese Rupee",
+    "countriesIso": [
+      "np"
+    ]
+  },
+  "nzd": {
+    "symbol": "NZ$",
+    "name": "New Zealand Dollar",
+    "countriesIso": [
+      "tk",
+      "pn",
+      "nz",
+      "nu",
+      "ck"
+    ]
+  },
+  "omr": {
+    "symbol": "OMR",
+    "name": "Omani Rial",
+    "countriesIso": [
+      "om"
+    ]
+  },
+  "pab": {
+    "symbol": "B/.",
+    "name": "Panamanian Balboa",
+    "countriesIso": [
+      "pa"
+    ]
+  },
+  "pen": {
+    "symbol": "S/.",
+    "name": "Peruvian Nuevo Sol",
+    "countriesIso": [
+      "pe"
+    ]
+  },
+  "php": {
+    "symbol": "₱",
+    "name": "Philippine Peso",
+    "countriesIso": [
+      "ph"
+    ]
+  },
+  "pkr": {
+    "symbol": "PKRs",
+    "name": "Pakistani Rupee",
+    "countriesIso": [
+      "pk"
+    ]
+  },
+  "pln": {
+    "symbol": "zł",
+    "name": "Polish Zloty",
+    "countriesIso": [
+      "pl"
+    ]
+  },
+  "pyg": {
+    "symbol": "₲",
+    "name": "Paraguayan Guarani",
+    "countriesIso": [
+      "py"
+    ]
+  },
+  "qar": {
+    "symbol": "QR",
+    "name": "Qatari Rial",
+    "countriesIso": [
+      "qa"
+    ]
+  },
+  "ron": {
+    "symbol": "RON",
+    "name": "Romanian Leu",
+    "countriesIso": [
+      "ro"
+    ]
+  },
+  "rsd": {
+    "symbol": "din.",
+    "name": "Serbian Dinar",
+    "countriesIso": [
+      "rs"
+    ]
+  },
+  "rub": {
+    "symbol": "RUB",
+    "name": "Russian Ruble",
+    "countriesIso": [
+      "ru"
+    ]
+  },
+  "rwf": {
+    "symbol": "RWF",
+    "name": "Rwandan Franc",
+    "countriesIso": [
+      "rw"
+    ]
+  },
+  "sar": {
+    "symbol": "SR",
+    "name": "Saudi Riyal",
+    "countriesIso": [
+      "sa"
+    ]
+  },
+  "sdg": {
+    "symbol": "SDG",
+    "name": "Sudanese Pound",
+    "countriesIso": [
+      "sd"
+    ]
+  },
+  "sek": {
+    "symbol": "Skr",
+    "name": "Swedish Krona",
+    "countriesIso": [
+      "se"
+    ]
+  },
+  "sgd": {
+    "symbol": "S$",
+    "name": "Singapore Dollar",
+    "countriesIso": [
+      "sg"
+    ]
+  },
+  "sos": {
+    "symbol": "Ssh",
+    "name": "Somali Shilling",
+    "countriesIso": [
+      "so"
+    ]
+  },
+  "syp": {
+    "symbol": "SY£",
+    "name": "Syrian Pound",
+    "countriesIso": [
+      "sy"
+    ]
+  },
+  "thb": {
+    "symbol": "฿",
+    "name": "Thai Baht",
+    "countriesIso": [
+      "th"
+    ]
+  },
+  "tnd": {
+    "symbol": "DT",
+    "name": "Tunisian Dinar",
+    "countriesIso": [
+      "tn"
+    ]
+  },
+  "top": {
+    "symbol": "T$",
+    "name": "Tongan Paʻanga",
+    "countriesIso": [
+      "to"
+    ]
+  },
+  "try": {
+    "symbol": "TL",
+    "name": "Turkish Lira",
+    "countriesIso": [
+      "tr"
+    ]
+  },
+  "ttd": {
+    "symbol": "TT$",
+    "name": "Trinidad and Tobago Dollar",
+    "countriesIso": [
+      "tt"
+    ]
+  },
+  "twd": {
+    "symbol": "NT$",
+    "name": "New Taiwan Dollar",
+    "countriesIso": [
+      "tw"
+    ]
+  },
+  "tzs": {
+    "symbol": "TSh",
+    "name": "Tanzanian Shilling",
+    "countriesIso": [
+      "tz"
+    ]
+  },
+  "uah": {
+    "symbol": "₴",
+    "name": "Ukrainian Hryvnia",
+    "countriesIso": [
+      "ua"
+    ]
+  },
+  "ugx": {
+    "symbol": "USh",
+    "name": "Ugandan Shilling",
+    "countriesIso": [
+      "ug"
+    ]
+  },
+  "uyu": {
+    "symbol": "$U",
+    "name": "Uruguayan Peso",
+    "countriesIso": [
+      "uy"
+    ]
+  },
+  "uzs": {
+    "symbol": "UZS",
+    "name": "Uzbekistan Som",
+    "countriesIso": [
+      "uz"
+    ]
+  },
+  "vef": {
+    "symbol": "Bs.F.",
+    "name": "Venezuelan Bolívar",
+    "countriesIso": [
+      "ve"
+    ]
+  },
+  "vnd": {
+    "symbol": "₫",
+    "name": "Vietnamese Dong",
+    "countriesIso": [
+      "vn"
+    ]
+  },
+  "xaf": {
+    "symbol": "FCFA",
+    "name": "CFA Franc BEAC",
+    "countriesIso": [
+      "gq",
+      "ga",
+      "cm",
+      "cg",
+      "cf",
+      "td"
+    ]
+  },
+  "xof": {
+    "symbol": "CFA",
+    "name": "CFA Franc BCEAO",
+    "countriesIso": [
+      "bf",
+      "bj",
+      "gw",
+      "ml",
+      "ne",
+      "ci",
+      "sn",
+      "tg"
+    ]
+  },
+  "yer": {
+    "symbol": "YR",
+    "name": "Yemeni Rial",
+    "countriesIso": [
+      "ye"
+    ]
+  },
+  "zar": {
+    "symbol": "R",
+    "name": "South African Rand",
+    "countriesIso": [
+      "za"
+    ]
+  },
+  "zmk": {
+    "symbol": "ZK",
+    "name": "Zambian Kwacha",
+    "countriesIso": [
+      "zm"
+    ]
+  }
+}
+
+},{}],74:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -10967,7 +12128,7 @@ function extractBundledDataFromHeaders(headers) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"transfer-tools/dist/lib/stringTransform":95}],73:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":97}],75:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 var __read = (this && this.__read) || function (o, n) {
@@ -11052,86 +12213,86 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"transfer-tools/dist/lib/stringTransform":95,"ts-sip":110}],74:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":97,"ts-sip":112}],76:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],75:[function(require,module,exports){
-arguments[4][31][0].apply(exports,arguments)
-},{"./custom/trap":76,"./custom/zalgo":77,"./maps/america":80,"./maps/rainbow":81,"./maps/random":82,"./maps/zebra":83,"./styles":84,"./system/supports-colors":86,"dup":31,"util":8}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32}],77:[function(require,module,exports){
+},{"./custom/trap":78,"./custom/zalgo":79,"./maps/america":82,"./maps/rainbow":83,"./maps/random":84,"./maps/zebra":85,"./styles":86,"./system/supports-colors":88,"dup":32,"util":8}],78:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"dup":33}],78:[function(require,module,exports){
+},{"dup":33}],79:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"./colors":75,"dup":34}],79:[function(require,module,exports){
+},{"dup":34}],80:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./colors":75,"./extendStringPrototype":78,"dup":35}],80:[function(require,module,exports){
+},{"./colors":77,"dup":35}],81:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"dup":36}],81:[function(require,module,exports){
+},{"./colors":77,"./extendStringPrototype":80,"dup":36}],82:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"dup":37}],82:[function(require,module,exports){
+},{"dup":37}],83:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"dup":38}],83:[function(require,module,exports){
+},{"dup":38}],84:[function(require,module,exports){
 arguments[4][39][0].apply(exports,arguments)
-},{"dup":39}],84:[function(require,module,exports){
+},{"dup":39}],85:[function(require,module,exports){
 arguments[4][40][0].apply(exports,arguments)
-},{"dup":40}],85:[function(require,module,exports){
+},{"dup":40}],86:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"_process":6,"dup":41}],86:[function(require,module,exports){
+},{"dup":41}],87:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"./has-flag.js":85,"_process":6,"dup":42,"os":5}],87:[function(require,module,exports){
+},{"_process":6,"dup":42}],88:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],88:[function(require,module,exports){
+},{"./has-flag.js":87,"_process":6,"dup":43,"os":5}],89:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"./implementation":87,"dup":44}],89:[function(require,module,exports){
+},{"dup":44}],90:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"dup":45,"function-bind":88}],90:[function(require,module,exports){
+},{"./implementation":89,"dup":45}],91:[function(require,module,exports){
+arguments[4][46][0].apply(exports,arguments)
+},{"dup":46,"function-bind":90}],92:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"dup":10}],91:[function(require,module,exports){
+},{"dup":10}],93:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],92:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50,"has":89}],93:[function(require,module,exports){
+},{"dup":11}],94:[function(require,module,exports){
 arguments[4][51][0].apply(exports,arguments)
-},{"dup":51,"super-json":92}],94:[function(require,module,exports){
+},{"dup":51,"has":91}],95:[function(require,module,exports){
 arguments[4][52][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":93,"./stringTransform":95,"./stringTransformExt":96,"./testing":97,"dup":52}],95:[function(require,module,exports){
+},{"dup":52,"super-json":94}],96:[function(require,module,exports){
 arguments[4][53][0].apply(exports,arguments)
-},{"buffer":2,"dup":53}],96:[function(require,module,exports){
+},{"./JSON_CUSTOM":95,"./stringTransform":97,"./stringTransformExt":98,"./testing":99,"dup":53}],97:[function(require,module,exports){
 arguments[4][54][0].apply(exports,arguments)
-},{"./stringTransform":95,"dup":54}],97:[function(require,module,exports){
+},{"buffer":2,"dup":54}],98:[function(require,module,exports){
 arguments[4][55][0].apply(exports,arguments)
-},{"./stringTransform":95,"dup":55}],98:[function(require,module,exports){
+},{"./stringTransform":97,"dup":55}],99:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"./stringTransform":97,"dup":56}],100:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"./SyncEventBase":99,"dup":12}],99:[function(require,module,exports){
+},{"./SyncEventBase":101,"dup":12}],101:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":100,"dup":13}],100:[function(require,module,exports){
+},{"./SyncEventBaseProtected":102,"dup":13}],102:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"./defs":101,"dup":14,"run-exclusive":90}],101:[function(require,module,exports){
+},{"./defs":103,"dup":14,"run-exclusive":92}],103:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15,"setprototypeof":91}],102:[function(require,module,exports){
+},{"dup":15,"setprototypeof":93}],104:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"./SyncEvent":98,"./defs":101,"dup":16}],103:[function(require,module,exports){
-arguments[4][61][0].apply(exports,arguments)
-},{"buffer":2,"dup":61,"ts-events-extended":102}],104:[function(require,module,exports){
+},{"./SyncEvent":100,"./defs":103,"dup":16}],105:[function(require,module,exports){
 arguments[4][62][0].apply(exports,arguments)
-},{"./IConnection":103,"./api/ApiMessage":105,"./core":109,"./misc":113,"colors":79,"dup":62,"ts-events-extended":102}],105:[function(require,module,exports){
+},{"buffer":2,"dup":62,"ts-events-extended":104}],106:[function(require,module,exports){
 arguments[4][63][0].apply(exports,arguments)
-},{"../core":109,"../misc":113,"buffer":2,"dup":63,"transfer-tools":94}],106:[function(require,module,exports){
+},{"./IConnection":105,"./api/ApiMessage":107,"./core":111,"./misc":115,"colors":81,"dup":63,"ts-events-extended":104}],107:[function(require,module,exports){
 arguments[4][64][0].apply(exports,arguments)
-},{"../misc":113,"./ApiMessage":105,"colors":79,"dup":64,"util":8}],107:[function(require,module,exports){
+},{"../core":111,"../misc":115,"buffer":2,"dup":64,"transfer-tools":96}],108:[function(require,module,exports){
 arguments[4][65][0].apply(exports,arguments)
-},{"../misc":113,"./ApiMessage":105,"dup":65,"setprototypeof":91}],108:[function(require,module,exports){
+},{"../misc":115,"./ApiMessage":107,"colors":81,"dup":65,"util":8}],109:[function(require,module,exports){
 arguments[4][66][0].apply(exports,arguments)
-},{"./Server":106,"./client":107,"dup":66}],109:[function(require,module,exports){
+},{"../misc":115,"./ApiMessage":107,"dup":66,"setprototypeof":93}],110:[function(require,module,exports){
 arguments[4][67][0].apply(exports,arguments)
-},{"./legacy/sdp":111,"./legacy/sip":112,"buffer":2,"dup":67,"setprototypeof":91}],110:[function(require,module,exports){
+},{"./Server":108,"./client":109,"dup":67}],111:[function(require,module,exports){
 arguments[4][68][0].apply(exports,arguments)
-},{"./Socket":104,"./api":108,"./core":109,"./misc":113,"dup":68}],111:[function(require,module,exports){
+},{"./legacy/sdp":113,"./legacy/sip":114,"buffer":2,"dup":68,"setprototypeof":93}],112:[function(require,module,exports){
 arguments[4][69][0].apply(exports,arguments)
-},{"dup":69}],112:[function(require,module,exports){
+},{"./Socket":106,"./api":110,"./core":111,"./misc":115,"dup":69}],113:[function(require,module,exports){
 arguments[4][70][0].apply(exports,arguments)
-},{"dup":70}],113:[function(require,module,exports){
+},{"dup":70}],114:[function(require,module,exports){
 arguments[4][71][0].apply(exports,arguments)
-},{"./core":109,"buffer":2,"dup":71}]},{},[9]);
+},{"dup":71}],115:[function(require,module,exports){
+arguments[4][72][0].apply(exports,arguments)
+},{"./core":111,"buffer":2,"dup":72}]},{},[9]);
