@@ -2734,14 +2734,11 @@ function renewPassword(email, newPassword, token) {
     return sendRequest(methodName, { email: email, newPassword: newPassword, token: token });
 }
 exports.renewPassword = renewPassword;
-function guessCountryIso() {
-    var methodName = apiDeclaration.guessCountryIso.methodName;
+function getCountryIso() {
+    var methodName = apiDeclaration.getCountryIso.methodName;
     return sendRequest(methodName, undefined);
 }
-exports.guessCountryIso = guessCountryIso;
-(function (guessCountryIso) {
-    guessCountryIso.cacheOut = undefined;
-})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+exports.getCountryIso = getCountryIso;
 function getChangesRates() {
     var methodName = apiDeclaration.getChangesRates.methodName;
     return sendRequest(methodName, undefined);
@@ -2784,11 +2781,23 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
-function createStripeCheckoutSession(cart, shipToCountryIso, currency) {
+function createStripeCheckoutSession(cart, shippingFormData, currency) {
     var methodName = apiDeclaration.createStripeCheckoutSession.methodName;
-    return sendRequest(methodName, { cart: cart, shipToCountryIso: shipToCountryIso, currency: currency });
+    return sendRequest(methodName, {
+        "cartDescription": cart.map(function (_a) {
+            var product = _a.product, quantity = _a.quantity;
+            return ({ "productName": product.name, quantity: quantity });
+        }),
+        shippingFormData: shippingFormData,
+        currency: currency
+    });
 }
 exports.createStripeCheckoutSession = createStripeCheckoutSession;
+function getOrders() {
+    var methodName = apiDeclaration.getOrders.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.getOrders = getOrders;
 
 },{"../web_api_declaration":11,"transfer-tools/dist/lib/JSON_CUSTOM":16}],11:[function(require,module,exports){
 "use strict";
@@ -2818,10 +2827,10 @@ var renewPassword;
 (function (renewPassword) {
     renewPassword.methodName = "renew-password";
 })(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
-var guessCountryIso;
-(function (guessCountryIso) {
-    guessCountryIso.methodName = "guess-country-iso";
-})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
+var getCountryIso;
+(function (getCountryIso) {
+    getCountryIso.methodName = "guess-country-iso";
+})(getCountryIso = exports.getCountryIso || (exports.getCountryIso = {}));
 var getChangesRates;
 (function (getChangesRates) {
     getChangesRates.methodName = "get-changes-rates";
@@ -2842,6 +2851,10 @@ var createStripeCheckoutSession;
 (function (createStripeCheckoutSession) {
     createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
 })(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
+var getOrders;
+(function (getOrders) {
+    getOrders.methodName = "get-orders";
+})(getOrders = exports.getOrders || (exports.getOrders = {}));
 
 },{}],12:[function(require,module,exports){
 'use strict';

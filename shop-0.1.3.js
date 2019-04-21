@@ -30,13 +30,13 @@ var UiCart = /** @class */ (function () {
         var currency = locals.currency, shipToCountryIso = locals.shipToCountryIso;
         if (currency !== undefined) {
             this.currency = currency;
+            for (var _i = 0, _a = this.uiCartEntries; _i < _a.length; _i++) {
+                var uiShoppingBagEntry = _a[_i];
+                uiShoppingBagEntry.updateCurrency(currency);
+            }
         }
         if (shipToCountryIso !== undefined) {
             this.shipToCountryIso = shipToCountryIso;
-        }
-        for (var _i = 0, _a = this.uiCartEntries; _i < _a.length; _i++) {
-            var uiShoppingBagEntry = _a[_i];
-            uiShoppingBagEntry.updateLocals({ currency: currency, shipToCountryIso: shipToCountryIso });
         }
         this.updateTotal();
     };
@@ -48,13 +48,12 @@ var UiCart = /** @class */ (function () {
         else {
             this.structure.show();
         }
-        //TODO: Do something with shipping, offer extra
-        var shipping = shipping_1.estimateShipping(this.shipToCountryIso, types.shop.Cart.getOverallFootprint(cart));
-        var displayedCartPrice = types.shop.Price.addition(types.shop.Cart.getPrice(cart, currency_1.convertFromEuro), { "eur": shipping.eurAmount }, currency_1.convertFromEuro);
-        var displayedShippingPrice = { "eur": 0 };
-        this.structure.find(".id_goods_price").text(types.shop.Price.prettyPrint(displayedCartPrice, this.currency, currency_1.convertFromEuro));
-        this.structure.find(".id_delivery_price").text(types.shop.Price.prettyPrint(displayedShippingPrice, this.currency, currency_1.convertFromEuro));
-        this.structure.find(".id_cart_total").text(types.shop.Price.prettyPrint(types.shop.Price.addition(displayedCartPrice, displayedShippingPrice, currency_1.convertFromEuro), this.currency, currency_1.convertFromEuro));
+        var shipping = shipping_1.solve(this.shipToCountryIso, types.shop.Cart.getOverallFootprint(cart), types.shop.Cart.getOverallWeight(cart));
+        var cartPrice = types.shop.Cart.getPrice(cart, currency_1.convertFromEuro);
+        console.log("TODO: display delay ", shipping.delay);
+        this.structure.find(".id_cart_price").text(types.shop.Price.prettyPrint(cartPrice, this.currency, currency_1.convertFromEuro));
+        this.structure.find(".id_shipping_price").text(types.shop.Price.prettyPrint({ "eur": shipping.eurAmount }, this.currency, currency_1.convertFromEuro));
+        this.structure.find(".id_cart_total").text(types.shop.Price.prettyPrint(types.shop.Price.addition(cartPrice, { "eur": shipping.eurAmount }, currency_1.convertFromEuro), this.currency, currency_1.convertFromEuro));
     };
     UiCart.prototype.addProduct = function (product) {
         var _this = this;
@@ -68,7 +67,7 @@ var UiCart = /** @class */ (function () {
                 return;
             }
         }
-        var uiCartEntry = new UiCartEntry({ product: product, "quantity": 1 }, this.currency, this.shipToCountryIso);
+        var uiCartEntry = new UiCartEntry({ product: product, "quantity": 1 }, this.currency);
         this.uiCartEntries.push(uiCartEntry);
         this.structure.find(".shopping-cart").append(uiCartEntry.structure);
         uiCartEntry.evtUserClickDelete.attachOnce(function () {
@@ -85,7 +84,7 @@ var UiCart = /** @class */ (function () {
 }());
 exports.UiCart = UiCart;
 var UiCartEntry = /** @class */ (function () {
-    function UiCartEntry(cartEntry, currency, shipToCountryIso) {
+    function UiCartEntry(cartEntry, currency) {
         var _this = this;
         this.cartEntry = cartEntry;
         this.structure = html.templates.find(".id_UiCartEntry").clone();
@@ -120,26 +119,18 @@ var UiCartEntry = /** @class */ (function () {
             this.structure.find(".plus-btn").on("click", updateCounter("++"));
         }
         this.structure.find(".delete-btn").one("click", function () { return _this.evtUserClickDelete.post(); });
-        this.updateLocals({ currency: currency, shipToCountryIso: shipToCountryIso });
+        this.updateCurrency(currency);
     }
     UiCartEntry.prototype.simulatePlusClick = function () {
         this.structure.find(".plus-btn").trigger("click");
     };
-    UiCartEntry.prototype.updateLocals = function (locals) {
-        var currency = locals.currency, shipToCountryIso = locals.shipToCountryIso;
-        if (currency !== undefined) {
-            this.currency = currency;
-        }
-        if (shipToCountryIso !== undefined) {
-            this.shipToCountryIso = shipToCountryIso;
-        }
+    UiCartEntry.prototype.updateCurrency = function (currency) {
+        this.currency = currency;
         this.updateDisplayedPrice();
     };
     UiCartEntry.prototype.updateDisplayedPrice = function () {
         var _this = this;
-        this.structure.find(".total-price").html(types.shop.Price.prettyPrint(types.shop.Price.addition(types.shop.Price.operation(this.cartEntry.product.price, function (amount) { return amount * _this.cartEntry.quantity; }), {
-            "eur": shipping_1.estimateShipping(this.shipToCountryIso, this.cartEntry.product.footprint).eurAmount
-        }, currency_1.convertFromEuro), this.currency, currency_1.convertFromEuro));
+        this.structure.find(".total-price").html(types.shop.Price.prettyPrint(types.shop.Price.operation(this.cartEntry.product.price, function (amount) { return amount * _this.cartEntry.quantity; }), this.currency, currency_1.convertFromEuro));
     };
     return UiCartEntry;
 }());
@@ -235,9 +226,8 @@ var UiController = /** @class */ (function () {
         uiShipTo.evtChange.attach(function (shipToCountryIso) { return uiCart.updateLocals({ shipToCountryIso: shipToCountryIso }); });
         this.structure.find(".id_container").append(uiCart.structure);
         var _loop_1 = function (product) {
-            var uiProduct = new UiProduct_1.UiProduct(product, currency, defaultCountryIso);
-            uiCurrency.evtChange.attach(function (currency) { return uiProduct.updateLocals({ currency: currency }); });
-            uiShipTo.evtChange.attach(function (shipToCountryIso) { return uiProduct.updateLocals({ shipToCountryIso: shipToCountryIso }); });
+            var uiProduct = new UiProduct_1.UiProduct(product, currency);
+            uiCurrency.evtChange.attach(function (currency) { return uiProduct.updateCurrency(currency); });
             uiProduct.evtUserClickAddToCart.attach(function () {
                 uiCart.addProduct(product);
                 $("html, body").animate({ "scrollTop": 0 }, "slow");
@@ -436,12 +426,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var ts_events_extended_1 = require("ts-events-extended");
 var types = require("../../../shared/dist/lib/types");
-var shipping_1 = require("../../../shared/dist/lib/shipping");
 var currency_1 = require("../../../shared/dist/lib/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiProduct.html"), "UiProduct");
 require("../templates/UiProduct.less");
 var UiProduct = /** @class */ (function () {
-    function UiProduct(product, currency, shipToCountryIso) {
+    function UiProduct(product, currency) {
         var _this = this;
         this.product = product;
         this.structure = html.structure.clone();
@@ -486,25 +475,14 @@ var UiProduct = /** @class */ (function () {
         this.structure.find(".id_product_description").text(product.description);
         this.structure.find(".id_add_to_cart")
             .on("click", function () { return _this.evtUserClickAddToCart.post(); });
-        this.updateLocals({ currency: currency, shipToCountryIso: shipToCountryIso });
+        this.updateCurrency(currency);
     }
-    UiProduct.prototype.updateLocals = function (locals) {
-        var currency = locals.currency, shipToCountryIso = locals.shipToCountryIso;
-        if (currency !== undefined) {
-            this.currency = currency;
-        }
-        if (shipToCountryIso !== undefined) {
-            var $divFlag = this.structure.find(".id_flag");
-            $divFlag.removeClass(this.shipToCountryIso);
-            this.shipToCountryIso = shipToCountryIso;
-            $divFlag.addClass(this.shipToCountryIso);
-        }
+    UiProduct.prototype.updateCurrency = function (currency) {
+        this.currency = currency;
         this.updatePrice();
     };
     UiProduct.prototype.updatePrice = function () {
-        this.structure.find(".id_product_price").text(types.shop.Price.prettyPrint(types.shop.Price.addition(this.product.price, {
-            "eur": shipping_1.estimateShipping(this.shipToCountryIso, this.product.footprint).eurAmount
-        }, currency_1.convertFromEuro), this.currency, currency_1.convertFromEuro));
+        this.structure.find(".id_product_price").text(types.shop.Price.prettyPrint(this.product.price, this.currency, currency_1.convertFromEuro));
     };
     UiProduct.getCounter = (function () {
         var counter = 0;
@@ -514,7 +492,7 @@ var UiProduct = /** @class */ (function () {
 }());
 exports.UiProduct = UiProduct;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":130,"../../../shared/dist/lib/shipping":131,"../../../shared/dist/lib/tools/currency":134,"../../../shared/dist/lib/types":138,"../templates/UiProduct.html":123,"../templates/UiProduct.less":124,"ts-events-extended":117}],5:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":130,"../../../shared/dist/lib/tools/currency":134,"../../../shared/dist/lib/types":138,"../templates/UiProduct.html":123,"../templates/UiProduct.less":124,"ts-events-extended":117}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
@@ -823,7 +801,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                     ])];
             case 1:
                 _a = _c.sent(), changesRates = _a[0], _b = _a[1], countryIsoFromLocation = _b.location, countryIsoForLanguage = _b.language;
-                currency_1.convertFromEuro.changeRates = changesRates;
+                currency_1.convertFromEuro.setChangeRates(changesRates);
                 console.log({ countryIsoForLanguage: countryIsoForLanguage, countryIsoFromLocation: countryIsoFromLocation });
                 uiController = new UiController_1.UiController(countryIsoFromLocation || countryIsoForLanguage);
                 $("#page-payload").html("").append(uiController.structure);
@@ -5538,7 +5516,7 @@ var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
 },{"./SyncEvent":113,"./defs":116}],118:[function(require,module,exports){
-module.exports = "\r\n\r\n<!--TODO: col-sm-12 should be externalized -->\r\n<div class=\"id_UiCart panel plain col-sm-12 col-lg-10\">\r\n\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\"><i class=\"glyphicon glyphicon-shopping-cart\"></i> Shopping bag</h4>\r\n    </div>\r\n\r\n    <div class=\"panel-body\">\r\n\r\n      <div class=\"shopping-cart\">\r\n\r\n      </div>\r\n\r\n      <div class=\"pull-right mt15\">\r\n\r\n        <span class=\"id_goods_price\"></span>\r\n        &nbsp;\r\n        <span>+</span>\r\n        &nbsp;\r\n        <span class=\"id_delivery_price\"></span>\r\n        <span>delivery fees,</span>\r\n        &nbsp;\r\n        &nbsp;\r\n        <span>Total: </span><span class=\"id_cart_total\"> 270,00 €</span>\r\n        &nbsp;\r\n        <button type=\"button\" class=\"id_checkout btn btn-default\">Checkout</button>\r\n\r\n      </div>\r\n\r\n    </div>\r\n\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n  <div class=\"item id_UiCartEntry\">\r\n    <div class=\"buttons\">\r\n      <span class=\"delete-btn\"></span>\r\n    </div>\r\n\r\n    <div class=\"image\">\r\n      <img src=\"\" alt=\"\" />\r\n    </div>\r\n\r\n    <div class=\"description\">\r\n      <span class=\"id_item_name\">Common Projects</span>\r\n      <span class=\"id_short_description\" >White</span>\r\n    </div>\r\n\r\n    <div class=\"quantity\">\r\n      <button class=\"plus-btn\" type=\"button\" name=\"button\">\r\n        <img  alt=\"\" /><!-- src=\"/svg/plus.svg\" -->\r\n      </button>\r\n      <input type=\"text\" name=\"name\" value=\"1\">\r\n      <button class=\"minus-btn\" type=\"button\" name=\"button\">\r\n        <img src=\"\" alt=\"\" /><!-- src=\"/svg/minus.svg\" -->\r\n      </button>\r\n    </div>\r\n\r\n    <div class=\"total-price\">$549</div>\r\n  </div>\r\n\r\n\r\n</div>\r\n\r\n\r\n\r\n";
+module.exports = "\r\n\r\n<!--TODO: col-sm-12 should be externalized -->\r\n<div class=\"id_UiCart panel plain col-sm-12 col-lg-10\">\r\n\r\n    <div class=\"panel-heading\">\r\n        <h4 class=\"panel-title\"><i class=\"glyphicon glyphicon-shopping-cart\"></i> Shopping bag</h4>\r\n    </div>\r\n\r\n    <div class=\"panel-body\">\r\n\r\n      <div class=\"shopping-cart\">\r\n\r\n      </div>\r\n\r\n      <div class=\"pull-right mt15\">\r\n\r\n        <span class=\"id_cart_price\"></span>\r\n        &nbsp;\r\n        <span>+</span>\r\n        &nbsp;\r\n        <span style=\"font-style: italic;\">shipping:</span>\r\n        &nbsp;\r\n        <span class=\"id_shipping_price\"></span>\r\n        &nbsp;\r\n        &nbsp;\r\n        <span style=\"font-weight: bold;\">Total: </span><span class=\"id_cart_total\" ></span>\r\n        &nbsp;\r\n        <button type=\"button\" class=\"id_checkout btn btn-success\">Checkout</button>\r\n\r\n      </div>\r\n\r\n    </div>\r\n\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n  <div class=\"item id_UiCartEntry\">\r\n    <div class=\"buttons\">\r\n      <span class=\"delete-btn\"></span>\r\n    </div>\r\n\r\n    <div class=\"image\">\r\n      <img src=\"\" alt=\"\" />\r\n    </div>\r\n\r\n    <div class=\"description\">\r\n      <span class=\"id_item_name\">Common Projects</span>\r\n      <span class=\"id_short_description\" >White</span>\r\n    </div>\r\n\r\n    <div class=\"quantity\">\r\n      <button class=\"plus-btn\" type=\"button\" name=\"button\">\r\n        <img  alt=\"\" /><!-- src=\"/svg/plus.svg\" -->\r\n      </button>\r\n      <input type=\"text\" name=\"name\" value=\"1\">\r\n      <button class=\"minus-btn\" type=\"button\" name=\"button\">\r\n        <img src=\"\" alt=\"\" /><!-- src=\"/svg/minus.svg\" -->\r\n      </button>\r\n    </div>\r\n\r\n    <div class=\"total-price\">$549</div>\r\n  </div>\r\n\r\n\r\n</div>\r\n\r\n\r\n\r\n";
 },{}],119:[function(require,module,exports){
 var css = "div.id_UiCart {\n  /* Responsive */\n}\ndiv.id_UiCart .shopping-cart {\n  box-shadow: 1px 2px 3px 0px rgba(0, 0, 0, 0.1);\n  border-radius: 6px;\n  display: flex;\n  flex-direction: column;\n  border-top: 1px solid #E1E8EE;\n  border-left: 1px solid #E1E8EE;\n  border-right: 1px solid #E1E8EE;\n  /* Buttons -  Delete and Like */\n  /* Product Image */\n  /* Product Description */\n  /* Product Quantity */\n  /* Total Price */\n}\ndiv.id_UiCart .shopping-cart .item {\n  padding: 20px 30px;\n  height: 120px;\n  display: flex;\n  border-bottom: 1px solid #E1E8EE;\n}\ndiv.id_UiCart .shopping-cart .buttons {\n  position: relative;\n  padding-top: 30px;\n  margin-right: 60px;\n}\ndiv.id_UiCart .shopping-cart .delete-btn {\n  display: inline-block;\n  cursor: pointer;\n  width: 18px;\n  height: 17px;\n  margin-right: 20px;\n}\ndiv.id_UiCart .shopping-cart .is-active {\n  animation-name: animate;\n  animation-duration: .8s;\n  animation-iteration-count: 1;\n  animation-timing-function: steps(28);\n  animation-fill-mode: forwards;\n}\n@keyframes animate {\n  0% {\n    background-position: left;\n  }\n  50% {\n    background-position: right;\n  }\n  100% {\n    background-position: right;\n  }\n}\ndiv.id_UiCart .shopping-cart .image {\n  margin-right: 50px;\n}\ndiv.id_UiCart .shopping-cart .image img {\n  height: 80px;\n}\ndiv.id_UiCart .shopping-cart .description {\n  padding-top: 10px;\n  margin-right: 60px;\n  width: 115px;\n}\ndiv.id_UiCart .shopping-cart .description span {\n  display: block;\n  font-size: 14px;\n  color: #43484D;\n  font-weight: 400;\n}\ndiv.id_UiCart .shopping-cart .description span.id_item_name {\n  margin-bottom: 5px;\n}\ndiv.id_UiCart .shopping-cart .description span.id_short_description {\n  font-weight: 300;\n  margin-top: 8px;\n  color: #86939E;\n}\ndiv.id_UiCart .shopping-cart .quantity {\n  padding-top: 20px;\n  margin-right: 60px;\n}\ndiv.id_UiCart .shopping-cart .quantity input {\n  -webkit-appearance: none;\n  border: none;\n  text-align: center;\n  width: 32px;\n  font-size: 16px;\n  color: #43484D;\n  font-weight: 300;\n}\ndiv.id_UiCart .shopping-cart button[class*=btn] {\n  width: 30px;\n  height: 30px;\n  background-color: #E1E8EE;\n  border-radius: 6px;\n  border: none;\n  cursor: pointer;\n}\ndiv.id_UiCart .shopping-cart .minus-btn img {\n  margin-bottom: 3px;\n}\ndiv.id_UiCart .shopping-cart .plus-btn img {\n  margin-top: 2px;\n}\ndiv.id_UiCart .shopping-cart button:focus,\ndiv.id_UiCart .shopping-cart input:focus {\n  outline: 0;\n}\ndiv.id_UiCart .shopping-cart .total-price {\n  width: 83px;\n  padding-top: 27px;\n  text-align: center;\n  font-size: 16px;\n  color: #43484D;\n  font-weight: 300;\n}\n@media (max-width: 800px) {\n  div.id_UiCart .shopping-cart {\n    width: 100%;\n    height: auto;\n    overflow: hidden;\n  }\n  div.id_UiCart .shopping-cart .item {\n    height: auto;\n    flex-wrap: wrap;\n    justify-content: center;\n  }\n  div.id_UiCart .shopping-cart .image,\n  div.id_UiCart .shopping-cart .quantity,\n  div.id_UiCart .shopping-cart .description {\n    width: 100%;\n    text-align: center;\n    margin: 6px 0;\n  }\n  div.id_UiCart .shopping-cart .buttons {\n    margin-right: 20px;\n  }\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":107}],120:[function(require,module,exports){
@@ -5548,7 +5526,7 @@ module.exports = "<li class=\"id_UiCurrency dropdown\">\r\n\r\n  <a href=\"#\" d
 },{}],122:[function(require,module,exports){
 var css = ".id_UiCurrency {\n  /*@media all and (max-width: 767px) {*/\n}\n@media all and (max-width: 768px) {\n  .id_UiCurrency {\n    top: -21px;\n  }\n}\n.id_UiCurrency select {\n  width: 200px;\n}\n.id_UiCurrency .dropdown-menu.dynamic-settings {\n  min-width: unset !important;\n}\n.id_UiCurrency .dropdown-menu {\n  border-bottom-width: 0px;\n  border-left-width: 0px;\n  border-right-width: 0px;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":107}],123:[function(require,module,exports){
-module.exports = "<!--TODO: col-sm-12 should be externalized -->\r\n<div class=\"id_UiProduct panel plain col-sm-12 col-lg-10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"left-column\">\r\n\r\n            <div class=\"carousel slide\">\r\n                <ol class=\"carousel-indicators dotstyle center\">\r\n                </ol>\r\n                <div class=\"carousel-inner\">\r\n                </div>\r\n                <a class=\"left carousel-control\" data-slide=\"prev\">\r\n                    <i class=\"fa fa-angle-left\"></i>\r\n                </a>\r\n                <a class=\"right carousel-control\" data-slide=\"next\">\r\n                    <i class=\"fa fa-angle-right\"></i>\r\n                </a>\r\n            </div>\r\n\r\n\r\n\r\n        </div>\r\n\r\n        <div class=\"right-column\">\r\n\r\n            <div class=\"product-description\">\r\n                <span class=\"id_short_description\"></span>\r\n                <h1 class=\"id_product_name\"></h1>\r\n                <p class=\"id_product_description\"></p>\r\n            </div>\r\n\r\n            <div class=\"product-price\">\r\n                <span class=\"id_product_price\"></span>\r\n                <span style=\"font-style: italic;\">free shipping to</span>\r\n                &nbsp;&nbsp;\r\n                <div class=\"id_flag iti-flag\"></div>\r\n            </div>\r\n\r\n            <div class=\"pull-right mt10\">\r\n                <button type=\"button\" class=\"id_add_to_cart btn btn-success\">Add to cart</button>\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"item\">\r\n        <img src=\"\">\r\n    </div>\r\n\r\n    <li>\r\n        <a href=\"#\"></a>\r\n    </li>\r\n\r\n</div>";
+module.exports = "<!--TODO: col-sm-12 should be externalized -->\r\n<div class=\"id_UiProduct panel plain col-sm-12 col-lg-10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"left-column\">\r\n\r\n            <div class=\"carousel slide\">\r\n                <ol class=\"carousel-indicators dotstyle center\">\r\n                </ol>\r\n                <div class=\"carousel-inner\">\r\n                </div>\r\n                <a class=\"left carousel-control\" data-slide=\"prev\">\r\n                    <i class=\"fa fa-angle-left\"></i>\r\n                </a>\r\n                <a class=\"right carousel-control\" data-slide=\"next\">\r\n                    <i class=\"fa fa-angle-right\"></i>\r\n                </a>\r\n            </div>\r\n\r\n\r\n\r\n        </div>\r\n\r\n        <div class=\"right-column\">\r\n\r\n            <div class=\"product-description\">\r\n                <span class=\"id_short_description\"></span>\r\n                <h1 class=\"id_product_name\"></h1>\r\n                <p class=\"id_product_description\"></p>\r\n            </div>\r\n\r\n            <div class=\"product-price\">\r\n                <span class=\"id_product_price\"></span>\r\n            </div>\r\n\r\n            <div class=\"pull-right mt10\">\r\n                <button type=\"button\" class=\"id_add_to_cart btn btn-success\">Add to cart</button>\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"item\">\r\n        <img src=\"\">\r\n    </div>\r\n\r\n    <li>\r\n        <a href=\"#\"></a>\r\n    </li>\r\n\r\n</div>";
 },{}],124:[function(require,module,exports){
 var css = "div.id_UiProduct .panel-body {\n  max-width: 1200px;\n  margin: 0 auto;\n  padding: 15px;\n  display: flex;\n}\ndiv.id_UiProduct .panel-body .left-column {\n  width: 35%;\n  padding-right: 4%;\n}\ndiv.id_UiProduct .panel-body .right-column {\n  width: 65%;\n}\ndiv.id_UiProduct .panel-body .carousel-control {\n  background-image: none !important;\n}\ndiv.id_UiProduct .panel-body .product-description {\n  border-bottom: 1px solid #E1E8EE;\n  margin-bottom: 20px;\n}\ndiv.id_UiProduct .panel-body .product-description span {\n  font-size: 12px;\n  color: #358ED7;\n  letter-spacing: 1px;\n  text-transform: uppercase;\n  text-decoration: none;\n}\ndiv.id_UiProduct .panel-body .product-description h1 {\n  font-weight: 300;\n  font-size: 52px;\n  color: #43484D;\n  letter-spacing: -2px;\n}\ndiv.id_UiProduct .panel-body .product-description p {\n  font-size: 16px;\n  font-weight: 300;\n  color: #86939E;\n  line-height: 24px;\n}\ndiv.id_UiProduct .panel-body .product-price {\n  display: flex;\n  align-items: center;\n}\ndiv.id_UiProduct .panel-body .product-price .id_product_price {\n  font-size: 26px;\n  font-weight: 300;\n  color: #43474D;\n  margin-right: 20px;\n}\n@media (max-width: 940px) {\n  div.id_UiProduct .panel-body {\n    flex-direction: column;\n    /*margin-top    : 60px;*/\n  }\n  div.id_UiProduct .panel-body .left-column,\n  div.id_UiProduct .panel-body .right-column {\n    width: 100%;\n  }\n  div.id_UiProduct .panel-body .carousel {\n    max-width: 445px;\n    margin: auto;\n  }\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":107}],125:[function(require,module,exports){
@@ -5583,22 +5561,51 @@ exports.loadUiClassHtml = loadUiClassHtml;
 
 },{}],131:[function(require,module,exports){
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-//TODO: move
-function estimateShipping(destinationCountryIso, footprint) {
-    var zone = (function () {
-        if (destinationCountryIso === "fr") {
-            return "france";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
         }
-        if (destinationCountryIso === "fr_dom") {
-            return "dom";
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var availablePackaging = {
+    "light": {
+        "weight": 21.5,
+        "eurAmount": 20
+    },
+    "normal": {
+        "weight": 45,
+        "eurAmount": 50
+    }
+};
+function getZone(destinationCountryIso) {
+    var out = (function () {
+        if (getZone.national.indexOf(destinationCountryIso) >= 0) {
+            return "Metropolitan France, Andorra et Monaco";
+        }
+        if (__spread(getZone.om1, getZone.om2).indexOf(destinationCountryIso)) {
+            return "DOM";
         }
         if ([
             "be", "el", "lt", "pt", "bg", "es", "lu", "ro", "cz", "fr",
             "hu", "si", "dk", "hr", "mt", "sk", "de", "it", "nl", "fi",
             "ee", "cy", "at", "se", "ie", "lv", "pl", "uk"
         ].indexOf(destinationCountryIso) > 0) {
-            return "europe";
+            return "Europe";
         }
         if ([
             "no", "by", "hu​", "md", "ua", "dz",
@@ -5606,82 +5613,174 @@ function estimateShipping(destinationCountryIso, footprint) {
         ].indexOf(destinationCountryIso) > 0) {
             return "Eastern Europe - Maghreb - Norway";
         }
-        return "rest of the world";
+        return "Rest of the world";
     })();
-    switch (footprint) {
-        case "FLAT": {
-            var isTracked = false;
-            switch (zone) {
-                case "france":
-                    return {
-                        isTracked: isTracked,
-                        "delay": 2,
-                        "eurAmount": 216
-                    };
-                case "dom":
-                    return {
-                        isTracked: isTracked,
-                        "delay": [4, 7],
-                        "eurAmount": 261
-                    };
-                case "europe":
-                    return {
-                        isTracked: isTracked,
-                        "delay": [2, 3],
-                        "eurAmount": 260
-                    };
-                default:
-                    return {
-                        isTracked: isTracked,
-                        "delay": [3, 8],
-                        "eurAmount": 260
-                    };
-            }
+    console.log("getZone(" + destinationCountryIso + ") -> " + out);
+    return out;
+}
+(function (getZone) {
+    getZone.national = ["fr", "mc", "ad"];
+    getZone.om1 = ["gf", "gp", "mq", "re", "pm", "bl", "mf", "yt"];
+    getZone.om2 = ["nc", "pf", "wf", "tf"];
+})(getZone || (getZone = {}));
+function getLaPostDelay(destinationCountryIso) {
+    var out = (function () {
+        if (destinationCountryIso === "de") {
+            return [3, 4];
         }
-        case "VOLUME": {
-            var isTracked = true;
-            switch (zone) {
-                case "france":
-                    return {
-                        isTracked: isTracked,
-                        "delay": 2,
-                        "eurAmount": 495
-                    };
-                case "dom": return {
-                    isTracked: isTracked,
-                    "delay": [5, 7],
-                    "eurAmount": 1140
-                };
-                case "europe": return {
-                    isTracked: isTracked,
-                    "delay": [3, 8],
-                    "eurAmount": 1230,
-                    "premium": {
-                        "eurAmountExtra": 578,
-                        "betterDelay": [2, 4]
-                    }
-                };
-                case "Eastern Europe - Maghreb - Norway":
-                    return {
-                        isTracked: isTracked,
-                        "delay": [3, 8],
-                        "eurAmount": 1665
-                    };
-                default:
-                    return {
-                        isTracked: isTracked,
-                        "delay": [3, 8],
-                        "eurAmount": 2435,
-                        "premium": {
-                            "eurAmountExtra": 2165,
-                            "betterDelay": [1, 5]
-                        }
-                    };
+        switch (destinationCountryIso) {
+            case "de": return [3, 4];
+            case "at": return [3, 5];
+            case "be": return [3, 5];
+            case "it": return [3, 5];
+            case "nl": return [3, 6];
+            case "pt": return [3, 6];
+            case "gb": return [3, 4];
+            case "ch": return [3, 5];
+            case "ca": return [4, 8];
+            case "us": return [4, 8];
+        }
+        var zone = getZone(destinationCountryIso);
+        switch (zone) {
+            case "Metropolitan France, Andorra et Monaco": return [1, 2];
+            case "DOM": return [4, 7];
+            case "Europe":
+            case "Eastern Europe - Maghreb - Norway": return [6, 8];
+            default: return [7, 12];
+        }
+    })();
+    console.log("getLaPostDelay(" + destinationCountryIso + ") -> " + out);
+    return out;
+}
+/** To use for delivery to france and DOM Flat */
+function solveLaPost(_a) {
+    var footprint = _a.footprint, weight = _a.weight, destinationCountryIso = _a.destinationCountryIso;
+    var out = (function () {
+        if (footprint === "VOLUME") {
+            throw new Error("Volume not supported by La Poste ( max 3cm )");
+        }
+        var packaging = weight + availablePackaging.light.weight < 100 ?
+            availablePackaging.light : availablePackaging.normal;
+        var totalWeight = weight + packaging.weight;
+        if (totalWeight > 250) {
+            throw new Error("Suboptimal for parcel > 250g");
+        }
+        var zone = getZone(destinationCountryIso);
+        if (totalWeight > 100 && zone !== "Metropolitan France, Andorra et Monaco" && zone !== "DOM") {
+            throw new Error("Suboptimal for international shipping of parcel > 100g");
+        }
+        var eurAmount = packaging.eurAmount;
+        var offer;
+        if (zone === "Metropolitan France, Andorra et Monaco" || zone === "DOM") {
+            offer = "Lettre prioritaire, +sticker de suivie";
+            eurAmount += totalWeight < 100 ? 210 : 420;
+            if (zone === "DOM") {
+                //NOTE: Extra for DOM-TOM
+                eurAmount += (getZone.om1.indexOf(destinationCountryIso) >= 0 ? 5 : 11)
+                    * Math.floor(totalWeight / 10);
             }
+            //NOTE: For tracking.
+            eurAmount += 40;
+        }
+        else {
+            offer = "Lettre suivie internationale";
+            eurAmount += 580;
+        }
+        return {
+            "carrier": "La Poste",
+            offer: offer,
+            "delay": getLaPostDelay(destinationCountryIso),
+            eurAmount: eurAmount,
+            "needLightPackage": (availablePackaging.light === packaging &&
+                weight + availablePackaging.normal.weight > 100)
+        };
+    })();
+    console.log("solveLaPoste(" + JSON.stringify({ footprint: footprint, weight: weight, destinationCountryIso: destinationCountryIso }) + " -> " + JSON.stringify(out, null, 2));
+    return out;
+}
+function solveColissimo(_a) {
+    var footprint = _a.footprint, weight = _a.weight, destinationCountryIso = _a.destinationCountryIso;
+    var out = (function () {
+        var zone = getZone(destinationCountryIso);
+        if (zone !== "Metropolitan France, Andorra et Monaco") {
+            throw new Error("Colissimo is suboptimal for shipping outside of France (zone)");
+        }
+        if (footprint === "FLAT" && weight + availablePackaging.light.weight < 100) {
+            throw new Error("Colissimo is suboptimal for flat parcel of < 100g");
+        }
+        var packaging = availablePackaging.normal;
+        return {
+            "carrier": "Colissimo",
+            "offer": "Colissimo France",
+            "delay": getLaPostDelay(destinationCountryIso),
+            "eurAmount": packaging.eurAmount + (function () {
+                var totalWeight = weight + packaging.weight;
+                if (totalWeight < 250) {
+                    return 495;
+                }
+                else if (totalWeight < 500) {
+                    return 625;
+                }
+                else if (totalWeight < 750) {
+                    return 710;
+                }
+                else {
+                    return 880;
+                }
+            })(),
+            "needLightPackage": false
+        };
+    })();
+    console.log("solveColissimo(" + JSON.stringify({ footprint: footprint, weight: weight, destinationCountryIso: destinationCountryIso }) + " -> " + JSON.stringify(out, null, 2));
+    return out;
+}
+function solveDelivengo(_a) {
+    var weight = _a.weight, destinationCountryIso = _a.destinationCountryIso;
+    var out = (function () {
+        var zone = getZone(destinationCountryIso);
+        if (zone === "Metropolitan France, Andorra et Monaco") {
+            throw new Error("Suboptimal for international");
+        }
+        return {
+            "carrier": "Delivengo",
+            "offer": "Delivengo Easy",
+            "delay": getLaPostDelay(destinationCountryIso),
+            "eurAmount": Math.round(1.20 * (function () {
+                var totalWeight = weight + availablePackaging.normal.weight;
+                var isEu = zone === "Europe";
+                if (totalWeight < 250) {
+                    return isEu ? 630 : 700;
+                }
+                else if (totalWeight < 500) {
+                    return isEu ? 720 : 920;
+                }
+                else {
+                    return isEu ? 900 : 1400;
+                }
+            })()),
+            "needLightPackage": false
+        };
+    })();
+    console.log("solveDelivengo(" + JSON.stringify({ weight: weight, destinationCountryIso: destinationCountryIso }) + " -> " + JSON.stringify(out, null, 2));
+    return out;
+}
+function solve(destinationCountryIso, footprint, weight) {
+    var params = { destinationCountryIso: destinationCountryIso, footprint: footprint, weight: weight };
+    try {
+        return solveLaPost(params);
+    }
+    catch (error) {
+        console.log(error.message);
+        try {
+            return solveColissimo(params);
+        }
+        catch (error) {
+            console.log(error.message);
+            return solveDelivengo(params);
         }
     }
 }
-exports.estimateShipping = estimateShipping;
+exports.solve = solve;
 
 },{}],132:[function(require,module,exports){
 "use strict";
@@ -5704,8 +5803,9 @@ function getProducts(assetsRoot) {
                 assetsRoot + "img/sample-shop-items/e180_1.png",
                 assetsRoot + "img/sample-shop-items/adapter.jpg"
             ],
-            "price": { "eur": 2800 },
-            "footprint": "FLAT"
+            "price": { "eur": 1490 },
+            "footprint": "FLAT",
+            "weight": 35
         },
         {
             "name": "Sim adapter",
@@ -5713,8 +5813,9 @@ function getProducts(assetsRoot) {
             "description": "Adapter to put a nano or micro sim in the SIM's dongle",
             "cartImageUrl": assetsRoot + "img/sample-shop-items/adapter_cart.jpg",
             "imageUrls": [assetsRoot + "img/sample-shop-items/adapter.jpg"],
-            "price": { "eur": 300 },
-            "footprint": "FLAT"
+            "price": { "eur": 290 },
+            "footprint": "FLAT",
+            "weight": 10
         },
         {
             "name": "Semasim Gateway",
@@ -5729,8 +5830,9 @@ function getProducts(assetsRoot) {
             "imageUrls": [
                 assetsRoot + "img/sample-shop-items/raspberry.jpg"
             ],
-            "price": { "eur": 11000 },
-            "footprint": "VOLUME"
+            "price": { "eur": 5900 },
+            "footprint": "FLAT",
+            "weight": 150
         }
     ];
 }
@@ -5847,6 +5949,41 @@ exports.confirm = confirm;
 
 },{"./modal_stack":136}],134:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
@@ -5924,17 +6061,63 @@ exports.getCountryCurrency = getCountryCurrency;
 (function (getCountryCurrency) {
     getCountryCurrency.cache = {};
 })(getCountryCurrency = exports.getCountryCurrency || (exports.getCountryCurrency = {}));
-/** Must define convertFromEuro.changeRate first */
+/** Must define convertFromEuro.changeRates first */
 function convertFromEuro(euroAmount, currencyTo) {
-    var changeRates = convertFromEuro.changeRates;
-    if (changeRates === undefined) {
-        throw new Error("Changes rates have not been defined");
-    }
-    return Math.round(euroAmount * changeRates[currencyTo]);
+    return Math.round(euroAmount * convertFromEuro.getChangeRates()[currencyTo]);
 }
 exports.convertFromEuro = convertFromEuro;
 (function (convertFromEuro) {
-    convertFromEuro.changeRates = undefined;
+    var changeRates_ = undefined;
+    var lastUpdateDate = new Date(0);
+    function setChangeRates(changeRates) {
+        lastUpdateDate = new Date();
+        changeRates_ = changeRates;
+    }
+    convertFromEuro.setChangeRates = setChangeRates;
+    function getChangeRates() {
+        if (changeRates_ === undefined) {
+            throw new Error("Change rates not defined");
+        }
+        return changeRates_;
+    }
+    convertFromEuro.getChangeRates = getChangeRates;
+    var updater = undefined;
+    function setChangeRatesFetchMethod(fetchChangeRates, ttl) {
+        updater = { fetchChangeRates: fetchChangeRates, ttl: ttl };
+    }
+    convertFromEuro.setChangeRatesFetchMethod = setChangeRatesFetchMethod;
+    function refreshChangeRates() {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, error_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (updater === undefined) {
+                            throw new Error("No method for updating rates changes have been defined");
+                        }
+                        if (Date.now() - lastUpdateDate.getTime() < updater.ttl) {
+                            return [2 /*return*/];
+                        }
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 4]);
+                        _a = setChangeRates;
+                        return [4 /*yield*/, updater.fetchChangeRates()];
+                    case 2:
+                        _a.apply(void 0, [_b.sent()]);
+                        return [3 /*break*/, 4];
+                    case 3:
+                        error_1 = _b.sent();
+                        if (lastUpdateDate.getTime() === 0) {
+                            throw error_1;
+                        }
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    }
+    convertFromEuro.refreshChangeRates = refreshChangeRates;
 })(convertFromEuro = exports.convertFromEuro || (exports.convertFromEuro = {}));
 /**
  * get currency of stripe card,
@@ -6366,6 +6549,13 @@ var shop;
             }) ? "VOLUME" : "FLAT";
         }
         Cart.getOverallFootprint = getOverallFootprint;
+        function getOverallWeight(cart) {
+            return cart.reduce(function (out, _a) {
+                var weight = _a.product.weight, quantity = _a.quantity;
+                return out + weight * quantity;
+            }, 0);
+        }
+        Cart.getOverallWeight = getOverallWeight;
     })(Cart = shop.Cart || (shop.Cart = {}));
     var Price;
     (function (Price) {
@@ -6445,6 +6635,32 @@ var shop;
         Price.prettyPrint = prettyPrint;
     })(Price = shop.Price || (shop.Price = {}));
     ;
+    var ShippingFormData;
+    (function (ShippingFormData) {
+        function toStripeShippingInformation(shippingFormData, carrier) {
+            var get = function (key) {
+                var component = shippingFormData.addressComponents
+                    .find(function (_a) {
+                    var _b = __read(_a.types, 1), type = _b[0];
+                    return type === key;
+                });
+                return component !== undefined ? component["long_name"] : undefined;
+            };
+            return {
+                "name": shippingFormData.firstName + " " + shippingFormData.lastName,
+                "address": {
+                    "line1": get("street_number") + " " + get("route"),
+                    "line2": shippingFormData.addressExtra,
+                    "postal_code": get("postal_code") || "",
+                    "city": get("locality") || "",
+                    "state": get("administrative_area_level_1") || "",
+                    "country": get("country") || ""
+                },
+                carrier: carrier,
+            };
+        }
+        ShippingFormData.toStripeShippingInformation = toStripeShippingInformation;
+    })(ShippingFormData = shop.ShippingFormData || (shop.ShippingFormData = {}));
 })(shop = exports.shop || (exports.shop = {}));
 
 },{"./tools/currency":134,"./tools/isAscendingAlphabeticalOrder":135}],139:[function(require,module,exports){
@@ -6544,10 +6760,6 @@ function getCountryIso() {
     return sendRequest(methodName, undefined);
 }
 exports.getCountryIso = getCountryIso;
-var guessCountryIso;
-(function (guessCountryIso) {
-    guessCountryIso.cacheOut = undefined;
-})(guessCountryIso = exports.guessCountryIso || (exports.guessCountryIso = {}));
 function getChangesRates() {
     var methodName = apiDeclaration.getChangesRates.methodName;
     return sendRequest(methodName, undefined);
@@ -6602,6 +6814,11 @@ function createStripeCheckoutSession(cart, shippingFormData, currency) {
     });
 }
 exports.createStripeCheckoutSession = createStripeCheckoutSession;
+function getOrders() {
+    var methodName = apiDeclaration.getOrders.methodName;
+    return sendRequest(methodName, undefined);
+}
+exports.getOrders = getOrders;
 
 },{"../web_api_declaration":140,"transfer-tools/dist/lib/JSON_CUSTOM":145}],140:[function(require,module,exports){
 "use strict";
@@ -6655,6 +6872,10 @@ var createStripeCheckoutSession;
 (function (createStripeCheckoutSession) {
     createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
 })(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
+var getOrders;
+(function (getOrders) {
+    getOrders.methodName = "get-orders";
+})(getOrders = exports.getOrders || (exports.getOrders = {}));
 
 },{}],141:[function(require,module,exports){
 arguments[4][98][0].apply(exports,arguments)
