@@ -5597,7 +5597,7 @@ function getZone(destinationCountryIso) {
         if (getZone.national.indexOf(destinationCountryIso) >= 0) {
             return "Metropolitan France, Andorra et Monaco";
         }
-        if (__spread(getZone.om1, getZone.om2).indexOf(destinationCountryIso)) {
+        if (__spread(getZone.om1, getZone.om2).indexOf(destinationCountryIso) >= 0) {
             return "DOM";
         }
         if ([
@@ -5610,7 +5610,7 @@ function getZone(destinationCountryIso) {
         if ([
             "no", "by", "hu​", "md", "ua", "dz",
             "ly", "ma", "eh", "mr", "tn"
-        ].indexOf(destinationCountryIso) > 0) {
+        ].indexOf(destinationCountryIso) >= 0) {
             return "Eastern Europe - Maghreb - Norway";
         }
         return "Rest of the world";
@@ -5788,14 +5788,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function getProducts(assetsRoot) {
     return [
         {
+            "name": "Semasim Gateway v1.0",
+            "shortDescription": "PiZero powered",
+            "description": [
+                "-Fully plug and play",
+                "-Support for one SIM card.",
+                "-Support up to 3 SIM ( require additional Sim dongle, sold separately ).",
+                "-Grant you 6 month of free access to Semasim subscriptions"
+            ].join(" "),
+            "cartImageUrl": assetsRoot + "img/sample-shop-items/raspberry.jpg",
+            "imageUrls": [
+                assetsRoot + "img/sample-shop-items/raspberry.jpg"
+            ],
+            "price": { "eur": 5900 },
+            "footprint": "FLAT",
+            "weight": 150
+        },
+        {
             "name": "SIM usb Dongle",
             "shortDescription": "Huawei E180",
             "description": [
-                "Provider unlocked, Voice enabled, include SIM adaptor",
-                "If you already have a Raspberry PI this is the only device",
-                "you need to start using Semasim",
-                "Provided with SIM adaptor for nano and micro SIM.",
-                "Comes with one year of prepaid subscription"
+                "Add support for more SIM cards on your Semasim gateway.",
+                "OR if you already have a server like a raspberry pi you do not need",
+                "the semasim gateway you simply need one of those dongles for every",
+                "SIM that you want to put online. [Ref for installing manually]"
             ].join(" "),
             "cartImageUrl": assetsRoot + "img/sample-shop-items/e180_cart.jpg",
             "imageUrls": [
@@ -5816,23 +5832,6 @@ function getProducts(assetsRoot) {
             "price": { "eur": 290 },
             "footprint": "FLAT",
             "weight": 10
-        },
-        {
-            "name": "Semasim Gateway",
-            "shortDescription": "Ready to use semasim gateway",
-            "description": [
-                "Semasim Gateway powered by Raspberry Pi.",
-                "Come with a SIM dongle and an adapter for nano and micro sim.",
-                "Support up to 3 SIM ( require additional Sim dongle, sold separately ).",
-                "Purchase will grant you one year of free subscription"
-            ].join(" "),
-            "cartImageUrl": assetsRoot + "img/sample-shop-items/raspberry.jpg",
-            "imageUrls": [
-                assetsRoot + "img/sample-shop-items/raspberry.jpg"
-            ],
-            "price": { "eur": 5900 },
-            "footprint": "FLAT",
-            "weight": 150
         }
     ];
 }
