@@ -2077,6 +2077,7 @@ var UiController = /** @class */ (function () {
         var _this = this;
         this.structure = html.structure.clone();
         this.evtDone = new ts_events_extended_1.VoidSyncEvent();
+        console.log(JSON.stringify(subscriptionInfos, null, 2));
         var uiDownloadButton = new UiDownloadButtons_1.UiDownloadButtons();
         this.structure.find(".id_placeholder_UiDownloadButtons")
             .append(uiDownloadButton.structure);
@@ -2167,6 +2168,10 @@ var UiController = /** @class */ (function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
+                            if (1 === 1) {
+                                this.interact_checkout("eur");
+                            }
+                            console.log("we should not be here");
                             newSourceId = undefined;
                             if (!(!source || !source.isChargeable)) return [3 /*break*/, 2];
                             return [4 /*yield*/, retreaveUserSourceViaStripeCheckout()];
@@ -2234,6 +2239,29 @@ var UiController = /** @class */ (function () {
                 .append(uiPaymentMethod.structure);
         }
     }
+    UiController.prototype.interact_checkout = function (currency) {
+        return __awaiter(this, void 0, void 0, function () {
+            var url, _a, stripePublicApiKey, sessionId, stripe;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        bootbox_custom.loading("Redirecting to payment page");
+                        url = window.location.href.split("?")[0];
+                        return [4 /*yield*/, webApiCaller.createStripeCheckoutSessionForSubscription(currency, url + "?success=true", url + "?success=false")];
+                    case 1:
+                        _a = _b.sent(), stripePublicApiKey = _a.stripePublicApiKey, sessionId = _a.checkoutSessionId;
+                        stripe = Stripe(stripePublicApiKey);
+                        stripe.redirectToCheckout({ sessionId: sessionId })
+                            .then(function (result) {
+                            if (!!result.error) {
+                                alert(result.error.message);
+                            }
+                        });
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     return UiController;
 }());
 exports.UiController = UiController;
@@ -12375,18 +12403,32 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
-function createStripeCheckoutSession(cart, shippingFormData, currency) {
-    var methodName = apiDeclaration.createStripeCheckoutSession.methodName;
+function createStripeCheckoutSessionForShop(cart, shippingFormData, currency, success_url, cancel_url) {
+    var methodName = apiDeclaration.createStripeCheckoutSessionForShop.methodName;
     return sendRequest(methodName, {
         "cartDescription": cart.map(function (_a) {
             var product = _a.product, quantity = _a.quantity;
-            return ({ "productName": product.name, quantity: quantity });
+            return ({
+                "productName": product.name,
+                quantity: quantity
+            });
         }),
         shippingFormData: shippingFormData,
-        currency: currency
+        currency: currency,
+        success_url: success_url,
+        cancel_url: cancel_url
     });
 }
-exports.createStripeCheckoutSession = createStripeCheckoutSession;
+exports.createStripeCheckoutSessionForShop = createStripeCheckoutSessionForShop;
+function createStripeCheckoutSessionForSubscription(currency, success_url, cancel_url) {
+    var methodName = apiDeclaration.createStripeCheckoutSessionForSubscription.methodName;
+    return sendRequest(methodName, {
+        currency: currency,
+        success_url: success_url,
+        cancel_url: cancel_url
+    });
+}
+exports.createStripeCheckoutSessionForSubscription = createStripeCheckoutSessionForSubscription;
 function getOrders() {
     var methodName = apiDeclaration.getOrders.methodName;
     return sendRequest(methodName, undefined);
@@ -12441,10 +12483,14 @@ var unsubscribe;
 (function (unsubscribe) {
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
-var createStripeCheckoutSession;
-(function (createStripeCheckoutSession) {
-    createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
-})(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
+var createStripeCheckoutSessionForShop;
+(function (createStripeCheckoutSessionForShop) {
+    createStripeCheckoutSessionForShop.methodName = "create-stripe-checkout-session-for-shop";
+})(createStripeCheckoutSessionForShop = exports.createStripeCheckoutSessionForShop || (exports.createStripeCheckoutSessionForShop = {}));
+var createStripeCheckoutSessionForSubscription;
+(function (createStripeCheckoutSessionForSubscription) {
+    createStripeCheckoutSessionForSubscription.methodName = "create-stripe-checkout-session-for-subscription";
+})(createStripeCheckoutSessionForSubscription = exports.createStripeCheckoutSessionForSubscription || (exports.createStripeCheckoutSessionForSubscription = {}));
 var getOrders;
 (function (getOrders) {
     getOrders.methodName = "get-orders";

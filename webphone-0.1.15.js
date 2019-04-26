@@ -17452,18 +17452,32 @@ function unsubscribe() {
     });
 }
 exports.unsubscribe = unsubscribe;
-function createStripeCheckoutSession(cart, shippingFormData, currency) {
-    var methodName = apiDeclaration.createStripeCheckoutSession.methodName;
+function createStripeCheckoutSessionForShop(cart, shippingFormData, currency, success_url, cancel_url) {
+    var methodName = apiDeclaration.createStripeCheckoutSessionForShop.methodName;
     return sendRequest(methodName, {
         "cartDescription": cart.map(function (_a) {
             var product = _a.product, quantity = _a.quantity;
-            return ({ "productName": product.name, quantity: quantity });
+            return ({
+                "productName": product.name,
+                quantity: quantity
+            });
         }),
         shippingFormData: shippingFormData,
-        currency: currency
+        currency: currency,
+        success_url: success_url,
+        cancel_url: cancel_url
     });
 }
-exports.createStripeCheckoutSession = createStripeCheckoutSession;
+exports.createStripeCheckoutSessionForShop = createStripeCheckoutSessionForShop;
+function createStripeCheckoutSessionForSubscription(currency, success_url, cancel_url) {
+    var methodName = apiDeclaration.createStripeCheckoutSessionForSubscription.methodName;
+    return sendRequest(methodName, {
+        currency: currency,
+        success_url: success_url,
+        cancel_url: cancel_url
+    });
+}
+exports.createStripeCheckoutSessionForSubscription = createStripeCheckoutSessionForSubscription;
 function getOrders() {
     var methodName = apiDeclaration.getOrders.methodName;
     return sendRequest(methodName, undefined);
@@ -17670,10 +17684,14 @@ var unsubscribe;
 (function (unsubscribe) {
     unsubscribe.methodName = "unsubscribe";
 })(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
-var createStripeCheckoutSession;
-(function (createStripeCheckoutSession) {
-    createStripeCheckoutSession.methodName = "create-stripe-checkout-session";
-})(createStripeCheckoutSession = exports.createStripeCheckoutSession || (exports.createStripeCheckoutSession = {}));
+var createStripeCheckoutSessionForShop;
+(function (createStripeCheckoutSessionForShop) {
+    createStripeCheckoutSessionForShop.methodName = "create-stripe-checkout-session-for-shop";
+})(createStripeCheckoutSessionForShop = exports.createStripeCheckoutSessionForShop || (exports.createStripeCheckoutSessionForShop = {}));
+var createStripeCheckoutSessionForSubscription;
+(function (createStripeCheckoutSessionForSubscription) {
+    createStripeCheckoutSessionForSubscription.methodName = "create-stripe-checkout-session-for-subscription";
+})(createStripeCheckoutSessionForSubscription = exports.createStripeCheckoutSessionForSubscription || (exports.createStripeCheckoutSessionForSubscription = {}));
 var getOrders;
 (function (getOrders) {
     getOrders.methodName = "get-orders";
