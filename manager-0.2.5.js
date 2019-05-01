@@ -9681,7 +9681,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /** semasim.com or dev.semasim.com */
 exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
 exports.assetsRoot = window["assets_root"];
-exports.isProd = exports.assetsRoot !== "/";
+exports.isDevEnv = window["isDevEnv"];
 
 },{}],136:[function(require,module,exports){
 "use strict";
@@ -9756,7 +9756,7 @@ exports.url = "wss://web." + env_1.baseDomain;
 var idString = "toBackend";
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
-    "log": env_1.isProd ? (function () { }) : console.log.bind(console),
+    "log": env_1.isDevEnv ? console.log.bind(console) : (function () { }),
     "hideKeepAlive": true
 }));
 var socketCurrent = undefined;
