@@ -3041,7 +3041,7 @@ var exposedToAndroid = {
                 case 1:
                     ua = _b.sent();
                     evtCallReceived = new ts_events_extended_1.VoidSyncEvent();
-                    ua.evtRegistrationStateChanged.attachOnce(function (isRegistered) { return !!isRegistered; }, function () {
+                    ua.evtRegistrationStateChanged.attachOnce(function (isRegistered) { return isRegistered; }, function () {
                         if (evtCallReceived.postCount === 0) {
                             evtCallReceived.waitFor(1500)
                                 .catch(function () { return androidEventHandlers.onCallTerminated("Call missed"); });
