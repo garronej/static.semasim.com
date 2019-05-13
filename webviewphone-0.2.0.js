@@ -2951,17 +2951,6 @@ var localApiHandler = require("../../../shared/dist/lib/toBackend/localApiHandle
 var getURLParameter_1 = require("../../../shared/dist/lib/tools/getURLParameter");
 var ts_events_extended_1 = require("ts-events-extended");
 var jsSipWebRTCIsolation = require("../../../shared/dist/lib/tools/pjSipWebRTCIsolation");
-var observer = require("../../../shared/dist/lib/tools/observer");
-{
-    //const { onCallTerminated }= apiExposedByHost;
-    apiExposedByHost["onCallTerminated"] = function (errorMessage) {
-        console.log({ errorMessage: errorMessage });
-        console.log("Doing nothing, debugging...");
-    };
-}
-observer.observeObjectProperty(navigator.mediaDevices, "getUserMedia");
-observer.observeObjectProperty(window, "RTCPeerConnection");
-console.log(JSON.stringify(Object.getOwnPropertyNames(apiExposedByHost), null, 2));
 var webRTCListeners;
 jsSipWebRTCIsolation.useAlternativeWebRTCImplementation((function () {
     var webRTCApi = {
@@ -2970,6 +2959,7 @@ jsSipWebRTCIsolation.useAlternativeWebRTCImplementation((function () {
     };
     return webRTCApi;
 })());
+//observer.observeWebRTC();
 {
     var resolvePrErrorMessage_1;
     var prErrorMessage = new Promise(function (resolve) { return resolvePrErrorMessage_1 = resolve; });
@@ -3033,24 +3023,18 @@ var apiExposedToHost = __assign({}, webRTCListeners, { "placeOutgoingCall": func
         var ua, _a, terminate, prTerminated, prNextState;
         return __generator(this, function (_b) {
             switch (_b.label) {
-                case 0:
-                    console.log("waiting...");
-                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 5000); })];
+                case 0: return [4 /*yield*/, initUa(uaInstanceId, readEmailFromUrl(), imsi)];
                 case 1:
-                    _b.sent();
-                    console.log("go!");
-                    return [4 /*yield*/, initUa(uaInstanceId, readEmailFromUrl(), imsi)];
-                case 2:
                     ua = _b.sent();
                     ua.evtIncomingCall.attach(function (_a) {
                         var terminate = _a.terminate;
                         return terminate();
                     });
                     return [4 /*yield*/, ua.evtRegistrationStateChanged.waitFor()];
-                case 3:
+                case 2:
                     _b.sent();
                     return [4 /*yield*/, ua.placeOutgoingCall(number)];
-                case 4:
+                case 3:
                     _a = _b.sent(), terminate = _a.terminate, prTerminated = _a.prTerminated, prNextState = _a.prNextState;
                     apiExposedToHost.terminateCall = function () { return terminate(); };
                     prTerminated.then(function () { return apiExposedByHost.onCallTerminated(null); });
@@ -3108,7 +3092,7 @@ var apiExposedToHost = __assign({}, webRTCListeners, { "placeOutgoingCall": func
 window["apiExposedToHost"] = apiExposedToHost;
 
 }).call(this,require("buffer").Buffer)
-},{"../../../shared/dist/lib/Ua":18,"../../../shared/dist/lib/toBackend/connection":20,"../../../shared/dist/lib/toBackend/localApiHandlers":21,"../../../shared/dist/lib/toBackend/remoteApiCaller":22,"../../../shared/dist/lib/tools/getURLParameter":25,"../../../shared/dist/lib/tools/observer":28,"../../../shared/dist/lib/tools/pjSipWebRTCIsolation":29,"buffer":2,"ts-events-extended":16}],10:[function(require,module,exports){
+},{"../../../shared/dist/lib/Ua":18,"../../../shared/dist/lib/toBackend/connection":20,"../../../shared/dist/lib/toBackend/localApiHandlers":21,"../../../shared/dist/lib/toBackend/remoteApiCaller":22,"../../../shared/dist/lib/tools/getURLParameter":25,"../../../shared/dist/lib/tools/pjSipWebRTCIsolation":28,"buffer":2,"ts-events-extended":16}],10:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -4025,7 +4009,7 @@ exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 exports.urlSafeB64 = bundledData_1.urlSafeB64;
 
-},{"../../../gateway/dist/lib/misc/bundledData":76,"../../../gateway/dist/lib/misc/sipRouting":77,"../../../gateway/dist/lib/types":78}],18:[function(require,module,exports){
+},{"../../../gateway/dist/lib/misc/bundledData":75,"../../../gateway/dist/lib/misc/sipRouting":76,"../../../gateway/dist/lib/types":77}],18:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 //NOTE: Require jssip_compat loaded on the page.
@@ -4637,7 +4621,7 @@ function newIceCandidateHandler(rtcICEServer) {
 })(newIceCandidateHandler || (newIceCandidateHandler = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../gateway":17,"./env":19,"./toBackend/connection":20,"./toBackend/localApiHandlers":21,"buffer":2,"run-exclusive":51,"ts-events-extended":63,"ts-sip":71}],19:[function(require,module,exports){
+},{"../gateway":17,"./env":19,"./toBackend/connection":20,"./toBackend/localApiHandlers":21,"buffer":2,"run-exclusive":50,"ts-events-extended":62,"ts-sip":70}],19:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** semasim.com or dev.semasim.com */
@@ -4882,7 +4866,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../env":19,"../tools/bootbox_custom":23,"./localApiHandlers":21,"./remoteApiCaller":22,"js-cookie":49,"ts-events-extended":63,"ts-sip":71}],21:[function(require,module,exports){
+},{"../env":19,"../tools/bootbox_custom":23,"./localApiHandlers":21,"./remoteApiCaller":22,"js-cookie":48,"ts-events-extended":62,"ts-sip":70}],21:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -5503,7 +5487,7 @@ exports.getRTCIceServer = (function () {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":32,"../tools/bootbox_custom":23,"./remoteApiCaller":22,"chan-dongle-extended-client/dist/lib/types":33,"ts-events-extended":63}],22:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":31,"../tools/bootbox_custom":23,"./remoteApiCaller":22,"chan-dongle-extended-client/dist/lib/types":32,"ts-events-extended":62}],22:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -6377,7 +6361,7 @@ function sendRequest(methodName, params, retry) {
     });
 }
 
-},{"../../sip_api_declarations/backendToUa":31,"../types":30,"./connection":20,"phone-number":50,"ts-events-extended":63,"ts-sip":71}],23:[function(require,module,exports){
+},{"../../sip_api_declarations/backendToUa":30,"../types":29,"./connection":20,"phone-number":49,"ts-events-extended":62,"ts-sip":70}],23:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -6683,7 +6667,7 @@ function prettyPrint(amount, currency) {
 }
 exports.prettyPrint = prettyPrint;
 
-},{"../../../res/currency.json":75}],25:[function(require,module,exports){
+},{"../../../res/currency.json":74}],25:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getURLParameter(sParam) {
@@ -6855,304 +6839,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
-};
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-function getPropertyNames(o) {
-    var pSet = new Set();
-    var o_ = o;
-    while (true) {
-        Object.getOwnPropertyNames(o_).forEach(function (p) { return pSet.add(p); });
-        o_ = Object.getPrototypeOf(o_);
-        if (!o_) {
-            break;
-        }
-    }
-    return Array.from(pSet);
-}
-function logFunctionCall(callExpression, args, out) {
-    var extra = {};
-    args.forEach(function (value, i) {
-        extra["p" + i] = value;
-    });
-    extra["returns"] = out;
-    includeStackTrace(extra);
-    console.log(callExpression + "(" + (args.length === 0 ? "" : args.map(function (_value, index) { return "p" + index; }).join(", ")) + ") -> ", extra);
-}
-function includeStackTrace(obj) {
-    var stack = new Error().stack;
-    Object.defineProperty(obj, "stackTrace", {
-        "enumerable": false,
-        "get": function () {
-            var arr = stack.split("\n");
-            for (var i = 1; i <= 4; i++) {
-                arr.shift();
-            }
-            var out = arr.join("\n");
-            console.log(out);
-            return out;
-        }
-    });
-}
-var functionProxies = new WeakMap();
-function observeObjectProperty(o, p, interceptOutput) {
-    var objName = (function (str) { return str.charAt(0).toLowerCase() + str.slice(1); })(Object.getPrototypeOf(o).constructor.name);
-    var propertyDescriptor = (function () {
-        var propertyDescriptor = (function () {
-            var pd = undefined;
-            var o_ = o;
-            while (pd === undefined) {
-                pd = Object.getOwnPropertyDescriptor(o_, p);
-                o_ = Object.getPrototypeOf(o_);
-                if (!o_) {
-                    break;
-                }
-            }
-            return pd;
-        })();
-        if (propertyDescriptor === undefined) {
-            throw new Error("No property " + String(p) + " on obj");
-        }
-        if (!propertyDescriptor.configurable) {
-            throw new Error("Property " + String(p) + " of " + objName + " will not be observed (not configurable)");
-        }
-        var logAccess = function (type, value) {
-            return console.log(objName + "." + String(p) + " " + (type === "GET" ? "->" : "<-"), (function () {
-                var valueAndTrace = { value: value };
-                includeStackTrace(valueAndTrace);
-                return valueAndTrace;
-            })());
-        };
-        return {
-            "enumerable": propertyDescriptor.enumerable,
-            "configurable": true,
-            "get": function () {
-                var e_1, _a, e_2, _b;
-                var value = "value" in propertyDescriptor ?
-                    propertyDescriptor.value :
-                    propertyDescriptor.get.apply(o);
-                if (value instanceof Function) {
-                    if (functionProxies.has(value)) {
-                        return functionProxies.get(value);
-                    }
-                    if (!value.name) {
-                        Object.defineProperty(value, "name", __assign({}, Object.getOwnPropertyDescriptor(value, "name"), { "value": String(p) }));
-                    }
-                    var valueProxy = function _g() {
-                        var _newTarget = this && this instanceof _g ? this.constructor : void 0;
-                        var args = [];
-                        for (var _i = 0; _i < arguments.length; _i++) {
-                            args[_i] = arguments[_i];
-                        }
-                        var binded = Function.prototype.bind.apply(value, __spread([!!_newTarget ? null : this], args));
-                        var out = !!_newTarget ? new binded() : binded();
-                        if (!!interceptOutput) {
-                            interceptOutput(out);
-                        }
-                        observe(out);
-                        logFunctionCall("" + (!!_newTarget ? "new " : objName + ".") + String(p), args, out);
-                        return out;
-                    };
-                    Object.defineProperty(valueProxy, "name", __assign({}, Object.getOwnPropertyDescriptor(value, "name"), { "value": value.name }));
-                    {
-                        var prototype = value.prototype;
-                        if (!!prototype) {
-                            try {
-                                for (var _c = __values(__spread(Object.getOwnPropertyNames(prototype), Object.getOwnPropertySymbols(prototype))), _d = _c.next(); !_d.done; _d = _c.next()) {
-                                    var propertyName = _d.value;
-                                    Object.defineProperty(valueProxy.prototype, propertyName, Object.getOwnPropertyDescriptor(prototype, propertyName));
-                                }
-                            }
-                            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                            finally {
-                                try {
-                                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
-                                }
-                                finally { if (e_1) throw e_1.error; }
-                            }
-                        }
-                    }
-                    var _loop_1 = function (p_1) {
-                        var pd = Object.getOwnPropertyDescriptor(value, p_1);
-                        if ("value" in pd && pd.value instanceof Function) {
-                            Object.defineProperty(valueProxy, p_1, __assign({}, pd, { "value": (function () {
-                                    var f = pd.value;
-                                    var f_ = function () {
-                                        var args = [];
-                                        for (var _i = 0; _i < arguments.length; _i++) {
-                                            args[_i] = arguments[_i];
-                                        }
-                                        var out = f.apply(value, args);
-                                        logFunctionCall(value.name + "." + String(p_1), args, out);
-                                        return out;
-                                    };
-                                    Object.defineProperty(f_, "name", __assign({}, Object.getOwnPropertyDescriptor(f, "name"), { "value": f.name }));
-                                    return f_;
-                                })() }));
-                        }
-                    };
-                    try {
-                        for (var _e = __values(Object.getOwnPropertyNames(value)), _f = _e.next(); !_f.done; _f = _e.next()) {
-                            var p_1 = _f.value;
-                            _loop_1(p_1);
-                        }
-                    }
-                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                    finally {
-                        try {
-                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
-                        }
-                        finally { if (e_2) throw e_2.error; }
-                    }
-                    functionProxies.set(value, valueProxy);
-                    return valueProxy;
-                }
-                else {
-                    logAccess("GET", value);
-                    observe(value);
-                    return value;
-                }
-            },
-            "set": function (value) {
-                logAccess("SET", value);
-                return "value" in propertyDescriptor ?
-                    propertyDescriptor.value = value :
-                    propertyDescriptor.set.apply(o, value);
-            }
-        };
-    })();
-    Object.defineProperty(o, p, propertyDescriptor);
-}
-exports.observeObjectProperty = observeObjectProperty;
-var observedObjects = new WeakSet();
-function observeObject(o) {
-    var e_3, _a;
-    if (o instanceof Function) {
-        throw new Error("cannot observe function");
-    }
-    if (!(o instanceof Object)) {
-        throw new Error("not an object, cannot observe");
-    }
-    if (Object.getPrototypeOf(o).constructor.name === "Promise") {
-        throw new Error("should not observe Promise");
-    }
-    if (observedObjects.has(o)) {
-        return;
-    }
-    observedObjects.add(o);
-    try {
-        for (var _b = __values(getPropertyNames(o)), _c = _b.next(); !_c.done; _c = _b.next()) {
-            var p = _c.value;
-            try {
-                observeObjectProperty(o, p);
-            }
-            catch (error) {
-                console.log("WARNING: " + error.message);
-            }
-        }
-    }
-    catch (e_3_1) { e_3 = { error: e_3_1 }; }
-    finally {
-        try {
-            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-        }
-        finally { if (e_3) throw e_3.error; }
-    }
-}
-function observe(o) {
-    var then = function (o) {
-        if (o instanceof Function) {
-            console.log("===========>warning, function not observed", o);
-            return;
-        }
-        if (!(o instanceof Object)) {
-            return;
-        }
-        observeObject(o);
-    };
-    if (o instanceof Object && Object.getPrototypeOf(o).constructor.name === "Promise") {
-        o.then(function (o) { return then(o); });
-    }
-    else {
-        then(o);
-    }
-}
-/** will observe getUserMedia and RTCPeerConnection */
-function observeWebRTC() {
-    observeObjectProperty(navigator.mediaDevices, "getUserMedia");
-    observeObjectProperty(window, "RTCPeerConnection", function (rtcPeerConnection) {
-        var addEventListenerBackup = rtcPeerConnection.addEventListener, removeEventListenerBackup = rtcPeerConnection.removeEventListener;
-        var proxyByOriginal = new WeakMap();
-        Object.defineProperties(rtcPeerConnection, {
-            "addEventListener": {
-                "configurable": true,
-                "enumerable": true,
-                "value": function addEventListener(type, listener) {
-                    var listenerProxy = function () {
-                        var args = [];
-                        for (var _i = 0; _i < arguments.length; _i++) {
-                            args[_i] = arguments[_i];
-                        }
-                        console.log("RTCPeerConnectionEvent: \"" + type + "\"", args);
-                        return listener.apply(rtcPeerConnection, args);
-                    };
-                    proxyByOriginal.set(listener, listenerProxy);
-                    return addEventListenerBackup.call(rtcPeerConnection, type, listenerProxy);
-                }
-            },
-            "removeEventListener": {
-                "configurable": true,
-                "enumerable": true,
-                "value": function removeEventListener(type, listener) {
-                    return removeEventListenerBackup.call(rtcPeerConnection, type, proxyByOriginal.get(listener));
-                }
-            }
-        });
-    });
-}
-exports.observeWebRTC = observeWebRTC;
-
-},{}],29:[function(require,module,exports){
-"use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -7217,9 +6903,13 @@ var __read = (this && this.__read) || function (o, n) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 function useAlternativeWebRTCImplementation(api) {
-    console.log("Using alternative WebRTC implementation");
+    console.log("Using alternative WebRTC implementation !");
     var getCounter = (function () {
-        var counter = 0;
+        var counter = (function () {
+            var min = -2147483000;
+            var max = 1147483000;
+            return Math.floor(Math.random() * (max - min)) + min;
+        })();
         return function () { return counter++; };
     })();
     var evtIcecandidate = new ts_events_extended_1.SyncEvent();
@@ -7258,19 +6948,13 @@ function useAlternativeWebRTCImplementation(api) {
                             })];
                     case 1:
                         _a.sent();
-                        mediaStreamProxy = (function () {
-                            var getTracks = function () {
-                                var mediaStreamTrackProxy = (function () {
-                                    var stop = function () {
-                                        return api.methods.stopMediaStreamTrack(mediaStreamRef);
-                                    };
-                                    return { stop: stop };
-                                })();
-                                return [mediaStreamTrackProxy];
-                            };
-                            var wrap = { getTracks: getTracks };
-                            return Object.setPrototypeOf(wrap, { "constructor": function MediaStream() { } });
-                        })();
+                        mediaStreamProxy = Object.setPrototypeOf({
+                            "getTracks": function () { return [
+                                ({
+                                    "stop": function () { return api.methods.stopMediaStreamTrack(mediaStreamRef); }
+                                })
+                            ]; }
+                        }, { "constructor": function MediaStream() { } });
                         refByMediaStream.set(mediaStreamProxy, mediaStreamRef);
                         return [2 /*return*/, mediaStreamProxy];
                 }
@@ -7314,7 +6998,24 @@ function useAlternativeWebRTCImplementation(api) {
                     new RTCSessionDescription(localDescriptionRTCSessionDescriptionInitOrNull) : null;
             })();
         });
-        var rtcPeerConnectionProxy = __assign({ "createOffer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
+        var rtcPeerConnectionProxy = __assign({ "createAnswer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
+                var ref, rtcSessionDescriptionInitJson;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            ref = getCounter();
+                            api.methods.createAnswerForRTCPeerConnection(rtcPeerConnectionRef, ref);
+                            return [4 /*yield*/, evtMethodReturn.waitFor(function (_a) {
+                                    var callRef = _a.callRef;
+                                    return callRef === ref;
+                                })];
+                        case 1:
+                            rtcSessionDescriptionInitJson = (_a.sent()).out;
+                            //NOTE: We could just JSON.parse, as the return type is *Init
+                            return [2 /*return*/, new RTCSessionDescription(JSON.parse(rtcSessionDescriptionInitJson))];
+                    }
+                });
+            }); }, "createOffer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
                 var ref, rtcSessionDescriptionInitJson;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -7327,13 +7028,7 @@ function useAlternativeWebRTCImplementation(api) {
                                 })];
                         case 1:
                             rtcSessionDescriptionInitJson = (_a.sent()).out;
-                            //NOTE: Just to help debug, RTCSessionDescriptionInit is not a class, just a type.
-                            /*
-                            return Object.setPrototypeOf(
-                                JSON.parse(rtcSessionDescriptionInitJson!),
-                                { "constructor": function RTCSessionDescriptionInit() { } }
-                            );
-                            */
+                            //NOTE: We could just JSON.parse, as the return type is *Init
                             return [2 /*return*/, new RTCSessionDescription(JSON.parse(rtcSessionDescriptionInitJson))];
                     }
                 });
@@ -7456,14 +7151,12 @@ exports.localApi = (function () {
     var mediaStreamByRef = new Map();
     var rtcPeerConnectionByRef = new Map();
     var listeners;
-    var methods = {
-        "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
+    var methods = __assign({ "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
             return getUserMediaBackup(JSON.parse(mediaStreamConstraintsJson)).then(function (mediaStream) {
                 mediaStreamByRef.set(mediaStreamRef, mediaStream);
-                listeners.onMethodReturn(callRef, null);
+                listeners.onMethodReturn(callRef, undefined);
             });
-        },
-        "createRTCPeerConnection": function (rtcPeerConnectionRef, rtcConfigurationJson) {
+        }, "createRTCPeerConnection": function (rtcPeerConnectionRef, rtcConfigurationJson) {
             var rtcPeerConnection = new RTCPeerConnectionBackup((function () {
                 var rtcConfiguration = JSON.parse(rtcConfigurationJson);
                 return rtcConfiguration;
@@ -7478,41 +7171,36 @@ exports.localApi = (function () {
                 audio.srcObject = stream;
             });
             rtcPeerConnectionByRef.set(rtcPeerConnectionRef, rtcPeerConnection);
-        },
-        "addStreamToRTCPeerConnection": function (rtcPeerConnectionRef, mediaStreamRef) {
+        }, "addStreamToRTCPeerConnection": function (rtcPeerConnectionRef, mediaStreamRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)["addStream"](mediaStreamByRef.get(mediaStreamRef));
-        },
-        "stopMediaStreamTrack": function (mediaStreamRef) {
+        }, "stopMediaStreamTrack": function (mediaStreamRef) {
             var _a = __read(mediaStreamByRef.get(mediaStreamRef).getTracks(), 1), mediaStreamTrack = _a[0];
             if (mediaStreamTrack === undefined) {
                 return;
             }
             mediaStreamTrack.stop();
-        },
-        "createOfferForRTCPeerConnection": function (rtcPeerConnectionRef, callRef) {
-            return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
-                .createOffer()
-                .then(function (rtcSessionDescriptionInit) { return listeners.onMethodReturn(callRef, JSON.stringify(rtcSessionDescriptionInit)); });
-        },
-        "setLocalDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
+        } }, (function () {
+        var createXForRTCPeerConnection = function (xIs, rtcPeerConnectionRef, callRef) { return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)[xIs === "ANSWER" ? "createAnswer" : "createOffer"]()
+            .then(function (rtcSessionDescriptionInit) { return listeners.onMethodReturn(callRef, JSON.stringify(rtcSessionDescriptionInit)); }); };
+        var createAnswerForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("ANSWER", rtcPeerConnectionRef, callRef); };
+        var createOfferForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("OFFER", rtcPeerConnectionRef, callRef); };
+        return { createAnswerForRTCPeerConnection: createAnswerForRTCPeerConnection, createOfferForRTCPeerConnection: createOfferForRTCPeerConnection };
+    })(), { "setLocalDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
                 .setLocalDescription(JSON.parse(rtcSessionDescriptionInitJson))
-                .then(function () { return listeners.onMethodReturn(callRef, null); });
-        },
-        "setRemoteDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
+                .then(function () { return listeners.onMethodReturn(callRef, undefined); });
+        }, "setRemoteDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
                 .setRemoteDescription(JSON.parse(rtcSessionDescriptionInitJson))
-                .then(function () { return listeners.onMethodReturn(callRef, null); });
-        },
-        "closeRTCPeerConnection": function (rtcPeerConnectionRef) {
+                .then(function () { return listeners.onMethodReturn(callRef, undefined); });
+        }, "closeRTCPeerConnection": function (rtcPeerConnectionRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
                 .close();
-        }
-    };
+        } });
     return { methods: methods, "setListeners": function (listeners_) { return listeners = listeners_; } };
 })();
 
-},{"ts-events-extended":63}],30:[function(require,module,exports){
+},{"ts-events-extended":62}],29:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -7876,7 +7564,7 @@ var shop;
     })(ShippingFormData = shop.ShippingFormData || (shop.ShippingFormData = {}));
 })(shop = exports.shop || (exports.shop = {}));
 
-},{"./tools/currency":24,"./tools/isAscendingAlphabeticalOrder":26}],31:[function(require,module,exports){
+},{"./tools/currency":24,"./tools/isAscendingAlphabeticalOrder":26}],30:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -7975,7 +7663,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -8028,7 +7716,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],33:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -8049,7 +7737,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -8252,7 +7940,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":35,"./custom/zalgo":36,"./maps/america":39,"./maps/rainbow":40,"./maps/random":41,"./maps/zebra":42,"./styles":43,"./system/supports-colors":45,"util":8}],35:[function(require,module,exports){
+},{"./custom/trap":34,"./custom/zalgo":35,"./maps/america":38,"./maps/rainbow":39,"./maps/random":40,"./maps/zebra":41,"./styles":42,"./system/supports-colors":44,"util":8}],34:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -8300,7 +7988,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],36:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -8412,7 +8100,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],37:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -8524,7 +8212,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":34}],38:[function(require,module,exports){
+},{"./colors":33}],37:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -8539,7 +8227,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":34,"./extendStringPrototype":37}],39:[function(require,module,exports){
+},{"./colors":33,"./extendStringPrototype":36}],38:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -8551,7 +8239,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],40:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -8565,7 +8253,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],41:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -8577,14 +8265,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],43:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -8663,7 +8351,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],44:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -8702,7 +8390,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],45:[function(require,module,exports){
+},{"_process":6}],44:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -8857,7 +8545,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":44,"_process":6,"os":5}],46:[function(require,module,exports){
+},{"./has-flag.js":43,"_process":6,"os":5}],45:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -8911,21 +8599,21 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],47:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":46}],48:[function(require,module,exports){
+},{"./implementation":45}],47:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":47}],49:[function(require,module,exports){
+},{"function-bind":46}],48:[function(require,module,exports){
 /*!
  * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
@@ -9092,7 +8780,7 @@ module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 	return init(function () {});
 }));
 
-},{}],50:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 (function (process,global){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -9283,11 +8971,11 @@ var phoneNumber;
 })(phoneNumber = exports.phoneNumber || (exports.phoneNumber = {}));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":6}],51:[function(require,module,exports){
+},{"_process":6}],50:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"dup":10}],52:[function(require,module,exports){
+},{"dup":10}],51:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],53:[function(require,module,exports){
+},{"dup":11}],52:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -9622,7 +9310,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":48}],54:[function(require,module,exports){
+},{"has":47}],53:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -9672,7 +9360,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":53}],55:[function(require,module,exports){
+},{"super-json":52}],54:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -9684,7 +9372,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":54,"./stringTransform":56,"./stringTransformExt":57,"./testing":58}],56:[function(require,module,exports){
+},{"./JSON_CUSTOM":53,"./stringTransform":55,"./stringTransformExt":56,"./testing":57}],55:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -9746,7 +9434,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2}],57:[function(require,module,exports){
+},{"buffer":2}],56:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -9814,7 +9502,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":56}],58:[function(require,module,exports){
+},{"./stringTransform":55}],57:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -10083,17 +9771,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":56}],59:[function(require,module,exports){
+},{"./stringTransform":55}],58:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"./SyncEventBase":60,"dup":12}],60:[function(require,module,exports){
+},{"./SyncEventBase":59,"dup":12}],59:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":61,"dup":13}],61:[function(require,module,exports){
+},{"./SyncEventBaseProtected":60,"dup":13}],60:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"./defs":62,"dup":14,"run-exclusive":51}],62:[function(require,module,exports){
+},{"./defs":61,"dup":14,"run-exclusive":50}],61:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15,"setprototypeof":52}],63:[function(require,module,exports){
+},{"dup":15,"setprototypeof":51}],62:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"./SyncEvent":59,"./defs":62,"dup":16}],64:[function(require,module,exports){
+},{"./SyncEvent":58,"./defs":61,"dup":16}],63:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -10265,7 +9953,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":2,"ts-events-extended":63}],65:[function(require,module,exports){
+},{"buffer":2,"ts-events-extended":62}],64:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -10577,7 +10265,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":64,"./api/ApiMessage":66,"./core":70,"./misc":74,"colors":38,"ts-events-extended":63}],66:[function(require,module,exports){
+},{"./IConnection":63,"./api/ApiMessage":65,"./core":69,"./misc":73,"colors":37,"ts-events-extended":62}],65:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -10658,7 +10346,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":70,"../misc":74,"buffer":2,"transfer-tools":55}],67:[function(require,module,exports){
+},{"../core":69,"../misc":73,"buffer":2,"transfer-tools":54}],66:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10840,7 +10528,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":74,"./ApiMessage":66,"colors":38,"util":8}],68:[function(require,module,exports){
+},{"../misc":73,"./ApiMessage":65,"colors":37,"util":8}],67:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -11059,7 +10747,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":74,"./ApiMessage":66,"setprototypeof":52}],69:[function(require,module,exports){
+},{"../misc":73,"./ApiMessage":65,"setprototypeof":51}],68:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -11067,7 +10755,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":67,"./client":68}],70:[function(require,module,exports){
+},{"./Server":66,"./client":67}],69:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -11151,7 +10839,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":72,"./legacy/sip":73,"buffer":2,"setprototypeof":52}],71:[function(require,module,exports){
+},{"./legacy/sdp":71,"./legacy/sip":72,"buffer":2,"setprototypeof":51}],70:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -11163,7 +10851,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":65,"./api":69,"./core":70,"./misc":74}],72:[function(require,module,exports){
+},{"./Socket":64,"./api":68,"./core":69,"./misc":73}],71:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -11279,7 +10967,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],73:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11670,7 +11358,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],74:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -11968,7 +11656,7 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":70,"buffer":2}],75:[function(require,module,exports){
+},{"./core":69,"buffer":2}],74:[function(require,module,exports){
 module.exports={
   "usd": {
     "symbol": "$",
@@ -12877,7 +12565,7 @@ module.exports={
   }
 }
 
-},{}],76:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -12944,7 +12632,7 @@ function extractBundledDataFromHeaders(headers) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"transfer-tools/dist/lib/stringTransform":99}],77:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":98}],76:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 var __read = (this && this.__read) || function (o, n) {
@@ -13029,21 +12717,23 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"transfer-tools/dist/lib/stringTransform":99,"ts-sip":114}],78:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":98,"ts-sip":113}],77:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],79:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
+arguments[4][33][0].apply(exports,arguments)
+},{"./custom/trap":79,"./custom/zalgo":80,"./maps/america":83,"./maps/rainbow":84,"./maps/random":85,"./maps/zebra":86,"./styles":87,"./system/supports-colors":89,"dup":33,"util":8}],79:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"./custom/trap":80,"./custom/zalgo":81,"./maps/america":84,"./maps/rainbow":85,"./maps/random":86,"./maps/zebra":87,"./styles":88,"./system/supports-colors":90,"dup":34,"util":8}],80:[function(require,module,exports){
+},{"dup":34}],80:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
 },{"dup":35}],81:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"dup":36}],82:[function(require,module,exports){
+},{"./colors":78,"dup":36}],82:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"./colors":79,"dup":37}],83:[function(require,module,exports){
+},{"./colors":78,"./extendStringPrototype":81,"dup":37}],83:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"./colors":79,"./extendStringPrototype":82,"dup":38}],84:[function(require,module,exports){
+},{"dup":38}],84:[function(require,module,exports){
 arguments[4][39][0].apply(exports,arguments)
 },{"dup":39}],85:[function(require,module,exports){
 arguments[4][40][0].apply(exports,arguments)
@@ -13053,62 +12743,60 @@ arguments[4][41][0].apply(exports,arguments)
 arguments[4][42][0].apply(exports,arguments)
 },{"dup":42}],88:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],89:[function(require,module,exports){
+},{"_process":6,"dup":43}],89:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"_process":6,"dup":44}],90:[function(require,module,exports){
+},{"./has-flag.js":88,"_process":6,"dup":44,"os":5}],90:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"./has-flag.js":89,"_process":6,"dup":45,"os":5}],91:[function(require,module,exports){
+},{"dup":45}],91:[function(require,module,exports){
 arguments[4][46][0].apply(exports,arguments)
-},{"dup":46}],92:[function(require,module,exports){
+},{"./implementation":90,"dup":46}],92:[function(require,module,exports){
 arguments[4][47][0].apply(exports,arguments)
-},{"./implementation":91,"dup":47}],93:[function(require,module,exports){
-arguments[4][48][0].apply(exports,arguments)
-},{"dup":48,"function-bind":92}],94:[function(require,module,exports){
+},{"dup":47,"function-bind":91}],93:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"dup":10}],95:[function(require,module,exports){
+},{"dup":10}],94:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],96:[function(require,module,exports){
+},{"dup":11}],95:[function(require,module,exports){
+arguments[4][52][0].apply(exports,arguments)
+},{"dup":52,"has":92}],96:[function(require,module,exports){
 arguments[4][53][0].apply(exports,arguments)
-},{"dup":53,"has":93}],97:[function(require,module,exports){
+},{"dup":53,"super-json":95}],97:[function(require,module,exports){
 arguments[4][54][0].apply(exports,arguments)
-},{"dup":54,"super-json":96}],98:[function(require,module,exports){
+},{"./JSON_CUSTOM":96,"./stringTransform":98,"./stringTransformExt":99,"./testing":100,"dup":54}],98:[function(require,module,exports){
 arguments[4][55][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":97,"./stringTransform":99,"./stringTransformExt":100,"./testing":101,"dup":55}],99:[function(require,module,exports){
+},{"buffer":2,"dup":55}],99:[function(require,module,exports){
 arguments[4][56][0].apply(exports,arguments)
-},{"buffer":2,"dup":56}],100:[function(require,module,exports){
+},{"./stringTransform":98,"dup":56}],100:[function(require,module,exports){
 arguments[4][57][0].apply(exports,arguments)
-},{"./stringTransform":99,"dup":57}],101:[function(require,module,exports){
-arguments[4][58][0].apply(exports,arguments)
-},{"./stringTransform":99,"dup":58}],102:[function(require,module,exports){
+},{"./stringTransform":98,"dup":57}],101:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"./SyncEventBase":103,"dup":12}],103:[function(require,module,exports){
+},{"./SyncEventBase":102,"dup":12}],102:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":104,"dup":13}],104:[function(require,module,exports){
+},{"./SyncEventBaseProtected":103,"dup":13}],103:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"./defs":105,"dup":14,"run-exclusive":94}],105:[function(require,module,exports){
+},{"./defs":104,"dup":14,"run-exclusive":93}],104:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15,"setprototypeof":95}],106:[function(require,module,exports){
+},{"dup":15,"setprototypeof":94}],105:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"./SyncEvent":102,"./defs":105,"dup":16}],107:[function(require,module,exports){
+},{"./SyncEvent":101,"./defs":104,"dup":16}],106:[function(require,module,exports){
+arguments[4][63][0].apply(exports,arguments)
+},{"buffer":2,"dup":63,"ts-events-extended":105}],107:[function(require,module,exports){
 arguments[4][64][0].apply(exports,arguments)
-},{"buffer":2,"dup":64,"ts-events-extended":106}],108:[function(require,module,exports){
+},{"./IConnection":106,"./api/ApiMessage":108,"./core":112,"./misc":116,"colors":82,"dup":64,"ts-events-extended":105}],108:[function(require,module,exports){
 arguments[4][65][0].apply(exports,arguments)
-},{"./IConnection":107,"./api/ApiMessage":109,"./core":113,"./misc":117,"colors":83,"dup":65,"ts-events-extended":106}],109:[function(require,module,exports){
+},{"../core":112,"../misc":116,"buffer":2,"dup":65,"transfer-tools":97}],109:[function(require,module,exports){
 arguments[4][66][0].apply(exports,arguments)
-},{"../core":113,"../misc":117,"buffer":2,"dup":66,"transfer-tools":98}],110:[function(require,module,exports){
+},{"../misc":116,"./ApiMessage":108,"colors":82,"dup":66,"util":8}],110:[function(require,module,exports){
 arguments[4][67][0].apply(exports,arguments)
-},{"../misc":117,"./ApiMessage":109,"colors":83,"dup":67,"util":8}],111:[function(require,module,exports){
+},{"../misc":116,"./ApiMessage":108,"dup":67,"setprototypeof":94}],111:[function(require,module,exports){
 arguments[4][68][0].apply(exports,arguments)
-},{"../misc":117,"./ApiMessage":109,"dup":68,"setprototypeof":95}],112:[function(require,module,exports){
+},{"./Server":109,"./client":110,"dup":68}],112:[function(require,module,exports){
 arguments[4][69][0].apply(exports,arguments)
-},{"./Server":110,"./client":111,"dup":69}],113:[function(require,module,exports){
+},{"./legacy/sdp":114,"./legacy/sip":115,"buffer":2,"dup":69,"setprototypeof":94}],113:[function(require,module,exports){
 arguments[4][70][0].apply(exports,arguments)
-},{"./legacy/sdp":115,"./legacy/sip":116,"buffer":2,"dup":70,"setprototypeof":95}],114:[function(require,module,exports){
+},{"./Socket":107,"./api":111,"./core":112,"./misc":116,"dup":70}],114:[function(require,module,exports){
 arguments[4][71][0].apply(exports,arguments)
-},{"./Socket":108,"./api":112,"./core":113,"./misc":117,"dup":71}],115:[function(require,module,exports){
+},{"dup":71}],115:[function(require,module,exports){
 arguments[4][72][0].apply(exports,arguments)
 },{"dup":72}],116:[function(require,module,exports){
 arguments[4][73][0].apply(exports,arguments)
-},{"dup":73}],117:[function(require,module,exports){
-arguments[4][74][0].apply(exports,arguments)
-},{"./core":113,"buffer":2,"dup":74}]},{},[9]);
+},{"./core":112,"buffer":2,"dup":73}]},{},[9]);
