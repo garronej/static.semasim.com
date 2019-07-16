@@ -12630,7 +12630,7 @@ function newIceCandidateHandler(rtcICEServer) {
         var candidate = data.candidate, ready = data.ready;
         //console.log(candidate);
         var readyState = isReady(candidate.candidate);
-        console.log(readyState);
+        console.log("ICE: " + readyState);
         switch (readyState) {
             case "NOT READY": return;
             case "AT LEAST ONE RELAY CANDIDATE READY":
@@ -13175,9 +13175,7 @@ var env_1 = require("../env");
 var cookies = require("../cookies/logic/frontend");
 exports.url = "wss://web." + env_1.baseDomain;
 var idString = "toBackend";
-//const log= isDevEnv ? console.log.bind(console) : (() => { });
-var log = console.log.bind(console);
-env_1.isDevEnv;
+var log = env_1.isDevEnv ? console.log.bind(console) : (function () { });
 var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.getDefaultLogger({
     idString: idString,
     log: log,
@@ -13951,8 +13949,6 @@ exports.getRTCIceServer = (function () {
     var handler = {
         "handler": function (params, fromSocket) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                params.urls = params.urls.filter(function (url) { return url.startsWith("turns") || url.startsWith("stun"); });
-                console.log(params);
                 evtRTCIceEServer.post({
                     "rtcIceServer": params !== undefined ? params :
                         ({
