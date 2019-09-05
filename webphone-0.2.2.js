@@ -3224,10 +3224,11 @@ require("../templates/UiConversation.less");
 var checkMark = Buffer.from("e29c93", "hex").toString("utf8");
 var crossMark = Buffer.from("e29d8c", "hex").toString("utf8");
 var UiConversation = /** @class */ (function () {
-    function UiConversation(userSim, wdChat) {
+    function UiConversation(userSim, isRegistered, wdChat) {
         var e_1, _a;
         var _this = this;
         this.userSim = userSim;
+        this.isRegistered = isRegistered;
         this.wdChat = wdChat;
         this.structure = html.structure.clone();
         this.evtUpdateContact = new ts_events_extended_1.VoidSyncEvent();
@@ -3244,9 +3245,11 @@ var UiConversation = /** @class */ (function () {
         this.evtLoadMore = new ts_events_extended_1.SyncEvent();
         /** indexed by wd.Message.id_ */
         this.uiBubbles = new Map();
-        this.notifyContactNameUpdated();
-        this.notifySipIsRegistered(false);
-        this.notifySimGsmConnectivityChange();
+        var prettyNumber = phone_number_1.phoneNumber.prettyPrint(this.wdChat.contactNumber, this.userSim.sim.country ?
+            this.userSim.sim.country.iso : undefined);
+        this.isDialable = phone_number_1.phoneNumber.isDialable(this.wdChat.contactNumber);
+        this.structure.find("span.id_number").text(prettyNumber);
+        this.notify();
         this.btnUpdateContact
             .on("click", function () { return _this.evtUpdateContact.post(); });
         this.btnCall
@@ -3331,27 +3334,28 @@ var UiConversation = /** @class */ (function () {
         }
         this.unselect();
     }
-    UiConversation.prototype.notifySimGsmConnectivityChange = function () {
-        this.btnCall.prop("disabled", !this.userSim.isGsmConnectivityOk);
-    };
-    UiConversation.prototype.notifySipIsRegistered = function (isRegistered) {
-        if (isRegistered) {
-            if (!phone_number_1.phoneNumber.isDialable(this.wdChat.contactNumber)) {
-                return;
-            }
+    /** To call whenever the widget should be updated */
+    UiConversation.prototype.notify = function () {
+        this.structure.find("span.id_name").text(this.wdChat.contactName || "");
+        if (this.isRegistered() && this.isDialable) {
             this.textarea.removeAttr("disabled");
             this.aSend.show();
-            this.btnUpdateContact.prop("disabled", false);
-            this.btnCall.prop("disabled", false);
-            this.btnDelete.prop("disabled", false);
         }
         else {
             this.textarea.attr("disabled", true);
             this.aSend.hide();
-            this.btnUpdateContact.prop("disabled", true);
-            this.btnCall.prop("disabled", true);
-            this.btnDelete.prop("disabled", true);
         }
+        this.btnUpdateContact.prop("disabled", (this.userSim.reachableSimState === undefined ||
+            !this.isDialable));
+        this.btnDelete.prop("disabled", this.userSim.reachableSimState === undefined);
+        this.btnCall.prop("disabled", (!this.isRegistered() ||
+            !this.isDialable ||
+            this.userSim.reachableSimState === undefined ||
+            !this.userSim.reachableSimState.isGsmConnectivityOk ||
+            (this.userSim.reachableSimState.ongoingCall !== undefined &&
+                (this.userSim.reachableSimState.ongoingCall.number !== this.wdChat.contactNumber ||
+                    this.userSim.reachableSimState.ongoingCall.isUserInCall)) ||
+            !this.isRegistered()));
     };
     UiConversation.prototype.setSelected = function () {
         var _this = this;
@@ -3380,18 +3384,6 @@ var UiConversation = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    UiConversation.prototype.notifyContactNameUpdated = function () {
-        var prettyNumber = phone_number_1.phoneNumber.prettyPrint(this.wdChat.contactNumber, this.userSim.sim.country ?
-            this.userSim.sim.country.iso : undefined);
-        if (this.wdChat.contactName) {
-            this.structure.find("span.id_name").text(this.wdChat.contactName);
-            this.structure.find("span.id_number").text(prettyNumber);
-        }
-        else {
-            this.structure.find("span.id_name").text("");
-            this.structure.find("span.id_number").text(prettyNumber);
-        }
-    };
     /**
      * Place uiBubble in the structure, assume all bubbles already sorted
      * return true if the bubble is the last <li> of the <ul>
@@ -3540,15 +3532,18 @@ var UiBubble = /** @class */ (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
 var phone_number_1 = require("phone-number");
+var ts_events_extended_1 = require("ts-events-extended");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiHeader.html"), "UiHeader");
 var UiHeader = /** @class */ (function () {
-    function UiHeader(userSim) {
+    function UiHeader(userSim, isRegistered) {
         var _this = this;
         this.userSim = userSim;
+        this.isRegistered = isRegistered;
         this.structure = html.structure.clone();
         this.templates = html.templates.clone();
+        this.evtJoinCall = new ts_events_extended_1.SyncEvent();
         this.isSimOnlinePreviousState = false;
-        this.notifySimStateChange();
+        this.notify();
         this.structure.find("a.id_friendly_name").popover({
             "html": true,
             "trigger": "hover",
@@ -3591,18 +3586,16 @@ var UiHeader = /** @class */ (function () {
         );
         */
     }
-    UiHeader.prototype.notifyIsSipRegistered = function (isRegistered) {
-        this.structure.find(".id_sip_registration_in_progress")[(!this.userSim.isOnline ||
-            isRegistered) ? "hide" : "show"]();
-    };
-    UiHeader.prototype.notifySimStateChange = function () {
+    UiHeader.prototype.notify = function () {
         var _this = this;
+        this.structure.find(".id_sip_registration_in_progress")[(!this.userSim.reachableSimState ||
+            this.isRegistered()) ? "hide" : "show"]();
         {
             var text = (function () {
-                if (!_this.userSim.isOnline) {
+                if (!_this.userSim.reachableSimState) {
                     return "Sim not reachable";
                 }
-                if (!_this.userSim.isGsmConnectivityOk) {
+                if (!_this.userSim.reachableSimState.isGsmConnectivityOk) {
                     return "Not connected to GSM network";
                 }
                 return undefined;
@@ -3622,13 +3615,13 @@ var UiHeader = /** @class */ (function () {
             if (!cellSignalStrength) {
                 return;
             }
-            $i[(_this.userSim.isOnline &&
-                _this.userSim.isGsmConnectivityOk &&
-                cellSignalStrength === _this.userSim.cellSignalStrength) ? "show" : "hide"]();
+            $i[(!!_this.userSim.reachableSimState &&
+                _this.userSim.reachableSimState.isGsmConnectivityOk &&
+                cellSignalStrength === _this.userSim.reachableSimState.cellSignalStrength) ? "show" : "hide"]();
         });
         (function () {
             var $i = _this.structure.find(".id_sip_registration_in_progress");
-            if (!_this.userSim.isOnline) {
+            if (!_this.userSim.reachableSimState) {
                 $i.hide();
                 return;
             }
@@ -3637,20 +3630,72 @@ var UiHeader = /** @class */ (function () {
         })();
         {
             var $i = this.structure.find(".id_sip_registration_in_progress");
-            if (!this.userSim.isOnline) {
+            if (!this.userSim.reachableSimState) {
                 $i.hide();
             }
             else if (!this.isSimOnlinePreviousState) {
                 $i.show();
             }
         }
-        this.isSimOnlinePreviousState = this.userSim.isOnline;
+        this.isSimOnlinePreviousState = !!this.userSim.reachableSimState;
+        (function () {
+            var divConf = _this.structure.find(".id_conf");
+            if (!_this.userSim.reachableSimState ||
+                !_this.userSim.reachableSimState.isGsmConnectivityOk ||
+                !_this.userSim.reachableSimState.ongoingCall) {
+                divConf.hide();
+                return;
+            }
+            divConf.show();
+            var ongoingCall = _this.userSim.reachableSimState.ongoingCall;
+            divConf.find("span").text((function () {
+                var contact = _this.userSim.phonebook.find(function (_a) {
+                    var number_raw = _a.number_raw;
+                    return phone_number_1.phoneNumber.areSame(ongoingCall.number, number_raw);
+                });
+                var peerId = contact === undefined ?
+                    phone_number_1.phoneNumber.prettyPrint(ongoingCall.number, _this.userSim.sim.country ?
+                        _this.userSim.sim.country.iso : undefined) : contact.name;
+                var userList = ongoingCall.otherUserInCallEmails.map(function (email, index) {
+                    var length = ongoingCall.otherUserInCallEmails.length;
+                    if (index === length - 1) {
+                        return email;
+                    }
+                    if (index === length - 2) {
+                        return email + " and ";
+                    }
+                    return email + ", ";
+                }).join("");
+                if (ongoingCall.isUserInCall) {
+                    if (userList === "") {
+                        return "You are in call with " + peerId;
+                    }
+                    else {
+                        return "You alongside with " + userList + " are in call with " + peerId;
+                    }
+                }
+                return [
+                    userList,
+                    ongoingCall.otherUserInCallEmails.length >= 2 ? "are" : "is",
+                    "in call with " + peerId
+                ].join(" ");
+            })());
+            var $button = divConf.find("button");
+            if (ongoingCall.isUserInCall) {
+                $button.hide();
+                return;
+            }
+            $button
+                .off("click")
+                .click(function () { return _this.evtJoinCall.post(ongoingCall.number); })
+                .show();
+        })();
     };
     return UiHeader;
 }());
 exports.UiHeader = UiHeader;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":67,"../templates/UiHeader.html":52,"phone-number":40}],13:[function(require,module,exports){
+},{"../../../shared/dist/lib/loadUiClassHtml":67,"../templates/UiHeader.html":52,"phone-number":40,"ts-events-extended":49}],13:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __values = (this && this.__values) || function (o) {
@@ -3889,16 +3934,6 @@ var UiContact = /** @class */ (function () {
 
 },{"../../../shared/dist/lib/loadUiClassHtml":67,"../../../shared/dist/lib/types/webphoneData/logic":76,"../templates/UiPhonebook.html":53,"phone-number":40,"ts-events-extended":49}],14:[function(require,module,exports){
 "use strict";
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
@@ -3915,9 +3950,10 @@ $.validator.addMethod("validateTelInput", function (value, element) {
 }, "Malformed phone number");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiQuickAction.html"), "UiQuickAction");
 var UiQuickAction = /** @class */ (function () {
-    function UiQuickAction(userSim) {
+    function UiQuickAction(userSim, isRegistered) {
         var _this = this;
         this.userSim = userSim;
+        this.isRegistered = isRegistered;
         this.structure = html.structure.clone();
         this.templates = html.templates.clone();
         this.evtVoiceCall = new ts_events_extended_1.SyncEvent();
@@ -4009,26 +4045,17 @@ var UiQuickAction = /** @class */ (function () {
             }
             input.intlTelInput("setNumber", "");
         });
-        this.notifySimStateChange();
+        this.notify();
     }
-    UiQuickAction.prototype.notifySimStateChange = function () {
-        var e_1, _a;
-        try {
-            for (var _b = __values([".id_sms", ".id_contact"]), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var selector = _c.value;
-                this.structure.find(selector)
-                    .prop("disabled", !this.userSim.isOnline);
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        this.structure.find(".id_call")
-            .prop("disabled", !(this.userSim.isOnline && this.userSim.isGsmConnectivityOk));
+    UiQuickAction.prototype.notify = function () {
+        this.structure.find(".id_sms")
+            .prop("disabled", !this.isRegistered());
+        this.structure.find(".id_contact")
+            .prop("disabled", !this.userSim.reachableSimState);
+        this.structure.find(".id_call").prop("disabled", (!this.isRegistered() ||
+            !this.userSim.reachableSimState ||
+            !this.userSim.reachableSimState.isGsmConnectivityOk ||
+            !!this.userSim.reachableSimState.ongoingCall));
     };
     return UiQuickAction;
 }());
@@ -4170,6 +4197,7 @@ var UiVoiceCall = /** @class */ (function () {
     };
     UiVoiceCall.prototype.setState = function (state, message) {
         var _this = this;
+        console.log("UiVoiceCall.setState", { state: state, message: message });
         if (state === this.state) {
             return;
         }
@@ -4295,8 +4323,8 @@ var UiWebphoneController = /** @class */ (function () {
         this._uiConversations = new Map();
         this.ua = new Ua_1.Ua(userSim.sim.imsi, userSim.password, cryptoLib.rsa.encryptorFactory(cryptoLib.RsaKey.parse(userSim.towardSimEncryptKeyStr), workerThreadPoolId_1.rsaWorkerThreadPoolId));
         this.uiVoiceCall = new UiVoiceCall_1.UiVoiceCall(userSim);
-        this.uiHeader = new UiHeader_1.UiHeader(userSim);
-        this.uiQuickAction = new UiQuickAction_1.UiQuickAction(userSim);
+        this.uiHeader = new UiHeader_1.UiHeader(userSim, function () { return _this.ua.isRegistered; });
+        this.uiQuickAction = new UiQuickAction_1.UiQuickAction(userSim, function () { return _this.ua.isRegistered; });
         this.uiPhonebook = new UiPhonebook_1.UiPhonebook(userSim, wdInstance);
         this.registerRemoteNotifyHandlers();
         this.initUa();
@@ -4308,10 +4336,7 @@ var UiWebphoneController = /** @class */ (function () {
     }
     UiWebphoneController.prototype.registerRemoteNotifyHandlers = function () {
         var _this = this;
-        localApiHandlers.evtSharedSimUnregistered.attachOnce(function (_a) {
-            var userSim = _a.userSim;
-            return userSim === _this.userSim;
-        }, function () {
+        localApiHandlers.evtSimPermissionLost.attachOnce(function (userSim) { return userSim === _this.userSim; }, function () {
             //TODO: Terminate UA.
             _this.structure.detach();
         });
@@ -4343,7 +4368,7 @@ var UiWebphoneController = /** @class */ (function () {
                             }
                             this.uiPhonebook.notifyContactChanged(wdChat);
                             this.getOrCreateUiConversation(wdChat)
-                                .notifyContactNameUpdated();
+                                .notify();
                             _b.label = 4;
                         case 4: return [2 /*return*/];
                     }
@@ -4372,15 +4397,17 @@ var UiWebphoneController = /** @class */ (function () {
                             }
                             this.uiPhonebook.notifyContactChanged(wdChat);
                             this.getOrCreateUiConversation(wdChat)
-                                .notifyContactNameUpdated();
+                                .notify();
                             return [2 /*return*/];
                     }
                 });
             });
         });
         localApiHandlers.evtSimIsOnlineStatusChange.attach(function (userSim) { return userSim === _this.userSim; }, function () { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                if (!this.userSim.isOnline) {
+            var _a, _b, uiConversation;
+            var e_1, _c;
+            return __generator(this, function (_d) {
+                if (!this.userSim.reachableSimState) {
                     if (this.ua.isRegistered) {
                         this.ua.unregister();
                     }
@@ -4388,40 +4415,32 @@ var UiWebphoneController = /** @class */ (function () {
                 else {
                     this.ua.register();
                 }
-                this.uiHeader.notifySimStateChange();
-                this.uiQuickAction.notifySimStateChange();
+                this.uiHeader.notify();
+                this.uiQuickAction.notify();
+                try {
+                    for (_a = __values(this._uiConversations.values()), _b = _a.next(); !_b.done; _b = _a.next()) {
+                        uiConversation = _b.value;
+                        uiConversation.notify();
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
                 return [2 /*return*/];
             });
         }); });
         localApiHandlers.evtSimGsmConnectivityChange.attach(function (userSim) { return userSim === _this.userSim; }, function () {
-            var e_1, _a;
-            _this.uiHeader.notifySimStateChange();
-            _this.uiQuickAction.notifySimStateChange();
-            try {
-                for (var _b = __values(_this._uiConversations.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var uiConversation = _c.value;
-                    uiConversation.notifySimGsmConnectivityChange();
-                }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                }
-                finally { if (e_1) throw e_1.error; }
-            }
-        });
-        localApiHandlers.evtSimCellSignalStrengthChange.attach(function (userSim) { return userSim === _this.userSim; }, function () { return _this.uiHeader.notifySimStateChange(); });
-    };
-    UiWebphoneController.prototype.initUa = function () {
-        var _this = this;
-        this.ua.evtRegistrationStateChanged.attach(function (isRegistered) {
             var e_2, _a;
-            _this.uiHeader.notifyIsSipRegistered(isRegistered);
+            _this.uiHeader.notify();
+            _this.uiQuickAction.notify();
             try {
                 for (var _b = __values(_this._uiConversations.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var uiConversation = _c.value;
-                    uiConversation.notifySipIsRegistered(isRegistered);
+                    uiConversation.notify();
                 }
             }
             catch (e_2_1) { e_2 = { error: e_2_1 }; }
@@ -4430,6 +4449,46 @@ var UiWebphoneController = /** @class */ (function () {
                     if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                 }
                 finally { if (e_2) throw e_2.error; }
+            }
+        });
+        localApiHandlers.evtSimCellSignalStrengthChange.attach(function (userSim) { return userSim === _this.userSim; }, function () { return _this.uiHeader.notify(); });
+        localApiHandlers.evtOngoingCall.attach(function (userSim) { return userSim === _this.userSim; }, function () {
+            var e_3, _a;
+            _this.uiHeader.notify();
+            _this.uiQuickAction.notify();
+            try {
+                for (var _b = __values(_this._uiConversations.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var uiConversation = _c.value;
+                    uiConversation.notify();
+                }
+            }
+            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_3) throw e_3.error; }
+            }
+        });
+    };
+    UiWebphoneController.prototype.initUa = function () {
+        var _this = this;
+        this.ua.evtRegistrationStateChanged.attach(function () {
+            var e_4, _a;
+            _this.uiHeader.notify();
+            _this.uiQuickAction.notify();
+            try {
+                for (var _b = __values(_this._uiConversations.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var uiConversation = _c.value;
+                    uiConversation.notify();
+                }
+            }
+            catch (e_4_1) { e_4 = { error: e_4_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                }
+                finally { if (e_4) throw e_4.error; }
             }
         });
         this.ua.evtIncomingMessage.attach(function (_a) {
@@ -4479,12 +4538,22 @@ var UiWebphoneController = /** @class */ (function () {
                                     case "MMS NOTIFICATION":
                                         console.log("WPA PUSH: " + Buffer.from(bundledData.wapPushMessageB64, "base64").toString("utf8"));
                                     case "CALL ANSWERED BY":
+                                    case "FROM SIP CALL SUMMARY":
                                     case "MISSED CALL": {
                                         var message = {
                                             "direction": "INCOMING",
                                             "isNotification": true,
-                                            "time": bundledData.type === "MMS NOTIFICATION" ?
-                                                bundledData.pduDateTime : bundledData.dateTime,
+                                            "time": (function () {
+                                                switch (bundledData.type) {
+                                                    case "CALL ANSWERED BY":
+                                                    case "MISSED CALL":
+                                                        return bundledData.dateTime;
+                                                    case "MMS NOTIFICATION":
+                                                        return bundledData.pduDateTime;
+                                                    case "FROM SIP CALL SUMMARY":
+                                                        return bundledData.callPlacedAtDateTime;
+                                                }
+                                            })(),
                                             "text": Buffer.from(bundledData.textB64, "base64").toString("utf8")
                                         };
                                         return remoteApiCaller.newWdMessage(wdChat, message);
@@ -4545,14 +4614,18 @@ var UiWebphoneController = /** @class */ (function () {
                 });
             });
         });
-        if (this.userSim.isOnline) {
+        if (!!this.userSim.reachableSimState) {
             this.ua.register();
         }
     };
     UiWebphoneController.prototype.initUiHeader = function () {
+        var _this = this;
         this.structure
             .find("div.id_header")
             .append(this.uiHeader.structure);
+        this.uiHeader.evtJoinCall.attach(function (number) {
+            return _this.uiQuickAction.evtVoiceCall.post(number);
+        });
     };
     UiWebphoneController.prototype.initUiQuickAction = function () {
         var _this = this;
@@ -4605,10 +4678,7 @@ var UiWebphoneController = /** @class */ (function () {
         if (this._uiConversations.has(wdChat)) {
             return this._uiConversations.get(wdChat);
         }
-        var uiConversation = new UiConversation_1.UiConversation(this.userSim, wdChat);
-        if (this.ua.isRegistered) {
-            uiConversation.notifySipIsRegistered(true);
-        }
+        var uiConversation = new UiConversation_1.UiConversation(this.userSim, function () { return _this.ua.isRegistered; }, wdChat);
         this._uiConversations.set(wdChat, uiConversation);
         this.structure.find("div.id_colRight").append(uiConversation.structure);
         uiConversation.evtChecked.attach(function () { return __awaiter(_this, void 0, void 0, function () {
@@ -4740,7 +4810,7 @@ var UiWebphoneController = /** @class */ (function () {
                             return [2 /*return*/];
                         }
                         this.uiPhonebook.notifyContactChanged(wdChat);
-                        uiConversation.notifyContactNameUpdated();
+                        uiConversation.notify();
                         return [2 /*return*/];
                 }
             });
@@ -4892,8 +4962,8 @@ var localStorage = require("../../../shared/dist/lib/localStorage/logic");
 var availablePages = require("../../../shared/dist/lib/availablePages");
 var workerThreadPoolId_1 = require("./workerThreadPoolId");
 //import * as observer from "../../../shared/dist/tools/observer";
-var overrideWebRTCImplementation = require("../../../shared/dist/tools/overrideWebRTCImplementation");
-overrideWebRTCImplementation.testOverrideWebRTCImplementation();
+//import * as overrideWebRTCImplementation from "../../../shared/dist/tools/overrideWebRTCImplementation";
+//overrideWebRTCImplementation.testOverrideWebRTCImplementation();
 //observer.observeWebRTC();
 $(document).ready(function () { return __awaiter(_this, void 0, void 0, function () {
     var _a, email, webUaInstanceId, encryptedSymmetricKey, towardUserKeys, towardUserDecryptor, aesWorkerThreadPoolId, _b, _c, _d, _e, userSims, wdInstances;
@@ -4955,8 +5025,8 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
                 //NOTE: Sort user sims so we always have the most relevant at the top of the page.
                 userSims
                     .sort(function (s1, s2) {
-                    if (s1.isOnline !== s2.isOnline) {
-                        return s1.isOnline ? 1 : -1;
+                    if (!!s1.reachableSimState !== !!s2.reachableSimState) {
+                        return !!s1.reachableSimState ? 1 : -1;
                     }
                     var _a = __read([s1, s2].map(function (userSim) {
                         return wd.getChatWithLatestActivity(wdInstances.get(userSim));
@@ -4995,7 +5065,7 @@ $(document).ready(function () { return __awaiter(_this, void 0, void 0, function
     });
 }); });
 
-},{"../../../shared/dist/lib/Ua":61,"../../../shared/dist/lib/availablePages":62,"../../../shared/dist/lib/cookies/logic/frontend":63,"../../../shared/dist/lib/crypto":65,"../../../shared/dist/lib/localStorage/logic":68,"../../../shared/dist/lib/toBackend/connection":70,"../../../shared/dist/lib/toBackend/localApiHandlers":71,"../../../shared/dist/lib/toBackend/remoteApiCaller":73,"../../../shared/dist/lib/types/webphoneData/logic":76,"../../../shared/dist/lib/webApiCaller":77,"../../../shared/dist/tools/bootbox_custom":80,"../../../shared/dist/tools/overrideWebRTCImplementation":83,"./UiWebphoneController":16,"./workerThreadPoolId":18,"crypto-lib":23}],18:[function(require,module,exports){
+},{"../../../shared/dist/lib/Ua":61,"../../../shared/dist/lib/availablePages":62,"../../../shared/dist/lib/cookies/logic/frontend":63,"../../../shared/dist/lib/crypto":65,"../../../shared/dist/lib/localStorage/logic":68,"../../../shared/dist/lib/toBackend/connection":70,"../../../shared/dist/lib/toBackend/localApiHandlers":71,"../../../shared/dist/lib/toBackend/remoteApiCaller":73,"../../../shared/dist/lib/types/webphoneData/logic":76,"../../../shared/dist/lib/webApiCaller":77,"../../../shared/dist/tools/bootbox_custom":80,"./UiWebphoneController":16,"./workerThreadPoolId":18,"crypto-lib":23}],18:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var cryptoLib = require("crypto-lib");
@@ -12120,7 +12190,7 @@ module.exports = "<div class=\"id_UiConversation panel panel-default\">\r\n    <
 },{}],51:[function(require,module,exports){
 var css = ".id_UiConversation .panel-heading {\n  cursor: default;\n}\n.id_UiConversation .panel-title {\n  display: inline-block;\n}\n.id_UiConversation .panel-title span {\n  cursor: text;\n}\n.id_UiConversation .panel-body {\n  padding: 0;\n}\n.id_UiConversation .panel-footer {\n  padding: 0;\n}\n.id_UiConversation form {\n  position: relative;\n}\n.id_UiConversation textarea {\n  padding-right: 36px;\n}\n.id_UiConversation a.id_send {\n  position: absolute;\n  top: 7px;\n  right: 0px;\n  left: auto;\n  width: 33px;\n}\n.id_UiConversation ul {\n  margin: 0 10px 0;\n  padding: 0;\n  list-style: none;\n}\n.id_UiConversation ul li {\n  margin-bottom: 5px;\n  margin-top: 5px;\n}\n.id_UiConversation ul li div.message {\n  border-radius: 4px;\n  padding: 5px 10px;\n  border: 1px solid #ecf0f1;\n  position: relative;\n}\n.id_UiConversation ul li div.message.notification {\n  background-color: #ecefde;\n  text-align: center;\n  font-style: italic;\n  margin-left: 80px;\n  margin-right: 80px;\n}\n.id_UiConversation ul li div.message.in,\n.id_UiConversation ul li div.message.out {\n  background-color: #ecf0f1;\n}\n.id_UiConversation ul li div.message.in:after,\n.id_UiConversation ul li div.message.out:after,\n.id_UiConversation ul li div.message.in:before,\n.id_UiConversation ul li div.message.out:before {\n  top: 20px;\n  border: solid transparent;\n  content: '';\n  position: absolute;\n}\n.id_UiConversation ul li div.message.in:after,\n.id_UiConversation ul li div.message.out:after {\n  border-width: 8px;\n  margin-top: -8px;\n}\n.id_UiConversation ul li div.message.in {\n  margin-left: 7px;\n  margin-right: 60px;\n}\n.id_UiConversation ul li div.message.in:after,\n.id_UiConversation ul li div.message.in:before {\n  right: 100%;\n}\n.id_UiConversation ul li div.message.in:after {\n  border-right-color: #ecf0f1;\n}\n.id_UiConversation ul li div.message.out {\n  margin-left: 60px;\n  margin-right: 7px;\n}\n.id_UiConversation ul li div.message.out:after,\n.id_UiConversation ul li div.message.out:before {\n  left: 100%;\n}\n.id_UiConversation ul li div.message.out:after {\n  border-left-color: #ecf0f1;\n}\n.id_UiConversation ul li div.message p.id_emitter {\n  color: #95a5a6;\n  margin-bottom: 2px;\n}\n.id_UiConversation ul li div.message div.id_status {\n  float: right;\n  padding: 2px 0;\n  position: absolute;\n  right: 10px;\n  bottom: 2px;\n}\n.id_UiConversation ul li div.message span.id_date {\n  font-size: 75%;\n  font-style: italic;\n}\n.id_UiConversation ul li div.message span.id_check {\n  font-size: 75%;\n  font-style: italic;\n}\n.id_UiConversation ul li div.message p.id_content {\n  font-size: 13px;\n  line-height: 18px;\n  margin-bottom: 0;\n  padding-bottom: 15px;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":33}],52:[function(require,module,exports){
-module.exports = "\r\n<div class=\"id_UiHeader page-header\">\r\n    <h4>\r\n        <i class=\"id_icon_sim_up\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <span class=\"id_number\"></span>\r\n        &nbsp;\r\n\r\n        <span class=\"id_offline color-red\"><b>Offline</b></span>\r\n\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"NULL\">NULL</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"VERY WEAK\">VERY WEAK</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"WEAK\">WEAK</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"GOOD\">GOOD</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"EXCELLENT\">EXCELLENT</i>\r\n\r\n        <i class=\"id_sip_registration_in_progress fa fa-spin fa-spinner\"></i>\r\n\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\" style=\"display: inline-block;\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Current location: </strong>\r\n        <span class=\"id_geoInfo\"></span>\r\n    </div>\r\n\r\n</div>\r\n";
+module.exports = "\r\n<div class=\"id_UiHeader page-header\">\r\n    <h4>\r\n        <i class=\"id_icon_sim_up\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <span class=\"id_number\"></span>\r\n        &nbsp;\r\n\r\n        <span class=\"id_offline color-red\"><b>Offline</b></span>\r\n\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"NULL\">NULL</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"VERY WEAK\">VERY WEAK</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"WEAK\">WEAK</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"GOOD\">GOOD</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"EXCELLENT\">EXCELLENT</i>\r\n\r\n        <i class=\"id_sip_registration_in_progress fa fa-spin fa-spinner\"></i>\r\n\r\n        &nbsp;\r\n        <div class=\"id_conf\" style=\"display: inline-block;\">\r\n            <span style=\"font-size:70%;\"> </span>\r\n            <button type=\"button\" class=\"btn btn-primary btn-sm\">Join call</button>\r\n        </div>\r\n\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\" style=\"display: inline-block;\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Current location: </strong>\r\n        <span class=\"id_geoInfo\"></span>\r\n    </div>\r\n\r\n</div>\r\n";
 },{}],53:[function(require,module,exports){
 module.exports = "<style>\r\n    .id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    .id_UiPhonebook ul li .id_number {\r\n        cursor: text !important;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.selected > div,\r\n    .id_UiPhonebook ul li > div:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.has-messages > div {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number pl15\"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
 },{}],54:[function(require,module,exports){
@@ -12135,26 +12205,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var RegistrationParams_1 = require("../../../../gateway/dist/lib/misc/RegistrationParams");
 exports.RegistrationParams = RegistrationParams_1.RegistrationParams;
 
-},{"../../../../gateway/dist/lib/misc/RegistrationParams":151}],58:[function(require,module,exports){
+},{"../../../../gateway/dist/lib/misc/RegistrationParams":150}],58:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var bundledData_1 = require("../../../../gateway/dist/lib/misc/bundledData");
 exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 
-},{"../../../../gateway/dist/lib/misc/bundledData":152}],59:[function(require,module,exports){
+},{"../../../../gateway/dist/lib/misc/bundledData":151}],59:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var sipRouting_1 = require("../../../../gateway/dist/lib/misc/sipRouting");
 exports.readImsi = sipRouting_1.readImsi;
 
-},{"../../../../gateway/dist/lib/misc/sipRouting":153}],60:[function(require,module,exports){
+},{"../../../../gateway/dist/lib/misc/sipRouting":152}],60:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("../../../../gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"../../../../gateway/dist/web_api_declaration":155}],61:[function(require,module,exports){
+},{"../../../../gateway/dist/web_api_declaration":154}],61:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 //NOTE: Require jssip_compat loaded on the page.
@@ -12808,7 +12878,7 @@ function newIceCandidateHandler(rtcICEServer) {
 })(newIceCandidateHandler || (newIceCandidateHandler = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../gateway/RegistrationParams":57,"../gateway/bundledData":58,"../gateway/readImsi":59,"./env":66,"./toBackend/connection":70,"./toBackend/localApiHandlers":71,"buffer":3,"run-exclusive":119,"ts-events-extended":139,"ts-sip":147}],62:[function(require,module,exports){
+},{"../gateway/RegistrationParams":57,"../gateway/bundledData":58,"../gateway/readImsi":59,"./env":66,"./toBackend/connection":70,"./toBackend/localApiHandlers":71,"buffer":3,"run-exclusive":118,"ts-events-extended":138,"ts-sip":146}],62:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -12870,7 +12940,7 @@ var WebsocketConnectionParams;
 })(WebsocketConnectionParams = exports.WebsocketConnectionParams || (exports.WebsocketConnectionParams = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../types":64,"buffer":3,"js-cookie":112}],64:[function(require,module,exports){
+},{"../types":64,"buffer":3,"js-cookie":111}],64:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cookieKeys = {
@@ -13075,7 +13145,7 @@ var symmetricKey;
 })(symmetricKey = exports.symmetricKey || (exports.symmetricKey = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../tools/bootbox_custom":80,"buffer":3,"crypto-lib":102,"crypto-lib/dist/sync/utils/binaryDataManipulations":106}],66:[function(require,module,exports){
+},{"../tools/bootbox_custom":80,"buffer":3,"crypto-lib":101,"crypto-lib/dist/sync/utils/binaryDataManipulations":105}],66:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
@@ -13167,7 +13237,7 @@ var TowardUserKeys;
     TowardUserKeys.retrieve = retrieve;
 })(TowardUserKeys = exports.TowardUserKeys || (exports.TowardUserKeys = {}));
 
-},{"./types":69,"crypto-lib":102}],69:[function(require,module,exports){
+},{"./types":69,"crypto-lib":101}],69:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cookieKeys = {
@@ -13282,7 +13352,7 @@ function connect(connectionParams, isReconnect) {
         "error": true,
         "close": true,
         "incomingTraffic": false,
-        "outgoingTraffic": true,
+        "outgoingTraffic": false,
         "ignoreApiTraffic": true
     }, log);
     socketCurrent = socket;
@@ -13320,14 +13390,14 @@ function connect(connectionParams, isReconnect) {
                     If userSim is online we received a notification before having the
                     response of the request... even possible?
                      */
-                    if (userSim.isOnline) {
+                    if (!!userSim.reachableSimState) {
                         return "continue";
                     }
-                    userSim.isOnline = userSim_.isOnline;
+                    userSim.reachableSimState = userSim_.reachableSimState;
                     userSim.password = userSim_.password;
                     userSim.dongle = userSim_.dongle;
                     userSim.gatewayLocation = userSim_.gatewayLocation;
-                    if (userSim.isOnline) {
+                    if (!!userSim.reachableSimState) {
                         localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
                     }
                 };
@@ -13360,7 +13430,7 @@ function connect(connectionParams, isReconnect) {
                     try {
                         for (_a = __values(userSims || []), _b = _a.next(); !_b.done; _b = _a.next()) {
                             userSim = _b.value;
-                            userSim.isOnline = false;
+                            userSim.reachableSimState = undefined;
                             localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
                         }
                     }
@@ -13404,7 +13474,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../../tools/bootbox_custom":80,"../cookies/logic/frontend":63,"../env":66,"./localApiHandlers":71,"./remoteApiCaller/base":72,"ts-events-extended":139,"ts-sip":147}],71:[function(require,module,exports){
+},{"../../tools/bootbox_custom":80,"../cookies/logic/frontend":63,"../env":66,"./localApiHandlers":71,"./remoteApiCaller/base":72,"ts-events-extended":138,"ts-sip":146}],71:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -13457,7 +13527,7 @@ exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
         "handler": function (_a) {
             var imsi = _a.imsi;
             return __awaiter(_this, void 0, void 0, function () {
-                var userSim;
+                var userSim, hadOngoingCall;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0: return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
@@ -13467,7 +13537,13 @@ exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.isOnline = false;
+                            hadOngoingCall = (userSim.reachableSimState !== undefined &&
+                                userSim.reachableSimState.isGsmConnectivityOk &&
+                                userSim.reachableSimState.ongoingCall !== undefined);
+                            userSim.reachableSimState = undefined;
+                            if (hadOngoingCall) {
+                                exports.evtOngoingCall.post(userSim);
+                            }
                             exports.evtSimIsOnlineStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
@@ -13506,12 +13582,12 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
                                 location.reload();
                                 return [2 /*return*/];
                             }
-                            userSim.isOnline = true;
+                            userSim.reachableSimState = isGsmConnectivityOk ?
+                                ({ "isGsmConnectivityOk": true, cellSignalStrength: cellSignalStrength, "ongoingCall": undefined }) :
+                                ({ "isGsmConnectivityOk": false, cellSignalStrength: cellSignalStrength });
                             userSim.password = password;
                             userSim.dongle = simDongle;
                             userSim.gatewayLocation = gatewayLocation;
-                            userSim.isGsmConnectivityOk = isGsmConnectivityOk;
-                            userSim.cellSignalStrength = cellSignalStrength;
                             exports.evtSimIsOnlineStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
@@ -13521,16 +13597,14 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     };
     exports.handlers[methodName] = handler;
 }
-//TODO: Make use of.
 exports.evtSimGsmConnectivityChange = new ts_events_extended_1.SyncEvent();
-exports.evtSimGsmConnectivityChange.attach(function (userSim) { return console.log("evtSimGsmConnectivityChange", { "isGsmConnectivityOk": userSim.isGsmConnectivityOk }); });
 {
     var methodName = apiDeclaration.notifyGsmConnectivityChange.methodName;
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, isGsmConnectivityOk = _a.isGsmConnectivityOk;
             return __awaiter(_this, void 0, void 0, function () {
-                var userSim;
+                var userSim, reachableSimState, hadOngoingCall;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0: return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
@@ -13540,7 +13614,27 @@ exports.evtSimGsmConnectivityChange.attach(function (userSim) { return console.l
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.isGsmConnectivityOk = isGsmConnectivityOk;
+                            reachableSimState = userSim.reachableSimState;
+                            if (reachableSimState === undefined) {
+                                throw new Error("assert");
+                            }
+                            if (isGsmConnectivityOk === reachableSimState.isGsmConnectivityOk) {
+                                throw new Error("assert");
+                            }
+                            if (reachableSimState.isGsmConnectivityOk) {
+                                hadOngoingCall = false;
+                                if (reachableSimState.ongoingCall !== undefined) {
+                                    delete reachableSimState.ongoingCall;
+                                    hadOngoingCall = true;
+                                }
+                                reachableSimState.isGsmConnectivityOk = false;
+                                if (hadOngoingCall) {
+                                    exports.evtOngoingCall.post(userSim);
+                                }
+                            }
+                            else {
+                                reachableSimState.isGsmConnectivityOk = true;
+                            }
                             exports.evtSimGsmConnectivityChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
@@ -13550,9 +13644,7 @@ exports.evtSimGsmConnectivityChange.attach(function (userSim) { return console.l
     };
     exports.handlers[methodName] = handler;
 }
-//TODO: Make use of.
 exports.evtSimCellSignalStrengthChange = new ts_events_extended_1.SyncEvent();
-exports.evtSimCellSignalStrengthChange.attach(function (userSim) { return console.log("evtSimCellSignalStrengthChange", { "cellSignalStrength": userSim.cellSignalStrength }); });
 {
     var methodName = apiDeclaration.notifyCellSignalStrengthChange.methodName;
     var handler = {
@@ -13569,13 +13661,119 @@ exports.evtSimCellSignalStrengthChange.attach(function (userSim) { return consol
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.cellSignalStrength = cellSignalStrength;
+                            if (userSim.reachableSimState === undefined) {
+                                throw new Error("Sim should be reachable");
+                            }
+                            userSim.reachableSimState.cellSignalStrength = cellSignalStrength;
                             exports.evtSimCellSignalStrengthChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
                 });
             });
         }
+    };
+    exports.handlers[methodName] = handler;
+}
+//TODO: Make use of.
+exports.evtOngoingCall = new ts_events_extended_1.SyncEvent();
+/*
+evtOngoingCall.attach(userSim => {
+
+    const { reachableSimState } = userSim;
+
+    if( !reachableSimState ){
+
+        console.log("===> sim no longer reachable");
+
+        return;
+        
+    }
+
+    if( !reachableSimState.isGsmConnectivityOk ){
+
+        console.log("=============> cell connectivity lost");
+
+        return;
+
+    }
+
+    if( reachableSimState.ongoingCall === undefined ){
+
+        console.log("=================> call terminated");
+
+        return;
+
+    }
+
+    console.log("===========> ", JSON.stringify(reachableSimState.ongoingCall, null, 2));
+
+});
+*/
+{
+    var methodName = apiDeclaration.notifyOngoingCall.methodName;
+    var handler = {
+        "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
+            var imsi, userSim, ongoingCallId, reachableSimState, ongoingCall, reachableSimState, ongoingCallId, from, number, isUserInCall, otherUserInCallEmails, prevOngoingCall_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        imsi = params.imsi;
+                        return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
+                    case 1:
+                        userSim = (_a.sent())
+                            .find(function (_a) {
+                            var sim = _a.sim;
+                            return sim.imsi === imsi;
+                        });
+                        if (params.isTerminated) {
+                            ongoingCallId = params.ongoingCallId;
+                            reachableSimState = userSim.reachableSimState;
+                            if (!reachableSimState) {
+                                //NOTE: The event would have been posted in setSimOffline handler.
+                                return [2 /*return*/];
+                            }
+                            if (!reachableSimState.isGsmConnectivityOk) {
+                                //NOTE: If we have had event notifying connectivity lost
+                                //before this event the evtOngoingCall will have been posted
+                                //in notifyGsmConnectivityChange handler function.
+                                return [2 /*return*/];
+                            }
+                            if (reachableSimState.ongoingCall === undefined ||
+                                reachableSimState.ongoingCall.ongoingCallId !== ongoingCallId) {
+                                return [2 /*return*/];
+                            }
+                            reachableSimState.ongoingCall = undefined;
+                        }
+                        else {
+                            ongoingCall = params.ongoingCall;
+                            reachableSimState = userSim.reachableSimState;
+                            if (reachableSimState === undefined) {
+                                throw new Error("assert");
+                            }
+                            if (!reachableSimState.isGsmConnectivityOk) {
+                                throw new Error("assert");
+                            }
+                            if (reachableSimState.ongoingCall === undefined) {
+                                reachableSimState.ongoingCall = ongoingCall;
+                            }
+                            else if (reachableSimState.ongoingCall.ongoingCallId !== ongoingCall.ongoingCallId) {
+                                reachableSimState.ongoingCall === undefined;
+                                exports.evtOngoingCall.post(userSim);
+                                reachableSimState.ongoingCall = ongoingCall;
+                            }
+                            else {
+                                ongoingCallId = ongoingCall.ongoingCallId, from = ongoingCall.from, number = ongoingCall.number, isUserInCall = ongoingCall.isUserInCall, otherUserInCallEmails = ongoingCall.otherUserInCallEmails;
+                                prevOngoingCall_1 = reachableSimState.ongoingCall;
+                                Object.assign(prevOngoingCall_1, { ongoingCallId: ongoingCallId, from: from, number: number, isUserInCall: isUserInCall });
+                                prevOngoingCall_1.otherUserInCallEmails.splice(0, prevOngoingCall_1.otherUserInCallEmails.length);
+                                otherUserInCallEmails.forEach(function (email) { return prevOngoingCall_1.otherUserInCallEmails.push(email); });
+                            }
+                        }
+                        exports.evtOngoingCall.post(userSim);
+                        return [2 /*return*/, undefined];
+                }
+            });
+        }); }
     };
     exports.handlers[methodName] = handler;
 }
@@ -13978,12 +14176,20 @@ exports.evtSharingRequestResponse = new ts_events_extended_1.SyncEvent();
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.ownership.sharedWith.notConfirmed.splice(userSim.ownership.sharedWith.notConfirmed.indexOf(email), 1);
-                            if (isAccepted) {
-                                userSim.ownership.sharedWith.confirmed.push(email);
+                            switch (userSim.ownership.status) {
+                                case "OWNED":
+                                    userSim.ownership.sharedWith.notConfirmed.splice(userSim.ownership.sharedWith.notConfirmed.indexOf(email), 1);
+                                    if (isAccepted) {
+                                        userSim.ownership.sharedWith.confirmed.push(email);
+                                    }
+                                    break;
+                                case "SHARED CONFIRMED":
+                                    if (isAccepted) {
+                                        userSim.ownership.otherUserEmails.push(email);
+                                    }
+                                    break;
                             }
-                            exports.evtSharingRequestResponse.post({ userSim: userSim, email: email, isAccepted: isAccepted });
-                            bootbox_custom.alert(email + " " + (isAccepted ? "accepted" : "rejected") + " your sharing request for " + userSim.friendlyName);
+                            bootbox_custom.alert(email + " " + (isAccepted ? "accepted" : "rejected") + " sharing request for " + userSim.friendlyName);
                             return [2 /*return*/, undefined];
                     }
                 });
@@ -13992,9 +14198,9 @@ exports.evtSharingRequestResponse = new ts_events_extended_1.SyncEvent();
     };
     exports.handlers[methodName] = handler;
 }
-exports.evtSharedSimUnregistered = new ts_events_extended_1.SyncEvent();
+exports.evtOtherSimUserUnregisteredSim = new ts_events_extended_1.SyncEvent();
 {
-    var methodName = apiDeclaration.notifySharedSimUnregistered.methodName;
+    var methodName = apiDeclaration.notifyOtherSimUserUnregisteredSim.methodName;
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, email = _a.email;
@@ -14009,8 +14215,14 @@ exports.evtSharedSimUnregistered = new ts_events_extended_1.SyncEvent();
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.ownership.sharedWith.confirmed.splice(userSim.ownership.sharedWith.confirmed.indexOf(email), 1);
-                            exports.evtSharedSimUnregistered.post({ userSim: userSim, email: email });
+                            switch (userSim.ownership.status) {
+                                case "OWNED":
+                                    userSim.ownership.sharedWith.confirmed.splice(userSim.ownership.sharedWith.confirmed.indexOf(email), 1);
+                                    break;
+                                case "SHARED CONFIRMED":
+                                    userSim.ownership.otherUserEmails.splice(userSim.ownership.otherUserEmails.indexOf(email), 1);
+                                    break;
+                            }
                             bootbox_custom.alert(email + " no longer share " + userSim.friendlyName);
                             return [2 /*return*/, undefined];
                     }
@@ -14085,7 +14297,7 @@ exports.getRTCIceServer = (function () {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":79,"../../tools/bootbox_custom":80,"./remoteApiCaller/base":72,"chan-dongle-extended-client/dist/lib/types":85,"ts-events-extended":139}],72:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":79,"../../tools/bootbox_custom":80,"./remoteApiCaller/base":72,"chan-dongle-extended-client/dist/lib/types":84,"ts-events-extended":138}],72:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14331,14 +14543,13 @@ exports.acceptSharingRequest = (function () {
                             "towardSimEncryptKeyStr": notConfirmedUserSim.towardSimEncryptKeyStr,
                             "dongle": notConfirmedUserSim.dongle,
                             "gatewayLocation": notConfirmedUserSim.gatewayLocation,
-                            "isOnline": notConfirmedUserSim.isOnline,
                             "ownership": {
                                 "status": "SHARED CONFIRMED",
-                                "ownerEmail": notConfirmedUserSim.ownership.ownerEmail
+                                "ownerEmail": notConfirmedUserSim.ownership.ownerEmail,
+                                "otherUserEmails": notConfirmedUserSim.ownership.otherUserEmails
                             },
                             "phonebook": notConfirmedUserSim.phonebook,
-                            "isGsmConnectivityOk": notConfirmedUserSim.isGsmConnectivityOk,
-                            "cellSignalStrength": notConfirmedUserSim.cellSignalStrength
+                            "reachableSimState": notConfirmedUserSim.reachableSimState
                         };
                         return [4 /*yield*/, exports.getUsableUserSims()];
                     case 2:
@@ -14480,7 +14691,7 @@ exports.shouldAppendPromotionalMessage = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":78,"./sendRequest":74,"ts-events-extended":139}],73:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":78,"./sendRequest":74,"ts-events-extended":138}],73:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -14561,7 +14772,7 @@ function sendRequest(methodName, params, retry) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../connection":70,"ts-sip":147}],75:[function(require,module,exports){
+},{"../connection":70,"ts-sip":146}],75:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -15174,7 +15385,7 @@ exports.notifyStatusReportReceived = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":78,"../../types/webphoneData/logic":76,"./sendRequest":74,"crypto-lib":102,"phone-number":118}],76:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":78,"../../types/webphoneData/logic":76,"./sendRequest":74,"crypto-lib":101,"phone-number":117}],76:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -15475,7 +15686,7 @@ function getUnreadMessagesCount(wdChat) {
 }
 exports.getUnreadMessagesCount = getUnreadMessagesCount;
 
-},{"../../../tools/isAscendingAlphabeticalOrder":81,"crypto-lib":102}],77:[function(require,module,exports){
+},{"../../../tools/isAscendingAlphabeticalOrder":81,"crypto-lib":101}],77:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15667,7 +15878,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../gateway/webApiPath":60,"../web_api_declaration":84,"transfer-tools/dist/lib/JSON_CUSTOM":130}],78:[function(require,module,exports){
+},{"../gateway/webApiPath":60,"../web_api_declaration":83,"transfer-tools/dist/lib/JSON_CUSTOM":129}],78:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -15781,6 +15992,10 @@ var notifyCellSignalStrengthChange;
 (function (notifyCellSignalStrengthChange) {
     notifyCellSignalStrengthChange.methodName = "notifyCellSignalStrengthChange";
 })(notifyCellSignalStrengthChange = exports.notifyCellSignalStrengthChange || (exports.notifyCellSignalStrengthChange = {}));
+var notifyOngoingCall;
+(function (notifyOngoingCall) {
+    notifyOngoingCall.methodName = "notifyOngoingCall";
+})(notifyOngoingCall = exports.notifyOngoingCall || (exports.notifyOngoingCall = {}));
 /** posted when a user that share this SIM create or update a contact */
 var notifyContactCreatedOrUpdated;
 (function (notifyContactCreatedOrUpdated) {
@@ -15810,10 +16025,10 @@ var notifySharingRequestResponse;
 (function (notifySharingRequestResponse) {
     notifySharingRequestResponse.methodName = "notifySharingRequestResponse";
 })(notifySharingRequestResponse = exports.notifySharingRequestResponse || (exports.notifySharingRequestResponse = {}));
-var notifySharedSimUnregistered;
-(function (notifySharedSimUnregistered) {
-    notifySharedSimUnregistered.methodName = "notifySharedSimUnregistered";
-})(notifySharedSimUnregistered = exports.notifySharedSimUnregistered || (exports.notifySharedSimUnregistered = {}));
+var notifyOtherSimUserUnregisteredSim;
+(function (notifyOtherSimUserUnregisteredSim) {
+    notifyOtherSimUserUnregisteredSim.methodName = "notifyOtherSimUserUnregisteredSim";
+})(notifyOtherSimUserUnregisteredSim = exports.notifyOtherSimUserUnregisteredSim || (exports.notifyOtherSimUserUnregisteredSim = {}));
 var notifyLoggedFromOtherTab;
 (function (notifyLoggedFromOtherTab) {
     notifyLoggedFromOtherTab.methodName = "notifyLoggedFromOtherTab";
@@ -16081,390 +16296,6 @@ exports.add = add;
 
 },{}],83:[function(require,module,exports){
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-function overrideWebRTCImplementation(methods) {
-    console.log("Using alternative WebRTC implementation !");
-    var getCounter = (function () {
-        var counter = (function () {
-            var min = -2147483000;
-            var max = 1147483000;
-            return Math.floor(Math.random() * (max - min)) + min;
-        })();
-        return function () { return counter++; };
-    })();
-    var evtIcecandidate = new ts_events_extended_1.SyncEvent();
-    var evtIceconnectionstatechange = new ts_events_extended_1.SyncEvent();
-    var evtSignalingstatechange = new ts_events_extended_1.SyncEvent();
-    var evtMethodReturn = new ts_events_extended_1.SyncEvent();
-    var refByMediaStream = new WeakMap();
-    var getUserMediaProxy = function getUserMedia(mediaStreamConstraints) {
-        return __awaiter(this, void 0, void 0, function () {
-            var mediaStreamRef, ref_1, mediaStreamProxy;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        mediaStreamRef = getCounter();
-                        ref_1 = getCounter();
-                        methods.getUserMedia(mediaStreamRef, JSON.stringify(mediaStreamConstraints), ref_1);
-                        return [4 /*yield*/, evtMethodReturn.waitFor(function (_a) {
-                                var callRef = _a.callRef;
-                                return callRef === ref_1;
-                            })];
-                    case 1:
-                        _a.sent();
-                        mediaStreamProxy = Object.setPrototypeOf({
-                            "getTracks": function () { return [
-                                ({
-                                    "stop": function () { return methods.stopMediaStreamTrack(mediaStreamRef); }
-                                })
-                            ]; }
-                        }, { "constructor": function MediaStream() { } });
-                        refByMediaStream.set(mediaStreamProxy, mediaStreamRef);
-                        return [2 /*return*/, mediaStreamProxy];
-                }
-            });
-        });
-    };
-    var RTCPeerConnectionProxy = function RTCPeerConnection(rtcConfiguration) {
-        var e_1, _a;
-        var _this = this;
-        var rtcPeerConnectionRef = getCounter();
-        methods.createRTCPeerConnection(rtcPeerConnectionRef, JSON.stringify(rtcConfiguration));
-        var properties = {
-            //WARNING: Never updated, I guess in our implementation it's ok...
-            "iceGatheringState": "new",
-            "iceConnectionState": "new",
-            "localDescription": null,
-            "signalingState": "stable"
-        };
-        evtIceconnectionstatechange.attach(function (_a) {
-            var ref = _a.rtcPeerConnectionRef;
-            return ref === rtcPeerConnectionRef;
-        }, function (_a) {
-            var iceConnectionState = _a.iceConnectionState;
-            return properties.iceConnectionState = iceConnectionState;
-        });
-        evtSignalingstatechange.attach(function (_a) {
-            var ref = _a.rtcPeerConnectionRef;
-            return ref === rtcPeerConnectionRef;
-        }, function (_a) {
-            var rtcSignalingState = _a.rtcSignalingState;
-            return properties.signalingState = rtcSignalingState;
-        });
-        evtIcecandidate.attach(function (_a) {
-            var ref = _a.rtcPeerConnectionRef;
-            return ref === rtcPeerConnectionRef;
-        }, function (_a) {
-            var localDescriptionRTCSessionDescriptionInitOrNullJson = _a.localDescriptionRTCSessionDescriptionInitOrNullJson;
-            return properties.localDescription = (function () {
-                var localDescriptionRTCSessionDescriptionInitOrNull = JSON.parse(localDescriptionRTCSessionDescriptionInitOrNullJson);
-                return localDescriptionRTCSessionDescriptionInitOrNull !== null ?
-                    new RTCSessionDescription(localDescriptionRTCSessionDescriptionInitOrNull) : null;
-            })();
-        });
-        var rtcPeerConnectionProxy = __assign({ "createAnswer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
-                var ref, rtcSessionDescriptionInitJson;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            ref = getCounter();
-                            methods.createAnswerForRTCPeerConnection(rtcPeerConnectionRef, ref);
-                            return [4 /*yield*/, evtMethodReturn.waitFor(function (_a) {
-                                    var callRef = _a.callRef;
-                                    return callRef === ref;
-                                })];
-                        case 1:
-                            rtcSessionDescriptionInitJson = (_a.sent()).out;
-                            //NOTE: We could just JSON.parse, as the return type is *Init
-                            return [2 /*return*/, new RTCSessionDescription(JSON.parse(rtcSessionDescriptionInitJson))];
-                    }
-                });
-            }); }, "createOffer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
-                var ref, rtcSessionDescriptionInitJson;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            ref = getCounter();
-                            methods.createOfferForRTCPeerConnection(rtcPeerConnectionRef, ref);
-                            return [4 /*yield*/, evtMethodReturn.waitFor(function (_a) {
-                                    var callRef = _a.callRef;
-                                    return callRef === ref;
-                                })];
-                        case 1:
-                            rtcSessionDescriptionInitJson = (_a.sent()).out;
-                            //NOTE: We could just JSON.parse, as the return type is *Init
-                            return [2 /*return*/, new RTCSessionDescription(JSON.parse(rtcSessionDescriptionInitJson))];
-                    }
-                });
-            }); }, "setLocalDescription": function (rtcSessionDescriptionInit) { return __awaiter(_this, void 0, void 0, function () {
-                var ref;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            properties.localDescription = new RTCSessionDescription(rtcSessionDescriptionInit);
-                            ref = getCounter();
-                            methods.setLocalDescriptionOfRTCPeerConnection(rtcPeerConnectionRef, JSON.stringify(rtcSessionDescriptionInit), ref);
-                            return [4 /*yield*/, evtMethodReturn.waitFor(function (_a) {
-                                    var callRef = _a.callRef;
-                                    return callRef === ref;
-                                })];
-                        case 1:
-                            _a.sent();
-                            return [2 /*return*/];
-                    }
-                });
-            }); }, "setRemoteDescription": function (rtcSessionDescriptionInit) { return __awaiter(_this, void 0, void 0, function () {
-                var ref;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            ref = getCounter();
-                            methods.setRemoteDescriptionOfRTCPeerConnection(rtcPeerConnectionRef, JSON.stringify(rtcSessionDescriptionInit), ref);
-                            return [4 /*yield*/, evtMethodReturn.waitFor(function (_a) {
-                                    var callRef = _a.callRef;
-                                    return callRef === ref;
-                                })];
-                        case 1:
-                            _a.sent();
-                            return [2 /*return*/];
-                    }
-                });
-            }); } }, (function () {
-            var boundToByListener = new WeakMap();
-            var addEventListener = function (type, listener) {
-                var boundTo = {};
-                boundToByListener.set(listener, boundTo);
-                switch (type) {
-                    case "iceconnectionstatechange":
-                        evtIceconnectionstatechange.attach(function (_a) {
-                            var ref = _a.rtcPeerConnectionRef;
-                            return ref === rtcPeerConnectionRef;
-                        }, boundTo, function () { return listener.call(rtcPeerConnectionProxy, undefined); });
-                        return;
-                        ;
-                    case "icecandidate":
-                        evtIcecandidate.attach(function (_a) {
-                            var ref = _a.rtcPeerConnectionRef;
-                            return ref === rtcPeerConnectionRef;
-                        }, boundTo, function (_a) {
-                            var rtcIceCandidateInitOrNullJson = _a.rtcIceCandidateInitOrNullJson;
-                            return listener.call(rtcPeerConnectionProxy, {
-                                "candidate": (function () {
-                                    var rtcIceCandidateInitOrNull = JSON.parse(rtcIceCandidateInitOrNullJson);
-                                    return rtcIceCandidateInitOrNull !== null ? new RTCIceCandidate(rtcIceCandidateInitOrNull) : null;
-                                })()
-                            });
-                        });
-                        return;
-                    case "track":
-                        //NOTE: Swallow the event, JsSip does not listen to this event, track attached by remote.
-                        return;
-                }
-                throw Error("no handler for event " + type);
-            };
-            var removeEventListener = function (type, listener) {
-                var evt = (function () {
-                    switch (type) {
-                        case "iceconnectionstatechange": return evtIceconnectionstatechange;
-                        case "icecandidate": return evtIcecandidate;
-                        default: return undefined;
-                    }
-                })();
-                if (evt === undefined) {
-                    return;
-                }
-                evt
-                    .getHandlers()
-                    .find(function (_a) {
-                    var boundTo = _a.boundTo;
-                    return boundTo === boundToByListener.get(listener);
-                })
-                    .detach();
-            };
-            return { addEventListener: addEventListener, removeEventListener: removeEventListener };
-        })(), { "addStream": function (mediaStream) { return methods.addStreamToRTCPeerConnection(rtcPeerConnectionRef, refByMediaStream.get(mediaStream)); }, "close": function () { return methods.closeRTCPeerConnection(rtcPeerConnectionRef); } });
-        var _loop_1 = function (propertyName) {
-            Object.defineProperty(rtcPeerConnectionProxy, propertyName, {
-                "get": function () { return properties[propertyName]; },
-                "enumerable": true,
-                "configurable": true
-            });
-        };
-        try {
-            for (var _b = __values(Object.keys(properties)), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var propertyName = _c.value;
-                _loop_1(propertyName);
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        return Object.setPrototypeOf(rtcPeerConnectionProxy, { "constructor": RTCPeerConnection });
-    };
-    navigator.mediaDevices.getUserMedia = getUserMediaProxy;
-    window["RTCPeerConnection"] = RTCPeerConnectionProxy;
-    return {
-        "onIcecandidate": function (rtcPeerConnectionRef, rtcIceCandidateInitOrNullJson, localDescriptionRTCSessionDescriptionInitOrNullJson) { return evtIcecandidate.post({
-            rtcPeerConnectionRef: rtcPeerConnectionRef,
-            rtcIceCandidateInitOrNullJson: rtcIceCandidateInitOrNullJson,
-            localDescriptionRTCSessionDescriptionInitOrNullJson: localDescriptionRTCSessionDescriptionInitOrNullJson
-        }); },
-        "onIceconnectionstatechange": function (rtcPeerConnectionRef, iceConnectionState) { return evtIceconnectionstatechange.post({
-            rtcPeerConnectionRef: rtcPeerConnectionRef,
-            iceConnectionState: iceConnectionState
-        }); },
-        "onSignalingstatechange": function (rtcPeerConnectionRef, rtcSignalingState) { return evtSignalingstatechange.post({
-            rtcPeerConnectionRef: rtcPeerConnectionRef,
-            rtcSignalingState: rtcSignalingState
-        }); },
-        "onMethodReturn": function (callRef, out) { return evtMethodReturn.post({ callRef: callRef, out: out }); }
-    };
-}
-exports.overrideWebRTCImplementation = overrideWebRTCImplementation;
-function testOverrideWebRTCImplementation() {
-    var RTCPeerConnectionBackup = RTCPeerConnection;
-    var getUserMediaBackup = navigator.mediaDevices.getUserMedia;
-    var mediaStreamByRef = new Map();
-    var rtcPeerConnectionByRef = new Map();
-    var listeners = overrideWebRTCImplementation(__assign({ 
-        /*
-        "getUserMedia": (mediaStreamRef, mediaStreamConstraintsJson, callRef) =>
-            getUserMediaBackup(
-                JSON.parse(mediaStreamConstraintsJson)
-            ).then(mediaStream => {
-                mediaStreamByRef.set(mediaStreamRef, mediaStream);
-                listeners.onMethodReturn(callRef, undefined);
-            }),
-            */
-        "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
-            console.log("============> ", { mediaStreamConstraintsJson: mediaStreamConstraintsJson });
-            getUserMediaBackup(JSON.parse(mediaStreamConstraintsJson)).then(function (mediaStream) {
-                mediaStreamByRef.set(mediaStreamRef, mediaStream);
-                listeners.onMethodReturn(callRef, undefined);
-            });
-        }, "createRTCPeerConnection": function (rtcPeerConnectionRef, rtcConfigurationJson) {
-            var rtcPeerConnection = new RTCPeerConnectionBackup((function () {
-                var rtcConfiguration = JSON.parse(rtcConfigurationJson);
-                return rtcConfiguration;
-            })());
-            rtcPeerConnection.addEventListener("iceconnectionstatechange", function () { return listeners.onIceconnectionstatechange(rtcPeerConnectionRef, rtcPeerConnection.iceConnectionState); });
-            rtcPeerConnection.addEventListener("icecandidate", function (rtcPeerConnectionEvent) { return listeners.onIcecandidate(rtcPeerConnectionRef, JSON.stringify(rtcPeerConnectionEvent.candidate), JSON.stringify(rtcPeerConnection.localDescription)); });
-            rtcPeerConnection.addEventListener("signalingstatechange", function () { return listeners.onSignalingstatechange(rtcPeerConnectionRef, rtcPeerConnection.signalingState); });
-            rtcPeerConnection.addEventListener("track", function (_a) {
-                var _b = __read(_a.streams, 1), stream = _b[0];
-                var audio = document.createElement("audio");
-                audio.autoplay = true;
-                audio.srcObject = stream;
-            });
-            rtcPeerConnectionByRef.set(rtcPeerConnectionRef, rtcPeerConnection);
-        }, "addStreamToRTCPeerConnection": function (rtcPeerConnectionRef, mediaStreamRef) {
-            return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)["addStream"](mediaStreamByRef.get(mediaStreamRef));
-        }, "stopMediaStreamTrack": function (mediaStreamRef) {
-            var _a = __read(mediaStreamByRef.get(mediaStreamRef).getTracks(), 1), mediaStreamTrack = _a[0];
-            if (mediaStreamTrack === undefined) {
-                return;
-            }
-            mediaStreamTrack.stop();
-        } }, (function () {
-        var createXForRTCPeerConnection = function (xIs, rtcPeerConnectionRef, callRef) { return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)[xIs === "ANSWER" ? "createAnswer" : "createOffer"]()
-            .then(function (rtcSessionDescriptionInit) { return listeners.onMethodReturn(callRef, JSON.stringify(rtcSessionDescriptionInit)); }); };
-        var createAnswerForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("ANSWER", rtcPeerConnectionRef, callRef); };
-        var createOfferForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("OFFER", rtcPeerConnectionRef, callRef); };
-        return { createAnswerForRTCPeerConnection: createAnswerForRTCPeerConnection, createOfferForRTCPeerConnection: createOfferForRTCPeerConnection };
-    })(), { "setLocalDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
-            return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
-                .setLocalDescription(JSON.parse(rtcSessionDescriptionInitJson))
-                .then(function () { return listeners.onMethodReturn(callRef, undefined); });
-        }, "setRemoteDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
-            return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
-                .setRemoteDescription(JSON.parse(rtcSessionDescriptionInitJson))
-                .then(function () { return listeners.onMethodReturn(callRef, undefined); });
-        }, "closeRTCPeerConnection": function (rtcPeerConnectionRef) {
-            return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
-                .close();
-        } }));
-}
-exports.testOverrideWebRTCImplementation = testOverrideWebRTCImplementation;
-
-},{"ts-events-extended":139}],84:[function(require,module,exports){
-"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
 (function (registerUser) {
@@ -16523,7 +16354,7 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],85:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -16544,7 +16375,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],86:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -16747,7 +16578,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":87,"./custom/zalgo":88,"./maps/america":91,"./maps/rainbow":92,"./maps/random":93,"./maps/zebra":94,"./styles":95,"./system/supports-colors":97,"util":10}],87:[function(require,module,exports){
+},{"./custom/trap":86,"./custom/zalgo":87,"./maps/america":90,"./maps/rainbow":91,"./maps/random":92,"./maps/zebra":93,"./styles":94,"./system/supports-colors":96,"util":10}],86:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -16795,7 +16626,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],88:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -16907,7 +16738,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],89:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -17019,7 +16850,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":86}],90:[function(require,module,exports){
+},{"./colors":85}],89:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -17034,7 +16865,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":86,"./extendStringPrototype":89}],91:[function(require,module,exports){
+},{"./colors":85,"./extendStringPrototype":88}],90:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -17046,7 +16877,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],92:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -17060,7 +16891,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],93:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta'];
@@ -17072,14 +16903,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],94:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],95:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -17158,7 +16989,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],96:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -17197,7 +17028,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":7}],97:[function(require,module,exports){
+},{"_process":7}],96:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -17352,23 +17183,23 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":96,"_process":7,"os":5}],98:[function(require,module,exports){
+},{"./has-flag.js":95,"_process":7,"os":5}],97:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"../sync/utils/environnement":107,"./WorkerThread/node":99,"./WorkerThread/simulated":100,"./WorkerThread/web":101,"dup":19}],99:[function(require,module,exports){
+},{"../sync/utils/environnement":106,"./WorkerThread/node":98,"./WorkerThread/simulated":99,"./WorkerThread/web":100,"dup":19}],98:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"../../sync/_worker_thread/ThreadMessage":104,"buffer":3,"dup":20,"path":6,"ts-events-extended":139}],100:[function(require,module,exports){
+},{"../../sync/_worker_thread/ThreadMessage":103,"buffer":3,"dup":20,"path":6,"ts-events-extended":138}],99:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"dup":21,"ts-events-extended":139}],101:[function(require,module,exports){
+},{"dup":21,"ts-events-extended":138}],100:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
-},{"dup":22,"ts-events-extended":139}],102:[function(require,module,exports){
+},{"dup":22,"ts-events-extended":138}],101:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"../sync/types":105,"../sync/utils/environnement":107,"../sync/utils/toBuffer":108,"./WorkerThread":98,"./serializer":103,"buffer":3,"dup":23,"minimal-polyfills/dist/lib/Array.from":113,"minimal-polyfills/dist/lib/Map":115,"minimal-polyfills/dist/lib/Set":116,"path":6,"run-exclusive":119}],103:[function(require,module,exports){
+},{"../sync/types":104,"../sync/utils/environnement":106,"../sync/utils/toBuffer":107,"./WorkerThread":97,"./serializer":102,"buffer":3,"dup":23,"minimal-polyfills/dist/lib/Array.from":112,"minimal-polyfills/dist/lib/Map":114,"minimal-polyfills/dist/lib/Set":115,"path":6,"run-exclusive":118}],102:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"../sync/utils/toBuffer":108,"buffer":3,"dup":24,"transfer-tools/dist/lib/JSON_CUSTOM":130}],104:[function(require,module,exports){
+},{"../sync/utils/toBuffer":107,"buffer":3,"dup":24,"transfer-tools/dist/lib/JSON_CUSTOM":129}],103:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"../utils/environnement":107,"../utils/toBuffer":108,"buffer":3,"dup":25}],105:[function(require,module,exports){
+},{"../utils/environnement":106,"../utils/toBuffer":107,"buffer":3,"dup":25}],104:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"./utils/toBuffer":108,"buffer":3,"dup":26}],106:[function(require,module,exports){
+},{"./utils/toBuffer":107,"buffer":3,"dup":26}],105:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function concatUint8Array() {
@@ -17439,17 +17270,17 @@ function leftShift(uint8Array) {
 }
 exports.leftShift = leftShift;
 
-},{}],107:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],108:[function(require,module,exports){
+},{"dup":27}],107:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"buffer":3,"dup":28}],109:[function(require,module,exports){
+},{"buffer":3,"dup":28}],108:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],110:[function(require,module,exports){
+},{"dup":30}],109:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"./implementation":109,"dup":31}],111:[function(require,module,exports){
+},{"./implementation":108,"dup":31}],110:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32,"function-bind":110}],112:[function(require,module,exports){
+},{"dup":32,"function-bind":109}],111:[function(require,module,exports){
 /*!
  * JavaScript Cookie v2.2.0
  * https://github.com/js-cookie/js-cookie
@@ -17616,21 +17447,21 @@ arguments[4][32][0].apply(exports,arguments)
 	return init(function () {});
 }));
 
-},{}],113:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"dup":34}],114:[function(require,module,exports){
+},{"dup":34}],113:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"dup":35}],115:[function(require,module,exports){
+},{"dup":35}],114:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"dup":36}],116:[function(require,module,exports){
+},{"dup":36}],115:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"./Map":115,"dup":37}],117:[function(require,module,exports){
+},{"./Map":114,"dup":37}],116:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"./Map":115,"dup":38}],118:[function(require,module,exports){
+},{"./Map":114,"dup":38}],117:[function(require,module,exports){
 arguments[4][40][0].apply(exports,arguments)
-},{"_process":7,"dup":40}],119:[function(require,module,exports){
+},{"_process":7,"dup":40}],118:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"dup":41,"minimal-polyfills/dist/lib/WeakMap":117}],120:[function(require,module,exports){
+},{"dup":41,"minimal-polyfills/dist/lib/WeakMap":116}],119:[function(require,module,exports){
 // A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
@@ -17692,7 +17523,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":121,"./lib/tychei":122,"./lib/xor128":123,"./lib/xor4096":124,"./lib/xorshift7":125,"./lib/xorwow":126,"./seedrandom":127}],121:[function(require,module,exports){
+},{"./lib/alea":120,"./lib/tychei":121,"./lib/xor128":122,"./lib/xor4096":123,"./lib/xorshift7":124,"./lib/xorwow":125,"./seedrandom":126}],120:[function(require,module,exports){
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -17808,7 +17639,7 @@ if (module && module.exports) {
 
 
 
-},{}],122:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 // A Javascript implementaion of the "Tyche-i" prng algorithm by
 // Samuel Neves and Filipe Araujo.
 // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
@@ -17913,7 +17744,7 @@ if (module && module.exports) {
 
 
 
-},{}],123:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 // A Javascript implementaion of the "xor128" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -17996,7 +17827,7 @@ if (module && module.exports) {
 
 
 
-},{}],124:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 // A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
 //
 // This fast non-cryptographic random number generator is designed for
@@ -18144,7 +17975,7 @@ if (module && module.exports) {
   (typeof define) == 'function' && define   // present with an AMD loader
 );
 
-},{}],125:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 // A Javascript implementaion of the "xorshift7" algorithm by
 // François Panneton and Pierre L'ecuyer:
 // "On the Xorgshift Random Number Generators"
@@ -18243,7 +18074,7 @@ if (module && module.exports) {
 );
 
 
-},{}],126:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 // A Javascript implementaion of the "xorwow" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -18331,7 +18162,7 @@ if (module && module.exports) {
 
 
 
-},{}],127:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 /*
 Copyright 2014 David Bau.
 
@@ -18586,13 +18417,13 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":2}],128:[function(require,module,exports){
+},{"crypto":2}],127:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],129:[function(require,module,exports){
+},{"dup":42}],128:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43,"has":111}],130:[function(require,module,exports){
+},{"dup":43,"has":110}],129:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44,"super-json":129}],131:[function(require,module,exports){
+},{"dup":44,"super-json":128}],130:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -18604,7 +18435,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":130,"./stringTransform":132,"./stringTransformExt":133,"./testing":134}],132:[function(require,module,exports){
+},{"./JSON_CUSTOM":129,"./stringTransform":131,"./stringTransformExt":132,"./testing":133}],131:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -18666,7 +18497,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3}],133:[function(require,module,exports){
+},{"buffer":3}],132:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -18734,7 +18565,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":132}],134:[function(require,module,exports){
+},{"./stringTransform":131}],133:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -19034,17 +18865,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":132,"seedrandom":120}],135:[function(require,module,exports){
+},{"./stringTransform":131,"seedrandom":119}],134:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"./SyncEventBase":136,"dup":45}],136:[function(require,module,exports){
+},{"./SyncEventBase":135,"dup":45}],135:[function(require,module,exports){
 arguments[4][46][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":137,"dup":46}],137:[function(require,module,exports){
+},{"./SyncEventBaseProtected":136,"dup":46}],136:[function(require,module,exports){
 arguments[4][47][0].apply(exports,arguments)
-},{"./defs":138,"dup":47,"minimal-polyfills/dist/lib/Array.prototype.find":114,"minimal-polyfills/dist/lib/Map":115,"run-exclusive":119}],138:[function(require,module,exports){
+},{"./defs":137,"dup":47,"minimal-polyfills/dist/lib/Array.prototype.find":113,"minimal-polyfills/dist/lib/Map":114,"run-exclusive":118}],137:[function(require,module,exports){
 arguments[4][48][0].apply(exports,arguments)
-},{"dup":48,"setprototypeof":128}],139:[function(require,module,exports){
+},{"dup":48,"setprototypeof":127}],138:[function(require,module,exports){
 arguments[4][49][0].apply(exports,arguments)
-},{"./SyncEvent":135,"./defs":138,"dup":49}],140:[function(require,module,exports){
+},{"./SyncEvent":134,"./defs":137,"dup":49}],139:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -19216,7 +19047,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3,"ts-events-extended":139}],141:[function(require,module,exports){
+},{"buffer":3,"ts-events-extended":138}],140:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -19528,7 +19359,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":140,"./api/ApiMessage":142,"./core":146,"./misc":150,"colors":90,"ts-events-extended":139}],142:[function(require,module,exports){
+},{"./IConnection":139,"./api/ApiMessage":141,"./core":145,"./misc":149,"colors":89,"ts-events-extended":138}],141:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -19609,7 +19440,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":146,"../misc":150,"buffer":3,"transfer-tools":131}],143:[function(require,module,exports){
+},{"../core":145,"../misc":149,"buffer":3,"transfer-tools":130}],142:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -19791,7 +19622,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":150,"./ApiMessage":142,"colors":90,"util":10}],144:[function(require,module,exports){
+},{"../misc":149,"./ApiMessage":141,"colors":89,"util":10}],143:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -20010,7 +19841,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":150,"./ApiMessage":142,"setprototypeof":128}],145:[function(require,module,exports){
+},{"../misc":149,"./ApiMessage":141,"setprototypeof":127}],144:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -20018,7 +19849,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":143,"./client":144}],146:[function(require,module,exports){
+},{"./Server":142,"./client":143}],145:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -20102,7 +19933,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":148,"./legacy/sip":149,"buffer":3,"setprototypeof":128}],147:[function(require,module,exports){
+},{"./legacy/sdp":147,"./legacy/sip":148,"buffer":3,"setprototypeof":127}],146:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -20114,7 +19945,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":141,"./api":145,"./core":146,"./misc":150}],148:[function(require,module,exports){
+},{"./Socket":140,"./api":144,"./core":145,"./misc":149}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -20230,7 +20061,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],149:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -20621,7 +20452,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],150:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -20919,7 +20750,7 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":146,"buffer":3}],151:[function(require,module,exports){
+},{"./core":145,"buffer":3}],150:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var urlSafeBase64encoderDecoder_1 = require("./urlSafeBase64encoderDecoder");
@@ -20938,7 +20769,7 @@ var RegistrationParams;
 })(RegistrationParams = exports.RegistrationParams || (exports.RegistrationParams = {}));
 ;
 
-},{"./urlSafeBase64encoderDecoder":154}],152:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":153}],151:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -20992,7 +20823,7 @@ function extractBundledDataFromHeaders(headers, decryptor) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"./urlSafeBase64encoderDecoder":154,"crypto-lib/dist/async/serializer":168,"transfer-tools/dist/lib/stringTransform":188}],153:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":153,"crypto-lib/dist/async/serializer":167,"transfer-tools/dist/lib/stringTransform":187}],152:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 var __read = (this && this.__read) || function (o, n) {
@@ -21075,7 +20906,7 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"./urlSafeBase64encoderDecoder":154,"ts-sip":203}],154:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":153,"ts-sip":202}],153:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Transpiled to ES3.
@@ -21085,7 +20916,7 @@ exports.urlSafeB64 = stringTransform.transcode("base64", {
     "/": "-"
 });
 
-},{"transfer-tools/dist/lib/stringTransform":188}],155:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":187}],154:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
@@ -21094,17 +20925,19 @@ var version;
     version.methodName = "version";
 })(version = exports.version || (exports.version = {}));
 
-},{}],156:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
+arguments[4][85][0].apply(exports,arguments)
+},{"./custom/trap":156,"./custom/zalgo":157,"./maps/america":160,"./maps/rainbow":161,"./maps/random":162,"./maps/zebra":163,"./styles":164,"./system/supports-colors":166,"dup":85,"util":10}],156:[function(require,module,exports){
 arguments[4][86][0].apply(exports,arguments)
-},{"./custom/trap":157,"./custom/zalgo":158,"./maps/america":161,"./maps/rainbow":162,"./maps/random":163,"./maps/zebra":164,"./styles":165,"./system/supports-colors":167,"dup":86,"util":10}],157:[function(require,module,exports){
+},{"dup":86}],157:[function(require,module,exports){
 arguments[4][87][0].apply(exports,arguments)
 },{"dup":87}],158:[function(require,module,exports){
 arguments[4][88][0].apply(exports,arguments)
-},{"dup":88}],159:[function(require,module,exports){
+},{"./colors":155,"dup":88}],159:[function(require,module,exports){
 arguments[4][89][0].apply(exports,arguments)
-},{"./colors":156,"dup":89}],160:[function(require,module,exports){
+},{"./colors":155,"./extendStringPrototype":158,"dup":89}],160:[function(require,module,exports){
 arguments[4][90][0].apply(exports,arguments)
-},{"./colors":156,"./extendStringPrototype":159,"dup":90}],161:[function(require,module,exports){
+},{"dup":90}],161:[function(require,module,exports){
 arguments[4][91][0].apply(exports,arguments)
 },{"dup":91}],162:[function(require,module,exports){
 arguments[4][92][0].apply(exports,arguments)
@@ -21114,25 +20947,23 @@ arguments[4][93][0].apply(exports,arguments)
 arguments[4][94][0].apply(exports,arguments)
 },{"dup":94}],165:[function(require,module,exports){
 arguments[4][95][0].apply(exports,arguments)
-},{"dup":95}],166:[function(require,module,exports){
+},{"_process":7,"dup":95}],166:[function(require,module,exports){
 arguments[4][96][0].apply(exports,arguments)
-},{"_process":7,"dup":96}],167:[function(require,module,exports){
-arguments[4][97][0].apply(exports,arguments)
-},{"./has-flag.js":166,"_process":7,"dup":97,"os":5}],168:[function(require,module,exports){
+},{"./has-flag.js":165,"_process":7,"dup":96,"os":5}],167:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"../sync/utils/toBuffer":169,"buffer":3,"dup":24,"transfer-tools/dist/lib/JSON_CUSTOM":186}],169:[function(require,module,exports){
+},{"../sync/utils/toBuffer":168,"buffer":3,"dup":24,"transfer-tools/dist/lib/JSON_CUSTOM":185}],168:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"buffer":3,"dup":28}],170:[function(require,module,exports){
+},{"buffer":3,"dup":28}],169:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],171:[function(require,module,exports){
+},{"dup":30}],170:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"./implementation":170,"dup":31}],172:[function(require,module,exports){
+},{"./implementation":169,"dup":31}],171:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32,"function-bind":171}],173:[function(require,module,exports){
+},{"dup":32,"function-bind":170}],172:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"dup":35}],174:[function(require,module,exports){
+},{"dup":35}],173:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"dup":36}],175:[function(require,module,exports){
+},{"dup":36}],174:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -21424,9 +21255,11 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{}],176:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
+arguments[4][119][0].apply(exports,arguments)
+},{"./lib/alea":176,"./lib/tychei":177,"./lib/xor128":178,"./lib/xor4096":179,"./lib/xorshift7":180,"./lib/xorwow":181,"./seedrandom":182,"dup":119}],176:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"./lib/alea":177,"./lib/tychei":178,"./lib/xor128":179,"./lib/xor4096":180,"./lib/xorshift7":181,"./lib/xorwow":182,"./seedrandom":183,"dup":120}],177:[function(require,module,exports){
+},{"dup":120}],177:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
 },{"dup":121}],178:[function(require,module,exports){
 arguments[4][122][0].apply(exports,arguments)
@@ -21438,52 +21271,50 @@ arguments[4][124][0].apply(exports,arguments)
 arguments[4][125][0].apply(exports,arguments)
 },{"dup":125}],182:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"dup":126}],183:[function(require,module,exports){
-arguments[4][127][0].apply(exports,arguments)
-},{"crypto":2,"dup":127}],184:[function(require,module,exports){
+},{"crypto":2,"dup":126}],183:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],185:[function(require,module,exports){
+},{"dup":42}],184:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43,"has":172}],186:[function(require,module,exports){
+},{"dup":43,"has":171}],185:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"dup":44,"super-json":185}],187:[function(require,module,exports){
+},{"dup":44,"super-json":184}],186:[function(require,module,exports){
+arguments[4][130][0].apply(exports,arguments)
+},{"./JSON_CUSTOM":185,"./stringTransform":187,"./stringTransformExt":188,"./testing":189,"dup":130}],187:[function(require,module,exports){
 arguments[4][131][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":186,"./stringTransform":188,"./stringTransformExt":189,"./testing":190,"dup":131}],188:[function(require,module,exports){
+},{"buffer":3,"dup":131}],188:[function(require,module,exports){
 arguments[4][132][0].apply(exports,arguments)
-},{"buffer":3,"dup":132}],189:[function(require,module,exports){
+},{"./stringTransform":187,"dup":132}],189:[function(require,module,exports){
 arguments[4][133][0].apply(exports,arguments)
-},{"./stringTransform":188,"dup":133}],190:[function(require,module,exports){
-arguments[4][134][0].apply(exports,arguments)
-},{"./stringTransform":188,"dup":134,"seedrandom":176}],191:[function(require,module,exports){
+},{"./stringTransform":187,"dup":133,"seedrandom":175}],190:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"./SyncEventBase":192,"dup":45}],192:[function(require,module,exports){
+},{"./SyncEventBase":191,"dup":45}],191:[function(require,module,exports){
 arguments[4][46][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":193,"dup":46}],193:[function(require,module,exports){
+},{"./SyncEventBaseProtected":192,"dup":46}],192:[function(require,module,exports){
 arguments[4][47][0].apply(exports,arguments)
-},{"./defs":194,"dup":47,"minimal-polyfills/dist/lib/Array.prototype.find":173,"minimal-polyfills/dist/lib/Map":174,"run-exclusive":175}],194:[function(require,module,exports){
+},{"./defs":193,"dup":47,"minimal-polyfills/dist/lib/Array.prototype.find":172,"minimal-polyfills/dist/lib/Map":173,"run-exclusive":174}],193:[function(require,module,exports){
 arguments[4][48][0].apply(exports,arguments)
-},{"dup":48,"setprototypeof":184}],195:[function(require,module,exports){
+},{"dup":48,"setprototypeof":183}],194:[function(require,module,exports){
 arguments[4][49][0].apply(exports,arguments)
-},{"./SyncEvent":191,"./defs":194,"dup":49}],196:[function(require,module,exports){
+},{"./SyncEvent":190,"./defs":193,"dup":49}],195:[function(require,module,exports){
+arguments[4][139][0].apply(exports,arguments)
+},{"buffer":3,"dup":139,"ts-events-extended":194}],196:[function(require,module,exports){
 arguments[4][140][0].apply(exports,arguments)
-},{"buffer":3,"dup":140,"ts-events-extended":195}],197:[function(require,module,exports){
+},{"./IConnection":195,"./api/ApiMessage":197,"./core":201,"./misc":205,"colors":159,"dup":140,"ts-events-extended":194}],197:[function(require,module,exports){
 arguments[4][141][0].apply(exports,arguments)
-},{"./IConnection":196,"./api/ApiMessage":198,"./core":202,"./misc":206,"colors":160,"dup":141,"ts-events-extended":195}],198:[function(require,module,exports){
+},{"../core":201,"../misc":205,"buffer":3,"dup":141,"transfer-tools":186}],198:[function(require,module,exports){
 arguments[4][142][0].apply(exports,arguments)
-},{"../core":202,"../misc":206,"buffer":3,"dup":142,"transfer-tools":187}],199:[function(require,module,exports){
+},{"../misc":205,"./ApiMessage":197,"colors":159,"dup":142,"util":10}],199:[function(require,module,exports){
 arguments[4][143][0].apply(exports,arguments)
-},{"../misc":206,"./ApiMessage":198,"colors":160,"dup":143,"util":10}],200:[function(require,module,exports){
+},{"../misc":205,"./ApiMessage":197,"dup":143,"setprototypeof":183}],200:[function(require,module,exports){
 arguments[4][144][0].apply(exports,arguments)
-},{"../misc":206,"./ApiMessage":198,"dup":144,"setprototypeof":184}],201:[function(require,module,exports){
+},{"./Server":198,"./client":199,"dup":144}],201:[function(require,module,exports){
 arguments[4][145][0].apply(exports,arguments)
-},{"./Server":199,"./client":200,"dup":145}],202:[function(require,module,exports){
+},{"./legacy/sdp":203,"./legacy/sip":204,"buffer":3,"dup":145,"setprototypeof":183}],202:[function(require,module,exports){
 arguments[4][146][0].apply(exports,arguments)
-},{"./legacy/sdp":204,"./legacy/sip":205,"buffer":3,"dup":146,"setprototypeof":184}],203:[function(require,module,exports){
+},{"./Socket":196,"./api":200,"./core":201,"./misc":205,"dup":146}],203:[function(require,module,exports){
 arguments[4][147][0].apply(exports,arguments)
-},{"./Socket":197,"./api":201,"./core":202,"./misc":206,"dup":147}],204:[function(require,module,exports){
+},{"dup":147}],204:[function(require,module,exports){
 arguments[4][148][0].apply(exports,arguments)
 },{"dup":148}],205:[function(require,module,exports){
 arguments[4][149][0].apply(exports,arguments)
-},{"dup":149}],206:[function(require,module,exports){
-arguments[4][150][0].apply(exports,arguments)
-},{"./core":202,"buffer":3,"dup":150}]},{},[17]);
+},{"./core":201,"buffer":3,"dup":149}]},{},[17]);

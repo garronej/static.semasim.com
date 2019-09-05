@@ -2923,7 +2923,7 @@ var UiButtonBar = /** @class */ (function () {
             var state = {
                 "isSimRowSelected": false,
                 "isSimSharable": false,
-                "isSimOnline": false,
+                "isSimReachable": false,
                 "areDetailsShown": false
             };
             return state;
@@ -2952,7 +2952,7 @@ var UiButtonBar = /** @class */ (function () {
         if (!this.state.isSimSharable) {
             this.btnShare.prop("disabled", true);
         }
-        if (!this.state.isSimOnline) {
+        if (!this.state.isSimReachable) {
             this.btnReboot.prop("disabled", true);
         }
     };
@@ -3022,7 +3022,7 @@ var UiController = /** @class */ (function () {
                 var userSim = _a.userSim, email = _a.email;
                 return evt.post({ userSim: userSim, email: email });
             });
-            localApiHandlers.evtSharedSimUnregistered.attach(function (_a) {
+            localApiHandlers.evtOtherSimUserUnregisteredSim.attach(function (_a) {
                 var userSim = _a.userSim, email = _a.email;
                 return evt.post({ userSim: userSim, email: email });
             });
@@ -3033,7 +3033,7 @@ var UiController = /** @class */ (function () {
         this.setState("NO SIM");
         this.initUiButtonBar();
         this.initUiShareSim();
-        for (var _i = 0, _a = userSims.sort(function (a, b) { return +b.isOnline - +a.isOnline; }); _i < _a.length; _i++) {
+        for (var _i = 0, _a = userSims.sort(function (a, b) { return +!!b.reachableSimState - +!!a.reachableSimState; }); _i < _a.length; _i++) {
             var userSim = _a[_i];
             this.addUserSim(userSim);
         }
@@ -3071,13 +3071,13 @@ var UiController = /** @class */ (function () {
             _this.uiButtonBar.setState({
                 "isSimRowSelected": true,
                 "isSimSharable": types.UserSim.Owned.match(userSim),
-                "isSimOnline": userSim.isOnline
+                "isSimReachable": !!userSim.reachableSimState
             });
         });
         localApiHandlers.evtSimIsOnlineStatusChange.attach(function (userSim_) { return userSim_ === userSim; }, function () {
             uiSimRow.populate();
             if (uiSimRow.isSelected) {
-                _this.uiButtonBar.setState({ "isSimOnline": userSim.isOnline });
+                _this.uiButtonBar.setState({ "isSimReachable": !!userSim.reachableSimState });
             }
             var uiPhonebook = _this.uiPhonebooks.find(function (ui) { return ui.userSim === userSim; });
             if (!!uiPhonebook) {
@@ -3121,7 +3121,7 @@ var UiController = /** @class */ (function () {
                                 this.uiButtonBar.setState({
                                     "isSimRowSelected": false,
                                     "isSimSharable": false,
-                                    "isSimOnline": false,
+                                    "isSimReachable": false,
                                     "areDetailsShown": false
                                 });
                                 uiSimRow.unselect();
@@ -3389,7 +3389,7 @@ var UiController = /** @class */ (function () {
                         _d.sent();
                         return [2 /*return*/];
                     case 5:
-                        if (!!userSim.isOnline) return [3 /*break*/, 7];
+                        if (!!userSim.reachableSimState) return [3 /*break*/, 7];
                         return [4 /*yield*/, new Promise(function (resolve) {
                                 return bootbox_custom.alert(userSim.friendlyName + " is not currently online. Can't edit phonebook", function () { return resolve(); });
                             })];
@@ -3472,7 +3472,7 @@ function interact_getUserSimContainingNumber(userSims, number) {
                         "title": phone_number_1.phoneNumber.prettyPrint(number) + " is present in " + userSimsContainingNumber.length + ", select phonebook to edit.",
                         "inputType": "select",
                         "inputOptions": userSimsContainingNumber.map(function (userSim) { return ({
-                            "text": userSim.friendlyName + " " + (userSim.isOnline ? "" : "( offline )"),
+                            "text": userSim.friendlyName + " " + (!!userSim.reachableSimState ? "" : "( offline )"),
                             "value": userSimsContainingNumber.indexOf(userSim)
                         }); }),
                         "callback": function (indexAsString) { return resolve(parseInt(indexAsString)); }
@@ -3603,7 +3603,7 @@ var UiPhonebook = /** @class */ (function () {
             this.buttonCreateContact,
             this.buttonDelete,
             this.buttonEdit
-        ].forEach(function (button) { return button.prop("disabled", !_this.userSim.isOnline); });
+        ].forEach(function (button) { return button.prop("disabled", !_this.userSim.reachableSimState); });
         var selectedCount = Array.from(this.uiContacts.keys())
             .map(function (key) { return _this.uiContacts.get(key); })
             .filter(function (uiContact) { return uiContact.isSelected; }).length;
@@ -3796,7 +3796,7 @@ var UiPhonebook = /** @class */ (function () {
                         if (!name) {
                             return [2 /*return*/];
                         }
-                        if (!!this.userSim.isOnline) return [3 /*break*/, 5];
+                        if (!!this.userSim.reachableSimState) return [3 /*break*/, 5];
                         return [4 /*yield*/, new Promise(function (resolve) {
                                 return bootbox_custom.alert("Can't proceed, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
                             })];
@@ -3881,7 +3881,7 @@ var UiPhonebook = /** @class */ (function () {
                         if (!isConfirmed) {
                             return [2 /*return*/];
                         }
-                        if (!!this.userSim.isOnline) return [3 /*break*/, 3];
+                        if (!!this.userSim.reachableSimState) return [3 /*break*/, 3];
                         return [4 /*yield*/, new Promise(function (resolve) {
                                 return bootbox_custom.alert("Can't delete, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
                             })];
@@ -3937,7 +3937,7 @@ var UiPhonebook = /** @class */ (function () {
                         if (!newName || contact.name === newName) {
                             return [2 /*return*/];
                         }
-                        if (!!this.userSim.isOnline) return [3 /*break*/, 3];
+                        if (!!this.userSim.reachableSimState) return [3 /*break*/, 3];
                         return [4 /*yield*/, new Promise(function (resolve) {
                                 return bootbox_custom.alert("Can't update, " + _this.userSim.friendlyName + " no longer online", function () { return resolve(); });
                             })];
@@ -4347,10 +4347,10 @@ var UiSimRow = /** @class */ (function () {
         })());
         {
             var text = undefined;
-            if (!this.userSim.isOnline) {
+            if (!this.userSim.reachableSimState) {
                 text = "Not reachable";
             }
-            if (!this.userSim.isGsmConnectivityOk) {
+            else if (!this.userSim.reachableSimState.isGsmConnectivityOk) {
                 text = "No GSM connection";
             }
             var $span = this.structure.find(".id_connectivity");
@@ -4368,16 +4368,12 @@ var UiSimRow = /** @class */ (function () {
             if (!cellSignalStrength) {
                 return;
             }
-            $i[(_this.userSim.isOnline &&
-                _this.userSim.isGsmConnectivityOk &&
-                cellSignalStrength === _this.userSim.cellSignalStrength) ? "show" : "hide"]();
+            $i[(!!_this.userSim.reachableSimState &&
+                _this.userSim.reachableSimState.isGsmConnectivityOk &&
+                cellSignalStrength === _this.userSim.reachableSimState.cellSignalStrength) ? "show" : "hide"]();
         });
-        if (!this.userSim.isOnline || !this.userSim.isGsmConnectivityOk) {
-            this.structure.find(".id_row").addClass("offline");
-        }
-        else {
-            this.structure.find(".id_row").removeClass("offline");
-        }
+        this.structure.find(".id_row")[!this.userSim.reachableSimState || !this.userSim.reachableSimState.isGsmConnectivityOk ?
+            "addClass" : "removeClass"]("offline");
         this.structure.find(".id_ownership").text(this.userSim.ownership.status === "OWNED" ?
             "" :
             "owned by: " + this.userSim.ownership.ownerEmail);
@@ -6185,7 +6181,7 @@ function connect(connectionParams, isReconnect) {
         "error": true,
         "close": true,
         "incomingTraffic": false,
-        "outgoingTraffic": true,
+        "outgoingTraffic": false,
         "ignoreApiTraffic": true
     }, log);
     socketCurrent = socket;
@@ -6223,14 +6219,14 @@ function connect(connectionParams, isReconnect) {
                     If userSim is online we received a notification before having the
                     response of the request... even possible?
                      */
-                    if (userSim.isOnline) {
+                    if (!!userSim.reachableSimState) {
                         return "continue";
                     }
-                    userSim.isOnline = userSim_.isOnline;
+                    userSim.reachableSimState = userSim_.reachableSimState;
                     userSim.password = userSim_.password;
                     userSim.dongle = userSim_.dongle;
                     userSim.gatewayLocation = userSim_.gatewayLocation;
-                    if (userSim.isOnline) {
+                    if (!!userSim.reachableSimState) {
                         localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
                     }
                 };
@@ -6263,7 +6259,7 @@ function connect(connectionParams, isReconnect) {
                     try {
                         for (_a = __values(userSims || []), _b = _a.next(); !_b.done; _b = _a.next()) {
                             userSim = _b.value;
-                            userSim.isOnline = false;
+                            userSim.reachableSimState = undefined;
                             localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
                         }
                     }
@@ -6360,7 +6356,7 @@ exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
         "handler": function (_a) {
             var imsi = _a.imsi;
             return __awaiter(_this, void 0, void 0, function () {
-                var userSim;
+                var userSim, hadOngoingCall;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0: return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
@@ -6370,7 +6366,13 @@ exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.isOnline = false;
+                            hadOngoingCall = (userSim.reachableSimState !== undefined &&
+                                userSim.reachableSimState.isGsmConnectivityOk &&
+                                userSim.reachableSimState.ongoingCall !== undefined);
+                            userSim.reachableSimState = undefined;
+                            if (hadOngoingCall) {
+                                exports.evtOngoingCall.post(userSim);
+                            }
                             exports.evtSimIsOnlineStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
@@ -6409,12 +6411,12 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
                                 location.reload();
                                 return [2 /*return*/];
                             }
-                            userSim.isOnline = true;
+                            userSim.reachableSimState = isGsmConnectivityOk ?
+                                ({ "isGsmConnectivityOk": true, cellSignalStrength: cellSignalStrength, "ongoingCall": undefined }) :
+                                ({ "isGsmConnectivityOk": false, cellSignalStrength: cellSignalStrength });
                             userSim.password = password;
                             userSim.dongle = simDongle;
                             userSim.gatewayLocation = gatewayLocation;
-                            userSim.isGsmConnectivityOk = isGsmConnectivityOk;
-                            userSim.cellSignalStrength = cellSignalStrength;
                             exports.evtSimIsOnlineStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
@@ -6424,16 +6426,14 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     };
     exports.handlers[methodName] = handler;
 }
-//TODO: Make use of.
 exports.evtSimGsmConnectivityChange = new ts_events_extended_1.SyncEvent();
-exports.evtSimGsmConnectivityChange.attach(function (userSim) { return console.log("evtSimGsmConnectivityChange", { "isGsmConnectivityOk": userSim.isGsmConnectivityOk }); });
 {
     var methodName = apiDeclaration.notifyGsmConnectivityChange.methodName;
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, isGsmConnectivityOk = _a.isGsmConnectivityOk;
             return __awaiter(_this, void 0, void 0, function () {
-                var userSim;
+                var userSim, reachableSimState, hadOngoingCall;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0: return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
@@ -6443,7 +6443,27 @@ exports.evtSimGsmConnectivityChange.attach(function (userSim) { return console.l
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.isGsmConnectivityOk = isGsmConnectivityOk;
+                            reachableSimState = userSim.reachableSimState;
+                            if (reachableSimState === undefined) {
+                                throw new Error("assert");
+                            }
+                            if (isGsmConnectivityOk === reachableSimState.isGsmConnectivityOk) {
+                                throw new Error("assert");
+                            }
+                            if (reachableSimState.isGsmConnectivityOk) {
+                                hadOngoingCall = false;
+                                if (reachableSimState.ongoingCall !== undefined) {
+                                    delete reachableSimState.ongoingCall;
+                                    hadOngoingCall = true;
+                                }
+                                reachableSimState.isGsmConnectivityOk = false;
+                                if (hadOngoingCall) {
+                                    exports.evtOngoingCall.post(userSim);
+                                }
+                            }
+                            else {
+                                reachableSimState.isGsmConnectivityOk = true;
+                            }
                             exports.evtSimGsmConnectivityChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
@@ -6453,9 +6473,7 @@ exports.evtSimGsmConnectivityChange.attach(function (userSim) { return console.l
     };
     exports.handlers[methodName] = handler;
 }
-//TODO: Make use of.
 exports.evtSimCellSignalStrengthChange = new ts_events_extended_1.SyncEvent();
-exports.evtSimCellSignalStrengthChange.attach(function (userSim) { return console.log("evtSimCellSignalStrengthChange", { "cellSignalStrength": userSim.cellSignalStrength }); });
 {
     var methodName = apiDeclaration.notifyCellSignalStrengthChange.methodName;
     var handler = {
@@ -6472,13 +6490,119 @@ exports.evtSimCellSignalStrengthChange.attach(function (userSim) { return consol
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.cellSignalStrength = cellSignalStrength;
+                            if (userSim.reachableSimState === undefined) {
+                                throw new Error("Sim should be reachable");
+                            }
+                            userSim.reachableSimState.cellSignalStrength = cellSignalStrength;
                             exports.evtSimCellSignalStrengthChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
                 });
             });
         }
+    };
+    exports.handlers[methodName] = handler;
+}
+//TODO: Make use of.
+exports.evtOngoingCall = new ts_events_extended_1.SyncEvent();
+/*
+evtOngoingCall.attach(userSim => {
+
+    const { reachableSimState } = userSim;
+
+    if( !reachableSimState ){
+
+        console.log("===> sim no longer reachable");
+
+        return;
+        
+    }
+
+    if( !reachableSimState.isGsmConnectivityOk ){
+
+        console.log("=============> cell connectivity lost");
+
+        return;
+
+    }
+
+    if( reachableSimState.ongoingCall === undefined ){
+
+        console.log("=================> call terminated");
+
+        return;
+
+    }
+
+    console.log("===========> ", JSON.stringify(reachableSimState.ongoingCall, null, 2));
+
+});
+*/
+{
+    var methodName = apiDeclaration.notifyOngoingCall.methodName;
+    var handler = {
+        "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
+            var imsi, userSim, ongoingCallId, reachableSimState, ongoingCall, reachableSimState, ongoingCallId, from, number, isUserInCall, otherUserInCallEmails, prevOngoingCall_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        imsi = params.imsi;
+                        return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
+                    case 1:
+                        userSim = (_a.sent())
+                            .find(function (_a) {
+                            var sim = _a.sim;
+                            return sim.imsi === imsi;
+                        });
+                        if (params.isTerminated) {
+                            ongoingCallId = params.ongoingCallId;
+                            reachableSimState = userSim.reachableSimState;
+                            if (!reachableSimState) {
+                                //NOTE: The event would have been posted in setSimOffline handler.
+                                return [2 /*return*/];
+                            }
+                            if (!reachableSimState.isGsmConnectivityOk) {
+                                //NOTE: If we have had event notifying connectivity lost
+                                //before this event the evtOngoingCall will have been posted
+                                //in notifyGsmConnectivityChange handler function.
+                                return [2 /*return*/];
+                            }
+                            if (reachableSimState.ongoingCall === undefined ||
+                                reachableSimState.ongoingCall.ongoingCallId !== ongoingCallId) {
+                                return [2 /*return*/];
+                            }
+                            reachableSimState.ongoingCall = undefined;
+                        }
+                        else {
+                            ongoingCall = params.ongoingCall;
+                            reachableSimState = userSim.reachableSimState;
+                            if (reachableSimState === undefined) {
+                                throw new Error("assert");
+                            }
+                            if (!reachableSimState.isGsmConnectivityOk) {
+                                throw new Error("assert");
+                            }
+                            if (reachableSimState.ongoingCall === undefined) {
+                                reachableSimState.ongoingCall = ongoingCall;
+                            }
+                            else if (reachableSimState.ongoingCall.ongoingCallId !== ongoingCall.ongoingCallId) {
+                                reachableSimState.ongoingCall === undefined;
+                                exports.evtOngoingCall.post(userSim);
+                                reachableSimState.ongoingCall = ongoingCall;
+                            }
+                            else {
+                                ongoingCallId = ongoingCall.ongoingCallId, from = ongoingCall.from, number = ongoingCall.number, isUserInCall = ongoingCall.isUserInCall, otherUserInCallEmails = ongoingCall.otherUserInCallEmails;
+                                prevOngoingCall_1 = reachableSimState.ongoingCall;
+                                Object.assign(prevOngoingCall_1, { ongoingCallId: ongoingCallId, from: from, number: number, isUserInCall: isUserInCall });
+                                prevOngoingCall_1.otherUserInCallEmails.splice(0, prevOngoingCall_1.otherUserInCallEmails.length);
+                                otherUserInCallEmails.forEach(function (email) { return prevOngoingCall_1.otherUserInCallEmails.push(email); });
+                            }
+                        }
+                        exports.evtOngoingCall.post(userSim);
+                        return [2 /*return*/, undefined];
+                }
+            });
+        }); }
     };
     exports.handlers[methodName] = handler;
 }
@@ -6881,12 +7005,20 @@ exports.evtSharingRequestResponse = new ts_events_extended_1.SyncEvent();
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.ownership.sharedWith.notConfirmed.splice(userSim.ownership.sharedWith.notConfirmed.indexOf(email), 1);
-                            if (isAccepted) {
-                                userSim.ownership.sharedWith.confirmed.push(email);
+                            switch (userSim.ownership.status) {
+                                case "OWNED":
+                                    userSim.ownership.sharedWith.notConfirmed.splice(userSim.ownership.sharedWith.notConfirmed.indexOf(email), 1);
+                                    if (isAccepted) {
+                                        userSim.ownership.sharedWith.confirmed.push(email);
+                                    }
+                                    break;
+                                case "SHARED CONFIRMED":
+                                    if (isAccepted) {
+                                        userSim.ownership.otherUserEmails.push(email);
+                                    }
+                                    break;
                             }
-                            exports.evtSharingRequestResponse.post({ userSim: userSim, email: email, isAccepted: isAccepted });
-                            bootbox_custom.alert(email + " " + (isAccepted ? "accepted" : "rejected") + " your sharing request for " + userSim.friendlyName);
+                            bootbox_custom.alert(email + " " + (isAccepted ? "accepted" : "rejected") + " sharing request for " + userSim.friendlyName);
                             return [2 /*return*/, undefined];
                     }
                 });
@@ -6895,9 +7027,9 @@ exports.evtSharingRequestResponse = new ts_events_extended_1.SyncEvent();
     };
     exports.handlers[methodName] = handler;
 }
-exports.evtSharedSimUnregistered = new ts_events_extended_1.SyncEvent();
+exports.evtOtherSimUserUnregisteredSim = new ts_events_extended_1.SyncEvent();
 {
-    var methodName = apiDeclaration.notifySharedSimUnregistered.methodName;
+    var methodName = apiDeclaration.notifyOtherSimUserUnregisteredSim.methodName;
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, email = _a.email;
@@ -6912,8 +7044,14 @@ exports.evtSharedSimUnregistered = new ts_events_extended_1.SyncEvent();
                                 var sim = _a.sim;
                                 return sim.imsi === imsi;
                             });
-                            userSim.ownership.sharedWith.confirmed.splice(userSim.ownership.sharedWith.confirmed.indexOf(email), 1);
-                            exports.evtSharedSimUnregistered.post({ userSim: userSim, email: email });
+                            switch (userSim.ownership.status) {
+                                case "OWNED":
+                                    userSim.ownership.sharedWith.confirmed.splice(userSim.ownership.sharedWith.confirmed.indexOf(email), 1);
+                                    break;
+                                case "SHARED CONFIRMED":
+                                    userSim.ownership.otherUserEmails.splice(userSim.ownership.otherUserEmails.indexOf(email), 1);
+                                    break;
+                            }
                             bootbox_custom.alert(email + " no longer share " + userSim.friendlyName);
                             return [2 /*return*/, undefined];
                     }
@@ -7234,14 +7372,13 @@ exports.acceptSharingRequest = (function () {
                             "towardSimEncryptKeyStr": notConfirmedUserSim.towardSimEncryptKeyStr,
                             "dongle": notConfirmedUserSim.dongle,
                             "gatewayLocation": notConfirmedUserSim.gatewayLocation,
-                            "isOnline": notConfirmedUserSim.isOnline,
                             "ownership": {
                                 "status": "SHARED CONFIRMED",
-                                "ownerEmail": notConfirmedUserSim.ownership.ownerEmail
+                                "ownerEmail": notConfirmedUserSim.ownership.ownerEmail,
+                                "otherUserEmails": notConfirmedUserSim.ownership.otherUserEmails
                             },
                             "phonebook": notConfirmedUserSim.phonebook,
-                            "isGsmConnectivityOk": notConfirmedUserSim.isGsmConnectivityOk,
-                            "cellSignalStrength": notConfirmedUserSim.cellSignalStrength
+                            "reachableSimState": notConfirmedUserSim.reachableSimState
                         };
                         return [4 /*yield*/, exports.getUsableUserSims()];
                     case 2:
@@ -7803,6 +7940,10 @@ var notifyCellSignalStrengthChange;
 (function (notifyCellSignalStrengthChange) {
     notifyCellSignalStrengthChange.methodName = "notifyCellSignalStrengthChange";
 })(notifyCellSignalStrengthChange = exports.notifyCellSignalStrengthChange || (exports.notifyCellSignalStrengthChange = {}));
+var notifyOngoingCall;
+(function (notifyOngoingCall) {
+    notifyOngoingCall.methodName = "notifyOngoingCall";
+})(notifyOngoingCall = exports.notifyOngoingCall || (exports.notifyOngoingCall = {}));
 /** posted when a user that share this SIM create or update a contact */
 var notifyContactCreatedOrUpdated;
 (function (notifyContactCreatedOrUpdated) {
@@ -7832,10 +7973,10 @@ var notifySharingRequestResponse;
 (function (notifySharingRequestResponse) {
     notifySharingRequestResponse.methodName = "notifySharingRequestResponse";
 })(notifySharingRequestResponse = exports.notifySharingRequestResponse || (exports.notifySharingRequestResponse = {}));
-var notifySharedSimUnregistered;
-(function (notifySharedSimUnregistered) {
-    notifySharedSimUnregistered.methodName = "notifySharedSimUnregistered";
-})(notifySharedSimUnregistered = exports.notifySharedSimUnregistered || (exports.notifySharedSimUnregistered = {}));
+var notifyOtherSimUserUnregisteredSim;
+(function (notifyOtherSimUserUnregisteredSim) {
+    notifyOtherSimUserUnregisteredSim.methodName = "notifyOtherSimUserUnregisteredSim";
+})(notifyOtherSimUserUnregisteredSim = exports.notifyOtherSimUserUnregisteredSim || (exports.notifyOtherSimUserUnregisteredSim = {}));
 var notifyLoggedFromOtherTab;
 (function (notifyLoggedFromOtherTab) {
     notifyLoggedFromOtherTab.methodName = "notifyLoggedFromOtherTab";
