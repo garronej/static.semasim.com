@@ -4224,6 +4224,37 @@ var Ua = /** @class */ (function () {
             _this.evtIncomingMessage.post(__assign({}, evtData, { "onProcessed": onProcessed }));
             return pr;
         });
+        /*
+        public sendMessage(
+            number: phoneNumber,
+            text: string,
+            exactSendDate: Date,
+            appendPromotionalMessage: boolean
+        ): Promise<void> {
+            return new Promise<void>(
+                async (resolve, reject) => this.jsSipUa.sendMessage(
+                    `sip:${number}@${baseDomain}`,
+                    "| encrypted message bundled in header |",
+                    {
+                        "contentType": "text/plain; charset=UTF-8",
+                        "extraHeaders": await smuggleBundledDataInHeaders<gwTypes.BundledData.ClientToServer.Message>(
+                            {
+                                "type": "MESSAGE",
+                                "textB64": Buffer.from(text, "utf8").toString("base64"),
+                                "exactSendDateTime": exactSendDate.getTime(),
+                                appendPromotionalMessage
+                            },
+                            this.towardSimEncryptor
+                        ).then(headers => Object.keys(headers).map(key => `${key}: ${headers[key]}`)),
+                        "eventHandlers": {
+                            "succeeded": () => resolve(),
+                            "failed": ({ cause }) => reject(new Error(`Send message failed ${cause}`))
+                        }
+                    }
+                )
+            );
+        }
+        */
         /** return exactSendDate to match with sendReport and statusReport */
         this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
         var uri = "sip:" + imsi + "-webRTC@" + env_1.baseDomain;
@@ -4313,7 +4344,7 @@ var Ua = /** @class */ (function () {
             });
         });
     };
-    Ua.prototype.sendMessage = function (number, text, exactSendDate, appendPromotionalMessage) {
+    Ua.prototype.sendMessage = function (number, bundledData) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e;
@@ -4327,12 +4358,7 @@ var Ua = /** @class */ (function () {
                             "contentType": "text/plain; charset=UTF-8"
                         };
                         _e = "extraHeaders";
-                        return [4 /*yield*/, bundledData_1.smuggleBundledDataInHeaders({
-                                "type": "MESSAGE",
-                                "textB64": Buffer.from(text, "utf8").toString("base64"),
-                                "exactSendDateTime": exactSendDate.getTime(),
-                                appendPromotionalMessage: appendPromotionalMessage
-                            }, this.towardSimEncryptor).then(function (headers) { return Object.keys(headers).map(function (key) { return key + ": " + headers[key]; }); })];
+                        return [4 /*yield*/, bundledData_1.smuggleBundledDataInHeaders(bundledData, this.towardSimEncryptor).then(function (headers) { return Object.keys(headers).map(function (key) { return key + ": " + headers[key]; }); })];
                     case 1: return [2 /*return*/, _b.apply(_a, _c.concat([(_d[_e] = _f.sent(),
                                 _d["eventHandlers"] = {
                                     "succeeded": function () { return resolve(); },

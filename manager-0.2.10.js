@@ -8120,6 +8120,7 @@ function isAscendingAlphabeticalOrder(a, b) {
     return vA < vB;
 }
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
+exports.isForWeb = true;
 
 },{}],56:[function(require,module,exports){
 "use strict";

@@ -3235,7 +3235,8 @@ var UiConversation = /** @class */ (function () {
         this.evtVoiceCall = new ts_events_extended_1.VoidSyncEvent();
         this.evtSendText = new ts_events_extended_1.SyncEvent();
         this.evtDelete = new ts_events_extended_1.VoidSyncEvent();
-        this.evtChecked = new ts_events_extended_1.VoidSyncEvent();
+        //public readonly evtChecked = new SyncEvent<{ from: "OTHER UA" | "THIS UA"; }>();
+        this.evtChecked = new ts_events_extended_1.SyncEvent();
         this.textarea = this.structure.find("textarea");
         this.aSend = this.structure.find("a.id_send");
         this.ul = this.structure.find("ul");
@@ -3278,13 +3279,13 @@ var UiConversation = /** @class */ (function () {
         });
         this.textarea
             .on("keypress", function (event) {
-            _this.evtChecked.post();
+            _this.evtChecked.post({ "from": "THIS UA" });
             if (event.key === "Enter" && !event.shiftKey) {
                 _this.aSend.trigger("click");
                 return false;
             }
         })
-            .on("focus", function () { return _this.evtChecked.post(); });
+            .on("focus", function () { return _this.evtChecked.post({ "from": "THIS UA" }); });
         this.ul.slimScroll({
             "position": "right",
             "distance": '0px',
@@ -3365,7 +3366,7 @@ var UiConversation = /** @class */ (function () {
                 _this.ul.slimScroll({ "scrollTo": _this.ul.prop("scrollHeight") + "px" });
                 //NOTE: So that SMS from with no number to reply to can be marked as read.
                 if (!!_this.textarea.attr("disabled")) {
-                    _this.evtChecked.post();
+                    _this.evtChecked.post({ "from": "THIS UA" });
                 }
                 else {
                     _this.textarea.trigger("focus");
@@ -4495,9 +4496,12 @@ var UiWebphoneController = /** @class */ (function () {
             var fromNumber = _a.fromNumber, bundledData = _a.bundledData, onProcessed = _a.onProcessed;
             return __awaiter(_this, void 0, void 0, function () {
                 var wdChat, prWdMessage, wdMessage;
+                var _this = this;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
-                        case 0: return [4 /*yield*/, this.getOrCreateChatByPhoneNumber(fromNumber)];
+                        case 0:
+                            console.log(JSON.stringify({ fromNumber: fromNumber, bundledData: bundledData }, null, 2));
+                            return [4 /*yield*/, this.getOrCreateChatByPhoneNumber(fromNumber)];
                         case 1:
                             wdChat = _b.sent();
                             prWdMessage = (function () {
@@ -4558,16 +4562,34 @@ var UiWebphoneController = /** @class */ (function () {
                                         };
                                         return remoteApiCaller.newWdMessage(wdChat, message);
                                     }
+                                    case "CONVERSATION CHECKED OUT FROM OTHER UA": {
+                                        console.log("conversation checked out from other ua !");
+                                        var uiConversation = _this._uiConversations.get(wdChat);
+                                        var pr = void 0;
+                                        if (uiConversation !== undefined) {
+                                            var resolvePr_1;
+                                            pr = new Promise(function (resolve) { return resolvePr_1 = function () { return resolve(undefined); }; });
+                                            uiConversation.evtChecked.post({
+                                                "from": "OTHER UA",
+                                                "onProcessed": function () { return resolvePr_1(); }
+                                            });
+                                        }
+                                        else {
+                                            pr = Promise.resolve(undefined);
+                                        }
+                                        return pr;
+                                    }
                                 }
                             })();
                             return [4 /*yield*/, prWdMessage];
                         case 2:
                             wdMessage = _b.sent();
                             onProcessed();
-                            if (!!wdMessage) {
-                                this.getOrCreateUiConversation(wdChat).newMessage(wdMessage);
-                                this.uiPhonebook.notifyContactChanged(wdChat);
+                            if (!wdMessage) {
+                                return [2 /*return*/];
                             }
+                            this.getOrCreateUiConversation(wdChat).newMessage(wdMessage);
+                            this.uiPhonebook.notifyContactChanged(wdChat);
                             return [2 /*return*/];
                     }
                 });
@@ -4681,15 +4703,39 @@ var UiWebphoneController = /** @class */ (function () {
         var uiConversation = new UiConversation_1.UiConversation(this.userSim, function () { return _this.ua.isRegistered; }, wdChat);
         this._uiConversations.set(wdChat, uiConversation);
         this.structure.find("div.id_colRight").append(uiConversation.structure);
-        uiConversation.evtChecked.attach(function () { return __awaiter(_this, void 0, void 0, function () {
+        uiConversation.evtChecked.attach(function (data) { return __awaiter(_this, void 0, void 0, function () {
             var isUpdated;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, remoteApiCaller.updateWdChatIdOfLastMessageSeen(wdChat)];
                     case 1:
                         isUpdated = _a.sent();
+                        if (data.from === "OTHER UA") {
+                            data.onProcessed();
+                        }
                         if (!isUpdated) {
                             return [2 /*return*/];
+                        }
+                        if (data.from === "THIS UA") {
+                            //TODO: Notify that the conversation have been checked.
+                            console.log("Here we should notify that the converstation have been checked");
+                            /*
+                            this.ua.sendMessage(
+                                wdChat.contactNumber,
+                                (() => {
+            
+                                    const out: gwTypes.BundledData.ClientToServer.ConversationCheckedOut = {
+                                        "type": "CONVERSATION CHECKED OUT",
+                                        "textB64": Buffer.from("checked out from web", "utf8").toString("base64"),
+                                        "checkedOutAtTime": Date.now()
+                                    }
+            
+                                    return out;
+            
+            
+                                })()
+                            ).catch(() => console.log("Failed to send conversation checked out"));
+                            */
                         }
                         this.uiPhonebook.notifyContactChanged(wdChat);
                         return [2 /*return*/];
@@ -4698,6 +4744,7 @@ var UiWebphoneController = /** @class */ (function () {
         }); });
         uiConversation.evtSendText.attach(function (text) { return __awaiter(_this, void 0, void 0, function () {
             var exactSendDate, wdMessage, _a, _b, _c, error_1, wdMessageUpdated;
+            var _this = this;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
@@ -4718,10 +4765,26 @@ var UiWebphoneController = /** @class */ (function () {
                     case 2:
                         _d.trys.push([2, 5, , 7]);
                         _b = (_a = this.ua).sendMessage;
-                        _c = [uiConversation.wdChat.contactNumber,
-                            text,
-                            exactSendDate];
-                        return [4 /*yield*/, remoteApiCaller.shouldAppendPromotionalMessage()];
+                        _c = [uiConversation.wdChat.contactNumber];
+                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                                var out, _a, _b;
+                                return __generator(this, function (_c) {
+                                    switch (_c.label) {
+                                        case 0:
+                                            _a = {
+                                                "type": "MESSAGE",
+                                                "textB64": Buffer.from(text, "utf8").toString("base64"),
+                                                "exactSendDateTime": exactSendDate.getTime()
+                                            };
+                                            _b = "appendPromotionalMessage";
+                                            return [4 /*yield*/, remoteApiCaller.shouldAppendPromotionalMessage()];
+                                        case 1:
+                                            out = (_a[_b] = _c.sent(),
+                                                _a);
+                                            return [2 /*return*/, out];
+                                    }
+                                });
+                            }); })()];
                     case 3: return [4 /*yield*/, _b.apply(_a, _c.concat([_d.sent()]))];
                     case 4:
                         _d.sent();
@@ -12322,6 +12385,37 @@ var Ua = /** @class */ (function () {
             _this.evtIncomingMessage.post(__assign({}, evtData, { "onProcessed": onProcessed }));
             return pr;
         });
+        /*
+        public sendMessage(
+            number: phoneNumber,
+            text: string,
+            exactSendDate: Date,
+            appendPromotionalMessage: boolean
+        ): Promise<void> {
+            return new Promise<void>(
+                async (resolve, reject) => this.jsSipUa.sendMessage(
+                    `sip:${number}@${baseDomain}`,
+                    "| encrypted message bundled in header |",
+                    {
+                        "contentType": "text/plain; charset=UTF-8",
+                        "extraHeaders": await smuggleBundledDataInHeaders<gwTypes.BundledData.ClientToServer.Message>(
+                            {
+                                "type": "MESSAGE",
+                                "textB64": Buffer.from(text, "utf8").toString("base64"),
+                                "exactSendDateTime": exactSendDate.getTime(),
+                                appendPromotionalMessage
+                            },
+                            this.towardSimEncryptor
+                        ).then(headers => Object.keys(headers).map(key => `${key}: ${headers[key]}`)),
+                        "eventHandlers": {
+                            "succeeded": () => resolve(),
+                            "failed": ({ cause }) => reject(new Error(`Send message failed ${cause}`))
+                        }
+                    }
+                )
+            );
+        }
+        */
         /** return exactSendDate to match with sendReport and statusReport */
         this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
         var uri = "sip:" + imsi + "-webRTC@" + env_1.baseDomain;
@@ -12411,7 +12505,7 @@ var Ua = /** @class */ (function () {
             });
         });
     };
-    Ua.prototype.sendMessage = function (number, text, exactSendDate, appendPromotionalMessage) {
+    Ua.prototype.sendMessage = function (number, bundledData) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e;
@@ -12425,12 +12519,7 @@ var Ua = /** @class */ (function () {
                             "contentType": "text/plain; charset=UTF-8"
                         };
                         _e = "extraHeaders";
-                        return [4 /*yield*/, bundledData_1.smuggleBundledDataInHeaders({
-                                "type": "MESSAGE",
-                                "textB64": Buffer.from(text, "utf8").toString("base64"),
-                                "exactSendDateTime": exactSendDate.getTime(),
-                                appendPromotionalMessage: appendPromotionalMessage
-                            }, this.towardSimEncryptor).then(function (headers) { return Object.keys(headers).map(function (key) { return key + ": " + headers[key]; }); })];
+                        return [4 /*yield*/, bundledData_1.smuggleBundledDataInHeaders(bundledData, this.towardSimEncryptor).then(function (headers) { return Object.keys(headers).map(function (key) { return key + ": " + headers[key]; }); })];
                     case 1: return [2 /*return*/, _b.apply(_a, _c.concat([(_d[_e] = _f.sent(),
                                 _d["eventHandlers"] = {
                                     "succeeded": function () { return resolve(); },
@@ -16172,6 +16261,7 @@ function isAscendingAlphabeticalOrder(a, b) {
     return vA < vB;
 }
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
+exports.isForWeb = true;
 
 },{}],82:[function(require,module,exports){
 "use strict";
