@@ -5845,7 +5845,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3,"ts-events-extended":91}],47:[function(require,module,exports){
+},{"buffer":3,"ts-events-extended":95}],47:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -6157,7 +6157,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":46,"./api/ApiMessage":48,"./core":52,"./misc":56,"colors":61,"ts-events-extended":91}],48:[function(require,module,exports){
+},{"./IConnection":46,"./api/ApiMessage":48,"./core":52,"./misc":56,"colors":61,"ts-events-extended":95}],48:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -6238,13 +6238,14 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":52,"../misc":56,"buffer":3,"transfer-tools":83}],49:[function(require,module,exports){
+},{"../core":52,"../misc":56,"buffer":3,"transfer-tools":87}],49:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -6436,10 +6437,11 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -6593,7 +6595,7 @@ function enableKeepAlive(socket, interval) {
                 case 10:
                     if (Math.abs(Date.now() - before - interval) > 10000) {
                         socket.destroy([
-                            "A keep alive 'PING' haven't been as scheduled, we prefer closing the connection.",
+                            "A keep alive 'PING' haven't been sent as scheduled, we prefer closing the connection.",
                             "This happen for example while running in react native and the app is in the background.",
                             "The setTimeout callbacks are called only when the app is woke up"
                         ].join(" "));
@@ -6651,7 +6653,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":56,"./ApiMessage":48,"setprototypeof":80}],51:[function(require,module,exports){
+},{"../misc":56,"./ApiMessage":48,"setprototypeof":84}],51:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -6743,7 +6745,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":54,"./legacy/sip":55,"buffer":3,"setprototypeof":80}],53:[function(require,module,exports){
+},{"./legacy/sdp":54,"./legacy/sip":55,"buffer":3,"setprototypeof":84}],53:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -7276,15 +7278,16 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -7488,7 +7491,7 @@ exports.buildNextHopPacket = buildNextHopPacket;
 (function (buildNextHopPacket) {
     function buildLocalAoRWithParsedUri(socket) {
         return {
-            "uri": __assign({}, core.parseUri("sip:" + socket.localAddress + ":" + socket.localPort), { "params": {
+            "uri": __assign(__assign({}, core.parseUri("sip:" + socket.localAddress + ":" + socket.localPort)), { "params": {
                     "transport": socket.protocol,
                     "lr": null
                 } }),
@@ -7625,7 +7628,16 @@ var stylize = colors.stylize = function stylize(str, style) {
     return str+'';
   }
 
-  return ansiStyles[style].open + str + ansiStyles[style].close;
+  var styleMap = ansiStyles[style];
+
+  // Stylize should work for non-ANSI styles, too
+  if(!styleMap && style in colors){
+    // Style maps like trap operate as functions on strings;
+    // they don't have properties like open or close.
+    return colors[style](str);
+  }
+
+  return styleMap.open + str + styleMap.close;
 };
 
 var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
@@ -7668,7 +7680,8 @@ function applyStyle() {
   var args = Array.prototype.slice.call(arguments);
 
   var str = args.map(function(arg) {
-    if (arg !== undefined && arg.constructor === String) {
+    // Use weak equality check so we can colorize null/undefined in safe mode
+    if (arg != null && arg.constructor === String) {
       return arg;
     } else {
       return util.inspect(arg);
@@ -8079,7 +8092,8 @@ module['exports'] = function(colors) {
 },{}],64:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
-    'blue', 'white', 'cyan', 'magenta'];
+    'blue', 'white', 'cyan', 'magenta', 'brightYellow', 'brightRed',
+    'brightGreen', 'brightBlue', 'brightWhite', 'brightCyan', 'brightMagenta'];
   return function(letter, i, exploded) {
     return letter === ' ' ? letter :
       colors[
@@ -8146,6 +8160,14 @@ var codes = {
   gray: [90, 39],
   grey: [90, 39],
 
+  brightRed: [91, 39],
+  brightGreen: [92, 39],
+  brightYellow: [93, 39],
+  brightBlue: [94, 39],
+  brightMagenta: [95, 39],
+  brightCyan: [96, 39],
+  brightWhite: [97, 39],
+
   bgBlack: [40, 49],
   bgRed: [41, 49],
   bgGreen: [42, 49],
@@ -8154,6 +8176,16 @@ var codes = {
   bgMagenta: [45, 49],
   bgCyan: [46, 49],
   bgWhite: [47, 49],
+  bgGray: [100, 49],
+  bgGrey: [100, 49],
+
+  bgBrightRed: [101, 49],
+  bgBrightGreen: [102, 49],
+  bgBrightYellow: [103, 49],
+  bgBrightBlue: [104, 49],
+  bgBrightMagenta: [105, 49],
+  bgBrightCyan: [106, 49],
+  bgBrightWhite: [107, 49],
 
   // legacy styles for colors pre v1.0.0
   blackBG: [40, 49],
@@ -8375,6 +8407,14 @@ arguments[4][30][0].apply(exports,arguments)
 },{"./implementation":69,"dup":30}],71:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
 },{"dup":31,"function-bind":70}],72:[function(require,module,exports){
+arguments[4][38][0].apply(exports,arguments)
+},{"dup":38}],73:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23}],74:[function(require,module,exports){
+arguments[4][27][0].apply(exports,arguments)
+},{"./Map":73,"dup":27}],75:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25,"minimal-polyfills/dist/lib/WeakMap":74}],76:[function(require,module,exports){
 // A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
@@ -8436,7 +8476,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":73,"./lib/tychei":74,"./lib/xor128":75,"./lib/xor4096":76,"./lib/xorshift7":77,"./lib/xorwow":78,"./seedrandom":79}],73:[function(require,module,exports){
+},{"./lib/alea":77,"./lib/tychei":78,"./lib/xor128":79,"./lib/xor4096":80,"./lib/xorshift7":81,"./lib/xorwow":82,"./seedrandom":83}],77:[function(require,module,exports){
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -8552,7 +8592,7 @@ if (module && module.exports) {
 
 
 
-},{}],74:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 // A Javascript implementaion of the "Tyche-i" prng algorithm by
 // Samuel Neves and Filipe Araujo.
 // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
@@ -8657,7 +8697,7 @@ if (module && module.exports) {
 
 
 
-},{}],75:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 // A Javascript implementaion of the "xor128" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -8740,7 +8780,7 @@ if (module && module.exports) {
 
 
 
-},{}],76:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 // A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
 //
 // This fast non-cryptographic random number generator is designed for
@@ -8888,7 +8928,7 @@ if (module && module.exports) {
   (typeof define) == 'function' && define   // present with an AMD loader
 );
 
-},{}],77:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 // A Javascript implementaion of the "xorshift7" algorithm by
 // François Panneton and Pierre L'ecuyer:
 // "On the Xorgshift Random Number Generators"
@@ -8987,7 +9027,7 @@ if (module && module.exports) {
 );
 
 
-},{}],78:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 // A Javascript implementaion of the "xorwow" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -9075,9 +9115,9 @@ if (module && module.exports) {
 
 
 
-},{}],79:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 /*
-Copyright 2014 David Bau.
+Copyright 2019 David Bau.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -9100,15 +9140,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-(function (pool, math) {
+(function (global, pool, math) {
 //
 // The following constants are related to IEEE 754 limits.
 //
 
-// Detect the global object, even if operating in strict mode.
-// http://stackoverflow.com/a/14387057/265298
-var global = (0, eval)('this'),
-    width = 256,        // each RC4 output is 0 <= x < 256
+var width = 256,        // each RC4 output is 0 <= x < 256
     chunks = 6,         // at least six RC4 outputs for each double
     digits = 52,        // there are 52 significant digits in a double
     rngname = 'random', // rngname: name for Math.random and Math.seedrandom
@@ -9326,17 +9363,20 @@ if ((typeof module) == 'object' && module.exports) {
 
 // End anonymous scope, and pass initial values.
 })(
+  // global: `self` in browsers (including strict mode and web workers),
+  // otherwise `this` in Node and other environments
+  (typeof self !== 'undefined') ? self : this,
   [],     // pool: entropy pool starts empty
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":2}],80:[function(require,module,exports){
+},{"crypto":2}],84:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],81:[function(require,module,exports){
+},{"dup":43}],85:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32,"has":71}],82:[function(require,module,exports){
+},{"dup":32,"has":71}],86:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"dup":28,"super-json":81}],83:[function(require,module,exports){
+},{"dup":28,"super-json":85}],87:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -9348,7 +9388,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":82,"./stringTransform":84,"./stringTransformExt":85,"./testing":86}],84:[function(require,module,exports){
+},{"./JSON_CUSTOM":86,"./stringTransform":88,"./stringTransformExt":89,"./testing":90}],88:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -9410,7 +9450,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3}],85:[function(require,module,exports){
+},{"buffer":3}],89:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -9478,7 +9518,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":84}],86:[function(require,module,exports){
+},{"./stringTransform":88}],90:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -9778,27 +9818,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":84,"seedrandom":72}],87:[function(require,module,exports){
+},{"./stringTransform":88,"seedrandom":76}],91:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"./SyncEventBase":88,"dup":33}],88:[function(require,module,exports){
+},{"./SyncEventBase":92,"dup":33}],92:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":89,"dup":34}],89:[function(require,module,exports){
+},{"./SyncEventBaseProtected":93,"dup":34}],93:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./defs":90,"dup":35,"minimal-polyfills/dist/lib/Array.prototype.find":92,"minimal-polyfills/dist/lib/Map":93,"run-exclusive":94}],90:[function(require,module,exports){
+},{"./defs":94,"dup":35,"minimal-polyfills/dist/lib/Array.prototype.find":72,"minimal-polyfills/dist/lib/Map":73,"run-exclusive":75}],94:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"dup":36,"setprototypeof":80}],91:[function(require,module,exports){
+},{"dup":36,"setprototypeof":84}],95:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"./SyncEvent":87,"./defs":90,"dup":37}],92:[function(require,module,exports){
-arguments[4][38][0].apply(exports,arguments)
-},{"dup":38}],93:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],94:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25,"minimal-polyfills/dist/lib/WeakMap":96}],95:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],96:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"./Map":95,"dup":27}],97:[function(require,module,exports){
+},{"./SyncEvent":91,"./defs":94,"dup":37}],96:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
@@ -9879,7 +9909,7 @@ var UiButtonBar = /** @class */ (function () {
 }());
 exports.UiButtonBar = UiButtonBar;
 
-},{"../templates/UiButtonBar.html":109,"frontend-shared/dist/lib/loadUiClassHtml":120,"frontend-shared/node_modules/ts-events-extended":171}],98:[function(require,module,exports){
+},{"../templates/UiButtonBar.html":108,"frontend-shared/dist/lib/loadUiClassHtml":119,"frontend-shared/node_modules/ts-events-extended":170}],97:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -10420,7 +10450,7 @@ function interact_getUserSimContainingNumber(userSims, number) {
     });
 }
 
-},{"../templates/UiController.html":110,"./UiButtonBar":97,"./UiPhonebook":99,"./UiShareSim":100,"./UiSimRow":101,"frontend-shared/dist/lib/loadUiClassHtml":120,"frontend-shared/dist/lib/toBackend/events":132,"frontend-shared/dist/lib/toBackend/remoteApiCaller/base":134,"frontend-shared/dist/lib/types/userSim":139,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/node_modules/phone-number":45,"frontend-shared/node_modules/ts-events-extended":171}],99:[function(require,module,exports){
+},{"../templates/UiController.html":109,"./UiButtonBar":96,"./UiPhonebook":98,"./UiShareSim":99,"./UiSimRow":100,"frontend-shared/dist/lib/loadUiClassHtml":119,"frontend-shared/dist/lib/toBackend/events":131,"frontend-shared/dist/lib/toBackend/remoteApiCaller/base":133,"frontend-shared/dist/lib/types/userSim":138,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/phone-number":45,"frontend-shared/node_modules/ts-events-extended":170}],98:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -11056,7 +11086,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../templates/UiPhonebook.html":111,"frontend-shared/dist/lib/env":118,"frontend-shared/dist/lib/loadUiClassHtml":120,"frontend-shared/dist/tools/isAscendingAlphabeticalOrder":145,"frontend-shared/dist/tools/modal":151,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/node_modules/phone-number":45,"frontend-shared/node_modules/ts-events-extended":171,"minimal-polyfills/dist/lib/Map":107}],100:[function(require,module,exports){
+},{"../templates/UiPhonebook.html":110,"frontend-shared/dist/lib/env":117,"frontend-shared/dist/lib/loadUiClassHtml":119,"frontend-shared/dist/tools/isAscendingAlphabeticalOrder":144,"frontend-shared/dist/tools/modal":150,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/phone-number":45,"frontend-shared/node_modules/ts-events-extended":170,"minimal-polyfills/dist/lib/Map":106}],99:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11294,7 +11324,7 @@ var UiShareSim = /** @class */ (function () {
 }());
 exports.UiShareSim = UiShareSim;
 
-},{"../templates/UiShareSim.html":112,"../templates/UiShareSim.less":113,"frontend-shared/dist/lib/loadUiClassHtml":120,"frontend-shared/dist/tools/modal":151,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/node_modules/ts-events-extended":171}],101:[function(require,module,exports){
+},{"../templates/UiShareSim.html":111,"../templates/UiShareSim.less":112,"frontend-shared/dist/lib/loadUiClassHtml":119,"frontend-shared/dist/tools/modal":150,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/ts-events-extended":170}],100:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
@@ -11471,7 +11501,7 @@ var UiSimRow = /** @class */ (function () {
 }());
 exports.UiSimRow = UiSimRow;
 
-},{"../templates/UiSimRow.html":114,"../templates/UiSimRow.less":115,"frontend-shared/dist/lib/loadUiClassHtml":120,"frontend-shared/node_modules/ts-events-extended":171}],102:[function(require,module,exports){
+},{"../templates/UiSimRow.html":113,"../templates/UiSimRow.less":114,"frontend-shared/dist/lib/loadUiClassHtml":119,"frontend-shared/node_modules/ts-events-extended":170}],101:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11644,7 +11674,7 @@ $(document).ready(function () {
     onLoggedIn();
 });
 
-},{"./UiController":98,"frontend-shared/dist/lib/availablePages":117,"frontend-shared/dist/lib/notifyHostWhenPageIsReady":127,"frontend-shared/dist/lib/toBackend/connection":131,"frontend-shared/dist/lib/toBackend/remoteApiCaller/base":134,"frontend-shared/dist/lib/webApiCaller":141,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/dist/tools/polyfills/Object.assign":153,"minimal-polyfills/dist/lib/Array.from":105,"minimal-polyfills/dist/lib/ArrayBuffer.isView":106,"minimal-polyfills/dist/lib/String.prototype.startsWith":108}],103:[function(require,module,exports){
+},{"./UiController":97,"frontend-shared/dist/lib/availablePages":116,"frontend-shared/dist/lib/notifyHostWhenPageIsReady":126,"frontend-shared/dist/lib/toBackend/connection":130,"frontend-shared/dist/lib/toBackend/remoteApiCaller/base":133,"frontend-shared/dist/lib/webApiCaller":140,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/dist/tools/polyfills/Object.assign":152,"minimal-polyfills/dist/lib/Array.from":104,"minimal-polyfills/dist/lib/ArrayBuffer.isView":105,"minimal-polyfills/dist/lib/String.prototype.startsWith":107}],102:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -11683,48 +11713,48 @@ module.exports.byUrl = function(url) {
   }
 };
 
-},{}],104:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 module.exports = require('cssify');
 
-},{"cssify":103}],105:[function(require,module,exports){
+},{"cssify":102}],104:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],106:[function(require,module,exports){
+},{"dup":22}],105:[function(require,module,exports){
 if (!ArrayBuffer["isView"]) {
     ArrayBuffer.isView = function isView(a) {
         return a !== null && typeof (a) === "object" && a["buffer"] instanceof ArrayBuffer;
     };
 }
 
-},{}],107:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],108:[function(require,module,exports){
+},{"dup":23}],107:[function(require,module,exports){
 if (typeof String.prototype.startsWith !== "function") {
     String.prototype.startsWith = function startsWith(str) {
         return this.indexOf(str) === 0;
     };
 }
 
-},{}],109:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 module.exports = "<style>\r\n    .id_UiButtonBar .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiButtonBar .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n    @media (min-width: 768px) {\r\n        .id_UiButtonBar .id_g1 {\r\n            padding-right: 0px !important;\r\n        }\r\n        .id_UiButtonBar .id_g2 {\r\n            padding-left: 0px !important;\r\n        }\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiButtonBar col-xs-12 mb10\">\r\n\r\n    <div class=\"row\">\r\n\r\n        <div class=\"id_g1 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-default\">Details</button>\r\n                <button type=\"button\" class=\"btn btn-default\"> <i class=\"fa fa-arrow-left\"></i> </button>\r\n                <button type=\"button\" class=\"btn btn-danger\">Delete</button>\r\n                <button type=\"button\" class=\"btn btn-primary\">Contacts</button>\r\n            </div>\r\n        </div>\r\n        <div class=\"id_g2 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-success\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Make SIM usable by other Semasim users\">Share</button>\r\n                <button type=\"button\" class=\"btn btn-default\">Rename</button>\r\n                <button type=\"button\" class=\"btn btn-default\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Restart the GSM dongle that hold the SIM\">Reboot</button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n    \r\n</div>\r\n";
-},{}],110:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 module.exports = "\r\n<div class=\"id_UiController container-fluid panel-body row\">\r\n\r\n\r\n</div>";
-},{}],111:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 module.exports = "<style>\r\n\r\n    .id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    .id_UiPhonebook ul li > div .id_number {\r\n        cursor: text;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.selected > div {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n</style>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_number \"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>\r\n\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiPhonebook modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Sim Phonebook</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body p0\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row\">\r\n\r\n                                <div class=\"col-xd-12 pt15 pr15 pl15 pb5\">\r\n\r\n                                    <div style=\"float: right\">\r\n\r\n                                        <button class=\"id_edit btn btn-primary\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n                                        <!--<button class=\"id_edit btn btn-primary\"  type=\"button\">-->\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                            <!--<i class=\"semasim-icon-test-contact\" style=\"font-size: 17px;\"></i>-->\r\n                                        </button>\r\n                                        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n                                            <i class=\"glyphicon glyphicon-trash\"></i>\r\n                                            <span></span>\r\n                                            <!--<i class=\"semasim-icon-rubbish-bin\" style=\"font-size: 17px;\"></i>-->\r\n\r\n                                        </button>\r\n                                        <button class=\"id_createContact btn btn-success btn-sm\" type=\"button\" >\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-add_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                            <!--<i class=\"semasim-icon-contact\" style=\"font-size: 17px;\"></i>-->\r\n                                        </button>\r\n\r\n                                    </div>\r\n                                    <div style=\"overflow: hidden; padding-right: .5em;\">\r\n                                        <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search\"  style=\"width: 100%;\"/>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                                <div class=\"col-xs-12 pb15 bl15 pr15\">\r\n\r\n                                    <ul class=\"nav \">\r\n                                    </ul>\r\n\r\n                                </div>\r\n\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n";
-},{}],112:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 module.exports = "<style>\r\n</style>\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiShareSim modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Share SIM card</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row _toHideIfNotShared\">\r\n\r\n                                <div class=\"col-md-12\">\r\n\r\n                                    <label class=\"pt5\">Allowed users:</label>\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"id_stopSharing btn btn-danger btn-sm\" type=\"button\">\r\n                                            <span>Stop sharing</span>\r\n                                        </button>\r\n                                    </div>\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n                            <div class=\"id_list row b mt10 _toHideIfNotShared\">\r\n\r\n                            </div>\r\n\r\n                            <div class=\"row mt10\">\r\n\r\n                                <label class=\"col-md-12 pt5\">Invite users:</label>\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10\">\r\n                                    <input type=\"text\" class=\"id_emails\" name=\"email\">\r\n                                </div>\r\n\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10 id_message\">\r\n                                    <textarea class=\"form-control\" rows=\"2\">I would like to share SIM Free (06 34 39 39 99 ) with you.</textarea>\r\n                                    <i class=\"fa fa-comments textarea-icon s16\"></i>\r\n                                </div>\r\n\r\n                                <div class=\"col-md-12 mt10\">\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"btn btn-success id_submit\" type=\"button\">\r\n                                            <span>Submit share request</span>\r\n                                        </button>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_row col-md-12 pt10 pb10\">\r\n        <i class=\"glyphicon glyphicon-user mr10\"></i>\r\n        <span class=\"mr10 strong id_email\"></span>\r\n        <span class=\"mr10 text-nowrap id_isConfirmed\"></span>\r\n    </div>\r\n\r\n</div>";
-},{}],113:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 var css = ".id_UiShareSim .id_row {\n  cursor: pointer;\n}\n.id_UiShareSim .selected {\n  background-color: #e2e0db;\n}\n.id_UiShareSim .id_message textarea {\n  padding-left: 32px;\n}\n.id_UiShareSim .id_message i {\n  position: absolute;\n  top: 7px;\n  left: 8px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":104}],114:[function(require,module,exports){
+},{"lessify":103}],113:[function(require,module,exports){
 module.exports = "<div class=\"id_UiSimRow col-xs-12\">\r\n    <div class=\"id_row  bb p10\">\r\n        <i class=\"semasim-icon-sim\" style=\"font-size: 25px;\"></i>\r\n        <span class=\"id_simId strong mr10\">---My sim1 (0654996385)---</span>\r\n        <span class=\"id_connectivity mr10\">---Online---</span>\r\n        <span class=\"mr10\">\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"NULL\">NULL</i>\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"VERY WEAK\">VERY WEAK</i>\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"WEAK\">WEAK</i>\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"GOOD\">GOOD</i>\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"EXCELLENT\">EXCELLENT</i>\r\n        </span>\r\n        <span class=\"id_ownership hidden-xs\">---Owned by: ...---</span>\r\n    </div>\r\n    <div class=\"id_details pr0 pl0 pt15\">\r\n        <p>\r\n            <span class=\"strong p10\">Physical location:</span>\r\n            <span class=\"id_gw_location\">---Montpellier, Languedoc Rousillong, FR ( 82.302.102.2 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Owner:</span>\r\n            <span class=\"id_owner\">---foo@gmail.com---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Phone number:</span>\r\n            <span class=\"id_number\">---0636786385 ( +33636786385 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Service provider:</span>\r\n            <span class=\"id_serviceProvider\">---Free Mobile ( France )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle model:</span>\r\n            <span class=\"id_dongle_model\">---Huawei E160X</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle firmware:</span>\r\n            <span class=\"id_dongle_firm\">---10.12222---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle imei:</span>\r\n            <span class=\"id_dongle_imei\">---111111111111111---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle voice support:</span>\r\n            <span class=\"id_voice_support\">---yes---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM IMSI:</span>\r\n            <span class=\"id_imsi\">---332344242344---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM ICCID:</span>\r\n            <span class=\"id_iccid\">---2343334340342343---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM Phonebook memory usage:</span>\r\n            <span class=\"id_phonebook\">--12/123---</span>\r\n        </p>\r\n    </div>\r\n</div>";
-},{}],115:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 var css = ".id_UiSimRow .id_row {\n  cursor: pointer;\n}\n.id_UiSimRow .selected {\n  background-color: #e2e0db;\n}\n.id_UiSimRow .offline {\n  opacity: 0.6;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":104}],116:[function(require,module,exports){
+},{"lessify":103}],115:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"semasim-gateway/dist/web_api_declaration":172}],117:[function(require,module,exports){
+},{"semasim-gateway/dist/web_api_declaration":171}],116:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -11757,7 +11787,7 @@ var PageName;
     _a = __read(PageName.pagesNames, 6), PageName.login = _a[0], PageName.register = _a[1], PageName.manager = _a[2], PageName.webphone = _a[3], PageName.subscription = _a[4], PageName.shop = _a[5];
 })(PageName = exports.PageName || (exports.PageName = {}));
 
-},{}],118:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var jsRuntimeEnv_1 = require("./jsRuntimeEnv");
@@ -11769,12 +11799,12 @@ exports.baseDomain = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ?
     (exports.isDevEnv ? "dev.semasim.com" : "semasim.com") :
     window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
 
-},{"./jsRuntimeEnv":119}],119:[function(require,module,exports){
+},{"./jsRuntimeEnv":118}],118:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.jsRuntimeEnv = "browser";
 
-},{}],120:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -11788,7 +11818,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],121:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -11898,7 +11928,7 @@ var AuthenticatedSessionDescriptorSharedData;
 })(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./localStorageApi":124,"buffer":3}],122:[function(require,module,exports){
+},{"./localStorageApi":123,"buffer":3}],121:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -12023,12 +12053,12 @@ var Credentials;
 })(Credentials = exports.Credentials || (exports.Credentials = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../env":118,"./localStorageApi":124,"buffer":3}],123:[function(require,module,exports){
+},{"../env":117,"./localStorageApi":123,"buffer":3}],122:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = localStorage;
 
-},{}],124:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12093,7 +12123,7 @@ function removeItem(key) {
 }
 exports.removeItem = removeItem;
 
-},{"./asyncOrSyncLocalStorage":123}],125:[function(require,module,exports){
+},{"./asyncOrSyncLocalStorage":122}],124:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -12108,13 +12138,13 @@ var api = {
 };
 exports.getApi = function () { return Promise.resolve(api); };
 
-},{"ts-events-extended":171}],126:[function(require,module,exports){
+},{"ts-events-extended":170}],125:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.getApi = impl_1.getApi;
 
-},{"./impl":125}],127:[function(require,module,exports){
+},{"./impl":124}],126:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function notifyHostWhenPageIsReady() {
@@ -12122,7 +12152,7 @@ function notifyHostWhenPageIsReady() {
 }
 exports.notifyHostWhenPageIsReady = notifyHostWhenPageIsReady;
 
-},{}],128:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12246,7 +12276,7 @@ function tryLoginFromStoredCredentials() {
 }
 exports.tryLoginFromStoredCredentials = tryLoginFromStoredCredentials;
 
-},{"../env":118,"../localStorage/Credentials":122,"../webApiCaller":141}],129:[function(require,module,exports){
+},{"../env":117,"../localStorage/Credentials":121,"../webApiCaller":140}],128:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var env = require("../env");
@@ -12258,13 +12288,13 @@ var default_ = function () {
 };
 exports.default = default_;
 
-},{"../env":118}],130:[function(require,module,exports){
+},{"../env":117}],129:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.restartApp = impl_1.default;
 
-},{"./impl":129}],131:[function(require,module,exports){
+},{"./impl":128}],130:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12323,21 +12353,6 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-console.log("==================> before");
-var setTimeoutBack = window.setTimeout;
-window.setTimeout = function () {
-    var args = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        args[_i] = arguments[_i];
-    }
-    if (args[1] > 61000) {
-        console.log("========================> long set timeout called! ", args);
-        //throw new Error(`timeout too long ${args[1]}`);
-    }
-    return setTimeoutBack.apply(window, args);
-};
-//window.setTimeout = setTimeoutBack;
-console.log("========================> after");
 var sip = require("ts-sip");
 var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
@@ -12475,7 +12490,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                         "remotePort": 443
                     }, 20000);
                     apiServer.startListening(socket);
-                    sip.api.client.enableKeepAlive(socket, 2 * 60 * 1000);
+                    sip.api.client.enableKeepAlive(socket, 25 * 1000);
                     sip.api.client.enableErrorLogging(socket, sip.api.client.getDefaultErrorLogger({
                         idString: idString,
                         log: log
@@ -12523,7 +12538,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../../tools/modal/dialog":148,"../../tools/urlGetParameters":154,"../env":118,"../localStorage/AuthenticatedSessionDescriptorSharedData":121,"../procedure/tryLoginFromStoredCredentials":128,"../restartApp":130,"./events":132,"./localApiHandlers":133,"ts-events-extended":171,"ts-sip":53}],132:[function(require,module,exports){
+},{"../../tools/modal/dialog":147,"../../tools/urlGetParameters":153,"../env":117,"../localStorage/AuthenticatedSessionDescriptorSharedData":120,"../procedure/tryLoginFromStoredCredentials":127,"../restartApp":129,"./events":131,"./localApiHandlers":132,"ts-events-extended":170,"ts-sip":53}],131:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12607,7 +12622,7 @@ var rtcIceEServer;
     })();
 })(rtcIceEServer = exports.rtcIceEServer || (exports.rtcIceEServer = {}));
 
-},{"ts-events-extended":171}],133:[function(require,module,exports){
+},{"ts-events-extended":170}],132:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13407,7 +13422,7 @@ evtOngoingCall.attach(userSim => {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":144,"../../tools/modal/dialog":148,"../env":118,"../restartApp":130,"./events":132,"./remoteApiCaller":135,"chan-dongle-extended-client/dist/lib/types":156,"ts-events-extended":171}],134:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":143,"../../tools/modal/dialog":147,"../env":117,"../restartApp":129,"./events":131,"./remoteApiCaller":134,"chan-dongle-extended-client/dist/lib/types":155,"ts-events-extended":170}],133:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13890,7 +13905,7 @@ exports.shouldAppendPromotionalMessage = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":143,"../../restartApp":130,"../connection":131,"../events":132,"./sendRequest":136}],135:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":142,"../../restartApp":129,"../connection":130,"../events":131,"./sendRequest":135}],134:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -13899,7 +13914,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./base"));
 __export(require("./webphoneData"));
 
-},{"./base":134,"./webphoneData":137}],136:[function(require,module,exports){
+},{"./base":133,"./webphoneData":136}],135:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13968,7 +13983,7 @@ function sendRequest(methodName, params) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../restartApp":130,"../connection":131,"ts-sip":53}],137:[function(require,module,exports){
+},{"../../restartApp":129,"../connection":130,"ts-sip":53}],136:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -14047,7 +14062,7 @@ var __read = (this && this.__read) || function (o, n) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var sendRequest_1 = require("./sendRequest");
 var apiDeclaration = require("../../../sip_api_declarations/backendToUa");
-var lib_1 = require("../../../../../local_modules/phone-number/dist/lib");
+var lib_1 = require("phone-number/dist/lib");
 var wd = require("../../types/webphoneData/logic");
 var cryptoLib = require("crypto-lib");
 //WebData sync things :
@@ -14583,12 +14598,12 @@ exports.notifyStatusReportReceived = (function () {
     };
 })();
 
-},{"../../../../../local_modules/phone-number/dist/lib":45,"../../../sip_api_declarations/backendToUa":143,"../../types/webphoneData/logic":140,"./sendRequest":136,"crypto-lib":16}],138:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":142,"../../types/webphoneData/logic":139,"./sendRequest":135,"crypto-lib":16,"phone-number/dist/lib":45}],137:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectSidHttpHeaderName = "x-connect-sid";
 
-},{}],139:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var UserSim;
@@ -14630,7 +14645,7 @@ var UserSim;
     })(Usable = UserSim.Usable || (UserSim.Usable = {}));
 })(UserSim = exports.UserSim || (exports.UserSim = {}));
 
-},{}],140:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -14933,7 +14948,7 @@ function getUnreadMessagesCount(wdChat) {
 }
 exports.getUnreadMessagesCount = getUnreadMessagesCount;
 
-},{"../../../tools/isAscendingAlphabeticalOrder":145,"crypto-lib/dist/async/serializer":17}],141:[function(require,module,exports){
+},{"../../../tools/isAscendingAlphabeticalOrder":144,"crypto-lib/dist/async/serializer":17}],140:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -15284,7 +15299,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":155,"../env":118,"../localStorage/AuthenticatedSessionDescriptorSharedData":121,"../localStorage/Credentials":122,"../networkStateMonitoring":126,"../restartApp":130,"./sendRequest":142,"ts-events-extended":171}],142:[function(require,module,exports){
+},{"../../web_api_declaration":154,"../env":117,"../localStorage/AuthenticatedSessionDescriptorSharedData":120,"../localStorage/Credentials":121,"../networkStateMonitoring":125,"../restartApp":129,"./sendRequest":141,"ts-events-extended":170}],141:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -15403,7 +15418,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":116,"../env":118,"../types/connectSidHttpHeaderName":138,"transfer-tools/dist/lib/JSON_CUSTOM":166}],143:[function(require,module,exports){
+},{"../../gateway/webApiPath":115,"../env":117,"../types/connectSidHttpHeaderName":137,"transfer-tools/dist/lib/JSON_CUSTOM":165}],142:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -15498,7 +15513,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],144:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -15563,7 +15578,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],145:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -15587,7 +15602,7 @@ function isAscendingAlphabeticalOrder(a, b) {
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
 exports.isForWeb = true;
 
-},{}],146:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -15620,7 +15635,7 @@ function createGenericProxyForBootstrapModal($initializedModalDiv) {
 }
 exports.createGenericProxyForBootstrapModal = createGenericProxyForBootstrapModal;
 
-},{"ts-events-extended":171}],147:[function(require,module,exports){
+},{"ts-events-extended":170}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
@@ -15654,7 +15669,7 @@ var loading;
 })(loading || (loading = {}));
 exports.getApi = function () { return customImplementationOfApi || bootboxBasedImplementationOfBaseApi; };
 
-},{"../createGenericProxyForBootstrapModal":146}],148:[function(require,module,exports){
+},{"../createGenericProxyForBootstrapModal":145}],147:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -15877,11 +15892,11 @@ exports.dialogApi = {
     }
 };
 
-},{"../stack":152,"./getApi":147,"./types":149,"run-exclusive":163}],149:[function(require,module,exports){
+},{"../stack":151,"./getApi":146,"./types":148,"run-exclusive":162}],148:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],150:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("./createGenericProxyForBootstrapModal");
@@ -15899,7 +15914,7 @@ var bootstrapBasedImplementationOfApi = {
 };
 exports.getApi = function () { return customImplementationOfApi || bootstrapBasedImplementationOfApi; };
 
-},{"./createGenericProxyForBootstrapModal":146}],151:[function(require,module,exports){
+},{"./createGenericProxyForBootstrapModal":145}],150:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -15923,7 +15938,7 @@ function createModal(structure, options) {
 }
 exports.createModal = createModal;
 
-},{"./getApi":150,"./stack":152}],152:[function(require,module,exports){
+},{"./getApi":149,"./stack":151}],151:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -16048,7 +16063,7 @@ function add(modal) {
 }
 exports.add = add;
 
-},{}],153:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 if (typeof Object.assign !== 'function') {
     // Must be writable: true, enumerable: false, configurable: true
     Object.defineProperty(Object, "assign", {
@@ -16076,7 +16091,7 @@ if (typeof Object.assign !== 'function') {
     });
 }
 
-},{}],154:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function buildUrl(urlPath, params) {
@@ -16102,7 +16117,7 @@ function parseUrl(url) {
 }
 exports.parseUrl = parseUrl;
 
-},{}],155:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
@@ -16170,7 +16185,7 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],156:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -16191,37 +16206,37 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],157:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],158:[function(require,module,exports){
+},{"dup":29}],157:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"./implementation":157,"dup":30}],159:[function(require,module,exports){
+},{"./implementation":156,"dup":30}],158:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"dup":31,"function-bind":158}],160:[function(require,module,exports){
+},{"dup":31,"function-bind":157}],159:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"dup":38}],161:[function(require,module,exports){
+},{"dup":38}],160:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],162:[function(require,module,exports){
+},{"dup":23}],161:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"./Map":161,"dup":27}],163:[function(require,module,exports){
+},{"./Map":160,"dup":27}],162:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25,"minimal-polyfills/dist/lib/WeakMap":162}],164:[function(require,module,exports){
+},{"dup":25,"minimal-polyfills/dist/lib/WeakMap":161}],163:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],165:[function(require,module,exports){
+},{"dup":43}],164:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32,"has":159}],166:[function(require,module,exports){
+},{"dup":32,"has":158}],165:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"dup":28,"super-json":165}],167:[function(require,module,exports){
+},{"dup":28,"super-json":164}],166:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"./SyncEventBase":168,"dup":33}],168:[function(require,module,exports){
+},{"./SyncEventBase":167,"dup":33}],167:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":169,"dup":34}],169:[function(require,module,exports){
+},{"./SyncEventBaseProtected":168,"dup":34}],168:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./defs":170,"dup":35,"minimal-polyfills/dist/lib/Array.prototype.find":160,"minimal-polyfills/dist/lib/Map":161,"run-exclusive":163}],170:[function(require,module,exports){
+},{"./defs":169,"dup":35,"minimal-polyfills/dist/lib/Array.prototype.find":159,"minimal-polyfills/dist/lib/Map":160,"run-exclusive":162}],169:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"dup":36,"setprototypeof":164}],171:[function(require,module,exports){
+},{"dup":36,"setprototypeof":163}],170:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"./SyncEvent":167,"./defs":170,"dup":37}],172:[function(require,module,exports){
+},{"./SyncEvent":166,"./defs":169,"dup":37}],171:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
@@ -16230,4 +16245,4 @@ var version;
     version.methodName = "version";
 })(version = exports.version || (exports.version = {}));
 
-},{}]},{},[102]);
+},{}]},{},[101]);
