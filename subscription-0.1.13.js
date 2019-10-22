@@ -2022,10 +2022,11 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 "use strict";
 //NOTE: Assert StripeCheckout loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -2057,13 +2058,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var bootbox_custom = require("../../../shared/dist/tools/bootbox_custom");
-var ts_events_extended_1 = require("ts-events-extended");
-var currencyLib = require("../../../shared/dist/tools/currency");
-var env_1 = require("../../../shared/dist/lib/env");
-var cookies = require("../../../shared/dist/lib/cookies/logic/frontend");
+var webApiCaller = require("frontend-shared/dist/lib/webApiCaller");
+var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
+var dialog_1 = require("frontend-shared/dist/tools/modal/dialog");
+var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
+var currencyLib = require("frontend-shared/dist/tools/currency");
+var env_1 = require("frontend-shared/dist/lib/env");
+var AuthenticatedSessionDescriptorSharedData_1 = require("frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData");
 var UiMySubscription_1 = require("./UiMySubscription");
 var UiSubscribe_1 = require("./UiSubscribe");
 var UiPaymentMethod_1 = require("./UiPaymentMethod");
@@ -2081,19 +2082,20 @@ var UiController = /** @class */ (function () {
         this.structure.find(".id_placeholder_UiDownloadButtons")
             .append(uiDownloadButton.structure);
         if (subscriptionInfos.customerStatus === "EXEMPTED") {
-            bootbox_custom.alert("You get free access to the service, enjoy :)");
+            dialog_1.dialogApi.create("alert", { "message": "You get free access to the service, enjoy :)" });
             return;
         }
         var pricingByCurrency = subscriptionInfos.pricingByCurrency, source = subscriptionInfos.source, subscription = subscriptionInfos.subscription, due = subscriptionInfos.due;
         var retreaveUserSourceViaStripeCheckout = (function () {
             var evtSourceId = new ts_events_extended_1.SyncEvent();
-            var handler = StripeCheckout.configure({
+            var handler;
+            AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get().then(function (email) { return handler = StripeCheckout.configure({
                 "key": subscriptionInfos.stripePublicApiKey,
                 "image": env_1.assetsRoot + "img/shop.png",
                 "locale": "auto",
                 "allowRememberMe": false,
                 "name": 'Semasim',
-                "email": cookies.AuthenticatedSessionDescriptorSharedData.get().email,
+                email: email,
                 "description": "Android app access",
                 "zipCode": true,
                 "panelLabel": "ok",
@@ -2102,7 +2104,7 @@ var UiController = /** @class */ (function () {
                     "currency": currencyLib.getCardCurrency(source.card, pricingByCurrency)
                 }); },
                 "closed": function () { return evtSourceId.post(undefined); }
-            });
+            }); });
             // Close Checkout on page navigation:
             window.addEventListener("popstate", function () { return handler.close(); });
             return function () {
@@ -2121,11 +2123,11 @@ var UiController = /** @class */ (function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            bootbox_custom.loading("Canceling your subscription");
+                            dialog_1.dialogApi.loading("Canceling your subscription");
                             return [4 /*yield*/, webApiCaller.unsubscribe()];
                         case 1:
                             _a.sent();
-                            bootbox_custom.dismissLoading();
+                            dialog_1.dialogApi.dismissLoading();
                             location.reload();
                             return [2 /*return*/];
                     }
@@ -2136,14 +2138,14 @@ var UiController = /** @class */ (function () {
                     switch (_a.label) {
                         case 0:
                             if (!source.isChargeable) {
-                                bootbox_custom.alert("Please update your payment method first");
+                                dialog_1.dialogApi.create("alert", { "message": "Please update your payment method first" });
                                 return [2 /*return*/];
                             }
-                            bootbox_custom.loading("Re enabling your subscription");
+                            dialog_1.dialogApi.loading("Re enabling your subscription");
                             return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource()];
                         case 1:
                             _a.sent();
-                            bootbox_custom.dismissLoading();
+                            dialog_1.dialogApi.dismissLoading();
                             this.evtDone.post();
                             return [2 /*return*/];
                     }
@@ -2168,12 +2170,14 @@ var UiController = /** @class */ (function () {
                         case 0:
                             //TODO: Lot of work left.
                             if (typeof WeakMap === "undefined") {
-                                bootbox_custom.alert([
-                                    "We are very sorry but your phone is not compatible with",
-                                    "out payment platform. Please go to web.semasim.com and",
-                                    "subscribe from there.",
-                                    "Once you are done kill the app and login again"
-                                ].join(" "));
+                                dialog_1.dialogApi.create("alert", {
+                                    "message": [
+                                        "We are very sorry but your phone is not compatible with",
+                                        "out payment platform. Please go to web.semasim.com and",
+                                        "subscribe from there.",
+                                        "Once you are done kill the app and login again"
+                                    ].join(" ")
+                                });
                                 return [2 /*return*/];
                             }
                             if (1 === 1) {
@@ -2194,7 +2198,7 @@ var UiController = /** @class */ (function () {
                         case 2:
                             currency = source.currency;
                             _a.label = 3;
-                        case 3: return [4 /*yield*/, new Promise(function (resolve) { return bootbox_custom.confirm({
+                        case 3: return [4 /*yield*/, new Promise(function (resolve) { return dialog_1.dialogApi.create("confirm", {
                                 "title": "Enable subscription",
                                 "message": [
                                     "Confirm subscription for ",
@@ -2208,11 +2212,11 @@ var UiController = /** @class */ (function () {
                             if (!shouldProceed) {
                                 return [2 /*return*/];
                             }
-                            bootbox_custom.loading("Enabling your subscription");
+                            dialog_1.dialogApi.loading("Enabling your subscription");
                             return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource(newSourceId)];
                         case 5:
                             _a.sent();
-                            bootbox_custom.dismissLoading();
+                            dialog_1.dialogApi.dismissLoading();
                             this.evtDone.post();
                             return [2 /*return*/];
                     }
@@ -2233,11 +2237,11 @@ var UiController = /** @class */ (function () {
                             if (source === undefined) {
                                 return [2 /*return*/];
                             }
-                            bootbox_custom.loading("Updating your payment method");
+                            dialog_1.dialogApi.loading("Updating your payment method");
                             return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource(source.id)];
                         case 2:
                             _a.sent();
-                            bootbox_custom.dismissLoading();
+                            dialog_1.dialogApi.dismissLoading();
                             location.reload();
                             return [2 /*return*/];
                     }
@@ -2253,7 +2257,7 @@ var UiController = /** @class */ (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        bootbox_custom.loading("Redirecting to payment page");
+                        dialog_1.dialogApi.loading("Redirecting to payment page");
                         url = window.location.href.split("?")[0];
                         return [4 /*yield*/, webApiCaller.createStripeCheckoutSessionForSubscription(currency, url + "?success=true", url + "?success=false")];
                     case 1:
@@ -2274,10 +2278,10 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../../../shared/dist/lib/cookies/logic/frontend":36,"../../../shared/dist/lib/env":38,"../../../shared/dist/lib/loadUiClassHtml":39,"../../../shared/dist/lib/webApiCaller":41,"../../../shared/dist/tools/bootbox_custom":42,"../../../shared/dist/tools/currency":43,"../templates/UiController.html":25,"../templates/UiController.less":26,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"ts-events-extended":24}],5:[function(require,module,exports){
+},{"../templates/UiController.html":15,"../templates/UiController.less":16,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"frontend-shared/dist/lib/env":26,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":29,"frontend-shared/dist/lib/webApiCaller":39,"frontend-shared/dist/tools/currency":41,"frontend-shared/dist/tools/modal/dialog":44,"frontend-shared/node_modules/ts-events-extended":63}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
+var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiDownloadButtons.html"), "UiDownloadButtons");
 var UiDownloadButtons = /** @class */ (function () {
     function UiDownloadButtons() {
@@ -2287,13 +2291,13 @@ var UiDownloadButtons = /** @class */ (function () {
 }());
 exports.UiDownloadButtons = UiDownloadButtons;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":39,"../templates/UiDownloadButtons.html":27}],6:[function(require,module,exports){
+},{"../templates/UiDownloadButtons.html":17,"frontend-shared/dist/lib/loadUiClassHtml":28}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var ts_events_extended_1 = require("ts-events-extended");
+var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
+var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
 var moment = require("moment");
-var currencyLib = require("../../../shared/dist/tools/currency");
+var currencyLib = require("frontend-shared/dist/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiMySubscription.html"), "UiMySubscription");
 require("../templates/UiMySubscription.less");
 var UiMySubscription = /** @class */ (function () {
@@ -2327,11 +2331,11 @@ var UiMySubscription = /** @class */ (function () {
 }());
 exports.UiMySubscription = UiMySubscription;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":39,"../../../shared/dist/tools/currency":43,"../templates/UiMySubscription.html":28,"../templates/UiMySubscription.less":29,"moment":17,"ts-events-extended":24}],7:[function(require,module,exports){
+},{"../templates/UiMySubscription.html":18,"../templates/UiMySubscription.less":19,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/currency":41,"frontend-shared/node_modules/ts-events-extended":63,"moment":14}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var currencyLib = require("../../../shared/dist/tools/currency");
+var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
+var currencyLib = require("frontend-shared/dist/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiNegativeBalanceWarning.html"), "UiNegativeBalanceWarning");
 var UiNegativeBalanceWarning = /** @class */ (function () {
     function UiNegativeBalanceWarning(due) {
@@ -2343,11 +2347,11 @@ var UiNegativeBalanceWarning = /** @class */ (function () {
 }());
 exports.UiNegativeBalanceWarning = UiNegativeBalanceWarning;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":39,"../../../shared/dist/tools/currency":43,"../templates/UiNegativeBalanceWarning.html":30}],8:[function(require,module,exports){
+},{"../templates/UiNegativeBalanceWarning.html":20,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/currency":41}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var ts_events_extended_1 = require("ts-events-extended");
+var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
+var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiPaymentMethod.html"), "UiPaymentMethod");
 require("../templates/UiPaymentMethod.less");
 var UiPaymentMethod = /** @class */ (function () {
@@ -2365,12 +2369,12 @@ var UiPaymentMethod = /** @class */ (function () {
 }());
 exports.UiPaymentMethod = UiPaymentMethod;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":39,"../templates/UiPaymentMethod.html":31,"../templates/UiPaymentMethod.less":32,"ts-events-extended":24}],9:[function(require,module,exports){
+},{"../templates/UiPaymentMethod.html":21,"../templates/UiPaymentMethod.less":22,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/node_modules/ts-events-extended":63}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var loadUiClassHtml_1 = require("../../../shared/dist/lib/loadUiClassHtml");
-var ts_events_extended_1 = require("ts-events-extended");
-var currencyLib = require("../../../shared/dist/tools/currency");
+var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
+var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
+var currencyLib = require("frontend-shared/dist/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiSubscribe.html"), "UiSubscribe");
 var UiSubscribe = /** @class */ (function () {
     function UiSubscribe(currency, amount) {
@@ -2385,13 +2389,14 @@ var UiSubscribe = /** @class */ (function () {
 }());
 exports.UiSubscribe = UiSubscribe;
 
-},{"../../../shared/dist/lib/loadUiClassHtml":39,"../../../shared/dist/tools/currency":43,"../templates/UiSubscribe.html":33,"ts-events-extended":24}],10:[function(require,module,exports){
+},{"../templates/UiSubscribe.html":23,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/currency":41,"frontend-shared/node_modules/ts-events-extended":63}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -2422,15 +2427,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
-var webApiCaller = require("../../../shared/dist/lib/webApiCaller");
-var bootbox_custom = require("../../../shared/dist/tools/bootbox_custom");
+var webApiCaller = require("frontend-shared/dist/lib/webApiCaller");
+var dialog_1 = require("frontend-shared/dist/tools/modal/dialog");
 var UiController_1 = require("./UiController");
-var availablePages = require("../../../shared/dist/lib/availablePages");
-require("../../../shared/dist/tools/polyfills/Object.assign");
+var availablePages = require("frontend-shared/dist/lib/availablePages");
+require("frontend-shared/dist/tools/polyfills/Object.assign");
 require("minimal-polyfills/dist/lib/ArrayBuffer.isView");
-var notifyHostWhenPageIsReady_1 = require("../../../shared/dist/lib/notifyHostWhenPageIsReady");
+var notifyHostWhenPageIsReady_1 = require("frontend-shared/dist/lib/notifyHostWhenPageIsReady");
 notifyHostWhenPageIsReady_1.notifyHostWhenPageIsReady();
 if (typeof apiExposedByHost !== "undefined") {
     window.onerror = function (msg, url, lineNumber) {
@@ -2449,7 +2453,7 @@ function onLoggedIn() {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    bootbox_custom.loading("Loading subscription infos");
+                    dialog_1.dialogApi.loading("Loading subscription infos");
                     return [4 /*yield*/, Promise.all([
                             webApiCaller.getSubscriptionInfos(),
                             webApiCaller.getCountryIso()
@@ -2462,7 +2466,7 @@ function onLoggedIn() {
                         apiExposedByHost.onDone(null);
                         return [2 /*return*/];
                     }
-                    bootbox_custom.dismissLoading();
+                    dialog_1.dialogApi.dismissLoading();
                     uiController = new UiController_1.UiController(subscriptionInfos, countryIsoFromLocation || countryIsoForLanguage);
                     uiController.evtDone.attachOnce(function () {
                         if (typeof apiExposedByHost !== "undefined") {
@@ -2480,11 +2484,11 @@ function onLoggedIn() {
 }
 var apiExposedToHost = {
     "login": function (email, secret) {
-        (function () { return __awaiter(_this, void 0, void 0, function () {
+        (function () { return __awaiter(void 0, void 0, void 0, function () {
             var status;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, webApiCaller.loginUser(email, secret)];
+                    case 0: return [4 /*yield*/, webApiCaller.loginUser(email, secret, undefined)];
                     case 1:
                         status = (_a.sent()).status;
                         if (status !== "SUCCESS") {
@@ -2503,7 +2507,7 @@ $(document).ready(function () {
     if (typeof apiExposedByHost !== "undefined") {
         return;
     }
-    $("#logout").click(function () { return __awaiter(_this, void 0, void 0, function () {
+    $("#logout").click(function () { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, webApiCaller.logoutUser()];
@@ -2517,7 +2521,7 @@ $(document).ready(function () {
     onLoggedIn();
 });
 
-},{"../../../shared/dist/lib/availablePages":35,"../../../shared/dist/lib/notifyHostWhenPageIsReady":40,"../../../shared/dist/lib/webApiCaller":41,"../../../shared/dist/tools/bootbox_custom":42,"../../../shared/dist/tools/polyfills/Object.assign":45,"./UiController":4,"minimal-polyfills/dist/lib/ArrayBuffer.isView":14}],11:[function(require,module,exports){
+},{"./UiController":4,"frontend-shared/dist/lib/availablePages":25,"frontend-shared/dist/lib/notifyHostWhenPageIsReady":35,"frontend-shared/dist/lib/webApiCaller":39,"frontend-shared/dist/tools/modal/dialog":44,"frontend-shared/dist/tools/polyfills/Object.assign":47,"minimal-polyfills/dist/lib/ArrayBuffer.isView":13}],11:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -2560,121 +2564,13 @@ module.exports.byUrl = function(url) {
 module.exports = require('cssify');
 
 },{"cssify":11}],13:[function(require,module,exports){
-// https://tc39.github.io/ecma262/#sec-array.prototype.find
-if (!Array.prototype.find) {
-    Object.defineProperty(Array.prototype, 'find', {
-        value: function (predicate) {
-            // 1. Let O be ? ToObject(this value).
-            if (this == null) {
-                throw new TypeError('"this" is null or not defined');
-            }
-            var o = Object(this);
-            // 2. Let len be ? ToLength(? Get(O, "length")).
-            var len = o.length >>> 0;
-            // 3. If IsCallable(predicate) is false, throw a TypeError exception.
-            if (typeof predicate !== 'function') {
-                throw new TypeError('predicate must be a function');
-            }
-            // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
-            var thisArg = arguments[1];
-            // 5. Let k be 0.
-            var k = 0;
-            // 6. Repeat, while k < len
-            while (k < len) {
-                // a. Let Pk be ! ToString(k).
-                // b. Let kValue be ? Get(O, Pk).
-                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
-                // d. If testResult is true, return kValue.
-                var kValue = o[k];
-                if (predicate.call(thisArg, kValue, k, o)) {
-                    return kValue;
-                }
-                // e. Increase k by 1.
-                k++;
-            }
-            // 7. Return undefined.
-            return undefined;
-        },
-        configurable: true,
-        writable: true
-    });
-}
-
-},{}],14:[function(require,module,exports){
 if (!ArrayBuffer["isView"]) {
     ArrayBuffer.isView = function isView(a) {
         return a !== null && typeof (a) === "object" && a["buffer"] instanceof ArrayBuffer;
     };
 }
 
-},{}],15:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var LightMapImpl = /** @class */ (function () {
-    function LightMapImpl() {
-        this.record = [];
-    }
-    LightMapImpl.prototype.has = function (key) {
-        return this.record
-            .map(function (_a) {
-            var _key = _a[0];
-            return _key;
-        })
-            .indexOf(key) >= 0;
-    };
-    LightMapImpl.prototype.get = function (key) {
-        var entry = this.record
-            .filter(function (_a) {
-            var _key = _a[0];
-            return _key === key;
-        })[0];
-        if (entry === undefined) {
-            return undefined;
-        }
-        return entry[1];
-    };
-    LightMapImpl.prototype.set = function (key, value) {
-        var entry = this.record
-            .filter(function (_a) {
-            var _key = _a[0];
-            return _key === key;
-        })[0];
-        if (entry === undefined) {
-            this.record.push([key, value]);
-        }
-        else {
-            entry[1] = value;
-        }
-        return this;
-    };
-    LightMapImpl.prototype["delete"] = function (key) {
-        var index = this.record.map(function (_a) {
-            var key = _a[0];
-            return key;
-        }).indexOf(key);
-        if (index < 0) {
-            return false;
-        }
-        this.record.splice(index, 1);
-        return true;
-    };
-    LightMapImpl.prototype.keys = function () {
-        return this.record.map(function (_a) {
-            var key = _a[0];
-            return key;
-        });
-    };
-    return LightMapImpl;
-}());
-exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
-
-},{}],16:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var Map_1 = require("./Map");
-exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
-
-},{"./Map":15}],17:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 //! moment.js
 
 ;(function (global, factory) {
@@ -7278,7 +7174,1813 @@ exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
 
 })));
 
+},{}],15:[function(require,module,exports){
+module.exports = "<div class=\"id_UiController row\">\r\n\r\n    <div class=\"col-lg-9\">\r\n\r\n        <div class=\"id_placeholder_UiNegativeBalanceWarning\">\r\n        </div>\r\n\r\n        <div class=\"row\">\r\n\r\n            <div class=\"id_placeholder_UiSubscribe\">\r\n\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiMySubscription col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiPaymentMethod col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiDownloadButtons col-md-6\">\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n</div>";
+},{}],16:[function(require,module,exports){
+var css = "div.id_UiController .heading-1 {\n  font-size: 20px;\n  font-weight: normal;\n  margin-bottom: 16px;\n}\ndiv.id_UiController .heading-2 {\n  color: #007FEB;\n  font-size: 26px;\n  margin-bottom: 7px;\n}\n";(require('lessify'))(css); module.exports = css;
+},{"lessify":12}],17:[function(require,module,exports){
+module.exports = "<div class=\"id_UiDownloadButtons panel plain mt10\">\r\n\r\n    <div class=\"panel-body text-center\">\r\n\r\n        <a href='https://play.google.com/store/apps/details?id=com.semasim.android&ah=2KIGba1mmZ33bXvBLhumK535eEY&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>\r\n            <img alt='Get it on Google Play' height=\"90px\" src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' />\r\n        </a>\r\n\r\n    </div>\r\n</div>";
 },{}],18:[function(require,module,exports){
+module.exports = "<div class=\"id_UiMySubscription panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"payment-subscription\">\r\n                <h1 class=\"heading-1\">My subscription</h1>\r\n                <h2 class=\"heading-2\">Active</h2>\r\n                <p class=\"payment-text\">Cancels in <strong class=\"id_days_left\">X</strong> days</p>\r\n            </div>\r\n            <div class=\"payment-next clearfix\">\r\n                <h2 class=\"heading-1\">Next payment due</h2>\r\n\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">DATE</dt>\r\n                    <dt class=\"id_nextBillDate payment-list-info\">13/12/18</dt>\r\n                </dl>\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">AMOUNT</dt>\r\n                    <dt class=\"payment-list-info\"><span class=\"id_amount\">3.07€</span></dt>\r\n                </dl>\r\n            </div>\r\n            <div class=\"payment-actions mt10\">\r\n                <button class=\"btn btn-primary\" type=\"button\">\r\n                    Cancel subscription\r\n                </button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
+},{}],19:[function(require,module,exports){
+var css = "div.id_UiMySubscription .payment-list {\n  float: left;\n  line-height: 20px;\n  width: 50%;\n}\ndiv.id_UiMySubscription .payment-text {\n  color: #72727D;\n  font-size: 14px;\n  line-height: 20px;\n  margin-bottom: 15px;\n  text-align: left;\n}\ndiv.id_UiMySubscription .payment-subscription {\n  border-bottom: solid 1px #EFEFF2;\n  padding-bottom: 16px;\n}\ndiv.id_UiMySubscription .payment-list-title {\n  color: #72727D;\n  font-size: 14px;\n}\ndiv.id_UiMySubscription .payment-list-info {\n  font-weight: normal;\n}\n";(require('lessify'))(css); module.exports = css;
+},{"lessify":12}],20:[function(require,module,exports){
+module.exports = "<div class=\"id_UiNegativeBalanceWarning alert alert-warning fade in mt10 mb0\">\r\n    <i class=\"glyphicon glyphicon-warning-sign alert-icon \"></i>\r\n    <strong>Warning!</strong> Your current balance is <span class=\"id_val\">-22€</span>, Please update your payment method.\r\n</div>";
+},{}],21:[function(require,module,exports){
+module.exports = "<div class=\"id_UiPaymentMethod panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"page-subscription-payment-method clearfix\">\r\n                <h2 class=\"heading-1\">Payment method</h2>\r\n                <div class=\"alert alert-danger fade in\">\r\n                    <i class=\"glyphicon glyphicon-ban-circle alert-icon \"></i>\r\n                    <strong>No longer valid</strong> please register a new credit card\r\n                </div>\r\n                <dl class=\"page-subscription-payment-method-list card-number\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Card number</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\">XXX...<span class=\"id_last4\">1234</span></span></dt>\r\n                </dl>\r\n                <dl class=\"page-subscription-payment-method-list expiry\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Expiration date</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\"><span class=\"id_expire\">12/19</span></dt>\r\n                </dl>\r\n            </div>\r\n            <button class=\"btn btn-primary\">\r\n                Change credit card\r\n            </button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
+},{}],22:[function(require,module,exports){
+var css = "div.id_UiPaymentMethod .card-number {\n  width: 210px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list {\n  float: left;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-title {\n  color: #5F5E6A;\n  font-size: 14px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-info {\n  font-weight: normal;\n  font-size: 14px;\n}\n";(require('lessify'))(css); module.exports = css;
+},{"lessify":12}],23:[function(require,module,exports){
+module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>\r\n                For enabling semasim on your <b>Android</b> devices\r\n                <br>\r\n                and stop including <b>\"Sent with Semasim\"</b> in your SMSs.\r\n                <br>\r\n                <br>\r\n                Subscription cancelable anytime.\r\n            </p>\r\n            <button class=\"btn btn-primary\">Subscribe for <span class=\"id_amount\">XX€</span>/Month</button>\r\n        </div>\r\n\r\n        <div class=\"container\" style=\"text-align: center;\">\r\n            <div class=\"footer\">\r\n                <p>By subscribing you agree to our :</p>\r\n                <a href=\"http://www.semasim.com/terms-conditions\">terms</a>\r\n                <span> &amp; </span>\r\n                <a href=\"http://www.semasim.com/privacy-policy\">privacy policy</a>\r\n            </div>\r\n        </div>\r\n\r\n\r\n    </div>\r\n\r\n</div>";
+},{}],24:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
+exports.webApiPath = web_api_declaration_1.apiPath;
+
+},{"semasim-gateway/dist/web_api_declaration":65}],25:[function(require,module,exports){
+"use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var PageName;
+(function (PageName) {
+    var _a;
+    PageName.pagesNames = [
+        "login",
+        "register",
+        "manager",
+        "webphone",
+        "subscription",
+        "shop"
+    ];
+    _a = __read(PageName.pagesNames, 6), PageName.login = _a[0], PageName.register = _a[1], PageName.manager = _a[2], PageName.webphone = _a[3], PageName.subscription = _a[4], PageName.shop = _a[5];
+})(PageName = exports.PageName || (exports.PageName = {}));
+
+},{}],26:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var jsRuntimeEnv_1 = require("./jsRuntimeEnv");
+exports.jsRuntimeEnv = jsRuntimeEnv_1.jsRuntimeEnv;
+//NOTE: For web Defined at ejs building in templates/head_common.ejs, must be defined for react-native.
+exports.assetsRoot = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
+exports.isDevEnv = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
+exports.baseDomain = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ?
+    (exports.isDevEnv ? "dev.semasim.com" : "semasim.com") :
+    window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
+
+},{"./jsRuntimeEnv":27}],27:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.jsRuntimeEnv = "browser";
+
+},{}],28:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/** Assert jQuery is loaded on the page. */
+function loadUiClassHtml(html, widgetClassName) {
+    var wrap = $("<div>").html(html);
+    $("head").append(wrap.find("style"));
+    return {
+        "structure": wrap.find(".id_" + widgetClassName),
+        "templates": wrap.find(".templates")
+    };
+}
+exports.loadUiClassHtml = loadUiClassHtml;
+
+},{}],29:[function(require,module,exports){
+(function (Buffer){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var localStorageApi = require("./localStorageApi");
+exports.key = "authenticated-session-descriptor-shared-data";
+var AuthenticatedSessionDescriptorSharedData;
+(function (AuthenticatedSessionDescriptorSharedData) {
+    function isPresent() {
+        return __awaiter(this, void 0, void 0, function () {
+            var value;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 1:
+                        value = _a.sent();
+                        return [2 /*return*/, value !== null];
+                }
+            });
+        });
+    }
+    AuthenticatedSessionDescriptorSharedData.isPresent = isPresent;
+    function remove() {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, isPresent()];
+                    case 1:
+                        if (!(_a.sent())) {
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    AuthenticatedSessionDescriptorSharedData.remove = remove;
+    /** assert isPresent */
+    function get() {
+        return __awaiter(this, void 0, void 0, function () {
+            var value;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 1:
+                        value = _a.sent();
+                        if (value === undefined) {
+                            throw new Error("Auth not present in localStorage");
+                        }
+                        return [2 /*return*/, JSON.parse(Buffer.from(value, "hex").toString("utf8"))];
+                }
+            });
+        });
+    }
+    AuthenticatedSessionDescriptorSharedData.get = get;
+    function set(authenticatedSessionDescriptorSharedData) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    AuthenticatedSessionDescriptorSharedData.set = set;
+})(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
+
+}).call(this,require("buffer").Buffer)
+},{"./localStorageApi":32,"buffer":2}],30:[function(require,module,exports){
+(function (Buffer){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var localStorageApi = require("./localStorageApi");
+var env = require("../env");
+exports.key = "credentials";
+var Credentials;
+(function (Credentials) {
+    function throwIfWeb() {
+        if (env.jsRuntimeEnv === "react-native") {
+            return;
+        }
+        throw new Error("Storing credentials in local storage should be done only on react-native");
+    }
+    function isPresent() {
+        return __awaiter(this, void 0, void 0, function () {
+            var value;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        throwIfWeb();
+                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 1:
+                        value = _a.sent();
+                        return [2 /*return*/, value !== null];
+                }
+            });
+        });
+    }
+    Credentials.isPresent = isPresent;
+    function remove() {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        throwIfWeb();
+                        return [4 /*yield*/, isPresent()];
+                    case 1:
+                        if (!(_a.sent())) {
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    Credentials.remove = remove;
+    /** assert isPresent */
+    function get() {
+        return __awaiter(this, void 0, void 0, function () {
+            var value;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        throwIfWeb();
+                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 1:
+                        value = _a.sent();
+                        if (value === undefined) {
+                            throw new Error("Auth not present in localStorage");
+                        }
+                        return [2 /*return*/, JSON.parse(Buffer.from(value, "hex").toString("utf8"))];
+                }
+            });
+        });
+    }
+    Credentials.get = get;
+    function set(authenticatedSessionDescriptorSharedData) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        throwIfWeb();
+                        return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    Credentials.set = set;
+})(Credentials = exports.Credentials || (exports.Credentials = {}));
+
+}).call(this,require("buffer").Buffer)
+},{"../env":26,"./localStorageApi":32,"buffer":2}],31:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = localStorage;
+
+},{}],32:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var asyncOrSyncLocalStorage_1 = require("./asyncOrSyncLocalStorage");
+function getItem(key) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, asyncOrSyncLocalStorage_1.default.getItem(key)];
+        });
+    });
+}
+exports.getItem = getItem;
+function setItem(key, value) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, asyncOrSyncLocalStorage_1.default.setItem(key, value)];
+        });
+    });
+}
+exports.setItem = setItem;
+function removeItem(key) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, asyncOrSyncLocalStorage_1.default.removeItem(key)];
+        });
+    });
+}
+exports.removeItem = removeItem;
+
+},{"./asyncOrSyncLocalStorage":31}],33:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var ts_events_extended_1 = require("ts-events-extended");
+var api = {
+    "getIsOnline": function () { return navigator.onLine; },
+    "evtStateChange": (function () {
+        var out = new ts_events_extended_1.VoidSyncEvent();
+        window.addEventListener("online", function () { return out.post(); });
+        window.addEventListener("offline", function () { return out.post(); });
+        return out;
+    })()
+};
+exports.getApi = function () { return Promise.resolve(api); };
+
+},{"ts-events-extended":63}],34:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var impl_1 = require("./impl");
+exports.getApi = impl_1.getApi;
+
+},{"./impl":33}],35:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function notifyHostWhenPageIsReady() {
+    $(document).ready(function () { return console.log("->__PAGE_READY__<-"); });
+}
+exports.notifyHostWhenPageIsReady = notifyHostWhenPageIsReady;
+
+},{}],36:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var env = require("../env");
+var default_ = function () {
+    if (env.isDevEnv) {
+        throw new Error("In prod the app would have been restarted");
+    }
+    location.reload();
+};
+exports.default = default_;
+
+},{"../env":26}],37:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var impl_1 = require("./impl");
+exports.restartApp = impl_1.default;
+
+},{"./impl":36}],38:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.connectSidHttpHeaderName = "x-connect-sid";
+
+},{}],39:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var apiDeclaration = require("../../web_api_declaration");
+var sendRequest_1 = require("./sendRequest");
+exports.WebApiError = sendRequest_1.WebApiError;
+var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
+var Credentials_1 = require("../localStorage/Credentials");
+var env = require("../env");
+var ts_events_extended_1 = require("ts-events-extended");
+var restartApp_1 = require("../restartApp");
+var networkStateMonitoring = require("../networkStateMonitoring");
+var evtError = new ts_events_extended_1.SyncEvent();
+evtError.attach(function (_a) {
+    var methodName = _a.methodName, httpErrorStatus = _a.httpErrorStatus;
+    switch (env.jsRuntimeEnv) {
+        case "browser":
+            {
+                switch (httpErrorStatus) {
+                    case 401:
+                        restartApp_1.restartApp();
+                        break;
+                        ;
+                    case 500:
+                        alert("Internal server error");
+                        break;
+                    case 400:
+                        alert("Request malformed");
+                        break;
+                    case undefined:
+                        alert("Can't reach the server");
+                        break;
+                    default: alert(methodName + " httpErrorStatus: " + httpErrorStatus);
+                }
+            }
+            break;
+        case "react-native":
+            {
+                console.log("WebApi Error: " + methodName + " " + httpErrorStatus);
+                restartApp_1.restartApp();
+            }
+            break;
+    }
+});
+var canRequestThrow = false;
+function setCanRequestThrowToTrueForNextMethodCall() {
+    canRequestThrow = true;
+}
+exports.setCanRequestThrowToTrueForNextMethodCall = setCanRequestThrowToTrueForNextMethodCall;
+var sendRequest = function (methodName, params) { return __awaiter(void 0, void 0, void 0, function () {
+    var networkStateMonitoringApi, _a, _b, _c, _d, error_1;
+    return __generator(this, function (_e) {
+        switch (_e.label) {
+            case 0: return [4 /*yield*/, networkStateMonitoring.getApi()];
+            case 1:
+                networkStateMonitoringApi = _e.sent();
+                if (!!networkStateMonitoringApi.getIsOnline()) return [3 /*break*/, 3];
+                return [4 /*yield*/, networkStateMonitoringApi.evtStateChange.waitFor()];
+            case 2:
+                _e.sent();
+                _e.label = 3;
+            case 3:
+                _e.trys.push([3, 9, , 10]);
+                _a = sendRequest_1.sendRequest;
+                _b = [methodName,
+                    params];
+                _d = env.jsRuntimeEnv === "react-native";
+                if (!_d) return [3 /*break*/, 5];
+                return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
+            case 4:
+                _d = (_e.sent());
+                _e.label = 5;
+            case 5:
+                if (!_d) return [3 /*break*/, 7];
+                return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
+            case 6:
+                _c = (_e.sent()).connect_sid;
+                return [3 /*break*/, 8];
+            case 7:
+                _c = undefined;
+                _e.label = 8;
+            case 8: return [2 /*return*/, _a.apply(void 0, _b.concat([_c]))];
+            case 9:
+                error_1 = _e.sent();
+                if (!(error_1 instanceof sendRequest_1.WebApiError)) {
+                    throw error_1;
+                }
+                if (canRequestThrow) {
+                    canRequestThrow = false;
+                    throw error_1;
+                }
+                evtError.post(error_1);
+                return [2 /*return*/, new Promise(function () { })];
+            case 10: return [2 /*return*/];
+        }
+    });
+}); };
+exports.registerUser = (function () {
+    var methodName = apiDeclaration.registerUser.methodName;
+    return function (email, secret, towardUserEncryptKeyStr, encryptedSymmetricKey) {
+        return sendRequest(methodName, {
+            email: email,
+            secret: secret,
+            towardUserEncryptKeyStr: towardUserEncryptKeyStr,
+            encryptedSymmetricKey: encryptedSymmetricKey
+        });
+    };
+})();
+exports.validateEmail = (function () {
+    var methodName = apiDeclaration.validateEmail.methodName;
+    return function (email, activationCode) {
+        return sendRequest(methodName, { email: email, activationCode: activationCode });
+    };
+})();
+/** uaInstanceId should be provided on android/iOS and undefined on the web */
+exports.loginUser = (function () {
+    var methodName = apiDeclaration.loginUser.methodName;
+    return function (email, secret, uaInstanceId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        email = email.toLowerCase();
+                        return [4 /*yield*/, sendRequest(methodName, { email: email, secret: secret, uaInstanceId: uaInstanceId })];
+                    case 1:
+                        response = _a.sent();
+                        if (response.status !== "SUCCESS") {
+                            return [2 /*return*/, response];
+                        }
+                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
+                        return [4 /*yield*/, Credentials_1.Credentials.set({
+                                email: email,
+                                secret: secret,
+                                "uaInstanceId": uaInstanceId
+                            })];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.set({
+                            "connect_sid": response.connect_sid,
+                            email: email,
+                            "encryptedSymmetricKey": response.encryptedSymmetricKey,
+                            "uaInstanceId": uaInstanceId === undefined ?
+                                response.webUaInstanceId : uaInstanceId
+                        })];
+                    case 4:
+                        _a.sent();
+                        return [2 /*return*/, { "status": response.status }];
+                }
+            });
+        });
+    };
+})();
+exports.isUserLoggedIn = (function () {
+    var methodName = apiDeclaration.isUserLoggedIn.methodName;
+    return function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var isLoggedIn;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
+                    case 1:
+                        isLoggedIn = _a.sent();
+                        if (!!isLoggedIn) return [3 /*break*/, 3];
+                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [2 /*return*/, isLoggedIn];
+                }
+            });
+        });
+    };
+})();
+exports.declareUa = (function () {
+    var methodName = apiDeclaration.declareUa.methodName;
+    return function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, params)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+})();
+exports.logoutUser = (function () {
+    var methodName = apiDeclaration.logoutUser.methodName;
+    return function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
+                    case 2:
+                        _a.sent();
+                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
+                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+})();
+/** Return true if email has account */
+exports.sendRenewPasswordEmail = (function () {
+    var methodName = apiDeclaration.sendRenewPasswordEmail.methodName;
+    return function (email) {
+        return sendRequest(methodName, { email: email });
+    };
+})();
+exports.renewPassword = (function () {
+    var methodName = apiDeclaration.renewPassword.methodName;
+    return function (email, newSecret, newTowardUserEncryptKeyStr, newEncryptedSymmetricKey, token) {
+        return sendRequest(methodName, {
+            email: email,
+            newSecret: newSecret,
+            newTowardUserEncryptKeyStr: newTowardUserEncryptKeyStr,
+            newEncryptedSymmetricKey: newEncryptedSymmetricKey,
+            token: token
+        });
+    };
+})();
+exports.getCountryIso = (function () {
+    var methodName = apiDeclaration.getCountryIso.methodName;
+    return function () {
+        return sendRequest(methodName, undefined);
+    };
+})();
+exports.getChangesRates = (function () {
+    var methodName = apiDeclaration.getChangesRates.methodName;
+    return function () {
+        return sendRequest(methodName, undefined);
+    };
+})();
+exports.getSubscriptionInfos = (function () {
+    var methodName = apiDeclaration.getSubscriptionInfos.methodName;
+    return function () {
+        return sendRequest(methodName, undefined);
+    };
+})();
+exports.subscribeOrUpdateSource = (function () {
+    var methodName = apiDeclaration.subscribeOrUpdateSource.methodName;
+    return function (sourceId) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, { sourceId: sourceId })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+})();
+exports.unsubscribe = (function () {
+    var methodName = apiDeclaration.unsubscribe.methodName;
+    return function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+})();
+exports.createStripeCheckoutSessionForShop = (function () {
+    var methodName = apiDeclaration.createStripeCheckoutSessionForShop.methodName;
+    return function (cart, shippingFormData, currency, success_url, cancel_url) {
+        return sendRequest(methodName, {
+            "cartDescription": cart.map(function (_a) {
+                var product = _a.product, quantity = _a.quantity;
+                return ({
+                    "productName": product.name,
+                    quantity: quantity
+                });
+            }),
+            shippingFormData: shippingFormData,
+            currency: currency,
+            success_url: success_url,
+            cancel_url: cancel_url
+        });
+    };
+})();
+exports.createStripeCheckoutSessionForSubscription = (function () {
+    var methodName = apiDeclaration.createStripeCheckoutSessionForSubscription.methodName;
+    return function (currency, success_url, cancel_url) {
+        return sendRequest(methodName, {
+            currency: currency,
+            success_url: success_url,
+            cancel_url: cancel_url
+        });
+    };
+})();
+exports.getOrders = (function () {
+    var methodName = apiDeclaration.getOrders.methodName;
+    return function () {
+        return sendRequest(methodName, undefined);
+    };
+})();
+
+},{"../../web_api_declaration":48,"../env":26,"../localStorage/AuthenticatedSessionDescriptorSharedData":29,"../localStorage/Credentials":30,"../networkStateMonitoring":34,"../restartApp":37,"./sendRequest":40,"ts-events-extended":63}],40:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var connectSidHttpHeaderName_1 = require("../types/connectSidHttpHeaderName");
+var env = require("../env");
+var JSON_CUSTOM_1 = require("transfer-tools/dist/lib/JSON_CUSTOM");
+var webApiPath_1 = require("../../gateway/webApiPath");
+var serializer = JSON_CUSTOM_1.get();
+var WebApiError = /** @class */ (function (_super) {
+    __extends(WebApiError, _super);
+    function WebApiError(methodName, httpErrorStatus) {
+        var _this = _super.call(this, "Web api error " + httpErrorStatus + " calling " + methodName) || this;
+        _this.methodName = methodName;
+        _this.httpErrorStatus = httpErrorStatus;
+        Object.setPrototypeOf(_this, WebApiError.prototype);
+        return _this;
+    }
+    return WebApiError;
+}(Error));
+exports.WebApiError = WebApiError;
+function sendRequest(methodName, params, connectSid) {
+    return __awaiter(this, void 0, void 0, function () {
+        var fetchResp, resp, _a, _b;
+        var _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0: return [4 /*yield*/, fetch("https://web." + env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
+                        "method": "POST",
+                        "cache": "no-cache",
+                        "credentials": "same-origin",
+                        "headers": __assign({ "Content-Type": "application/json-custom; charset=utf-8" }, (connectSid !== undefined ?
+                            (_c = {}, _c[connectSidHttpHeaderName_1.connectSidHttpHeaderName] = connectSid, _c) :
+                            ({}))),
+                        "redirect": "error",
+                        "body": serializer.stringify(params)
+                    }).catch(function (error) {
+                        console.log("Fetch error: " + methodName + " " + JSON.stringify(params) + " " + error.message);
+                        return new WebApiError(methodName, undefined);
+                    })];
+                case 1:
+                    fetchResp = _d.sent();
+                    if (fetchResp instanceof WebApiError) {
+                        throw fetchResp;
+                    }
+                    if (fetchResp.status !== 200) {
+                        throw new WebApiError(methodName, fetchResp.status);
+                    }
+                    _b = (_a = serializer).parse;
+                    return [4 /*yield*/, fetchResp.text()];
+                case 2:
+                    resp = _b.apply(_a, [_d.sent()]);
+                    console.log(methodName, { params: params, resp: resp });
+                    return [2 /*return*/, resp];
+            }
+        });
+    });
+}
+exports.sendRequest = sendRequest;
+
+},{"../../gateway/webApiPath":24,"../env":26,"../types/connectSidHttpHeaderName":38,"transfer-tools/dist/lib/JSON_CUSTOM":58}],41:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.data = require("../../res/currency.json");
+function isValidCountryIso(countryIso) {
+    //NOTE: Avoid loading if we do not need
+    if (isValidCountryIso.countryIsoRecord === undefined) {
+        isValidCountryIso.countryIsoRecord = (function () {
+            var e_1, _a, e_2, _b;
+            var out = {};
+            try {
+                for (var _c = __values(Object.keys(exports.data)), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var currency = _d.value;
+                    try {
+                        for (var _e = (e_2 = void 0, __values(exports.data[currency].countriesIso)), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var countryIso_1 = _f.value;
+                            out[countryIso_1] = true;
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return out;
+        })();
+        return isValidCountryIso(countryIso);
+    }
+    if (typeof countryIso !== "string" || !/^[a-z]{2}$/.test(countryIso)) {
+        return false;
+    }
+    return !!isValidCountryIso.countryIsoRecord[countryIso];
+}
+exports.isValidCountryIso = isValidCountryIso;
+(function (isValidCountryIso) {
+    isValidCountryIso.countryIsoRecord = undefined;
+})(isValidCountryIso = exports.isValidCountryIso || (exports.isValidCountryIso = {}));
+function getCountryCurrency(countryIso) {
+    var cache = getCountryCurrency.cache;
+    {
+        var currency = cache[countryIso];
+        if (currency !== undefined) {
+            return currency;
+        }
+    }
+    cache[countryIso] = Object.keys(exports.data)
+        .map(function (currency) { return ({ currency: currency, "countriesIso": exports.data[currency].countriesIso }); })
+        .find(function (_a) {
+        var countriesIso = _a.countriesIso;
+        return !!countriesIso.find(function (_countryIso) { return _countryIso === countryIso; });
+    })
+        .currency;
+    return getCountryCurrency(countryIso);
+}
+exports.getCountryCurrency = getCountryCurrency;
+(function (getCountryCurrency) {
+    getCountryCurrency.cache = {};
+})(getCountryCurrency = exports.getCountryCurrency || (exports.getCountryCurrency = {}));
+/** Must define convertFromEuro.changeRates first */
+function convertFromEuro(euroAmount, currencyTo) {
+    return Math.round(euroAmount * convertFromEuro.getChangeRates()[currencyTo]);
+}
+exports.convertFromEuro = convertFromEuro;
+(function (convertFromEuro) {
+    var changeRates_ = undefined;
+    var lastUpdateDate = new Date(0);
+    function setChangeRates(changeRates) {
+        lastUpdateDate = new Date();
+        changeRates_ = changeRates;
+    }
+    convertFromEuro.setChangeRates = setChangeRates;
+    function getChangeRates() {
+        if (changeRates_ === undefined) {
+            throw new Error("Change rates not defined");
+        }
+        return changeRates_;
+    }
+    convertFromEuro.getChangeRates = getChangeRates;
+    var updater = undefined;
+    function setChangeRatesFetchMethod(fetchChangeRates, ttl) {
+        updater = { fetchChangeRates: fetchChangeRates, ttl: ttl };
+    }
+    convertFromEuro.setChangeRatesFetchMethod = setChangeRatesFetchMethod;
+    function refreshChangeRates() {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, error_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (updater === undefined) {
+                            throw new Error("No method for updating rates changes have been defined");
+                        }
+                        if (Date.now() - lastUpdateDate.getTime() < updater.ttl) {
+                            return [2 /*return*/];
+                        }
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 4]);
+                        _a = setChangeRates;
+                        return [4 /*yield*/, updater.fetchChangeRates()];
+                    case 2:
+                        _a.apply(void 0, [_b.sent()]);
+                        return [3 /*break*/, 4];
+                    case 3:
+                        error_1 = _b.sent();
+                        if (lastUpdateDate.getTime() === 0) {
+                            throw error_1;
+                        }
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    }
+    convertFromEuro.refreshChangeRates = refreshChangeRates;
+})(convertFromEuro = exports.convertFromEuro || (exports.convertFromEuro = {}));
+/**
+ * get currency of stripe card,
+ * if there is no special pricing for the currency
+ * "eur" will be returned.
+ *
+ * NOTE: This function does seems to come out of left field
+ * but this operation is done on the frontend and the backend
+ * so we export it.
+ *
+ */
+function getCardCurrency(stripeCard, pricingByCurrency) {
+    var currency = getCountryCurrency(stripeCard.country.toLowerCase());
+    if (!(currency in pricingByCurrency)) {
+        currency = "eur";
+    }
+    return currency;
+}
+exports.getCardCurrency = getCardCurrency;
+function prettyPrint(amount, currency) {
+    return (amount / 100).toLocaleString(undefined, {
+        "style": "currency",
+        currency: currency
+    });
+}
+exports.prettyPrint = prettyPrint;
+
+},{"../../res/currency.json":64}],42:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var ts_events_extended_1 = require("ts-events-extended");
+/**
+ * Assert bootstrap modal initialized on jQuery element.
+ * bootbox already call .modal().
+ * For custom modal .modal() need to be called first.
+ *
+ *
+ * NOTE: For dialog remember to invoke removeFromDom once hidden.
+ */
+function createGenericProxyForBootstrapModal($initializedModalDiv) {
+    var evtHide = new ts_events_extended_1.VoidSyncEvent();
+    var evtShown = new ts_events_extended_1.VoidSyncEvent();
+    var evtHidden = new ts_events_extended_1.VoidSyncEvent();
+    $initializedModalDiv.on("hide.bs.modal", function () { return evtHide.post(); });
+    $initializedModalDiv.on("shown.bs.modal", function () { return evtShown.post(); });
+    $initializedModalDiv.on("hidden.bs.modal", function () { return evtHidden.post(); });
+    var modal = {
+        evtHide: evtHide, evtShown: evtShown, evtHidden: evtHidden,
+        "show": function () { return $initializedModalDiv.modal("show"); },
+        "hide": function () { return $initializedModalDiv.modal("hide"); },
+        "removeFromDom": function () {
+            $initializedModalDiv.off();
+            $initializedModalDiv.data("bs.modal", null);
+            $initializedModalDiv.remove();
+        }
+    };
+    return modal;
+}
+exports.createGenericProxyForBootstrapModal = createGenericProxyForBootstrapModal;
+
+},{"ts-events-extended":63}],43:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
+var customImplementationOfApi = undefined;
+function provideCustomImplementationOfApi(api) {
+    customImplementationOfApi = api;
+}
+exports.provideCustomImplementationOfApi = provideCustomImplementationOfApi;
+var bootboxBasedImplementationOfBaseApi = {
+    "create": function (dialogType, options) {
+        var bootstrapModal = bootbox[dialogType](options);
+        return createGenericProxyForBootstrapModal_1.createGenericProxyForBootstrapModal(bootstrapModal);
+    },
+    "createLoading": function (message) { return bootboxBasedImplementationOfBaseApi.create("dialog", {
+        "message": [
+            '<p class="text-center">',
+            '<i class="fa fa-spin fa-spinner"></i>&nbsp;&nbsp;',
+            "<span class=\"" + loading.spanClass + "\">" + message + "</span>",
+            "</p>"
+        ].join(""),
+        "closeButton": false,
+        "onEscape": false,
+        "animate": false,
+        "show": false
+    }); }
+};
+//TODO: See if needed.
+var loading;
+(function (loading) {
+    loading.spanClass = "loading_message";
+})(loading || (loading = {}));
+exports.getApi = function () { return customImplementationOfApi || bootboxBasedImplementationOfBaseApi; };
+
+},{"../createGenericProxyForBootstrapModal":42}],44:[function(require,module,exports){
+"use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var modalStack = require("../stack");
+var types = require("./types");
+exports.baseTypes = types;
+var getApi_1 = require("./getApi");
+exports.provideCustomImplementationOfBaseApi = getApi_1.provideCustomImplementationOfApi;
+var runExclusive = require("run-exclusive");
+var noLockDialogApi = (function () {
+    var currentLoading = undefined;
+    var currentModal = undefined;
+    var restoreLoading = undefined;
+    var out = {
+        "dismissLoading": function () {
+            if (!!currentLoading) {
+                currentLoading.stop();
+                currentLoading = undefined;
+            }
+            if (!!restoreLoading) {
+                restoreLoading = undefined;
+            }
+        },
+        "loading": function (message, delayBeforeShow) {
+            if (delayBeforeShow === void 0) { delayBeforeShow = 700; }
+            if (!!currentModal) {
+                restoreLoading = function () { return out.loading(message, delayBeforeShow); };
+                return;
+            }
+            if (!!currentLoading) {
+                delayBeforeShow = 0;
+            }
+            out.dismissLoading();
+            var modal = undefined;
+            var timer = setTimeout(function () {
+                modal = getApi_1.getApi().createLoading(message);
+                modalStack.add(modal).show();
+            }, delayBeforeShow);
+            currentLoading = {
+                "stop": function () { return !!modal ? modal.hide() : clearTimeout(timer); },
+                message: message,
+                delayBeforeShow: delayBeforeShow
+            };
+        },
+        "create": function (method, options) {
+            if (!!currentModal) {
+                currentModal.hide();
+                return out.create(method, options);
+            }
+            if (!!currentLoading) {
+                var message_1 = currentLoading.message;
+                var delayBeforeShow_1 = currentLoading.delayBeforeShow;
+                out.dismissLoading();
+                restoreLoading = function () { return out.loading(message_1, delayBeforeShow_1); };
+            }
+            var modal = getApi_1.getApi().create(method, __assign(__assign(__assign({}, options), { "show": false }), ("animate" in options ? ({}) : ({ "animate": false }))));
+            modalStack.add(modal).show();
+            currentModal = modal;
+            modal.evtHide.attachOnce(function () { return currentModal = undefined; });
+            modal.evtHidden.attachOnce(function () {
+                if (restoreLoading) {
+                    restoreLoading();
+                }
+                modal.removeFromDom();
+            });
+            return modal.evtHidden.waitFor();
+        }
+    };
+    return out;
+})();
+var lockFn = runExclusive.build(function (pr) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                if (!pr) {
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, pr];
+            case 1:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); });
+exports.startMultiDialogProcess = function () {
+    var prLockAcquired = lockFn();
+    var endMultiDialogProcess;
+    lockFn(new Promise(function (resolve) { return endMultiDialogProcess = function () {
+        dialogApi.dismissLoading();
+        resolve();
+    }; }));
+    var dialogApi = {
+        "create": function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            return prLockAcquired.then(function () { return noLockDialogApi.create.apply(noLockDialogApi, __spread(args)); });
+        },
+        "loading": function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            return prLockAcquired.then(function () { return noLockDialogApi.loading.apply(noLockDialogApi, __spread(args)); });
+        },
+        "dismissLoading": function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            return prLockAcquired.then(function () { return noLockDialogApi.dismissLoading.apply(noLockDialogApi, __spread(args)); });
+        }
+    };
+    return {
+        endMultiDialogProcess: endMultiDialogProcess,
+        dialogApi: dialogApi
+    };
+};
+exports.dialogApi = {
+    "create": function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return __awaiter(void 0, void 0, void 0, function () {
+            var _a, endMultiDialogProcess, create;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = exports.startMultiDialogProcess(), endMultiDialogProcess = _a.endMultiDialogProcess, create = _a.dialogApi.create;
+                        return [4 /*yield*/, create.apply(void 0, __spread(args))];
+                    case 1:
+                        _b.sent();
+                        endMultiDialogProcess();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    },
+    "loading": function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return lockFn().then(function () { return noLockDialogApi.loading.apply(noLockDialogApi, __spread(args)); });
+    },
+    "dismissLoading": function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return lockFn().then(function () { return noLockDialogApi.dismissLoading.apply(noLockDialogApi, __spread(args)); });
+    }
+};
+
+},{"../stack":46,"./getApi":43,"./types":45,"run-exclusive":55}],45:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+
+},{}],46:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var stack = [];
+var onHideKey = " __hide_handler__ ";
+//NOTE: Assert provided modal is not shown.
+function add(modal) {
+    var _this = this;
+    return {
+        "show": function () { return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+            var currentModal_1, handler, prHidden;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (stack.indexOf(modal) >= 0) {
+                            resolve();
+                            return [2 /*return*/];
+                        }
+                        stack.push(modal);
+                        modal[onHideKey] = function () {
+                            var index = stack.indexOf(modal);
+                            var wasOnTop = index === stack.length - 1;
+                            stack.splice(index, 1);
+                            if (wasOnTop && stack.length !== 0) {
+                                var modalToRestore_1 = stack[stack.length - 1];
+                                modalToRestore_1[" scheduled to be shown "] = true;
+                                /*
+                                NOTE: To prevent flickering we do not restore
+                                the previous modal if an other one is immediately
+                                opened ( form with successive bootbox_custom )
+                                */
+                                setTimeout(function () {
+                                    delete modalToRestore_1[" scheduled to be shown "];
+                                    if (modalToRestore_1 !== stack[stack.length - 1]) {
+                                        return;
+                                    }
+                                    modalToRestore_1.show();
+                                }, 100);
+                            }
+                        };
+                        //modal.one("hide.bs.modal", modal[onHideKey]);
+                        modal.evtHide.attachOnce(modal[onHideKey]);
+                        if (!(stack.length !== 1)) return [3 /*break*/, 2];
+                        currentModal_1 = stack[stack.length - 2];
+                        if (!!currentModal_1[" scheduled to be shown "]) return [3 /*break*/, 2];
+                        //currentModal.off("hide.bs.modal", undefined, currentModal[onHideKey]);
+                        {
+                            handler = currentModal_1.evtHide.getHandlers()
+                                .find(function (_a) {
+                                var callback = _a.callback;
+                                return callback === currentModal_1[onHideKey];
+                            });
+                            //NOTE: I think this can never be undefined by who know.
+                            if (!!handler) {
+                                handler.detach();
+                            }
+                        }
+                        prHidden = new Promise(function (resolve) { return currentModal_1.evtHidden.attachOnce(function () { return resolve(); }); });
+                        //currentModal.modal("hide");
+                        currentModal_1.hide();
+                        //currentModal.one("hide.bs.modal", currentModal[onHideKey]);
+                        currentModal_1.evtHide.attachOnce(currentModal_1[onHideKey]);
+                        return [4 /*yield*/, prHidden];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2:
+                        //modal.one("shown.bs.modal", () => resolve());
+                        modal.evtShown.attachOnce(function () { return resolve(); });
+                        //modal.modal("show");
+                        modal.show();
+                        return [2 /*return*/];
+                }
+            });
+        }); }); },
+        "hide": function () { return new Promise(function (resolve) {
+            if (stack.indexOf(modal) < 0) {
+                resolve();
+                return;
+            }
+            //modal.one("hidden.bs.modal", () => resolve());
+            modal.evtHidden.attachOnce(function () { return resolve(); });
+            //modal.modal("hide");
+            modal.hide();
+        }); }
+    };
+}
+exports.add = add;
+
+},{}],47:[function(require,module,exports){
+if (typeof Object.assign !== 'function') {
+    // Must be writable: true, enumerable: false, configurable: true
+    Object.defineProperty(Object, "assign", {
+        value: function assign(target, varArgs) {
+            'use strict';
+            if (target === null || target === undefined) {
+                throw new TypeError('Cannot convert undefined or null to object');
+            }
+            var to = Object(target);
+            for (var index = 1; index < arguments.length; index++) {
+                var nextSource = arguments[index];
+                if (nextSource !== null && nextSource !== undefined) {
+                    for (var nextKey in nextSource) {
+                        // Avoid bugs when hasOwnProperty is shadowed
+                        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                            to[nextKey] = nextSource[nextKey];
+                        }
+                    }
+                }
+            }
+            return to;
+        },
+        writable: true,
+        configurable: true
+    });
+}
+
+},{}],48:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var registerUser;
+(function (registerUser) {
+    registerUser.methodName = "register-user";
+})(registerUser = exports.registerUser || (exports.registerUser = {}));
+var validateEmail;
+(function (validateEmail) {
+    validateEmail.methodName = "validate-email";
+})(validateEmail = exports.validateEmail || (exports.validateEmail = {}));
+var loginUser;
+(function (loginUser) {
+    loginUser.methodName = "login-user";
+})(loginUser = exports.loginUser || (exports.loginUser = {}));
+var isUserLoggedIn;
+(function (isUserLoggedIn) {
+    isUserLoggedIn.methodName = "isUserLoggedIn";
+})(isUserLoggedIn = exports.isUserLoggedIn || (exports.isUserLoggedIn = {}));
+var declareUa;
+(function (declareUa) {
+    declareUa.methodName = "declareUa";
+})(declareUa = exports.declareUa || (exports.declareUa = {}));
+var logoutUser;
+(function (logoutUser) {
+    logoutUser.methodName = "logout-user";
+})(logoutUser = exports.logoutUser || (exports.logoutUser = {}));
+var sendRenewPasswordEmail;
+(function (sendRenewPasswordEmail) {
+    sendRenewPasswordEmail.methodName = "send-renew-password-email";
+})(sendRenewPasswordEmail = exports.sendRenewPasswordEmail || (exports.sendRenewPasswordEmail = {}));
+var renewPassword;
+(function (renewPassword) {
+    renewPassword.methodName = "renew-password";
+})(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
+var getCountryIso;
+(function (getCountryIso) {
+    getCountryIso.methodName = "guess-country-iso";
+})(getCountryIso = exports.getCountryIso || (exports.getCountryIso = {}));
+var getChangesRates;
+(function (getChangesRates) {
+    getChangesRates.methodName = "get-changes-rates";
+})(getChangesRates = exports.getChangesRates || (exports.getChangesRates = {}));
+var getSubscriptionInfos;
+(function (getSubscriptionInfos) {
+    getSubscriptionInfos.methodName = "get-subscription-infos";
+})(getSubscriptionInfos = exports.getSubscriptionInfos || (exports.getSubscriptionInfos = {}));
+var subscribeOrUpdateSource;
+(function (subscribeOrUpdateSource) {
+    subscribeOrUpdateSource.methodName = "subscribe-or-update-source";
+})(subscribeOrUpdateSource = exports.subscribeOrUpdateSource || (exports.subscribeOrUpdateSource = {}));
+var unsubscribe;
+(function (unsubscribe) {
+    unsubscribe.methodName = "unsubscribe";
+})(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
+var createStripeCheckoutSessionForShop;
+(function (createStripeCheckoutSessionForShop) {
+    createStripeCheckoutSessionForShop.methodName = "create-stripe-checkout-session-for-shop";
+})(createStripeCheckoutSessionForShop = exports.createStripeCheckoutSessionForShop || (exports.createStripeCheckoutSessionForShop = {}));
+var createStripeCheckoutSessionForSubscription;
+(function (createStripeCheckoutSessionForSubscription) {
+    createStripeCheckoutSessionForSubscription.methodName = "create-stripe-checkout-session-for-subscription";
+})(createStripeCheckoutSessionForSubscription = exports.createStripeCheckoutSessionForSubscription || (exports.createStripeCheckoutSessionForSubscription = {}));
+var getOrders;
+(function (getOrders) {
+    getOrders.methodName = "get-orders";
+})(getOrders = exports.getOrders || (exports.getOrders = {}));
+
+},{}],49:[function(require,module,exports){
+'use strict';
+
+/* eslint no-invalid-this: 1 */
+
+var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
+var slice = Array.prototype.slice;
+var toStr = Object.prototype.toString;
+var funcType = '[object Function]';
+
+module.exports = function bind(that) {
+    var target = this;
+    if (typeof target !== 'function' || toStr.call(target) !== funcType) {
+        throw new TypeError(ERROR_MESSAGE + target);
+    }
+    var args = slice.call(arguments, 1);
+
+    var bound;
+    var binder = function () {
+        if (this instanceof bound) {
+            var result = target.apply(
+                this,
+                args.concat(slice.call(arguments))
+            );
+            if (Object(result) === result) {
+                return result;
+            }
+            return this;
+        } else {
+            return target.apply(
+                that,
+                args.concat(slice.call(arguments))
+            );
+        }
+    };
+
+    var boundLength = Math.max(0, target.length - args.length);
+    var boundArgs = [];
+    for (var i = 0; i < boundLength; i++) {
+        boundArgs.push('$' + i);
+    }
+
+    bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this,arguments); }')(binder);
+
+    if (target.prototype) {
+        var Empty = function Empty() {};
+        Empty.prototype = target.prototype;
+        bound.prototype = new Empty();
+        Empty.prototype = null;
+    }
+
+    return bound;
+};
+
+},{}],50:[function(require,module,exports){
+'use strict';
+
+var implementation = require('./implementation');
+
+module.exports = Function.prototype.bind || implementation;
+
+},{"./implementation":49}],51:[function(require,module,exports){
+'use strict';
+
+var bind = require('function-bind');
+
+module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
+
+},{"function-bind":50}],52:[function(require,module,exports){
+// https://tc39.github.io/ecma262/#sec-array.prototype.find
+if (!Array.prototype.find) {
+    Object.defineProperty(Array.prototype, 'find', {
+        value: function (predicate) {
+            // 1. Let O be ? ToObject(this value).
+            if (this == null) {
+                throw new TypeError('"this" is null or not defined');
+            }
+            var o = Object(this);
+            // 2. Let len be ? ToLength(? Get(O, "length")).
+            var len = o.length >>> 0;
+            // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+            if (typeof predicate !== 'function') {
+                throw new TypeError('predicate must be a function');
+            }
+            // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+            var thisArg = arguments[1];
+            // 5. Let k be 0.
+            var k = 0;
+            // 6. Repeat, while k < len
+            while (k < len) {
+                // a. Let Pk be ! ToString(k).
+                // b. Let kValue be ? Get(O, Pk).
+                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+                // d. If testResult is true, return kValue.
+                var kValue = o[k];
+                if (predicate.call(thisArg, kValue, k, o)) {
+                    return kValue;
+                }
+                // e. Increase k by 1.
+                k++;
+            }
+            // 7. Return undefined.
+            return undefined;
+        },
+        configurable: true,
+        writable: true
+    });
+}
+
+},{}],53:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var LightMapImpl = /** @class */ (function () {
+    function LightMapImpl() {
+        this.record = [];
+    }
+    LightMapImpl.prototype.has = function (key) {
+        return this.record
+            .map(function (_a) {
+            var _key = _a[0];
+            return _key;
+        })
+            .indexOf(key) >= 0;
+    };
+    LightMapImpl.prototype.get = function (key) {
+        var entry = this.record
+            .filter(function (_a) {
+            var _key = _a[0];
+            return _key === key;
+        })[0];
+        if (entry === undefined) {
+            return undefined;
+        }
+        return entry[1];
+    };
+    LightMapImpl.prototype.set = function (key, value) {
+        var entry = this.record
+            .filter(function (_a) {
+            var _key = _a[0];
+            return _key === key;
+        })[0];
+        if (entry === undefined) {
+            this.record.push([key, value]);
+        }
+        else {
+            entry[1] = value;
+        }
+        return this;
+    };
+    LightMapImpl.prototype["delete"] = function (key) {
+        var index = this.record.map(function (_a) {
+            var key = _a[0];
+            return key;
+        }).indexOf(key);
+        if (index < 0) {
+            return false;
+        }
+        this.record.splice(index, 1);
+        return true;
+    };
+    LightMapImpl.prototype.keys = function () {
+        return this.record.map(function (_a) {
+            var key = _a[0];
+            return key;
+        });
+    };
+    return LightMapImpl;
+}());
+exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
+
+},{}],54:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Map_1 = require("./Map");
+exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
+
+},{"./Map":53}],55:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -7571,7 +9273,7 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{"minimal-polyfills/dist/lib/WeakMap":16}],19:[function(require,module,exports){
+},{"minimal-polyfills/dist/lib/WeakMap":54}],56:[function(require,module,exports){
 'use strict'
 /* eslint no-proto: 0 */
 module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
@@ -7583,1680 +9285,14 @@ function setProtoOf (obj, proto) {
 
 function mixinProperties (obj, proto) {
   for (var prop in proto) {
-    if (!obj.hasOwnProperty(prop)) {
+    if (!Object.prototype.hasOwnProperty.call(obj, prop)) {
       obj[prop] = proto[prop]
     }
   }
   return obj
 }
 
-},{}],20:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-exports.__esModule = true;
-var SyncEventBase_1 = require("./SyncEventBase");
-var SyncEvent = /** @class */ (function (_super) {
-    __extends(SyncEvent, _super);
-    function SyncEvent() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.evtAttach = new SyncEventBase_1.SyncEventBase();
-        return _this;
-    }
-    SyncEvent.prototype.addHandler = function (attachParams, implicitAttachParams) {
-        var handler = _super.prototype.addHandler.call(this, attachParams, implicitAttachParams);
-        this.evtAttach.post(handler);
-        return handler;
-    };
-    return SyncEvent;
-}(SyncEventBase_1.SyncEventBase));
-exports.SyncEvent = SyncEvent;
-var VoidSyncEvent = /** @class */ (function (_super) {
-    __extends(VoidSyncEvent, _super);
-    function VoidSyncEvent() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    VoidSyncEvent.prototype.post = function () {
-        return _super.prototype.post.call(this, undefined);
-    };
-    return VoidSyncEvent;
-}(SyncEvent));
-exports.VoidSyncEvent = VoidSyncEvent;
-
-},{"./SyncEventBase":21}],21:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
-exports.__esModule = true;
-var SyncEventBaseProtected_1 = require("./SyncEventBaseProtected");
-function matchPostable(o) {
-    return o instanceof Object && typeof o.post === "function";
-}
-function isCallable(o) {
-    if (typeof o !== "function")
-        return false;
-    var prototype = o["prototype"];
-    if (!prototype)
-        return true;
-    var methods = Object.getOwnPropertyNames(prototype);
-    if (methods.length !== 1)
-        return false;
-    var name = o.name;
-    if (!name)
-        return true;
-    if (name[0].toUpperCase() === name[0])
-        return false;
-    return true;
-}
-/** SyncEvent without evtAttach property */
-var SyncEventBase = /** @class */ (function (_super) {
-    __extends(SyncEventBase, _super);
-    function SyncEventBase() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.defaultParams = {
-            "matcher": function matchAll() { return true; },
-            "boundTo": _this,
-            "timeout": undefined,
-            "callback": undefined
-        };
-        return _this;
-    }
-    SyncEventBase.prototype.getDefaultParams = function () {
-        return __assign({}, this.defaultParams);
-    };
-    SyncEventBase.prototype.readParams = function (inputs) {
-        var out = this.getDefaultParams();
-        var n = inputs.length;
-        if (!n)
-            return out;
-        //[ matcher, boundTo, timeout, callback ]
-        //[ matcher, boundTo, callback ]
-        //[ matcher, timeout, callback ]
-        //[ boundTo, timeout, callback ]
-        //[ matcher, callback ]
-        //[ boundTo, callback ]
-        //[ timeout, callback ]
-        //[ callback ]
-        //[ matcher, timeout, evt ]
-        //[ matcher, evt ]
-        //[ timeout, evt ]
-        //[ evt ]
-        if (matchPostable(inputs[n - 1])) {
-            out.boundTo = inputs[n - 1];
-            inputs[n - 1] = inputs[n - 1].post;
-        }
-        //[ matcher, boundTo, timeout, callback ]
-        //[ matcher, boundTo, callback ]
-        //[ matcher, timeout, callback ]
-        //[ boundTo, timeout, callback ]
-        //[ matcher, callback ]
-        //[ boundTo, callback ]
-        //[ timeout, callback ]
-        //[ callback ]
-        if (n === 4) {
-            //[ matcher, boundTo, timeout, callback ]
-            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2], p4 = inputs[3];
-            out.matcher = p1;
-            out.boundTo = p2;
-            out.timeout = p3;
-            out.callback = p4;
-        }
-        else if (n === 3) {
-            //[ matcher, boundTo, callback ]
-            //[ matcher, timeout, callback ]
-            //[ boundTo, timeout, callback ]
-            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2];
-            if (typeof p2 === "number") {
-                //[ matcher, timeout, callback ]
-                //[ boundTo, timeout, callback ]
-                out.timeout = p2;
-                out.callback = p3;
-                if (isCallable(p1)) {
-                    //[ matcher, timeout, callback ]
-                    out.matcher = p1;
-                }
-                else {
-                    //[ boundTo, timeout, callback ]
-                    out.boundTo = p1;
-                }
-            }
-            else {
-                //[ matcher, boundTo, callback ]
-                out.matcher = p1;
-                out.boundTo = p2;
-                out.callback = p3;
-            }
-        }
-        else if (n === 2) {
-            //[ matcher, callback ]
-            //[ boundTo, callback ]
-            //[ timeout, callback ]
-            var p1 = inputs[0], p2 = inputs[1];
-            if (typeof p1 === "number") {
-                //[ timeout, callback ]
-                out.timeout = p1;
-                out.callback = p2;
-            }
-            else {
-                //[ matcher, callback ]
-                //[ boundTo, callback ]
-                out.callback = p2;
-                if (isCallable(p1)) {
-                    out.matcher = p1;
-                }
-                else {
-                    out.boundTo = p1;
-                }
-            }
-        }
-        else if (n === 1) {
-            //[ callback ]
-            var p = inputs[0];
-            out.callback = p;
-        }
-        return out;
-    };
-    SyncEventBase.prototype.waitFor = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        var params = this.getDefaultParams();
-        var n = inputs.length;
-        if (n === 2) {
-            var p1 = inputs[0], p2 = inputs[1];
-            params.matcher = p1;
-            params.timeout = p2;
-        }
-        else {
-            var p = inputs[0];
-            if (isCallable(p)) {
-                params.matcher = p;
-            }
-            else {
-                params.timeout = p;
-            }
-        }
-        return _super.prototype.__waitFor.call(this, params);
-    };
-    SyncEventBase.prototype.attach = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attach(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachOnce = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachOnce(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachExtract = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachExtract(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachPrepend = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachPrepend(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachOncePrepend = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachOncePrepend(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachOnceExtract = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachOnceExtract(this.readParams(inputs));
-    };
-    return SyncEventBase;
-}(SyncEventBaseProtected_1.SyncEventBaseProtected));
-exports.SyncEventBase = SyncEventBase;
-
-},{"./SyncEventBaseProtected":22}],22:[function(require,module,exports){
-"use strict";
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
-exports.__esModule = true;
-var Map_1 = require("minimal-polyfills/dist/lib/Map");
-require("minimal-polyfills/dist/lib/Array.prototype.find");
-var runExclusive = require("run-exclusive");
-var defs_1 = require("./defs");
-/** SyncEvent without evtAttach property and without overload */
-var SyncEventBaseProtected = /** @class */ (function () {
-    function SyncEventBaseProtected() {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        var _this = this;
-        this.tick = 0;
-        this.postCount = 0;
-        this.traceId = null;
-        this.handlers = [];
-        this.handlerTriggers = new Map_1.Polyfill();
-        this.postAsync = runExclusive.buildCb(function (data, postTick, releaseLock) {
-            var isHandled = false;
-            for (var _i = 0, _a = _this.handlers.slice(); _i < _a.length; _i++) {
-                var handler = _a[_i];
-                var async = handler.async, matcher = handler.matcher;
-                if (!async || !matcher(data))
-                    continue;
-                var handlerTrigger = _this.handlerTriggers.get(handler);
-                if (!handlerTrigger)
-                    continue;
-                if (handlerTrigger.handlerTick > postTick)
-                    continue;
-                isHandled = true;
-                handlerTrigger.trigger(data);
-            }
-            if (!isHandled) {
-                releaseLock();
-            }
-            else {
-                var handlersDump_1 = _this.handlers.slice();
-                setTimeout(function () {
-                    for (var _i = 0, _a = _this.handlers; _i < _a.length; _i++) {
-                        var handler = _a[_i];
-                        var async = handler.async;
-                        if (!async)
-                            continue;
-                        if (handlersDump_1.indexOf(handler) >= 0)
-                            continue;
-                        _this.handlerTriggers.get(handler).handlerTick = postTick;
-                    }
-                    releaseLock();
-                }, 0);
-            }
-        });
-        if (!inputs.length)
-            return;
-        var eventEmitter = inputs[0], eventName = inputs[1];
-        var formatter = inputs[2] || this.defaultFormatter;
-        eventEmitter.on(eventName, function () {
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            return _this.post(formatter.apply(null, inputs));
-        });
-    }
-    SyncEventBaseProtected.prototype.defaultFormatter = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return inputs[0];
-    };
-    SyncEventBaseProtected.prototype.enableTrace = function (id, formatter, log) {
-        this.traceId = id;
-        if (!!formatter) {
-            this.traceFormatter = formatter;
-        }
-        else {
-            this.traceFormatter = function (data) {
-                try {
-                    return JSON.stringify(data, null, 2);
-                }
-                catch (_a) {
-                    return "" + data;
-                }
-            };
-        }
-        if (!!log) {
-            this.log = log;
-        }
-        else {
-            this.log = function () {
-                var inputs = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    inputs[_i] = arguments[_i];
-                }
-                return console.log.apply(console, inputs);
-            };
-        }
-    };
-    SyncEventBaseProtected.prototype.disableTrace = function () {
-        this.traceId = null;
-    };
-    SyncEventBaseProtected.prototype.addHandler = function (attachParams, implicitAttachParams) {
-        var _this = this;
-        var handler = __assign({}, attachParams, implicitAttachParams, { "detach": null, "promise": null });
-        handler.promise = new Promise(function (resolve, reject) {
-            var timer = undefined;
-            if (typeof handler.timeout === "number") {
-                timer = setTimeout(function () {
-                    timer = undefined;
-                    handler.detach();
-                    reject(new defs_1.EvtError.Timeout(handler.timeout));
-                }, handler.timeout);
-            }
-            handler.detach = function () {
-                var index = _this.handlers.indexOf(handler);
-                if (index < 0)
-                    return false;
-                _this.handlers.splice(index, 1);
-                _this.handlerTriggers["delete"](handler);
-                if (timer) {
-                    clearTimeout(timer);
-                    reject(new defs_1.EvtError.Detached());
-                }
-                return true;
-            };
-            var handlerTick = _this.tick++;
-            var trigger = function (data) {
-                var callback = handler.callback, once = handler.once;
-                if (timer) {
-                    clearTimeout(timer);
-                    timer = undefined;
-                }
-                if (once)
-                    handler.detach();
-                if (callback)
-                    callback.call(handler.boundTo, data);
-                resolve(data);
-            };
-            _this.handlerTriggers.set(handler, { handlerTick: handlerTick, trigger: trigger });
-        });
-        if (handler.prepend) {
-            var i = void 0;
-            for (i = 0; i < this.handlers.length; i++) {
-                if (this.handlers[i].extract)
-                    continue;
-                else
-                    break;
-            }
-            this.handlers.splice(i, 0, handler);
-        }
-        else {
-            this.handlers.push(handler);
-        }
-        return handler;
-    };
-    SyncEventBaseProtected.prototype.trace = function (data) {
-        if (this.traceId === null) {
-            return;
-        }
-        var message = "(" + this.traceId + ") ";
-        var isExtracted = !!this.handlers.find(function (_a) {
-            var extract = _a.extract, matcher = _a.matcher;
-            return extract && matcher(data);
-        });
-        if (isExtracted) {
-            message += "extracted ";
-        }
-        else {
-            var handlerCount = this.handlers
-                .filter(function (_a) {
-                var extract = _a.extract, matcher = _a.matcher;
-                return !extract && matcher(data);
-            })
-                .length;
-            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
-        }
-        this.log(message + this.traceFormatter(data));
-    };
-    SyncEventBaseProtected.prototype.post = function (data) {
-        this.trace(data);
-        this.postCount++;
-        var postTick = this.tick++;
-        var isExtracted = this.postSync(data);
-        if (!isExtracted) {
-            this.postAsync(data, postTick);
-        }
-        return this.postCount;
-    };
-    SyncEventBaseProtected.prototype.postSync = function (data) {
-        for (var _i = 0, _a = this.handlers.slice(); _i < _a.length; _i++) {
-            var handler = _a[_i];
-            var async = handler.async, matcher = handler.matcher, extract = handler.extract;
-            if (async || !matcher(data))
-                continue;
-            var handlerTrigger = this.handlerTriggers.get(handler);
-            if (!handlerTrigger)
-                continue;
-            handlerTrigger.trigger(data);
-            if (extract)
-                return true;
-        }
-        return false;
-    };
-    SyncEventBaseProtected.prototype.__waitFor = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": true,
-            "extract": false,
-            "once": true,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attach = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": false,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachExtract = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": true,
-            "once": false,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachPrepend = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": false,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOnce = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": true,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOncePrepend = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": true,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOnceExtract = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": true,
-            "once": true,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.getHandlers = function () { return this.handlers.slice(); };
-    /** Detach every handler bound to a given object or all handlers, return the detached handlers */
-    SyncEventBaseProtected.prototype.detach = function (boundTo) {
-        var detachedHandlers = [];
-        for (var _i = 0, _a = this.handlers.slice(); _i < _a.length; _i++) {
-            var handler = _a[_i];
-            if (boundTo === undefined || handler.boundTo === boundTo) {
-                handler.detach();
-                detachedHandlers.push(handler);
-            }
-        }
-        return detachedHandlers;
-    };
-    return SyncEventBaseProtected;
-}());
-exports.SyncEventBaseProtected = SyncEventBaseProtected;
-
-},{"./defs":23,"minimal-polyfills/dist/lib/Array.prototype.find":13,"minimal-polyfills/dist/lib/Map":15,"run-exclusive":18}],23:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-exports.__esModule = true;
-var setPrototypeOf = require("setprototypeof");
-var EvtError;
-(function (EvtError) {
-    var Timeout = /** @class */ (function (_super) {
-        __extends(Timeout, _super);
-        function Timeout(timeout) {
-            var _newTarget = this.constructor;
-            var _this = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
-            _this.timeout = timeout;
-            setPrototypeOf(_this, _newTarget.prototype);
-            return _this;
-        }
-        return Timeout;
-    }(Error));
-    EvtError.Timeout = Timeout;
-    var Detached = /** @class */ (function (_super) {
-        __extends(Detached, _super);
-        function Detached() {
-            var _newTarget = this.constructor;
-            var _this = _super.call(this, "Evt handler detached") || this;
-            setPrototypeOf(_this, _newTarget.prototype);
-            return _this;
-        }
-        return Detached;
-    }(Error));
-    EvtError.Detached = Detached;
-})(EvtError = exports.EvtError || (exports.EvtError = {}));
-
-},{"setprototypeof":19}],24:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var SyncEvent_1 = require("./SyncEvent");
-exports.SyncEvent = SyncEvent_1.SyncEvent;
-exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
-var defs_1 = require("./defs");
-exports.EvtError = defs_1.EvtError;
-
-},{"./SyncEvent":20,"./defs":23}],25:[function(require,module,exports){
-module.exports = "<div class=\"id_UiController row\">\r\n\r\n    <div class=\"col-lg-9\">\r\n\r\n        <div class=\"id_placeholder_UiNegativeBalanceWarning\">\r\n        </div>\r\n\r\n        <div class=\"row\">\r\n\r\n            <div class=\"id_placeholder_UiSubscribe\">\r\n\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiMySubscription col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiPaymentMethod col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiDownloadButtons col-md-6\">\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],26:[function(require,module,exports){
-var css = "div.id_UiController .heading-1 {\n  font-size: 20px;\n  font-weight: normal;\n  margin-bottom: 16px;\n}\ndiv.id_UiController .heading-2 {\n  color: #007FEB;\n  font-size: 26px;\n  margin-bottom: 7px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":12}],27:[function(require,module,exports){
-module.exports = "<div class=\"id_UiDownloadButtons panel plain mt10\">\r\n\r\n    <div class=\"panel-body text-center\">\r\n\r\n        <a href='https://play.google.com/store/apps/details?id=com.semasim.android&ah=2KIGba1mmZ33bXvBLhumK535eEY&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>\r\n            <img alt='Get it on Google Play' height=\"90px\" src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' />\r\n        </a>\r\n\r\n    </div>\r\n</div>";
-},{}],28:[function(require,module,exports){
-module.exports = "<div class=\"id_UiMySubscription panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"payment-subscription\">\r\n                <h1 class=\"heading-1\">My subscription</h1>\r\n                <h2 class=\"heading-2\">Active</h2>\r\n                <p class=\"payment-text\">Cancels in <strong class=\"id_days_left\">X</strong> days</p>\r\n            </div>\r\n            <div class=\"payment-next clearfix\">\r\n                <h2 class=\"heading-1\">Next payment due</h2>\r\n\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">DATE</dt>\r\n                    <dt class=\"id_nextBillDate payment-list-info\">13/12/18</dt>\r\n                </dl>\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">AMOUNT</dt>\r\n                    <dt class=\"payment-list-info\"><span class=\"id_amount\">3.07€</span></dt>\r\n                </dl>\r\n            </div>\r\n            <div class=\"payment-actions mt10\">\r\n                <button class=\"btn btn-primary\" type=\"button\">\r\n                    Cancel subscription\r\n                </button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],29:[function(require,module,exports){
-var css = "div.id_UiMySubscription .payment-list {\n  float: left;\n  line-height: 20px;\n  width: 50%;\n}\ndiv.id_UiMySubscription .payment-text {\n  color: #72727D;\n  font-size: 14px;\n  line-height: 20px;\n  margin-bottom: 15px;\n  text-align: left;\n}\ndiv.id_UiMySubscription .payment-subscription {\n  border-bottom: solid 1px #EFEFF2;\n  padding-bottom: 16px;\n}\ndiv.id_UiMySubscription .payment-list-title {\n  color: #72727D;\n  font-size: 14px;\n}\ndiv.id_UiMySubscription .payment-list-info {\n  font-weight: normal;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":12}],30:[function(require,module,exports){
-module.exports = "<div class=\"id_UiNegativeBalanceWarning alert alert-warning fade in mt10 mb0\">\r\n    <i class=\"glyphicon glyphicon-warning-sign alert-icon \"></i>\r\n    <strong>Warning!</strong> Your current balance is <span class=\"id_val\">-22€</span>, Please update your payment method.\r\n</div>";
-},{}],31:[function(require,module,exports){
-module.exports = "<div class=\"id_UiPaymentMethod panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"page-subscription-payment-method clearfix\">\r\n                <h2 class=\"heading-1\">Payment method</h2>\r\n                <div class=\"alert alert-danger fade in\">\r\n                    <i class=\"glyphicon glyphicon-ban-circle alert-icon \"></i>\r\n                    <strong>No longer valid</strong> please register a new credit card\r\n                </div>\r\n                <dl class=\"page-subscription-payment-method-list card-number\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Card number</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\">XXX...<span class=\"id_last4\">1234</span></span></dt>\r\n                </dl>\r\n                <dl class=\"page-subscription-payment-method-list expiry\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Expiration date</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\"><span class=\"id_expire\">12/19</span></dt>\r\n                </dl>\r\n            </div>\r\n            <button class=\"btn btn-primary\">\r\n                Change credit card\r\n            </button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],32:[function(require,module,exports){
-var css = "div.id_UiPaymentMethod .card-number {\n  width: 210px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list {\n  float: left;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-title {\n  color: #5F5E6A;\n  font-size: 14px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-info {\n  font-weight: normal;\n  font-size: 14px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":12}],33:[function(require,module,exports){
-module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>\r\n                For enabling semasim on your <b>Android</b> devices\r\n                <br>\r\n                and stop including <b>\"Sent with Semasim\"</b> in your SMSs.\r\n                <br>\r\n                <br>\r\n                Subscription cancelable anytime.\r\n            </p>\r\n            <button class=\"btn btn-primary\">Subscribe for <span class=\"id_amount\">XX€</span>/Month</button>\r\n        </div>\r\n\r\n        <div class=\"container\" style=\"text-align: center;\">\r\n            <div class=\"footer\">\r\n                <p>By subscribing you agree to our :</p>\r\n                <a href=\"http://www.semasim.com/terms-conditions\">terms</a>\r\n                <span> &amp; </span>\r\n                <a href=\"http://www.semasim.com/privacy-policy\">privacy policy</a>\r\n            </div>\r\n        </div>\r\n\r\n\r\n    </div>\r\n\r\n</div>";
-},{}],34:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var web_api_declaration_1 = require("../../../../gateway/dist/web_api_declaration");
-exports.webApiPath = web_api_declaration_1.apiPath;
-
-},{"../../../../gateway/dist/web_api_declaration":54}],35:[function(require,module,exports){
-"use strict";
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var PageName;
-(function (PageName) {
-    var _a;
-    PageName.pagesNames = [
-        "login",
-        "register",
-        "manager",
-        "webphone",
-        "subscription",
-        "shop",
-        "webviewphone"
-    ];
-    _a = __read(PageName.pagesNames, 7), PageName.login = _a[0], PageName.register = _a[1], PageName.manager = _a[2], PageName.webphone = _a[3], PageName.subscription = _a[4], PageName.shop = _a[5], PageName.webviewphone = _a[6];
-})(PageName = exports.PageName || (exports.PageName = {}));
-
-},{}],36:[function(require,module,exports){
-(function (Buffer){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var Cookies = require("js-cookie");
-var types = require("../types");
-var AuthenticatedSessionDescriptorSharedData;
-(function (AuthenticatedSessionDescriptorSharedData) {
-    function get() {
-        return JSON.parse(Buffer.from(Cookies.get(types.cookieKeys.SessionData), "hex").toString("utf8"));
-    }
-    AuthenticatedSessionDescriptorSharedData.get = get;
-})(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
-var WebsocketConnectionParams;
-(function (WebsocketConnectionParams) {
-    /**
-     * return a function that remove the cookie entry that should be called as
-     * soon as the websocket connection have been established.
-     */
-    function set(websocketConnectionParams) {
-        var key = types.cookieKeys.WebsocketConnectionParams;
-        Cookies.set(key, Buffer.from(JSON.stringify(websocketConnectionParams), "utf8").toString("hex"));
-        return function () { return Cookies.remove(key); };
-    }
-    WebsocketConnectionParams.set = set;
-})(WebsocketConnectionParams = exports.WebsocketConnectionParams || (exports.WebsocketConnectionParams = {}));
-
-}).call(this,require("buffer").Buffer)
-},{"../types":37,"buffer":2,"js-cookie":50}],37:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.cookieKeys = {
-    "SessionData": "authenticated-session-descriptor-shared-data",
-    "WebsocketConnectionParams": "websocket-connection-params"
-};
-
-},{}],38:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
-//NOTE: Defined at ejs building in templates/head_common.ejs
-exports.assetsRoot = window["assets_root"];
-exports.isDevEnv = window["isDevEnv"];
-
-},{}],39:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-/** Assert jQuery is loaded on the page. */
-function loadUiClassHtml(html, widgetClassName) {
-    var wrap = $("<div>").html(html);
-    $("head").append(wrap.find("style"));
-    return {
-        "structure": wrap.find(".id_" + widgetClassName),
-        "templates": wrap.find(".templates")
-    };
-}
-exports.loadUiClassHtml = loadUiClassHtml;
-
-},{}],40:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function notifyHostWhenPageIsReady() {
-    $(document).ready(function () { return console.log("->__PAGE_READY__<-"); });
-}
-exports.notifyHostWhenPageIsReady = notifyHostWhenPageIsReady;
-
-},{}],41:[function(require,module,exports){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var apiDeclaration = require("../web_api_declaration");
-var ttJC = require("transfer-tools/dist/lib/JSON_CUSTOM");
-var webApiPath_1 = require("../gateway/webApiPath");
-//NOTE: Assert jQuery loaded on the page
-var JSON_CUSTOM = ttJC.get();
-function sendRequest(methodName, params) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve) { return window["$"].ajax({
-                    "url": webApiPath_1.webApiPath + "/" + methodName,
-                    "method": "POST",
-                    "data": JSON_CUSTOM.stringify(params),
-                    "dataType": "text",
-                    "statusCode": {
-                        "400": function () { return alert("Bad request ( bug in the client )"); },
-                        "401": function () { return window.location.reload(); },
-                        "500": function () { return alert("Bug on the server, sorry :("); },
-                        "200": function (data) { return resolve(JSON_CUSTOM.parse(data)); }
-                    }
-                }); })];
-        });
-    });
-}
-exports.registerUser = (function () {
-    var methodName = apiDeclaration.registerUser.methodName;
-    return function (email, secret, towardUserEncryptKeyStr, encryptedSymmetricKey) {
-        return sendRequest(methodName, {
-            email: email,
-            secret: secret,
-            towardUserEncryptKeyStr: towardUserEncryptKeyStr,
-            encryptedSymmetricKey: encryptedSymmetricKey
-        });
-    };
-})();
-exports.validateEmail = (function () {
-    var methodName = apiDeclaration.validateEmail.methodName;
-    return function (email, activationCode) {
-        return sendRequest(methodName, { email: email, activationCode: activationCode });
-    };
-})();
-exports.loginUser = (function () {
-    var methodName = apiDeclaration.loginUser.methodName;
-    return function (email, secret) {
-        return sendRequest(methodName, { email: email, secret: secret });
-    };
-})();
-exports.logoutUser = (function () {
-    var methodName = apiDeclaration.logoutUser.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
-/** Return true if email has account */
-exports.sendRenewPasswordEmail = (function () {
-    var methodName = apiDeclaration.sendRenewPasswordEmail.methodName;
-    return function (email) {
-        return sendRequest(methodName, { email: email });
-    };
-})();
-exports.renewPassword = (function () {
-    var methodName = apiDeclaration.renewPassword.methodName;
-    return function (email, newSecret, newTowardUserEncryptKeyStr, newEncryptedSymmetricKey, token) {
-        return sendRequest(methodName, {
-            email: email,
-            newSecret: newSecret,
-            newTowardUserEncryptKeyStr: newTowardUserEncryptKeyStr,
-            newEncryptedSymmetricKey: newEncryptedSymmetricKey,
-            token: token
-        });
-    };
-})();
-exports.getCountryIso = (function () {
-    var methodName = apiDeclaration.getCountryIso.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
-exports.getChangesRates = (function () {
-    var methodName = apiDeclaration.getChangesRates.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
-exports.getSubscriptionInfos = (function () {
-    var methodName = apiDeclaration.getSubscriptionInfos.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
-exports.subscribeOrUpdateSource = (function () {
-    var methodName = apiDeclaration.subscribeOrUpdateSource.methodName;
-    return function (sourceId) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest(methodName, { sourceId: sourceId })];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.unsubscribe = (function () {
-    var methodName = apiDeclaration.unsubscribe.methodName;
-    return function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.createStripeCheckoutSessionForShop = (function () {
-    var methodName = apiDeclaration.createStripeCheckoutSessionForShop.methodName;
-    return function (cart, shippingFormData, currency, success_url, cancel_url) {
-        return sendRequest(methodName, {
-            "cartDescription": cart.map(function (_a) {
-                var product = _a.product, quantity = _a.quantity;
-                return ({
-                    "productName": product.name,
-                    quantity: quantity
-                });
-            }),
-            shippingFormData: shippingFormData,
-            currency: currency,
-            success_url: success_url,
-            cancel_url: cancel_url
-        });
-    };
-})();
-exports.createStripeCheckoutSessionForSubscription = (function () {
-    var methodName = apiDeclaration.createStripeCheckoutSessionForSubscription.methodName;
-    return function (currency, success_url, cancel_url) {
-        return sendRequest(methodName, {
-            currency: currency,
-            success_url: success_url,
-            cancel_url: cancel_url
-        });
-    };
-})();
-exports.getOrders = (function () {
-    var methodName = apiDeclaration.getOrders.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
-
-},{"../gateway/webApiPath":34,"../web_api_declaration":46,"transfer-tools/dist/lib/JSON_CUSTOM":52}],42:[function(require,module,exports){
-"use strict";
-//TODO: Assert jQuery bootstrap and bootbox loaded on the page.
-Object.defineProperty(exports, "__esModule", { value: true });
-var modal_stack = require("./modal_stack");
-var currentLoading = undefined;
-var currentModal = undefined;
-var restoreLoading = undefined;
-function dismissLoading() {
-    if (currentLoading) {
-        currentLoading.stop();
-        currentLoading = undefined;
-    }
-    if (restoreLoading) {
-        restoreLoading = undefined;
-    }
-}
-exports.dismissLoading = dismissLoading;
-function loading(message, delayBeforeShow) {
-    if (delayBeforeShow === void 0) { delayBeforeShow = 700; }
-    if (currentModal) {
-        restoreLoading = function () { return loading(message, delayBeforeShow); };
-        return;
-    }
-    if (currentLoading) {
-        delayBeforeShow = 0;
-    }
-    dismissLoading();
-    var modal = undefined;
-    var timer = setTimeout(function () {
-        var options = {
-            "message": [
-                '<p class="text-center">',
-                '<i class="fa fa-spin fa-spinner"></i>&nbsp;&nbsp;',
-                "<span class=\"" + loading.spanClass + "\">" + message + "</span>",
-                "</p>"
-            ].join(""),
-            "closeButton": false
-        };
-        modal = run("dialog", [options], true);
-    }, delayBeforeShow);
-    currentLoading = {
-        "stop": function () { return modal ? modal.modal("hide") : clearTimeout(timer); },
-        message: message,
-        delayBeforeShow: delayBeforeShow
-    };
-}
-exports.loading = loading;
-(function (loading) {
-    loading.spanClass = "loading_message";
-})(loading = exports.loading || (exports.loading = {}));
-function run(method, args, isLoading) {
-    if (isLoading === void 0) { isLoading = false; }
-    if (!isLoading && currentModal) {
-        currentModal.modal("hide");
-        return run(method, args, false);
-    }
-    if (!isLoading && currentLoading) {
-        var message_1 = currentLoading.message;
-        var delayBeforeShow_1 = currentLoading.delayBeforeShow;
-        dismissLoading();
-        restoreLoading = function () { return loading(message_1, delayBeforeShow_1); };
-    }
-    var options = typeof args[0] === "string" ? ({
-        "message": args[0],
-        "callback": args[1]
-    }) : args[0];
-    if (!("animate" in options)) {
-        options.animate = false;
-    }
-    options.show = false;
-    //let modal: JQuery = bootbox[method].apply(bootbox, args);
-    var modal = bootbox[method](options);
-    modal_stack.add(modal, null).show();
-    if (!isLoading) {
-        currentModal = modal;
-    }
-    modal.one("hide.bs.modal", function () {
-        if (!isLoading) {
-            currentModal = undefined;
-        }
-    });
-    modal.one("hidden.bs.modal", function () {
-        if (restoreLoading) {
-            restoreLoading();
-        }
-        modal.data("bs.modal", null);
-        modal.remove();
-    });
-    return modal;
-}
-function dialog(options) {
-    return run("dialog", [options]);
-}
-exports.dialog = dialog;
-function alert() {
-    var args = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        args[_i] = arguments[_i];
-    }
-    return run("alert", args);
-}
-exports.alert = alert;
-function prompt(options) {
-    return run("prompt", [options]);
-}
-exports.prompt = prompt;
-function confirm(options) {
-    return run("confirm", [options]);
-}
-exports.confirm = confirm;
-
-},{"./modal_stack":44}],43:[function(require,module,exports){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.data = require("../../res/currency.json");
-function isValidCountryIso(countryIso) {
-    //NOTE: Avoid loading if we do not need
-    if (isValidCountryIso.countryIsoRecord === undefined) {
-        isValidCountryIso.countryIsoRecord = (function () {
-            var e_1, _a, e_2, _b;
-            var out = {};
-            try {
-                for (var _c = __values(Object.keys(exports.data)), _d = _c.next(); !_d.done; _d = _c.next()) {
-                    var currency = _d.value;
-                    try {
-                        for (var _e = (e_2 = void 0, __values(exports.data[currency].countriesIso)), _f = _e.next(); !_f.done; _f = _e.next()) {
-                            var countryIso_1 = _f.value;
-                            out[countryIso_1] = true;
-                        }
-                    }
-                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                    finally {
-                        try {
-                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
-                        }
-                        finally { if (e_2) throw e_2.error; }
-                    }
-                }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
-                }
-                finally { if (e_1) throw e_1.error; }
-            }
-            return out;
-        })();
-        return isValidCountryIso(countryIso);
-    }
-    if (typeof countryIso !== "string" || !/^[a-z]{2}$/.test(countryIso)) {
-        return false;
-    }
-    return !!isValidCountryIso.countryIsoRecord[countryIso];
-}
-exports.isValidCountryIso = isValidCountryIso;
-(function (isValidCountryIso) {
-    isValidCountryIso.countryIsoRecord = undefined;
-})(isValidCountryIso = exports.isValidCountryIso || (exports.isValidCountryIso = {}));
-function getCountryCurrency(countryIso) {
-    var cache = getCountryCurrency.cache;
-    {
-        var currency = cache[countryIso];
-        if (currency !== undefined) {
-            return currency;
-        }
-    }
-    cache[countryIso] = Object.keys(exports.data)
-        .map(function (currency) { return ({ currency: currency, "countriesIso": exports.data[currency].countriesIso }); })
-        .find(function (_a) {
-        var countriesIso = _a.countriesIso;
-        return !!countriesIso.find(function (_countryIso) { return _countryIso === countryIso; });
-    })
-        .currency;
-    return getCountryCurrency(countryIso);
-}
-exports.getCountryCurrency = getCountryCurrency;
-(function (getCountryCurrency) {
-    getCountryCurrency.cache = {};
-})(getCountryCurrency = exports.getCountryCurrency || (exports.getCountryCurrency = {}));
-/** Must define convertFromEuro.changeRates first */
-function convertFromEuro(euroAmount, currencyTo) {
-    return Math.round(euroAmount * convertFromEuro.getChangeRates()[currencyTo]);
-}
-exports.convertFromEuro = convertFromEuro;
-(function (convertFromEuro) {
-    var changeRates_ = undefined;
-    var lastUpdateDate = new Date(0);
-    function setChangeRates(changeRates) {
-        lastUpdateDate = new Date();
-        changeRates_ = changeRates;
-    }
-    convertFromEuro.setChangeRates = setChangeRates;
-    function getChangeRates() {
-        if (changeRates_ === undefined) {
-            throw new Error("Change rates not defined");
-        }
-        return changeRates_;
-    }
-    convertFromEuro.getChangeRates = getChangeRates;
-    var updater = undefined;
-    function setChangeRatesFetchMethod(fetchChangeRates, ttl) {
-        updater = { fetchChangeRates: fetchChangeRates, ttl: ttl };
-    }
-    convertFromEuro.setChangeRatesFetchMethod = setChangeRatesFetchMethod;
-    function refreshChangeRates() {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, error_1;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        if (updater === undefined) {
-                            throw new Error("No method for updating rates changes have been defined");
-                        }
-                        if (Date.now() - lastUpdateDate.getTime() < updater.ttl) {
-                            return [2 /*return*/];
-                        }
-                        _b.label = 1;
-                    case 1:
-                        _b.trys.push([1, 3, , 4]);
-                        _a = setChangeRates;
-                        return [4 /*yield*/, updater.fetchChangeRates()];
-                    case 2:
-                        _a.apply(void 0, [_b.sent()]);
-                        return [3 /*break*/, 4];
-                    case 3:
-                        error_1 = _b.sent();
-                        if (lastUpdateDate.getTime() === 0) {
-                            throw error_1;
-                        }
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
-                }
-            });
-        });
-    }
-    convertFromEuro.refreshChangeRates = refreshChangeRates;
-})(convertFromEuro = exports.convertFromEuro || (exports.convertFromEuro = {}));
-/**
- * get currency of stripe card,
- * if there is no special pricing for the currency
- * "eur" will be returned.
- *
- * NOTE: This function does seems to come out of left field
- * but this operation is done on the frontend and the backend
- * so we export it.
- *
- */
-function getCardCurrency(stripeCard, pricingByCurrency) {
-    var currency = getCountryCurrency(stripeCard.country.toLowerCase());
-    if (!(currency in pricingByCurrency)) {
-        currency = "eur";
-    }
-    return currency;
-}
-exports.getCardCurrency = getCardCurrency;
-function prettyPrint(amount, currency) {
-    return (amount / 100).toLocaleString(undefined, {
-        "style": "currency",
-        currency: currency
-    });
-}
-exports.prettyPrint = prettyPrint;
-
-},{"../../res/currency.json":53}],44:[function(require,module,exports){
-"use strict";
-//TODO: Assert jQuery bootstrap loaded on the page.
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var stack = [];
-var onHideKey = " __hide_handler__ ";
-function add(modal, options) {
-    var _this = this;
-    //NOTE: null only when called by bootbox_custom.
-    if (options !== null) {
-        modal.modal(__assign({}, options, { "show": false }));
-    }
-    return {
-        "show": function () { return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
-            var currentModal_1, prHidden;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (stack.indexOf(modal) >= 0) {
-                            resolve();
-                            return [2 /*return*/];
-                        }
-                        stack.push(modal);
-                        modal[onHideKey] = function () {
-                            var index = stack.indexOf(modal);
-                            var wasOnTop = index === stack.length - 1;
-                            stack.splice(index, 1);
-                            if (wasOnTop && stack.length !== 0) {
-                                var modalToRestore_1 = stack[stack.length - 1];
-                                modalToRestore_1[" scheduled to be shown "] = true;
-                                /*
-                                NOTE: To prevent flickering we do not restore
-                                the previous modal if an other one is immediately
-                                opened ( form with successive bootbox_custom )
-                                */
-                                setTimeout(function () {
-                                    delete modalToRestore_1[" scheduled to be shown "];
-                                    if (modalToRestore_1 !== stack[stack.length - 1]) {
-                                        return;
-                                    }
-                                    modalToRestore_1.modal("show");
-                                }, 100);
-                            }
-                        };
-                        modal.one("hide.bs.modal", modal[onHideKey]);
-                        if (!(stack.length !== 1)) return [3 /*break*/, 2];
-                        currentModal_1 = stack[stack.length - 2];
-                        if (!!currentModal_1[" scheduled to be shown "]) return [3 /*break*/, 2];
-                        currentModal_1.off("hide.bs.modal", undefined, currentModal_1[onHideKey]);
-                        prHidden = new Promise(function (resolve) { return currentModal_1.one("hidden.bs.modal", function () { return resolve(); }); });
-                        currentModal_1.modal("hide");
-                        currentModal_1.one("hide.bs.modal", currentModal_1[onHideKey]);
-                        return [4 /*yield*/, prHidden];
-                    case 1:
-                        _a.sent();
-                        _a.label = 2;
-                    case 2:
-                        modal.one("shown.bs.modal", function () { return resolve(); });
-                        modal.modal("show");
-                        return [2 /*return*/];
-                }
-            });
-        }); }); },
-        "hide": function () { return new Promise(function (resolve) {
-            if (stack.indexOf(modal) < 0) {
-                resolve();
-                return;
-            }
-            modal.one("hidden.bs.modal", function () { return resolve(); });
-            modal.modal("hide");
-        }); }
-    };
-}
-exports.add = add;
-
-},{}],45:[function(require,module,exports){
-if (typeof Object.assign !== 'function') {
-    // Must be writable: true, enumerable: false, configurable: true
-    Object.defineProperty(Object, "assign", {
-        value: function assign(target, varArgs) {
-            'use strict';
-            if (target === null || target === undefined) {
-                throw new TypeError('Cannot convert undefined or null to object');
-            }
-            var to = Object(target);
-            for (var index = 1; index < arguments.length; index++) {
-                var nextSource = arguments[index];
-                if (nextSource !== null && nextSource !== undefined) {
-                    for (var nextKey in nextSource) {
-                        // Avoid bugs when hasOwnProperty is shadowed
-                        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-                            to[nextKey] = nextSource[nextKey];
-                        }
-                    }
-                }
-            }
-            return to;
-        },
-        writable: true,
-        configurable: true
-    });
-}
-
-},{}],46:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var registerUser;
-(function (registerUser) {
-    registerUser.methodName = "register-user";
-})(registerUser = exports.registerUser || (exports.registerUser = {}));
-var validateEmail;
-(function (validateEmail) {
-    validateEmail.methodName = "validate-email";
-})(validateEmail = exports.validateEmail || (exports.validateEmail = {}));
-var loginUser;
-(function (loginUser) {
-    loginUser.methodName = "login-user";
-})(loginUser = exports.loginUser || (exports.loginUser = {}));
-var logoutUser;
-(function (logoutUser) {
-    logoutUser.methodName = "logout-user";
-})(logoutUser = exports.logoutUser || (exports.logoutUser = {}));
-var sendRenewPasswordEmail;
-(function (sendRenewPasswordEmail) {
-    sendRenewPasswordEmail.methodName = "send-renew-password-email";
-})(sendRenewPasswordEmail = exports.sendRenewPasswordEmail || (exports.sendRenewPasswordEmail = {}));
-var renewPassword;
-(function (renewPassword) {
-    renewPassword.methodName = "renew-password";
-})(renewPassword = exports.renewPassword || (exports.renewPassword = {}));
-var getCountryIso;
-(function (getCountryIso) {
-    getCountryIso.methodName = "guess-country-iso";
-})(getCountryIso = exports.getCountryIso || (exports.getCountryIso = {}));
-var getChangesRates;
-(function (getChangesRates) {
-    getChangesRates.methodName = "get-changes-rates";
-})(getChangesRates = exports.getChangesRates || (exports.getChangesRates = {}));
-var getSubscriptionInfos;
-(function (getSubscriptionInfos) {
-    getSubscriptionInfos.methodName = "get-subscription-infos";
-})(getSubscriptionInfos = exports.getSubscriptionInfos || (exports.getSubscriptionInfos = {}));
-var subscribeOrUpdateSource;
-(function (subscribeOrUpdateSource) {
-    subscribeOrUpdateSource.methodName = "subscribe-or-update-source";
-})(subscribeOrUpdateSource = exports.subscribeOrUpdateSource || (exports.subscribeOrUpdateSource = {}));
-var unsubscribe;
-(function (unsubscribe) {
-    unsubscribe.methodName = "unsubscribe";
-})(unsubscribe = exports.unsubscribe || (exports.unsubscribe = {}));
-var createStripeCheckoutSessionForShop;
-(function (createStripeCheckoutSessionForShop) {
-    createStripeCheckoutSessionForShop.methodName = "create-stripe-checkout-session-for-shop";
-})(createStripeCheckoutSessionForShop = exports.createStripeCheckoutSessionForShop || (exports.createStripeCheckoutSessionForShop = {}));
-var createStripeCheckoutSessionForSubscription;
-(function (createStripeCheckoutSessionForSubscription) {
-    createStripeCheckoutSessionForSubscription.methodName = "create-stripe-checkout-session-for-subscription";
-})(createStripeCheckoutSessionForSubscription = exports.createStripeCheckoutSessionForSubscription || (exports.createStripeCheckoutSessionForSubscription = {}));
-var getOrders;
-(function (getOrders) {
-    getOrders.methodName = "get-orders";
-})(getOrders = exports.getOrders || (exports.getOrders = {}));
-
-},{}],47:[function(require,module,exports){
-'use strict';
-
-/* eslint no-invalid-this: 1 */
-
-var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
-var slice = Array.prototype.slice;
-var toStr = Object.prototype.toString;
-var funcType = '[object Function]';
-
-module.exports = function bind(that) {
-    var target = this;
-    if (typeof target !== 'function' || toStr.call(target) !== funcType) {
-        throw new TypeError(ERROR_MESSAGE + target);
-    }
-    var args = slice.call(arguments, 1);
-
-    var bound;
-    var binder = function () {
-        if (this instanceof bound) {
-            var result = target.apply(
-                this,
-                args.concat(slice.call(arguments))
-            );
-            if (Object(result) === result) {
-                return result;
-            }
-            return this;
-        } else {
-            return target.apply(
-                that,
-                args.concat(slice.call(arguments))
-            );
-        }
-    };
-
-    var boundLength = Math.max(0, target.length - args.length);
-    var boundArgs = [];
-    for (var i = 0; i < boundLength; i++) {
-        boundArgs.push('$' + i);
-    }
-
-    bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this,arguments); }')(binder);
-
-    if (target.prototype) {
-        var Empty = function Empty() {};
-        Empty.prototype = target.prototype;
-        bound.prototype = new Empty();
-        Empty.prototype = null;
-    }
-
-    return bound;
-};
-
-},{}],48:[function(require,module,exports){
-'use strict';
-
-var implementation = require('./implementation');
-
-module.exports = Function.prototype.bind || implementation;
-
-},{"./implementation":47}],49:[function(require,module,exports){
-'use strict';
-
-var bind = require('function-bind');
-
-module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
-
-},{"function-bind":48}],50:[function(require,module,exports){
-/*!
- * JavaScript Cookie v2.2.0
- * https://github.com/js-cookie/js-cookie
- *
- * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
- * Released under the MIT license
- */
-;(function (factory) {
-	var registeredInModuleLoader = false;
-	if (typeof define === 'function' && define.amd) {
-		define(factory);
-		registeredInModuleLoader = true;
-	}
-	if (typeof exports === 'object') {
-		module.exports = factory();
-		registeredInModuleLoader = true;
-	}
-	if (!registeredInModuleLoader) {
-		var OldCookies = window.Cookies;
-		var api = window.Cookies = factory();
-		api.noConflict = function () {
-			window.Cookies = OldCookies;
-			return api;
-		};
-	}
-}(function () {
-	function extend () {
-		var i = 0;
-		var result = {};
-		for (; i < arguments.length; i++) {
-			var attributes = arguments[ i ];
-			for (var key in attributes) {
-				result[key] = attributes[key];
-			}
-		}
-		return result;
-	}
-
-	function init (converter) {
-		function api (key, value, attributes) {
-			var result;
-			if (typeof document === 'undefined') {
-				return;
-			}
-
-			// Write
-
-			if (arguments.length > 1) {
-				attributes = extend({
-					path: '/'
-				}, api.defaults, attributes);
-
-				if (typeof attributes.expires === 'number') {
-					var expires = new Date();
-					expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
-					attributes.expires = expires;
-				}
-
-				// We're using "expires" because "max-age" is not supported by IE
-				attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
-
-				try {
-					result = JSON.stringify(value);
-					if (/^[\{\[]/.test(result)) {
-						value = result;
-					}
-				} catch (e) {}
-
-				if (!converter.write) {
-					value = encodeURIComponent(String(value))
-						.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
-				} else {
-					value = converter.write(value, key);
-				}
-
-				key = encodeURIComponent(String(key));
-				key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
-				key = key.replace(/[\(\)]/g, escape);
-
-				var stringifiedAttributes = '';
-
-				for (var attributeName in attributes) {
-					if (!attributes[attributeName]) {
-						continue;
-					}
-					stringifiedAttributes += '; ' + attributeName;
-					if (attributes[attributeName] === true) {
-						continue;
-					}
-					stringifiedAttributes += '=' + attributes[attributeName];
-				}
-				return (document.cookie = key + '=' + value + stringifiedAttributes);
-			}
-
-			// Read
-
-			if (!key) {
-				result = {};
-			}
-
-			// To prevent the for loop in the first place assign an empty array
-			// in case there are no cookies at all. Also prevents odd result when
-			// calling "get()"
-			var cookies = document.cookie ? document.cookie.split('; ') : [];
-			var rdecode = /(%[0-9A-Z]{2})+/g;
-			var i = 0;
-
-			for (; i < cookies.length; i++) {
-				var parts = cookies[i].split('=');
-				var cookie = parts.slice(1).join('=');
-
-				if (!this.json && cookie.charAt(0) === '"') {
-					cookie = cookie.slice(1, -1);
-				}
-
-				try {
-					var name = parts[0].replace(rdecode, decodeURIComponent);
-					cookie = converter.read ?
-						converter.read(cookie, name) : converter(cookie, name) ||
-						cookie.replace(rdecode, decodeURIComponent);
-
-					if (this.json) {
-						try {
-							cookie = JSON.parse(cookie);
-						} catch (e) {}
-					}
-
-					if (key === name) {
-						result = cookie;
-						break;
-					}
-
-					if (!key) {
-						result[name] = cookie;
-					}
-				} catch (e) {}
-			}
-
-			return result;
-		}
-
-		api.set = api;
-		api.get = function (key) {
-			return api.call(api, key);
-		};
-		api.getJSON = function () {
-			return api.apply({
-				json: true
-			}, [].slice.call(arguments));
-		};
-		api.defaults = {};
-
-		api.remove = function (key, attributes) {
-			api(key, '', extend(attributes, {
-				expires: -1
-			}));
-		};
-
-		api.withConverter = init;
-
-		return api;
-	}
-
-	return init(function () {});
-}));
-
-},{}],51:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -9591,7 +9627,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":49}],52:[function(require,module,exports){
+},{"has":51}],58:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -9641,7 +9677,603 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":51}],53:[function(require,module,exports){
+},{"super-json":57}],59:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+exports.__esModule = true;
+var SyncEventBase_1 = require("./SyncEventBase");
+var SyncEvent = /** @class */ (function (_super) {
+    __extends(SyncEvent, _super);
+    function SyncEvent() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.evtAttach = new SyncEventBase_1.SyncEventBase();
+        return _this;
+    }
+    SyncEvent.prototype.addHandler = function (attachParams, implicitAttachParams) {
+        var handler = _super.prototype.addHandler.call(this, attachParams, implicitAttachParams);
+        this.evtAttach.post(handler);
+        return handler;
+    };
+    return SyncEvent;
+}(SyncEventBase_1.SyncEventBase));
+exports.SyncEvent = SyncEvent;
+var VoidSyncEvent = /** @class */ (function (_super) {
+    __extends(VoidSyncEvent, _super);
+    function VoidSyncEvent() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    VoidSyncEvent.prototype.post = function () {
+        return _super.prototype.post.call(this, undefined);
+    };
+    return VoidSyncEvent;
+}(SyncEvent));
+exports.VoidSyncEvent = VoidSyncEvent;
+
+},{"./SyncEventBase":60}],60:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
+exports.__esModule = true;
+var SyncEventBaseProtected_1 = require("./SyncEventBaseProtected");
+function matchPostable(o) {
+    return o instanceof Object && typeof o.post === "function";
+}
+function isCallable(o) {
+    if (typeof o !== "function")
+        return false;
+    var prototype = o["prototype"];
+    if (!prototype)
+        return true;
+    var methods = Object.getOwnPropertyNames(prototype);
+    if (methods.length !== 1)
+        return false;
+    var name = o.name;
+    if (!name)
+        return true;
+    if (name[0].toUpperCase() === name[0])
+        return false;
+    return true;
+}
+/** SyncEvent without evtAttach property */
+var SyncEventBase = /** @class */ (function (_super) {
+    __extends(SyncEventBase, _super);
+    function SyncEventBase() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.defaultParams = {
+            "matcher": function matchAll() { return true; },
+            "boundTo": _this,
+            "timeout": undefined,
+            "callback": undefined
+        };
+        return _this;
+    }
+    SyncEventBase.prototype.getDefaultParams = function () {
+        return __assign({}, this.defaultParams);
+    };
+    SyncEventBase.prototype.readParams = function (inputs) {
+        var out = this.getDefaultParams();
+        var n = inputs.length;
+        if (!n)
+            return out;
+        //[ matcher, boundTo, timeout, callback ]
+        //[ matcher, boundTo, callback ]
+        //[ matcher, timeout, callback ]
+        //[ boundTo, timeout, callback ]
+        //[ matcher, callback ]
+        //[ boundTo, callback ]
+        //[ timeout, callback ]
+        //[ callback ]
+        //[ matcher, timeout, evt ]
+        //[ matcher, evt ]
+        //[ timeout, evt ]
+        //[ evt ]
+        if (matchPostable(inputs[n - 1])) {
+            out.boundTo = inputs[n - 1];
+            inputs[n - 1] = inputs[n - 1].post;
+        }
+        //[ matcher, boundTo, timeout, callback ]
+        //[ matcher, boundTo, callback ]
+        //[ matcher, timeout, callback ]
+        //[ boundTo, timeout, callback ]
+        //[ matcher, callback ]
+        //[ boundTo, callback ]
+        //[ timeout, callback ]
+        //[ callback ]
+        if (n === 4) {
+            //[ matcher, boundTo, timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2], p4 = inputs[3];
+            out.matcher = p1;
+            out.boundTo = p2;
+            out.timeout = p3;
+            out.callback = p4;
+        }
+        else if (n === 3) {
+            //[ matcher, boundTo, callback ]
+            //[ matcher, timeout, callback ]
+            //[ boundTo, timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2];
+            if (typeof p2 === "number") {
+                //[ matcher, timeout, callback ]
+                //[ boundTo, timeout, callback ]
+                out.timeout = p2;
+                out.callback = p3;
+                if (isCallable(p1)) {
+                    //[ matcher, timeout, callback ]
+                    out.matcher = p1;
+                }
+                else {
+                    //[ boundTo, timeout, callback ]
+                    out.boundTo = p1;
+                }
+            }
+            else {
+                //[ matcher, boundTo, callback ]
+                out.matcher = p1;
+                out.boundTo = p2;
+                out.callback = p3;
+            }
+        }
+        else if (n === 2) {
+            //[ matcher, callback ]
+            //[ boundTo, callback ]
+            //[ timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1];
+            if (typeof p1 === "number") {
+                //[ timeout, callback ]
+                out.timeout = p1;
+                out.callback = p2;
+            }
+            else {
+                //[ matcher, callback ]
+                //[ boundTo, callback ]
+                out.callback = p2;
+                if (isCallable(p1)) {
+                    out.matcher = p1;
+                }
+                else {
+                    out.boundTo = p1;
+                }
+            }
+        }
+        else if (n === 1) {
+            //[ callback ]
+            var p = inputs[0];
+            out.callback = p;
+        }
+        return out;
+    };
+    SyncEventBase.prototype.waitFor = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        var params = this.getDefaultParams();
+        var n = inputs.length;
+        if (n === 2) {
+            var p1 = inputs[0], p2 = inputs[1];
+            params.matcher = p1;
+            params.timeout = p2;
+        }
+        else {
+            var p = inputs[0];
+            if (isCallable(p)) {
+                params.matcher = p;
+            }
+            else {
+                params.timeout = p;
+            }
+        }
+        return _super.prototype.__waitFor.call(this, params);
+    };
+    SyncEventBase.prototype.attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attach(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnce(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachExtract(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachPrepend(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOncePrepend(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnceExtract(this.readParams(inputs));
+    };
+    return SyncEventBase;
+}(SyncEventBaseProtected_1.SyncEventBaseProtected));
+exports.SyncEventBase = SyncEventBase;
+
+},{"./SyncEventBaseProtected":61}],61:[function(require,module,exports){
+"use strict";
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
+exports.__esModule = true;
+var Map_1 = require("minimal-polyfills/dist/lib/Map");
+require("minimal-polyfills/dist/lib/Array.prototype.find");
+var runExclusive = require("run-exclusive");
+var defs_1 = require("./defs");
+/** SyncEvent without evtAttach property and without overload */
+var SyncEventBaseProtected = /** @class */ (function () {
+    function SyncEventBaseProtected() {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        var _this = this;
+        this.tick = 0;
+        this.postCount = 0;
+        this.traceId = null;
+        this.handlers = [];
+        this.handlerTriggers = new Map_1.Polyfill();
+        this.postAsync = runExclusive.buildCb(function (data, postTick, releaseLock) {
+            var isHandled = false;
+            for (var _i = 0, _a = _this.handlers.slice(); _i < _a.length; _i++) {
+                var handler = _a[_i];
+                var async = handler.async, matcher = handler.matcher;
+                if (!async || !matcher(data))
+                    continue;
+                var handlerTrigger = _this.handlerTriggers.get(handler);
+                if (!handlerTrigger)
+                    continue;
+                if (handlerTrigger.handlerTick > postTick)
+                    continue;
+                isHandled = true;
+                handlerTrigger.trigger(data);
+            }
+            if (!isHandled) {
+                releaseLock();
+            }
+            else {
+                var handlersDump_1 = _this.handlers.slice();
+                setTimeout(function () {
+                    for (var _i = 0, _a = _this.handlers; _i < _a.length; _i++) {
+                        var handler = _a[_i];
+                        var async = handler.async;
+                        if (!async)
+                            continue;
+                        if (handlersDump_1.indexOf(handler) >= 0)
+                            continue;
+                        _this.handlerTriggers.get(handler).handlerTick = postTick;
+                    }
+                    releaseLock();
+                }, 0);
+            }
+        });
+        if (!inputs.length)
+            return;
+        var eventEmitter = inputs[0], eventName = inputs[1];
+        var formatter = inputs[2] || this.defaultFormatter;
+        eventEmitter.on(eventName, function () {
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            return _this.post(formatter.apply(null, inputs));
+        });
+    }
+    SyncEventBaseProtected.prototype.defaultFormatter = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return inputs[0];
+    };
+    SyncEventBaseProtected.prototype.enableTrace = function (id, formatter, log) {
+        this.traceId = id;
+        if (!!formatter) {
+            this.traceFormatter = formatter;
+        }
+        else {
+            this.traceFormatter = function (data) {
+                try {
+                    return JSON.stringify(data, null, 2);
+                }
+                catch (_a) {
+                    return "" + data;
+                }
+            };
+        }
+        if (!!log) {
+            this.log = log;
+        }
+        else {
+            this.log = function () {
+                var inputs = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    inputs[_i] = arguments[_i];
+                }
+                return console.log.apply(console, inputs);
+            };
+        }
+    };
+    SyncEventBaseProtected.prototype.disableTrace = function () {
+        this.traceId = null;
+    };
+    SyncEventBaseProtected.prototype.addHandler = function (attachParams, implicitAttachParams) {
+        var _this = this;
+        var handler = __assign({}, attachParams, implicitAttachParams, { "detach": null, "promise": null });
+        handler.promise = new Promise(function (resolve, reject) {
+            var timer = undefined;
+            if (typeof handler.timeout === "number") {
+                timer = setTimeout(function () {
+                    timer = undefined;
+                    handler.detach();
+                    reject(new defs_1.EvtError.Timeout(handler.timeout));
+                }, handler.timeout);
+            }
+            handler.detach = function () {
+                var index = _this.handlers.indexOf(handler);
+                if (index < 0)
+                    return false;
+                _this.handlers.splice(index, 1);
+                _this.handlerTriggers["delete"](handler);
+                if (timer) {
+                    clearTimeout(timer);
+                    reject(new defs_1.EvtError.Detached());
+                }
+                return true;
+            };
+            var handlerTick = _this.tick++;
+            var trigger = function (data) {
+                var callback = handler.callback, once = handler.once;
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = undefined;
+                }
+                if (once)
+                    handler.detach();
+                if (callback)
+                    callback.call(handler.boundTo, data);
+                resolve(data);
+            };
+            _this.handlerTriggers.set(handler, { handlerTick: handlerTick, trigger: trigger });
+        });
+        if (handler.prepend) {
+            var i = void 0;
+            for (i = 0; i < this.handlers.length; i++) {
+                if (this.handlers[i].extract)
+                    continue;
+                else
+                    break;
+            }
+            this.handlers.splice(i, 0, handler);
+        }
+        else {
+            this.handlers.push(handler);
+        }
+        return handler;
+    };
+    SyncEventBaseProtected.prototype.trace = function (data) {
+        if (this.traceId === null) {
+            return;
+        }
+        var message = "(" + this.traceId + ") ";
+        var isExtracted = !!this.handlers.find(function (_a) {
+            var extract = _a.extract, matcher = _a.matcher;
+            return extract && matcher(data);
+        });
+        if (isExtracted) {
+            message += "extracted ";
+        }
+        else {
+            var handlerCount = this.handlers
+                .filter(function (_a) {
+                var extract = _a.extract, matcher = _a.matcher;
+                return !extract && matcher(data);
+            })
+                .length;
+            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
+        }
+        this.log(message + this.traceFormatter(data));
+    };
+    SyncEventBaseProtected.prototype.post = function (data) {
+        this.trace(data);
+        this.postCount++;
+        var postTick = this.tick++;
+        var isExtracted = this.postSync(data);
+        if (!isExtracted) {
+            this.postAsync(data, postTick);
+        }
+        return this.postCount;
+    };
+    SyncEventBaseProtected.prototype.postSync = function (data) {
+        for (var _i = 0, _a = this.handlers.slice(); _i < _a.length; _i++) {
+            var handler = _a[_i];
+            var async = handler.async, matcher = handler.matcher, extract = handler.extract;
+            if (async || !matcher(data))
+                continue;
+            var handlerTrigger = this.handlerTriggers.get(handler);
+            if (!handlerTrigger)
+                continue;
+            handlerTrigger.trigger(data);
+            if (extract)
+                return true;
+        }
+        return false;
+    };
+    SyncEventBaseProtected.prototype.__waitFor = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": true,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attach = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachPrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOnce = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOncePrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOnceExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.getHandlers = function () { return this.handlers.slice(); };
+    /** Detach every handler bound to a given object or all handlers, return the detached handlers */
+    SyncEventBaseProtected.prototype.detach = function (boundTo) {
+        var detachedHandlers = [];
+        for (var _i = 0, _a = this.handlers.slice(); _i < _a.length; _i++) {
+            var handler = _a[_i];
+            if (boundTo === undefined || handler.boundTo === boundTo) {
+                handler.detach();
+                detachedHandlers.push(handler);
+            }
+        }
+        return detachedHandlers;
+    };
+    return SyncEventBaseProtected;
+}());
+exports.SyncEventBaseProtected = SyncEventBaseProtected;
+
+},{"./defs":62,"minimal-polyfills/dist/lib/Array.prototype.find":52,"minimal-polyfills/dist/lib/Map":53,"run-exclusive":55}],62:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+exports.__esModule = true;
+var setPrototypeOf = require("setprototypeof");
+var EvtError;
+(function (EvtError) {
+    var Timeout = /** @class */ (function (_super) {
+        __extends(Timeout, _super);
+        function Timeout(timeout) {
+            var _newTarget = this.constructor;
+            var _this = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
+            _this.timeout = timeout;
+            setPrototypeOf(_this, _newTarget.prototype);
+            return _this;
+        }
+        return Timeout;
+    }(Error));
+    EvtError.Timeout = Timeout;
+    var Detached = /** @class */ (function (_super) {
+        __extends(Detached, _super);
+        function Detached() {
+            var _newTarget = this.constructor;
+            var _this = _super.call(this, "Evt handler detached") || this;
+            setPrototypeOf(_this, _newTarget.prototype);
+            return _this;
+        }
+        return Detached;
+    }(Error));
+    EvtError.Detached = Detached;
+})(EvtError = exports.EvtError || (exports.EvtError = {}));
+
+},{"setprototypeof":56}],63:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var SyncEvent_1 = require("./SyncEvent");
+exports.SyncEvent = SyncEvent_1.SyncEvent;
+exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
+var defs_1 = require("./defs");
+exports.EvtError = defs_1.EvtError;
+
+},{"./SyncEvent":59,"./defs":62}],64:[function(require,module,exports){
 module.exports={
   "usd": {
     "symbol": "$",
@@ -10550,7 +11182,7 @@ module.exports={
   }
 }
 
-},{}],54:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";

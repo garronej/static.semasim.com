@@ -2883,10 +2883,11 @@ function hasOwnProperty(obj, prop) {
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -2951,13 +2952,13 @@ function encryptOrDecrypt(action, keyStr, inputData) {
 exports.encryptOrDecrypt = encryptOrDecrypt;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3,"crypto-lib/dist/sync/utils/toBuffer":13,"ts-events-extended":20}],11:[function(require,module,exports){
+},{"buffer":3,"crypto-lib/dist/sync/utils/toBuffer":13,"ts-events-extended":23}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var overrideWebRTCImplementation_1 = require("../../../shared/dist/tools/overrideWebRTCImplementation");
 exports.apiExposedToHost = overrideWebRTCImplementation_1.overrideWebRTCImplementation(apiExposedByHost);
 
-},{"../../../shared/dist/tools/overrideWebRTCImplementation":39}],12:[function(require,module,exports){
+},{"../../../shared/dist/tools/overrideWebRTCImplementation":47}],12:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -2971,10 +2972,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -3021,7 +3023,6 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Ua_1 = require("../../../shared/dist/lib/Ua");
 var connection = require("../../../shared/dist/lib/toBackend/connection");
@@ -3058,11 +3059,7 @@ function initUa(session, imsi) {
             switch (_b.label) {
                 case 0:
                     Ua_1.Ua.session = session;
-                    connection.connect({
-                        "connectionType": "AUXILIARY",
-                        "requestTurnCred": true,
-                        "uaInstanceId": session.instanceId
-                    });
+                    connection.connect("AUXILIARY", "REQUEST TURN CRED");
                     //NOTE: UA does not receive the live update on sim online state.
                     localApiHandler.evtSimIsOnlineStatusChange.attachOnce(function (isOnline) { return !isOnline; }, function () { return apiExposedByHost.onCallTerminated("Socket disconnected"); });
                     return [4 /*yield*/, Promise.all([
@@ -3098,11 +3095,11 @@ var START_ACTION = {
     "PLACE_OUTGOING_CALL": 0,
     "GET_READY_TO_ACCEPT_INCOMING_CALL": 1
 };
-var apiExposedToHost = __assign({}, hostWebRtc.apiExposedToHost, hostCrypto.apiExposedToHost, { "start": function (action, email, secret, towardUserEncryptKeyStr, towardUserDecryptKeyStr, uaInstanceId, imsi, number) { return __awaiter(_this, void 0, void 0, function () {
+var apiExposedToHost = __assign(__assign(__assign({}, hostWebRtc.apiExposedToHost), hostCrypto.apiExposedToHost), { "start": function (action, email, secret, towardUserEncryptKeyStr, towardUserDecryptKeyStr, uaInstanceId, imsi, number) { return __awaiter(void 0, void 0, void 0, function () {
         var status_1, ua, _a, _b, terminate_1, prTerminated, prNextState, evtCallReceived_1, _c, terminate_2, prTerminated, onAccepted, sendDtmf_1;
         return __generator(this, function (_d) {
             switch (_d.label) {
-                case 0: return [4 /*yield*/, webApiCaller.loginUser(email, secret)];
+                case 0: return [4 /*yield*/, webApiCaller.loginUser(email, secret, uaInstanceId)];
                 case 1:
                     status_1 = (_d.sent()).status;
                     if (status_1 !== "SUCCESS") {
@@ -3182,7 +3179,7 @@ var apiExposedToHost = __assign({}, hostWebRtc.apiExposedToHost, hostCrypto.apiE
     }); }, "sendDtmf": function () { return apiExposedByHost.onCallTerminated("never"); }, "terminateCall": function () { return apiExposedByHost.onCallTerminated(null); }, "acceptIncomingCall": function () { return evtAcceptIncomingCall.post(); } });
 Object.assign(window, { apiExposedToHost: apiExposedToHost });
 
-},{"../../../shared/dist/lib/Ua":25,"../../../shared/dist/lib/notifyHostWhenPageIsReady":29,"../../../shared/dist/lib/toBackend/connection":30,"../../../shared/dist/lib/toBackend/localApiHandlers":31,"../../../shared/dist/lib/toBackend/remoteApiCaller/base":32,"../../../shared/dist/lib/webApiCaller":34,"./hostCrypto":10,"./hostWebRtc":11,"ts-events-extended":20}],13:[function(require,module,exports){
+},{"../../../shared/dist/lib/Ua":28,"../../../shared/dist/lib/notifyHostWhenPageIsReady":35,"../../../shared/dist/lib/toBackend/connection":36,"../../../shared/dist/lib/toBackend/localApiHandlers":37,"../../../shared/dist/lib/toBackend/remoteApiCaller/base":38,"../../../shared/dist/lib/webApiCaller":41,"./hostCrypto":10,"./hostWebRtc":11,"ts-events-extended":23}],13:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -3197,6 +3194,114 @@ exports.toBuffer = toBuffer;
 
 }).call(this,require("buffer").Buffer)
 },{"buffer":3}],14:[function(require,module,exports){
+// https://tc39.github.io/ecma262/#sec-array.prototype.find
+if (!Array.prototype.find) {
+    Object.defineProperty(Array.prototype, 'find', {
+        value: function (predicate) {
+            // 1. Let O be ? ToObject(this value).
+            if (this == null) {
+                throw new TypeError('"this" is null or not defined');
+            }
+            var o = Object(this);
+            // 2. Let len be ? ToLength(? Get(O, "length")).
+            var len = o.length >>> 0;
+            // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+            if (typeof predicate !== 'function') {
+                throw new TypeError('predicate must be a function');
+            }
+            // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+            var thisArg = arguments[1];
+            // 5. Let k be 0.
+            var k = 0;
+            // 6. Repeat, while k < len
+            while (k < len) {
+                // a. Let Pk be ! ToString(k).
+                // b. Let kValue be ? Get(O, Pk).
+                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+                // d. If testResult is true, return kValue.
+                var kValue = o[k];
+                if (predicate.call(thisArg, kValue, k, o)) {
+                    return kValue;
+                }
+                // e. Increase k by 1.
+                k++;
+            }
+            // 7. Return undefined.
+            return undefined;
+        },
+        configurable: true,
+        writable: true
+    });
+}
+
+},{}],15:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var LightMapImpl = /** @class */ (function () {
+    function LightMapImpl() {
+        this.record = [];
+    }
+    LightMapImpl.prototype.has = function (key) {
+        return this.record
+            .map(function (_a) {
+            var _key = _a[0];
+            return _key;
+        })
+            .indexOf(key) >= 0;
+    };
+    LightMapImpl.prototype.get = function (key) {
+        var entry = this.record
+            .filter(function (_a) {
+            var _key = _a[0];
+            return _key === key;
+        })[0];
+        if (entry === undefined) {
+            return undefined;
+        }
+        return entry[1];
+    };
+    LightMapImpl.prototype.set = function (key, value) {
+        var entry = this.record
+            .filter(function (_a) {
+            var _key = _a[0];
+            return _key === key;
+        })[0];
+        if (entry === undefined) {
+            this.record.push([key, value]);
+        }
+        else {
+            entry[1] = value;
+        }
+        return this;
+    };
+    LightMapImpl.prototype["delete"] = function (key) {
+        var index = this.record.map(function (_a) {
+            var key = _a[0];
+            return key;
+        }).indexOf(key);
+        if (index < 0) {
+            return false;
+        }
+        this.record.splice(index, 1);
+        return true;
+    };
+    LightMapImpl.prototype.keys = function () {
+        return this.record.map(function (_a) {
+            var key = _a[0];
+            return key;
+        });
+    };
+    return LightMapImpl;
+}());
+exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
+
+},{}],16:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Map_1 = require("./Map");
+exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
+
+},{"./Map":15}],17:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -3219,6 +3324,7 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 exports.__esModule = true;
+var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
 var ExecQueue = /** @class */ (function () {
     function ExecQueue() {
         this.queuedCalls = [];
@@ -3234,13 +3340,13 @@ var ExecQueue = /** @class */ (function () {
     return ExecQueue;
 }());
 var globalContext = {};
-var clusters = new WeakMap();
+var clusters = new WeakMap_1.Polyfill();
 //console.log("Map version");
 //export const clusters = new Map<Object, Map<GroupRef,ExecQueue>>();
 function getOrCreateExecQueue(context, groupRef) {
     var execQueueByGroup = clusters.get(context);
     if (!execQueueByGroup) {
-        execQueueByGroup = new WeakMap();
+        execQueueByGroup = new WeakMap_1.Polyfill();
         clusters.set(context, execQueueByGroup);
     }
     var execQueue = execQueueByGroup.get(groupRef);
@@ -3330,7 +3436,7 @@ function getPrComplete(runExclusiveFunction, classInstanceObject) {
     return execQueue ? execQueue.prComplete : Promise.resolve();
 }
 exports.getPrComplete = getPrComplete;
-var groupByRunExclusiveFunction = new WeakMap();
+var groupByRunExclusiveFunction = new WeakMap_1.Polyfill();
 function getExecQueueByFunctionAndContext(runExclusiveFunction, context) {
     if (context === void 0) { context = globalContext; }
     var groupRef = groupByRunExclusiveFunction.get(runExclusiveFunction);
@@ -3488,7 +3594,7 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{}],15:[function(require,module,exports){
+},{"minimal-polyfills/dist/lib/WeakMap":16}],18:[function(require,module,exports){
 'use strict'
 /* eslint no-proto: 0 */
 module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
@@ -3500,14 +3606,14 @@ function setProtoOf (obj, proto) {
 
 function mixinProperties (obj, proto) {
   for (var prop in proto) {
-    if (!obj.hasOwnProperty(prop)) {
+    if (!Object.prototype.hasOwnProperty.call(obj, prop)) {
       obj[prop] = proto[prop]
     }
   }
   return obj
 }
 
-},{}],16:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -3548,7 +3654,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":17}],17:[function(require,module,exports){
+},{"./SyncEventBase":20}],20:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -3766,7 +3872,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":18}],18:[function(require,module,exports){
+},{"./SyncEventBaseProtected":21}],21:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -3777,6 +3883,8 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     return t;
 };
 exports.__esModule = true;
+var Map_1 = require("minimal-polyfills/dist/lib/Map");
+require("minimal-polyfills/dist/lib/Array.prototype.find");
 var runExclusive = require("run-exclusive");
 var defs_1 = require("./defs");
 /** SyncEvent without evtAttach property and without overload */
@@ -3791,7 +3899,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
         this.postCount = 0;
         this.traceId = null;
         this.handlers = [];
-        this.handlerTriggers = new Map();
+        this.handlerTriggers = new Map_1.Polyfill();
         this.postAsync = runExclusive.buildCb(function (data, postTick, releaseLock) {
             var isHandled = false;
             for (var _i = 0, _a = _this.handlers.slice(); _i < _a.length; _i++) {
@@ -4051,7 +4159,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":19,"run-exclusive":14}],19:[function(require,module,exports){
+},{"./defs":22,"minimal-polyfills/dist/lib/Array.prototype.find":14,"minimal-polyfills/dist/lib/Map":15,"run-exclusive":17}],22:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -4092,7 +4200,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{"setprototypeof":15}],20:[function(require,module,exports){
+},{"setprototypeof":18}],23:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -4101,32 +4209,32 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":16,"./defs":19}],21:[function(require,module,exports){
+},{"./SyncEvent":19,"./defs":22}],24:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var RegistrationParams_1 = require("../../../../gateway/dist/lib/misc/RegistrationParams");
+var RegistrationParams_1 = require("semasim-gateway/dist/lib/misc/RegistrationParams");
 exports.RegistrationParams = RegistrationParams_1.RegistrationParams;
 
-},{"../../../../gateway/dist/lib/misc/RegistrationParams":93}],22:[function(require,module,exports){
+},{"semasim-gateway/dist/lib/misc/RegistrationParams":101}],25:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var bundledData_1 = require("../../../../gateway/dist/lib/misc/bundledData");
+var bundledData_1 = require("semasim-gateway/dist/lib/misc/bundledData");
 exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 
-},{"../../../../gateway/dist/lib/misc/bundledData":94}],23:[function(require,module,exports){
+},{"semasim-gateway/dist/lib/misc/bundledData":102}],26:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var sipRouting_1 = require("../../../../gateway/dist/lib/misc/sipRouting");
+var sipRouting_1 = require("semasim-gateway/dist/lib/misc/sipRouting");
 exports.readImsi = sipRouting_1.readImsi;
 
-},{"../../../../gateway/dist/lib/misc/sipRouting":95}],24:[function(require,module,exports){
+},{"semasim-gateway/dist/lib/misc/sipRouting":103}],27:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var web_api_declaration_1 = require("../../../../gateway/dist/web_api_declaration");
+var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"../../../../gateway/dist/web_api_declaration":97}],25:[function(require,module,exports){
+},{"semasim-gateway/dist/web_api_declaration":105}],28:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 //NOTE: Require jssip_compat loaded on the page.
@@ -4142,10 +4250,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -4206,8 +4315,8 @@ var runExclusive = require("run-exclusive");
 var connection = require("./toBackend/connection");
 var localApiHandlers = require("./toBackend/localApiHandlers");
 var env_1 = require("./env");
-//JsSIP.debug.enable("JsSIP:*");
-JsSIP.debug.disable("JsSIP:*");
+JsSIP.debug.enable("JsSIP:*");
+//JsSIP.debug.disable("JsSIP:*");
 var Ua = /** @class */ (function () {
     function Ua(imsi, sipPassword, towardSimEncryptor, disabledMessage) {
         var _this = this;
@@ -4221,7 +4330,7 @@ var Ua = /** @class */ (function () {
         this.postEvtIncomingMessage = runExclusive.buildMethod(function (evtData) {
             var onProcessed;
             var pr = new Promise(function (resolve) { return onProcessed = resolve; });
-            _this.evtIncomingMessage.post(__assign({}, evtData, { "onProcessed": onProcessed }));
+            _this.evtIncomingMessage.post(__assign(__assign({}, evtData), { "onProcessed": onProcessed }));
             return pr;
         });
         /*
@@ -4726,7 +4835,7 @@ function newIceCandidateHandler(rtcICEServer) {
                 var component = _a.component;
                 return component === "RTCP";
             });
-            if (isFullyReady(__assign({}, p, { isRtcpExcepted: isRtcpExcepted }))) {
+            if (isFullyReady(__assign(__assign({}, p), { isRtcpExcepted: isRtcpExcepted }))) {
                 return "ALL CANDIDATES READY";
             }
             return countRelayCandidatesReady(p.lines, isRtcpExcepted) >= 1 ?
@@ -4806,65 +4915,32 @@ function newIceCandidateHandler(rtcICEServer) {
 })(newIceCandidateHandler || (newIceCandidateHandler = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../gateway/RegistrationParams":21,"../gateway/bundledData":22,"../gateway/readImsi":23,"./env":28,"./toBackend/connection":30,"./toBackend/localApiHandlers":31,"buffer":3,"run-exclusive":61,"ts-events-extended":81,"ts-sip":89}],26:[function(require,module,exports){
+},{"../gateway/RegistrationParams":24,"../gateway/bundledData":25,"../gateway/readImsi":26,"./env":29,"./toBackend/connection":36,"./toBackend/localApiHandlers":37,"buffer":3,"run-exclusive":69,"ts-events-extended":89,"ts-sip":97}],29:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var jsRuntimeEnv_1 = require("./jsRuntimeEnv");
+exports.jsRuntimeEnv = jsRuntimeEnv_1.jsRuntimeEnv;
+//NOTE: For web Defined at ejs building in templates/head_common.ejs, must be defined for react-native.
+exports.assetsRoot = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
+exports.isDevEnv = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
+exports.baseDomain = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ?
+    (exports.isDevEnv ? "dev.semasim.com" : "semasim.com") :
+    window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
+
+},{"./jsRuntimeEnv":30}],30:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.jsRuntimeEnv = "browser";
+
+},{}],31:[function(require,module,exports){
 (function (Buffer){
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var Cookies = require("js-cookie");
-var types = require("../types");
-var AuthenticatedSessionDescriptorSharedData;
-(function (AuthenticatedSessionDescriptorSharedData) {
-    function get() {
-        return JSON.parse(Buffer.from(Cookies.get(types.cookieKeys.SessionData), "hex").toString("utf8"));
-    }
-    AuthenticatedSessionDescriptorSharedData.get = get;
-})(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
-var WebsocketConnectionParams;
-(function (WebsocketConnectionParams) {
-    /**
-     * return a function that remove the cookie entry that should be called as
-     * soon as the websocket connection have been established.
-     */
-    function set(websocketConnectionParams) {
-        var key = types.cookieKeys.WebsocketConnectionParams;
-        Cookies.set(key, Buffer.from(JSON.stringify(websocketConnectionParams), "utf8").toString("hex"));
-        return function () { return Cookies.remove(key); };
-    }
-    WebsocketConnectionParams.set = set;
-})(WebsocketConnectionParams = exports.WebsocketConnectionParams || (exports.WebsocketConnectionParams = {}));
-
-}).call(this,require("buffer").Buffer)
-},{"../types":27,"buffer":3,"js-cookie":57}],27:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.cookieKeys = {
-    "SessionData": "authenticated-session-descriptor-shared-data",
-    "WebsocketConnectionParams": "websocket-connection-params"
-};
-
-},{}],28:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.baseDomain = window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
-//NOTE: Defined at ejs building in templates/head_common.ejs
-exports.assetsRoot = window["assets_root"];
-exports.isDevEnv = window["isDevEnv"];
-
-},{}],29:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function notifyHostWhenPageIsReady() {
-    $(document).ready(function () { return console.log("->__PAGE_READY__<-"); });
-}
-exports.notifyHostWhenPageIsReady = notifyHostWhenPageIsReady;
-
-},{}],30:[function(require,module,exports){
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -4895,15 +4971,328 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+Object.defineProperty(exports, "__esModule", { value: true });
+var localStorageApi = require("./localStorageApi");
+exports.key = "authenticated-session-descriptor-shared-data";
+var AuthenticatedSessionDescriptorSharedData;
+(function (AuthenticatedSessionDescriptorSharedData) {
+    function isPresent() {
+        return __awaiter(this, void 0, void 0, function () {
+            var value;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 1:
+                        value = _a.sent();
+                        return [2 /*return*/, value !== null];
+                }
+            });
+        });
+    }
+    AuthenticatedSessionDescriptorSharedData.isPresent = isPresent;
+    function remove() {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, isPresent()];
+                    case 1:
+                        if (!(_a.sent())) {
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    AuthenticatedSessionDescriptorSharedData.remove = remove;
+    /** assert isPresent */
+    function get() {
+        return __awaiter(this, void 0, void 0, function () {
+            var value;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 1:
+                        value = _a.sent();
+                        if (value === undefined) {
+                            throw new Error("Auth not present in localStorage");
+                        }
+                        return [2 /*return*/, JSON.parse(Buffer.from(value, "hex").toString("utf8"))];
+                }
+            });
+        });
+    }
+    AuthenticatedSessionDescriptorSharedData.get = get;
+    function set(authenticatedSessionDescriptorSharedData) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    AuthenticatedSessionDescriptorSharedData.set = set;
+})(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
+
+}).call(this,require("buffer").Buffer)
+},{"./localStorageApi":34,"buffer":3}],32:[function(require,module,exports){
+(function (Buffer){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var localStorageApi = require("./localStorageApi");
+var env = require("../env");
+exports.key = "credentials";
+var Credentials;
+(function (Credentials) {
+    function throwIfWeb() {
+        if (env.jsRuntimeEnv === "react-native") {
+            return;
+        }
+        throw new Error("Storing credentials in local storage should be done only on react-native");
+    }
+    function isPresent() {
+        return __awaiter(this, void 0, void 0, function () {
+            var value;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        throwIfWeb();
+                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 1:
+                        value = _a.sent();
+                        return [2 /*return*/, value !== null];
+                }
+            });
+        });
+    }
+    Credentials.isPresent = isPresent;
+    function remove() {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        throwIfWeb();
+                        return [4 /*yield*/, isPresent()];
+                    case 1:
+                        if (!(_a.sent())) {
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    Credentials.remove = remove;
+    /** assert isPresent */
+    function get() {
+        return __awaiter(this, void 0, void 0, function () {
+            var value;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        throwIfWeb();
+                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 1:
+                        value = _a.sent();
+                        if (value === undefined) {
+                            throw new Error("Auth not present in localStorage");
+                        }
+                        return [2 /*return*/, JSON.parse(Buffer.from(value, "hex").toString("utf8"))];
+                }
+            });
+        });
+    }
+    Credentials.get = get;
+    function set(authenticatedSessionDescriptorSharedData) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        throwIfWeb();
+                        return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    }
+    Credentials.set = set;
+})(Credentials = exports.Credentials || (exports.Credentials = {}));
+
+}).call(this,require("buffer").Buffer)
+},{"../env":29,"./localStorageApi":34,"buffer":3}],33:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.asyncOrSyncLocalStorage = localStorage;
+
+},{}],34:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var asyncOrSyncLocalStorage_1 = require("./asyncOrSyncLocalStorage");
+function getItem(key) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, asyncOrSyncLocalStorage_1.asyncOrSyncLocalStorage.getItem(key)];
+        });
+    });
+}
+exports.getItem = getItem;
+function setItem(key, value) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, asyncOrSyncLocalStorage_1.asyncOrSyncLocalStorage.setItem(key, value)];
+        });
+    });
+}
+exports.setItem = setItem;
+function removeItem(key) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, asyncOrSyncLocalStorage_1.asyncOrSyncLocalStorage.removeItem(key)];
+        });
+    });
+}
+exports.removeItem = removeItem;
+
+},{"./asyncOrSyncLocalStorage":33}],35:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function notifyHostWhenPageIsReady() {
+    $(document).ready(function () { return console.log("->__PAGE_READY__<-"); });
+}
+exports.notifyHostWhenPageIsReady = notifyHostWhenPageIsReady;
+
+},{}],36:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var sip = require("ts-sip");
@@ -4911,8 +5300,12 @@ var ts_events_extended_1 = require("ts-events-extended");
 var localApiHandlers = require("./localApiHandlers");
 var remoteApiCaller = require("./remoteApiCaller/base");
 var bootbox_custom = require("../../tools/bootbox_custom");
+var urlGetParameters = require("../../tools/urlGetParameters");
 var env_1 = require("../env");
-var cookies = require("../cookies/logic/frontend");
+var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
+var Credentials_1 = require("../localStorage/Credentials");
+var webApiCaller = require("../webApiCaller");
+var env = require("../env");
 exports.url = "wss://web." + env_1.baseDomain;
 var idString = "toBackend";
 var log = env_1.isDevEnv ? console.log.bind(console) : (function () { });
@@ -4934,145 +5327,195 @@ exports.evtConnect = new ts_events_extended_1.SyncEvent();
  *
  * Called from outside isReconnect should never be passed.
  *  */
-function connect(connectionParams, isReconnect) {
-    var _this = this;
-    //We register 'offline' event only on the first call of connect()
-    if (socketCurrent === undefined) {
-        window.addEventListener("offline", function () {
-            var socket = get();
-            if (socket instanceof Promise) {
-                return;
-            }
-            socket.destroy("Browser is offline");
-        });
-    }
-    var removeCookie = cookies.WebsocketConnectionParams.set(connectionParams);
-    var socket = new sip.Socket(new WebSocket(exports.url, "SIP"), true, {
-        "remoteAddress": "web." + env_1.baseDomain,
-        "remotePort": 443
-    }, 20000);
-    apiServer.startListening(socket);
-    sip.api.client.enableKeepAlive(socket, 6 * 1000);
-    sip.api.client.enableErrorLogging(socket, sip.api.client.getDefaultErrorLogger({
-        idString: idString,
-        "log": console.log.bind(console)
-    }));
-    socket.enableLogger({
-        "socketId": idString,
-        "remoteEndId": "BACKEND",
-        "localEndId": "FRONTEND",
-        "connection": true,
-        "error": true,
-        "close": true,
-        "incomingTraffic": false,
-        "outgoingTraffic": false,
-        "ignoreApiTraffic": true
-    }, log);
-    socketCurrent = socket;
-    socket.evtConnect.attachOnce(function () {
-        log("Socket " + (!!isReconnect ? "re-" : "") + "connected");
-        removeCookie();
-        if (!!isReconnect) {
-            bootbox_custom.dismissLoading();
-        }
-        var includeContacts = connectionParams.connectionType === "MAIN";
-        if (userSims === undefined) {
-            remoteApiCaller.getUsableUserSims(includeContacts)
-                .then(function (userSims_) { return userSims = userSims_; });
-        }
-        else {
-            remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
-                .then(function (userSims_) {
-                var e_1, _a;
-                var _loop_1 = function (userSim_) {
-                    var userSim = userSims
-                        .find(function (_a) {
-                        var sim = _a.sim;
-                        return sim.imsi === userSim_.sim.imsi;
-                    });
-                    /*
-                    By testing if digests are the same we cover 99% of the case
-                    when the sim could have been modified while offline...good enough.
-                    */
-                    if (!userSim ||
-                        userSim.sim.storage.digest !== userSim_.sim.storage.digest) {
-                        location.reload();
-                        return { value: void 0 };
-                    }
-                    /*
-                    If userSim is online we received a notification before having the
-                    response of the request... even possible?
-                     */
-                    if (!!userSim.reachableSimState) {
-                        return "continue";
-                    }
-                    userSim.reachableSimState = userSim_.reachableSimState;
-                    userSim.password = userSim_.password;
-                    userSim.dongle = userSim_.dongle;
-                    userSim.gatewayLocation = userSim_.gatewayLocation;
-                    if (!!userSim.reachableSimState) {
-                        localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
-                    }
-                };
-                try {
-                    for (var userSims_1 = __values(userSims_), userSims_1_1 = userSims_1.next(); !userSims_1_1.done; userSims_1_1 = userSims_1.next()) {
-                        var userSim_ = userSims_1_1.value;
-                        var state_1 = _loop_1(userSim_);
-                        if (typeof state_1 === "object")
-                            return state_1.value;
-                    }
-                }
-                catch (e_1_1) { e_1 = { error: e_1_1 }; }
-                finally {
-                    try {
-                        if (userSims_1_1 && !userSims_1_1.done && (_a = userSims_1.return)) _a.call(userSims_1);
-                    }
-                    finally { if (e_1) throw e_1.error; }
-                }
-            });
-        }
-        exports.evtConnect.post(socket);
-    });
-    socket.evtClose.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
-        var _a, _b, userSim;
-        var e_2, _c;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+function connect(connectionType, requestTurnCred, isReconnect) {
+    return __awaiter(this, void 0, void 0, function () {
+        var socket, _a, _b, _c, _d, _e, _f, _g, _h;
+        var _this = this;
+        return __generator(this, function (_j) {
+            switch (_j.label) {
                 case 0:
-                    log("Socket disconnected");
-                    try {
-                        for (_a = __values(userSims || []), _b = _a.next(); !_b.done; _b = _a.next()) {
-                            userSim = _b.value;
-                            userSim.reachableSimState = undefined;
-                            localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
-                        }
+                    //We register 'offline' event only on the first call of connect()
+                    //TODO: React native.
+                    if (socketCurrent === undefined && env.jsRuntimeEnv === "browser") {
+                        window.addEventListener("offline", function () {
+                            var socket = get();
+                            if (socket instanceof Promise) {
+                                return;
+                            }
+                            socket.destroy("Browser is offline");
+                        });
                     }
-                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                    finally {
-                        try {
-                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
-                        }
-                        finally { if (e_2) throw e_2.error; }
-                    }
-                    if (localApiHandlers.evtOpenElsewhere.postCount !== 0) {
-                        return [2 /*return*/];
-                    }
-                    if (socket.evtConnect.postCount === 1) {
-                        bootbox_custom.loading("Reconnecting...");
-                    }
-                    _d.label = 1;
+                    _b = (_a = sip.Socket).bind;
+                    _c = WebSocket.bind;
+                    _e = (_d = urlGetParameters).buildUrl;
+                    _f = [exports.url];
+                    _g = {};
+                    _h = "connect_sid";
+                    return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
                 case 1:
-                    if (!!navigator.onLine) return [3 /*break*/, 3];
-                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 1000); })];
-                case 2:
-                    _d.sent();
-                    return [3 /*break*/, 1];
-                case 3:
-                    connect(connectionParams, "RECONNECT");
+                    socket = new (_b.apply(_a, [void 0, new (_c.apply(WebSocket, [void 0, _e.apply(_d, _f.concat([(_g[_h] = (_j.sent()).connect_sid,
+                                    _g.connectionType = connectionType,
+                                    _g.requestTurnCred = requestTurnCred,
+                                    _g)])), "SIP"]))(),
+                        true,
+                        {
+                            "remoteAddress": "web." + env_1.baseDomain,
+                            "remotePort": 443
+                        },
+                        20000]))();
+                    apiServer.startListening(socket);
+                    sip.api.client.enableKeepAlive(socket, 6 * 1000);
+                    sip.api.client.enableErrorLogging(socket, sip.api.client.getDefaultErrorLogger({
+                        idString: idString,
+                        "log": console.log.bind(console)
+                    }));
+                    socket.enableLogger({
+                        "socketId": idString,
+                        "remoteEndId": "BACKEND",
+                        "localEndId": "FRONTEND",
+                        "connection": true,
+                        "error": true,
+                        "close": true,
+                        "incomingTraffic": false,
+                        "outgoingTraffic": false,
+                        "ignoreApiTraffic": true
+                    }, log);
+                    socketCurrent = socket;
+                    socket.evtConnect.attachOnce(function () {
+                        log("Socket " + (!!isReconnect ? "re-" : "") + "connected");
+                        if (!!isReconnect) {
+                            bootbox_custom.dismissLoading();
+                        }
+                        var includeContacts = connectionType === "MAIN";
+                        if (userSims === undefined) {
+                            remoteApiCaller.getUsableUserSims(includeContacts)
+                                .then(function (userSims_) { return userSims = userSims_; });
+                        }
+                        else {
+                            remoteApiCaller.getUsableUserSims(includeContacts, "STATELESS")
+                                .then(function (userSims_) {
+                                var e_1, _a;
+                                var _loop_1 = function (userSim_) {
+                                    var userSim = userSims
+                                        .find(function (_a) {
+                                        var sim = _a.sim;
+                                        return sim.imsi === userSim_.sim.imsi;
+                                    });
+                                    /*
+                                    By testing if digests are the same we cover 99% of the case
+                                    when the sim could have been modified while offline...good enough.
+                                    */
+                                    if (!userSim ||
+                                        userSim.sim.storage.digest !== userSim_.sim.storage.digest) {
+                                        location.reload();
+                                        return { value: void 0 };
+                                    }
+                                    /*
+                                    If userSim is online we received a notification before having the
+                                    response of the request... even possible?
+                                     */
+                                    if (!!userSim.reachableSimState) {
+                                        return "continue";
+                                    }
+                                    userSim.reachableSimState = userSim_.reachableSimState;
+                                    userSim.password = userSim_.password;
+                                    userSim.dongle = userSim_.dongle;
+                                    userSim.gatewayLocation = userSim_.gatewayLocation;
+                                    if (!!userSim.reachableSimState) {
+                                        localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
+                                    }
+                                };
+                                try {
+                                    for (var userSims_1 = __values(userSims_), userSims_1_1 = userSims_1.next(); !userSims_1_1.done; userSims_1_1 = userSims_1.next()) {
+                                        var userSim_ = userSims_1_1.value;
+                                        var state_1 = _loop_1(userSim_);
+                                        if (typeof state_1 === "object")
+                                            return state_1.value;
+                                    }
+                                }
+                                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                                finally {
+                                    try {
+                                        if (userSims_1_1 && !userSims_1_1.done && (_a = userSims_1.return)) _a.call(userSims_1);
+                                    }
+                                    finally { if (e_1) throw e_1.error; }
+                                }
+                            });
+                        }
+                        exports.evtConnect.post(socket);
+                    });
+                    socket.evtClose.attachOnce(function () { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, _b, userSim, _c, _d, email, secret, uaInstanceId, status_1;
+                        var e_2, _e;
+                        return __generator(this, function (_f) {
+                            switch (_f.label) {
+                                case 0:
+                                    log("Socket disconnected");
+                                    try {
+                                        for (_a = __values(userSims || []), _b = _a.next(); !_b.done; _b = _a.next()) {
+                                            userSim = _b.value;
+                                            userSim.reachableSimState = undefined;
+                                            localApiHandlers.evtSimIsOnlineStatusChange.post(userSim);
+                                        }
+                                    }
+                                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                                    finally {
+                                        try {
+                                            if (_b && !_b.done && (_e = _a.return)) _e.call(_a);
+                                        }
+                                        finally { if (e_2) throw e_2.error; }
+                                    }
+                                    if (localApiHandlers.evtOpenElsewhere.postCount !== 0) {
+                                        return [2 /*return*/];
+                                    }
+                                    if (socket.evtConnect.postCount === 1) {
+                                        bootbox_custom.loading("Reconnecting...");
+                                    }
+                                    if (!(env.jsRuntimeEnv === "browser")) return [3 /*break*/, 3];
+                                    _f.label = 1;
+                                case 1:
+                                    if (!!navigator.onLine) return [3 /*break*/, 3];
+                                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 1000); })];
+                                case 2:
+                                    _f.sent();
+                                    return [3 /*break*/, 1];
+                                case 3: return [4 /*yield*/, webApiCaller.isUserLoggedIn()];
+                                case 4:
+                                    if (!!(_f.sent())) return [3 /*break*/, 10];
+                                    _c = env.jsRuntimeEnv;
+                                    switch (_c) {
+                                        case "browser": return [3 /*break*/, 5];
+                                        case "react-native": return [3 /*break*/, 6];
+                                    }
+                                    return [3 /*break*/, 10];
+                                case 5:
+                                    window.location.reload();
+                                    return [2 /*return*/];
+                                case 6: return [4 /*yield*/, Credentials_1.Credentials.isPresent()];
+                                case 7:
+                                    if (!(_f.sent())) {
+                                        throw new Error("TODO: ...");
+                                    }
+                                    return [4 /*yield*/, Credentials_1.Credentials.get()];
+                                case 8:
+                                    _d = _f.sent(), email = _d.email, secret = _d.secret, uaInstanceId = _d.uaInstanceId;
+                                    return [4 /*yield*/, webApiCaller.loginUser(email, secret, uaInstanceId)];
+                                case 9:
+                                    status_1 = (_f.sent()).status;
+                                    if (status_1 !== "SUCCESS") {
+                                        throw new Error("TODO: relogin failed");
+                                    }
+                                    return [3 /*break*/, 10];
+                                case 10:
+                                    connect(connectionType, requestTurnCred, "RECONNECT");
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     return [2 /*return*/];
             }
         });
-    }); });
+    });
 }
 exports.connect = connect;
 function get() {
@@ -5087,13 +5530,14 @@ function get() {
 }
 exports.get = get;
 
-},{"../../tools/bootbox_custom":37,"../cookies/logic/frontend":26,"../env":28,"./localApiHandlers":31,"./remoteApiCaller/base":32,"ts-events-extended":81,"ts-sip":89}],31:[function(require,module,exports){
+},{"../../tools/bootbox_custom":45,"../../tools/urlGetParameters":48,"../env":29,"../localStorage/AuthenticatedSessionDescriptorSharedData":31,"../localStorage/Credentials":32,"../webApiCaller":41,"./localApiHandlers":37,"./remoteApiCaller/base":38,"ts-events-extended":89,"ts-sip":97}],37:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -5124,7 +5568,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var apiDeclaration = require("../../sip_api_declarations/uaToBackend");
 var ts_events_extended_1 = require("ts-events-extended");
@@ -5139,7 +5582,7 @@ exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi;
-            return __awaiter(_this, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, void 0, function () {
                 var userSim, hadOngoingCall;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -5178,7 +5621,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, hasInternalSimStorageChanged = _a.hasInternalSimStorageChanged, password = _a.password, simDongle = _a.simDongle, gatewayLocation = _a.gatewayLocation, isGsmConnectivityOk = _a.isGsmConnectivityOk, cellSignalStrength = _a.cellSignalStrength;
-            return __awaiter(_this, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, void 0, function () {
                 var userSim;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -5216,7 +5659,7 @@ exports.evtSimGsmConnectivityChange = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, isGsmConnectivityOk = _a.isGsmConnectivityOk;
-            return __awaiter(_this, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, void 0, function () {
                 var userSim, reachableSimState, hadOngoingCall;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -5263,7 +5706,7 @@ exports.evtSimCellSignalStrengthChange = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, cellSignalStrength = _a.cellSignalStrength;
-            return __awaiter(_this, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, void 0, function () {
                 var userSim;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -5325,7 +5768,7 @@ evtOngoingCall.attach(userSim => {
 {
     var methodName = apiDeclaration.notifyOngoingCall.methodName;
     var handler = {
-        "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
+        "handler": function (params) { return __awaiter(void 0, void 0, void 0, function () {
             var imsi, userSim, ongoingCallId, reachableSimState, ongoingCall, reachableSimState, ongoingCallId, from, number, isUserInCall, otherUserInCallEmails, prevOngoingCall_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -5397,7 +5840,7 @@ exports.evtContactCreatedOrUpdated = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, name = _a.name, number_raw = _a.number_raw, storage = _a.storage;
-            return __awaiter(_this, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, void 0, function () {
                 var userSim, contact;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -5456,7 +5899,7 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, number_raw = _a.number_raw, storage = _a.storage;
-            return __awaiter(_this, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, void 0, function () {
                 var userSim, contact, i;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -5496,7 +5939,7 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
 {
     var methodName = apiDeclaration.notifyDongleOnLan.methodName;
     var handler = {
-        "handler": function (dongle) { return __awaiter(_this, void 0, void 0, function () {
+        "handler": function (dongle) { return __awaiter(void 0, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 if (dcTypes.Dongle.Locked.match(dongle)) {
                     interact_onLockedDongle_1(dongle);
@@ -5510,7 +5953,7 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
         }); }
     };
     exports.handlers[methodName] = handler;
-    var interact_onLockedDongle_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
+    var interact_onLockedDongle_1 = function (dongle) { return __awaiter(void 0, void 0, void 0, function () {
         var pin, unlockResult;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -5581,7 +6024,7 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
             }
         });
     }); };
-    var interact_onUsableDongle_1 = function (dongle) { return __awaiter(_this, void 0, void 0, function () {
+    var interact_onUsableDongle_1 = function (dongle) { return __awaiter(void 0, void 0, void 0, function () {
         var shouldAdd_message, shouldAdd, friendlyName, friendlyNameSubmitted;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -5647,7 +6090,7 @@ exports.evtContactDeleted = new ts_events_extended_1.SyncEvent();
             }
         });
     }); };
-    var getDefaultFriendlyName_1 = function (sim) { return __awaiter(_this, void 0, void 0, function () {
+    var getDefaultFriendlyName_1 = function (sim) { return __awaiter(void 0, void 0, void 0, function () {
         var tag, num, build, i, userSims;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -5680,7 +6123,7 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi;
-            return __awaiter(_this, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, void 0, function () {
                 var userSims, userSim;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -5704,7 +6147,7 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
 {
     var methodName = apiDeclaration.notifySimSharingRequest.methodName;
     var handler = {
-        "handler": function (params) { return __awaiter(_this, void 0, void 0, function () {
+        "handler": function (params) { return __awaiter(void 0, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 interact_1(params);
                 return [2 /*return*/, undefined];
@@ -5713,7 +6156,7 @@ exports.evtSimPermissionLost = new ts_events_extended_1.SyncEvent();
     };
     exports.handlers[methodName] = handler;
     //TODO: run exclusive
-    var interact_1 = function (userSim) { return __awaiter(_this, void 0, void 0, function () {
+    var interact_1 = function (userSim) { return __awaiter(void 0, void 0, void 0, function () {
         var shouldProceed, friendlyNameSubmitted;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -5778,7 +6221,7 @@ exports.evtSharingRequestResponse = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, email = _a.email, isAccepted = _a.isAccepted;
-            return __awaiter(_this, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, void 0, function () {
                 var userSim;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -5817,7 +6260,7 @@ exports.evtOtherSimUserUnregisteredSim = new ts_events_extended_1.SyncEvent();
     var handler = {
         "handler": function (_a) {
             var imsi = _a.imsi, email = _a.email;
-            return __awaiter(_this, void 0, void 0, function () {
+            return __awaiter(void 0, void 0, void 0, function () {
                 var userSim;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -5849,7 +6292,7 @@ exports.evtOpenElsewhere = new ts_events_extended_1.VoidSyncEvent();
 {
     var methodName = apiDeclaration.notifyLoggedFromOtherTab.methodName;
     var handler = {
-        "handler": function () { return __awaiter(_this, void 0, void 0, function () {
+        "handler": function () { return __awaiter(void 0, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 exports.evtOpenElsewhere.post();
                 bootbox_custom.alert("You are connected somewhere else", function () { return location.reload(); });
@@ -5889,7 +6332,7 @@ exports.getRTCIceServer = (function () {
 {
     var methodName = apiDeclaration.notifyIceServer.methodName;
     var handler = {
-        "handler": function (params, fromSocket) { return __awaiter(_this, void 0, void 0, function () {
+        "handler": function (params, fromSocket) { return __awaiter(void 0, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 evtRTCIceEServer.post({
                     "rtcIceServer": params !== undefined ? params :
@@ -5910,13 +6353,14 @@ exports.getRTCIceServer = (function () {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":36,"../../tools/bootbox_custom":37,"./remoteApiCaller/base":32,"chan-dongle-extended-client/dist/lib/types":41,"ts-events-extended":81}],32:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":44,"../../tools/bootbox_custom":45,"./remoteApiCaller/base":38,"chan-dongle-extended-client/dist/lib/types":50,"ts-events-extended":89}],38:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -5947,15 +6391,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
-    return {
+    if (o && typeof o.length === "number") return {
         next: function () {
             if (o && i >= o.length) o = void 0;
             return { value: o && o[i++], done: !o };
         }
     };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var sendRequest_1 = require("./sendRequest");
@@ -6304,13 +6749,14 @@ exports.shouldAppendPromotionalMessage = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":35,"./sendRequest":33,"ts-events-extended":81}],33:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":43,"./sendRequest":39,"ts-events-extended":89}],39:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -6376,13 +6822,19 @@ function sendRequest(methodName, params, retry) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../connection":30,"ts-sip":89}],34:[function(require,module,exports){
+},{"../connection":36,"ts-sip":97}],40:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.connectSidHttpHeaderName = "x-connect-sid";
+
+},{}],41:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -6414,29 +6866,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var apiDeclaration = require("../web_api_declaration");
-var ttJC = require("transfer-tools/dist/lib/JSON_CUSTOM");
-var webApiPath_1 = require("../gateway/webApiPath");
-//NOTE: Assert jQuery loaded on the page
-var JSON_CUSTOM = ttJC.get();
-function sendRequest(methodName, params) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve) { return window["$"].ajax({
-                    "url": webApiPath_1.webApiPath + "/" + methodName,
-                    "method": "POST",
-                    "data": JSON_CUSTOM.stringify(params),
-                    "dataType": "text",
-                    "statusCode": {
-                        "400": function () { return alert("Bad request ( bug in the client )"); },
-                        "401": function () { return window.location.reload(); },
-                        "500": function () { return alert("Bug on the server, sorry :("); },
-                        "200": function (data) { return resolve(JSON_CUSTOM.parse(data)); }
-                    }
-                }); })];
-        });
-    });
-}
+var apiDeclaration = require("../../web_api_declaration");
+var JSON_CUSTOM_1 = require("transfer-tools/dist/lib/JSON_CUSTOM");
+var webApiPath_1 = require("../../gateway/webApiPath");
+var sendRequest_1 = require("./sendRequest");
+var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
+var Credentials_1 = require("../localStorage/Credentials");
+var env = require("../env");
+var sendRequest = sendRequest_1.sendRequestFactory(webApiPath_1.webApiPath, JSON_CUSTOM_1.get());
 exports.registerUser = (function () {
     var methodName = apiDeclaration.registerUser.methodName;
     return function (email, secret, towardUserEncryptKeyStr, encryptedSymmetricKey) {
@@ -6454,16 +6891,101 @@ exports.validateEmail = (function () {
         return sendRequest(methodName, { email: email, activationCode: activationCode });
     };
 })();
+/** uaInstanceId should be provided on android/iOS and undefined on the web */
 exports.loginUser = (function () {
     var methodName = apiDeclaration.loginUser.methodName;
-    return function (email, secret) {
-        return sendRequest(methodName, { email: email, secret: secret });
+    return function (email, secret, uaInstanceId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, { email: email, secret: secret, uaInstanceId: uaInstanceId })];
+                    case 1:
+                        response = _a.sent();
+                        if (response.status !== "SUCCESS") {
+                            return [2 /*return*/, response];
+                        }
+                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
+                        return [4 /*yield*/, Credentials_1.Credentials.set({
+                                email: email,
+                                secret: secret,
+                                "uaInstanceId": uaInstanceId
+                            })];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.set({
+                            "connect_sid": response.connect_sid,
+                            email: email,
+                            "encryptedSymmetricKey": response.encryptedSymmetricKey,
+                            "uaInstanceId": uaInstanceId === undefined ?
+                                response.webUaInstanceId : uaInstanceId
+                        })];
+                    case 4:
+                        _a.sent();
+                        return [2 /*return*/, { "status": response.status }];
+                }
+            });
+        });
+    };
+})();
+exports.isUserLoggedIn = (function () {
+    var methodName = apiDeclaration.isUserLoggedIn.methodName;
+    return function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var isLoggedIn;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
+                    case 1:
+                        isLoggedIn = _a.sent();
+                        if (!!isLoggedIn) return [3 /*break*/, 5];
+                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
+                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
+                    case 4:
+                        _a.sent();
+                        _a.label = 5;
+                    case 5: return [2 /*return*/, isLoggedIn];
+                }
+            });
+        });
+    };
+})();
+exports.declareUa = (function () {
+    var methodName = apiDeclaration.declareUa.methodName;
+    return function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, params)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
 })();
 exports.logoutUser = (function () {
     var methodName = apiDeclaration.logoutUser.methodName;
     return function () {
-        return sendRequest(methodName, undefined);
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
 })();
 /** Return true if email has account */
@@ -6568,7 +7090,165 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../gateway/webApiPath":24,"../web_api_declaration":40,"transfer-tools/dist/lib/JSON_CUSTOM":72}],35:[function(require,module,exports){
+},{"../../gateway/webApiPath":27,"../../web_api_declaration":49,"../env":29,"../localStorage/AuthenticatedSessionDescriptorSharedData":31,"../localStorage/Credentials":32,"./sendRequest":42,"transfer-tools/dist/lib/JSON_CUSTOM":80}],42:[function(require,module,exports){
+"use strict";
+//NOTE: Assert jQuery loaded on the page
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
+var Credentials_1 = require("../localStorage/Credentials");
+var connectSidHttpHeaderName_1 = require("../types/connectSidHttpHeaderName");
+var env = require("../env");
+//TODO: Locating reload in case of 401 unauthorized. and alert are not applicable in react-native.
+function sendRequestFactory(webApiPath, serializer) {
+    return function sendRequest(methodName, params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b, _c, _d, _e, _f, _g, _h;
+            var _j;
+            var _this = this;
+            return __generator(this, function (_k) {
+                switch (_k.label) {
+                    case 0:
+                        _a = fetch;
+                        _b = ["https://web." + env.baseDomain + webApiPath + "/" + methodName];
+                        _c = {
+                            "method": "POST",
+                            "cache": "no-cache",
+                            "credentials": "same-origin"
+                        };
+                        _d = "headers";
+                        _e = [{ "Content-Type": "application/json-custom; charset=utf-8" }];
+                        _g = env.jsRuntimeEnv === "react-native";
+                        if (!_g) return [3 /*break*/, 2];
+                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
+                    case 1:
+                        _g = (_k.sent());
+                        _k.label = 2;
+                    case 2:
+                        if (!_g) return [3 /*break*/, 4];
+                        _j = {};
+                        _h = connectSidHttpHeaderName_1.connectSidHttpHeaderName;
+                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
+                    case 3:
+                        _f = (_j[_h] = (_k.sent()).connect_sid, _j);
+                        return [3 /*break*/, 5];
+                    case 4:
+                        _f = ({});
+                        _k.label = 5;
+                    case 5: return [2 /*return*/, _a.apply(void 0, _b.concat([(_c[_d] = __assign.apply(void 0, _e.concat([(_f)])),
+                                _c["redirect"] = "error",
+                                _c["body"] = serializer.stringify(params),
+                                _c)])).then(function (response) { return __awaiter(_this, void 0, void 0, function () {
+                            var _a, text, out;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0:
+                                        _a = response.status;
+                                        switch (_a) {
+                                            case 400: return [3 /*break*/, 1];
+                                            case 401: return [3 /*break*/, 2];
+                                            case 500: return [3 /*break*/, 6];
+                                            case 200: return [3 /*break*/, 7];
+                                        }
+                                        return [3 /*break*/, 8];
+                                    case 1:
+                                        {
+                                            //TODO: Bad request ( bug in the client )
+                                            alert("Bad request ( bug in the client )");
+                                        }
+                                        return [2 /*return*/];
+                                    case 2:
+                                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
+                                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
+                                    case 3:
+                                        _b.sent();
+                                        _b.label = 4;
+                                    case 4: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
+                                    case 5:
+                                        _b.sent();
+                                        window.location.reload();
+                                        return [2 /*return*/];
+                                    case 6:
+                                        {
+                                            //TODO: Server side error.
+                                            alert("Bug on the server, sorry :(");
+                                        }
+                                        return [2 /*return*/];
+                                    case 7:
+                                        {
+                                        }
+                                        return [3 /*break*/, 9];
+                                    case 8:
+                                        {
+                                            //TODO: Unknown result code.
+                                        }
+                                        return [2 /*return*/];
+                                    case 9:
+                                        console.log("great we got the 200 response!");
+                                        return [4 /*yield*/, response.text()];
+                                    case 10:
+                                        text = _b.sent();
+                                        console.log("we have the text! ", text);
+                                        out = serializer.parse(text);
+                                        console.log("we have the out", out);
+                                        return [2 /*return*/, out];
+                                }
+                            });
+                        }); })];
+                }
+            });
+        });
+    };
+}
+exports.sendRequestFactory = sendRequestFactory;
+
+},{"../env":29,"../localStorage/AuthenticatedSessionDescriptorSharedData":31,"../localStorage/Credentials":32,"../types/connectSidHttpHeaderName":40}],43:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -6663,7 +7343,7 @@ var notifyStatusReportReceived;
     notifyStatusReportReceived.methodName = "notifyStatusReportReceived";
 })(notifyStatusReportReceived = exports.notifyStatusReportReceived || (exports.notifyStatusReportReceived = {}));
 
-},{}],36:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -6728,7 +7408,7 @@ var notifyIceServer;
     notifyIceServer.methodName = "notifyIceServer";
 })(notifyIceServer = exports.notifyIceServer || (exports.notifyIceServer = {}));
 
-},{}],37:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap and bootbox loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -6840,7 +7520,7 @@ function confirm(options) {
 }
 exports.confirm = confirm;
 
-},{"./modal_stack":38}],38:[function(require,module,exports){
+},{"./modal_stack":46}],46:[function(require,module,exports){
 "use strict";
 //TODO: Assert jQuery bootstrap loaded on the page.
 var __assign = (this && this.__assign) || function () {
@@ -6855,10 +7535,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -6896,7 +7577,7 @@ function add(modal, options) {
     var _this = this;
     //NOTE: null only when called by bootbox_custom.
     if (options !== null) {
-        modal.modal(__assign({}, options, { "show": false }));
+        modal.modal(__assign(__assign({}, options), { "show": false }));
     }
     return {
         "show": function () { return new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
@@ -6961,7 +7642,7 @@ function add(modal, options) {
 }
 exports.add = add;
 
-},{}],39:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -6975,10 +7656,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -7009,16 +7691,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -7035,10 +7707,101 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 function overrideWebRTCImplementation(methods) {
-    console.log("Using alternative WebRTC implementation !");
+    console.log("Using alternative WebRTC implementation !!");
+    //NOTE: Polyfills for deprecated RTCSessionDescription constructor.
+    window["RTCSessionDescription"] = (function RTCSessionDescription(rtcSessionDescriptionInit) {
+        return Object.setPrototypeOf((function () {
+            var _a = __read(!!rtcSessionDescriptionInit ?
+                [rtcSessionDescriptionInit.sdp || null, rtcSessionDescriptionInit.type || null] :
+                [null, null], 2), sdp = _a[0], type = _a[1];
+            return { sdp: sdp, type: type };
+        })(), {
+            "constructor": RTCSessionDescription,
+            "toJSON": function toJSON() {
+                var _a = this, sdp = _a.sdp, type = _a.type;
+                return { sdp: sdp, type: type };
+            }
+        });
+    });
+    //NOTE: Polyfills RTCIceCandidate constructor not provided by react-native.
+    window["RTCIceCandidate"] = (function RTCIceCandidate(rtcIceCandidateInit) {
+        return Object.setPrototypeOf((function () {
+            var p = rtcIceCandidateInit;
+            var _a = __read(!!p ?
+                [p.candidate || null, p.sdpMid || null, p.sdpMLineIndex || null, p.usernameFragment || null] :
+                [null, null, null, null], 4), candidate = _a[0], sdpMid = _a[1], sdpMLineIndex = _a[2], usernameFragment = _a[3];
+            return Object.defineProperties({ candidate: candidate, sdpMid: sdpMid, sdpMLineIndex: sdpMLineIndex, usernameFragment: usernameFragment }, {
+                "component": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("component not implemented");
+                    }
+                },
+                "foundation": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("foundation not implemented");
+                    }
+                },
+                "ip": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("ip not implemented");
+                    }
+                },
+                "port": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("port not implemented");
+                    }
+                },
+                "priority": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("priority not implemented");
+                    }
+                },
+                "protocol": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("protocol not implemented");
+                    }
+                },
+                "relatedAddress": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("relatedAddress not implemented");
+                    }
+                },
+                "relatedPort": {
+                    "enumerable": true,
+                    "get": function () {
+                        throw new Error("relatedPort not implemented");
+                    }
+                }
+            });
+        })(), {
+            "constructor": RTCIceCandidate,
+            "toJSON": function toJSON() {
+                var _a = this, candidate = _a.candidate, sdpMid = _a.sdpMid, sdpMLineIndex = _a.sdpMLineIndex, usernameFragment = _a.usernameFragment;
+                return { candidate: candidate, sdpMid: sdpMid, sdpMLineIndex: sdpMLineIndex, usernameFragment: usernameFragment };
+            },
+        });
+    });
     var getCounter = (function () {
         var counter = (function () {
             var min = -2147483000;
@@ -7117,7 +7880,7 @@ function overrideWebRTCImplementation(methods) {
                     new RTCSessionDescription(localDescriptionRTCSessionDescriptionInitOrNull) : null;
             })();
         });
-        var rtcPeerConnectionProxy = __assign({ "createAnswer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
+        var rtcPeerConnectionProxy = __assign(__assign({ "createAnswer": function (_options) { return __awaiter(_this, void 0, void 0, function () {
                 var ref, rtcSessionDescriptionInitJson;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -7237,7 +8000,7 @@ function overrideWebRTCImplementation(methods) {
                     .detach();
             };
             return { addEventListener: addEventListener, removeEventListener: removeEventListener };
-        })(), { "addStream": function (mediaStream) { return methods.addStreamToRTCPeerConnection(rtcPeerConnectionRef, refByMediaStream.get(mediaStream)); }, "close": function () { return methods.closeRTCPeerConnection(rtcPeerConnectionRef); } });
+        })()), { "addStream": function (mediaStream) { return methods.addStreamToRTCPeerConnection(rtcPeerConnectionRef, refByMediaStream.get(mediaStream)); }, "close": function () { return methods.closeRTCPeerConnection(rtcPeerConnectionRef); } });
         var _loop_1 = function (propertyName) {
             Object.defineProperty(rtcPeerConnectionProxy, propertyName, {
                 "get": function () { return properties[propertyName]; },
@@ -7260,6 +8023,10 @@ function overrideWebRTCImplementation(methods) {
         }
         return Object.setPrototypeOf(rtcPeerConnectionProxy, { "constructor": RTCPeerConnection });
     };
+    //NOTE: For react-native
+    if (!navigator.mediaDevices) {
+        navigator.mediaDevices = {};
+    }
     navigator.mediaDevices.getUserMedia = getUserMediaProxy;
     window["RTCPeerConnection"] = RTCPeerConnectionProxy;
     return {
@@ -7285,19 +8052,8 @@ function testOverrideWebRTCImplementation() {
     var getUserMediaBackup = navigator.mediaDevices.getUserMedia;
     var mediaStreamByRef = new Map();
     var rtcPeerConnectionByRef = new Map();
-    var listeners = overrideWebRTCImplementation(__assign({ 
-        /*
-        "getUserMedia": (mediaStreamRef, mediaStreamConstraintsJson, callRef) =>
-            getUserMediaBackup(
-                JSON.parse(mediaStreamConstraintsJson)
-            ).then(mediaStream => {
-                mediaStreamByRef.set(mediaStreamRef, mediaStream);
-                listeners.onMethodReturn(callRef, undefined);
-            }),
-            */
-        "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
-            console.log("============> ", { mediaStreamConstraintsJson: mediaStreamConstraintsJson });
-            getUserMediaBackup(JSON.parse(mediaStreamConstraintsJson)).then(function (mediaStream) {
+    var listeners = overrideWebRTCImplementation(__assign(__assign({ "getUserMedia": function (mediaStreamRef, mediaStreamConstraintsJson, callRef) {
+            return getUserMediaBackup(JSON.parse(mediaStreamConstraintsJson)).then(function (mediaStream) {
                 mediaStreamByRef.set(mediaStreamRef, mediaStream);
                 listeners.onMethodReturn(callRef, undefined);
             });
@@ -7330,7 +8086,7 @@ function testOverrideWebRTCImplementation() {
         var createAnswerForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("ANSWER", rtcPeerConnectionRef, callRef); };
         var createOfferForRTCPeerConnection = function (rtcPeerConnectionRef, callRef) { return createXForRTCPeerConnection("OFFER", rtcPeerConnectionRef, callRef); };
         return { createAnswerForRTCPeerConnection: createAnswerForRTCPeerConnection, createOfferForRTCPeerConnection: createOfferForRTCPeerConnection };
-    })(), { "setLocalDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
+    })()), { "setLocalDescriptionOfRTCPeerConnection": function (rtcPeerConnectionRef, rtcSessionDescriptionInitJson, callRef) {
             return rtcPeerConnectionByRef.get(rtcPeerConnectionRef)
                 .setLocalDescription(JSON.parse(rtcSessionDescriptionInitJson))
                 .then(function () { return listeners.onMethodReturn(callRef, undefined); });
@@ -7345,7 +8101,33 @@ function testOverrideWebRTCImplementation() {
 }
 exports.testOverrideWebRTCImplementation = testOverrideWebRTCImplementation;
 
-},{"ts-events-extended":81}],40:[function(require,module,exports){
+},{"ts-events-extended":89}],48:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function buildUrl(urlPath, params) {
+    return urlPath + "?" + Object.keys(params)
+        .filter(function (key) { return params[key] !== undefined; })
+        .map(function (key) { return key + "=" + encodeURIComponent(params[key]); })
+        .join("&");
+}
+exports.buildUrl = buildUrl;
+function parseUrl(url) {
+    if (url === void 0) { url = location.href; }
+    var sPageURL = url.split("?")[1];
+    if (sPageURL === undefined) {
+        return {};
+    }
+    var sURLVariables = sPageURL.split("&");
+    var out = {};
+    for (var i = 0; i < sURLVariables.length; i++) {
+        var sParameterName = sURLVariables[i].split("=");
+        out[sParameterName[0]] = decodeURIComponent(sParameterName[1]);
+    }
+    return out;
+}
+exports.parseUrl = parseUrl;
+
+},{}],49:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
@@ -7360,6 +8142,14 @@ var loginUser;
 (function (loginUser) {
     loginUser.methodName = "login-user";
 })(loginUser = exports.loginUser || (exports.loginUser = {}));
+var isUserLoggedIn;
+(function (isUserLoggedIn) {
+    isUserLoggedIn.methodName = "isUserLoggedIn";
+})(isUserLoggedIn = exports.isUserLoggedIn || (exports.isUserLoggedIn = {}));
+var declareUa;
+(function (declareUa) {
+    declareUa.methodName = "declareUa";
+})(declareUa = exports.declareUa || (exports.declareUa = {}));
 var logoutUser;
 (function (logoutUser) {
     logoutUser.methodName = "logout-user";
@@ -7405,7 +8195,7 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],41:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -7426,7 +8216,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],42:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -7491,7 +8281,16 @@ var stylize = colors.stylize = function stylize(str, style) {
     return str+'';
   }
 
-  return ansiStyles[style].open + str + ansiStyles[style].close;
+  var styleMap = ansiStyles[style];
+
+  // Stylize should work for non-ANSI styles, too
+  if(!styleMap && style in colors){
+    // Style maps like trap operate as functions on strings;
+    // they don't have properties like open or close.
+    return colors[style](str);
+  }
+
+  return styleMap.open + str + styleMap.close;
 };
 
 var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
@@ -7534,7 +8333,8 @@ function applyStyle() {
   var args = Array.prototype.slice.call(arguments);
 
   var str = args.map(function(arg) {
-    if (arg !== undefined && arg.constructor === String) {
+    // Use weak equality check so we can colorize null/undefined in safe mode
+    if (arg != null && arg.constructor === String) {
       return arg;
     } else {
       return util.inspect(arg);
@@ -7629,7 +8429,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":43,"./custom/zalgo":44,"./maps/america":47,"./maps/rainbow":48,"./maps/random":49,"./maps/zebra":50,"./styles":51,"./system/supports-colors":53,"util":9}],43:[function(require,module,exports){
+},{"./custom/trap":52,"./custom/zalgo":53,"./maps/america":56,"./maps/rainbow":57,"./maps/random":58,"./maps/zebra":59,"./styles":60,"./system/supports-colors":62,"util":9}],52:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -7677,7 +8477,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -7789,7 +8589,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],45:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -7901,7 +8701,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":42}],46:[function(require,module,exports){
+},{"./colors":51}],55:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -7916,7 +8716,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":42,"./extendStringPrototype":45}],47:[function(require,module,exports){
+},{"./colors":51,"./extendStringPrototype":54}],56:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -7928,7 +8728,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],48:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -7942,10 +8742,11 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],49:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
-    'blue', 'white', 'cyan', 'magenta'];
+    'blue', 'white', 'cyan', 'magenta', 'brightYellow', 'brightRed',
+    'brightGreen', 'brightBlue', 'brightWhite', 'brightCyan', 'brightMagenta'];
   return function(letter, i, exploded) {
     return letter === ' ' ? letter :
       colors[
@@ -7954,14 +8755,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],50:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],51:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -8012,6 +8813,14 @@ var codes = {
   gray: [90, 39],
   grey: [90, 39],
 
+  brightRed: [91, 39],
+  brightGreen: [92, 39],
+  brightYellow: [93, 39],
+  brightBlue: [94, 39],
+  brightMagenta: [95, 39],
+  brightCyan: [96, 39],
+  brightWhite: [97, 39],
+
   bgBlack: [40, 49],
   bgRed: [41, 49],
   bgGreen: [42, 49],
@@ -8020,6 +8829,16 @@ var codes = {
   bgMagenta: [45, 49],
   bgCyan: [46, 49],
   bgWhite: [47, 49],
+  bgGray: [100, 49],
+  bgGrey: [100, 49],
+
+  bgBrightRed: [101, 49],
+  bgBrightGreen: [102, 49],
+  bgBrightYellow: [103, 49],
+  bgBrightBlue: [104, 49],
+  bgBrightMagenta: [105, 49],
+  bgBrightCyan: [106, 49],
+  bgBrightWhite: [107, 49],
 
   // legacy styles for colors pre v1.0.0
   blackBG: [40, 49],
@@ -8040,7 +8859,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],52:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -8079,7 +8898,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":6}],53:[function(require,module,exports){
+},{"_process":6}],62:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -8234,7 +9053,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":52,"_process":6,"os":5}],54:[function(require,module,exports){
+},{"./has-flag.js":61,"_process":6,"os":5}],63:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -8288,589 +9107,29 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],55:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":54}],56:[function(require,module,exports){
+},{"./implementation":63}],65:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":55}],57:[function(require,module,exports){
-/*!
- * JavaScript Cookie v2.2.0
- * https://github.com/js-cookie/js-cookie
- *
- * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
- * Released under the MIT license
- */
-;(function (factory) {
-	var registeredInModuleLoader = false;
-	if (typeof define === 'function' && define.amd) {
-		define(factory);
-		registeredInModuleLoader = true;
-	}
-	if (typeof exports === 'object') {
-		module.exports = factory();
-		registeredInModuleLoader = true;
-	}
-	if (!registeredInModuleLoader) {
-		var OldCookies = window.Cookies;
-		var api = window.Cookies = factory();
-		api.noConflict = function () {
-			window.Cookies = OldCookies;
-			return api;
-		};
-	}
-}(function () {
-	function extend () {
-		var i = 0;
-		var result = {};
-		for (; i < arguments.length; i++) {
-			var attributes = arguments[ i ];
-			for (var key in attributes) {
-				result[key] = attributes[key];
-			}
-		}
-		return result;
-	}
-
-	function init (converter) {
-		function api (key, value, attributes) {
-			var result;
-			if (typeof document === 'undefined') {
-				return;
-			}
-
-			// Write
-
-			if (arguments.length > 1) {
-				attributes = extend({
-					path: '/'
-				}, api.defaults, attributes);
-
-				if (typeof attributes.expires === 'number') {
-					var expires = new Date();
-					expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
-					attributes.expires = expires;
-				}
-
-				// We're using "expires" because "max-age" is not supported by IE
-				attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
-
-				try {
-					result = JSON.stringify(value);
-					if (/^[\{\[]/.test(result)) {
-						value = result;
-					}
-				} catch (e) {}
-
-				if (!converter.write) {
-					value = encodeURIComponent(String(value))
-						.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
-				} else {
-					value = converter.write(value, key);
-				}
-
-				key = encodeURIComponent(String(key));
-				key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
-				key = key.replace(/[\(\)]/g, escape);
-
-				var stringifiedAttributes = '';
-
-				for (var attributeName in attributes) {
-					if (!attributes[attributeName]) {
-						continue;
-					}
-					stringifiedAttributes += '; ' + attributeName;
-					if (attributes[attributeName] === true) {
-						continue;
-					}
-					stringifiedAttributes += '=' + attributes[attributeName];
-				}
-				return (document.cookie = key + '=' + value + stringifiedAttributes);
-			}
-
-			// Read
-
-			if (!key) {
-				result = {};
-			}
-
-			// To prevent the for loop in the first place assign an empty array
-			// in case there are no cookies at all. Also prevents odd result when
-			// calling "get()"
-			var cookies = document.cookie ? document.cookie.split('; ') : [];
-			var rdecode = /(%[0-9A-Z]{2})+/g;
-			var i = 0;
-
-			for (; i < cookies.length; i++) {
-				var parts = cookies[i].split('=');
-				var cookie = parts.slice(1).join('=');
-
-				if (!this.json && cookie.charAt(0) === '"') {
-					cookie = cookie.slice(1, -1);
-				}
-
-				try {
-					var name = parts[0].replace(rdecode, decodeURIComponent);
-					cookie = converter.read ?
-						converter.read(cookie, name) : converter(cookie, name) ||
-						cookie.replace(rdecode, decodeURIComponent);
-
-					if (this.json) {
-						try {
-							cookie = JSON.parse(cookie);
-						} catch (e) {}
-					}
-
-					if (key === name) {
-						result = cookie;
-						break;
-					}
-
-					if (!key) {
-						result[name] = cookie;
-					}
-				} catch (e) {}
-			}
-
-			return result;
-		}
-
-		api.set = api;
-		api.get = function (key) {
-			return api.call(api, key);
-		};
-		api.getJSON = function () {
-			return api.apply({
-				json: true
-			}, [].slice.call(arguments));
-		};
-		api.defaults = {};
-
-		api.remove = function (key, attributes) {
-			api(key, '', extend(attributes, {
-				expires: -1
-			}));
-		};
-
-		api.withConverter = init;
-
-		return api;
-	}
-
-	return init(function () {});
-}));
-
-},{}],58:[function(require,module,exports){
-// https://tc39.github.io/ecma262/#sec-array.prototype.find
-if (!Array.prototype.find) {
-    Object.defineProperty(Array.prototype, 'find', {
-        value: function (predicate) {
-            // 1. Let O be ? ToObject(this value).
-            if (this == null) {
-                throw new TypeError('"this" is null or not defined');
-            }
-            var o = Object(this);
-            // 2. Let len be ? ToLength(? Get(O, "length")).
-            var len = o.length >>> 0;
-            // 3. If IsCallable(predicate) is false, throw a TypeError exception.
-            if (typeof predicate !== 'function') {
-                throw new TypeError('predicate must be a function');
-            }
-            // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
-            var thisArg = arguments[1];
-            // 5. Let k be 0.
-            var k = 0;
-            // 6. Repeat, while k < len
-            while (k < len) {
-                // a. Let Pk be ! ToString(k).
-                // b. Let kValue be ? Get(O, Pk).
-                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
-                // d. If testResult is true, return kValue.
-                var kValue = o[k];
-                if (predicate.call(thisArg, kValue, k, o)) {
-                    return kValue;
-                }
-                // e. Increase k by 1.
-                k++;
-            }
-            // 7. Return undefined.
-            return undefined;
-        },
-        configurable: true,
-        writable: true
-    });
-}
-
-},{}],59:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var LightMapImpl = /** @class */ (function () {
-    function LightMapImpl() {
-        this.record = [];
-    }
-    LightMapImpl.prototype.has = function (key) {
-        return this.record
-            .map(function (_a) {
-            var _key = _a[0];
-            return _key;
-        })
-            .indexOf(key) >= 0;
-    };
-    LightMapImpl.prototype.get = function (key) {
-        var entry = this.record
-            .filter(function (_a) {
-            var _key = _a[0];
-            return _key === key;
-        })[0];
-        if (entry === undefined) {
-            return undefined;
-        }
-        return entry[1];
-    };
-    LightMapImpl.prototype.set = function (key, value) {
-        var entry = this.record
-            .filter(function (_a) {
-            var _key = _a[0];
-            return _key === key;
-        })[0];
-        if (entry === undefined) {
-            this.record.push([key, value]);
-        }
-        else {
-            entry[1] = value;
-        }
-        return this;
-    };
-    LightMapImpl.prototype["delete"] = function (key) {
-        var index = this.record.map(function (_a) {
-            var key = _a[0];
-            return key;
-        }).indexOf(key);
-        if (index < 0) {
-            return false;
-        }
-        this.record.splice(index, 1);
-        return true;
-    };
-    LightMapImpl.prototype.keys = function () {
-        return this.record.map(function (_a) {
-            var key = _a[0];
-            return key;
-        });
-    };
-    return LightMapImpl;
-}());
-exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
-
-},{}],60:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var Map_1 = require("./Map");
-exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
-
-},{"./Map":59}],61:[function(require,module,exports){
-"use strict";
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
-};
-exports.__esModule = true;
-var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
-var ExecQueue = /** @class */ (function () {
-    function ExecQueue() {
-        this.queuedCalls = [];
-        this.isRunning = false;
-        this.prComplete = Promise.resolve();
-    }
-    //TODO: move where it is used.
-    ExecQueue.prototype.cancelAllQueuedCalls = function () {
-        var n;
-        this.queuedCalls.splice(0, n = this.queuedCalls.length);
-        return n;
-    };
-    return ExecQueue;
-}());
-var globalContext = {};
-var clusters = new WeakMap_1.Polyfill();
-//console.log("Map version");
-//export const clusters = new Map<Object, Map<GroupRef,ExecQueue>>();
-function getOrCreateExecQueue(context, groupRef) {
-    var execQueueByGroup = clusters.get(context);
-    if (!execQueueByGroup) {
-        execQueueByGroup = new WeakMap_1.Polyfill();
-        clusters.set(context, execQueueByGroup);
-    }
-    var execQueue = execQueueByGroup.get(groupRef);
-    if (!execQueue) {
-        execQueue = new ExecQueue();
-        execQueueByGroup.set(groupRef, execQueue);
-    }
-    return execQueue;
-}
-function createGroupRef() {
-    return new Array(0);
-}
-exports.createGroupRef = createGroupRef;
-function build() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnPromise(true, createGroupRef(), inputs[0]);
-        case 2: return buildFnPromise(true, inputs[0], inputs[1]);
-    }
-}
-exports.build = build;
-function buildMethod() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnPromise(false, createGroupRef(), inputs[0]);
-        case 2: return buildFnPromise(false, inputs[0], inputs[1]);
-    }
-}
-exports.buildMethod = buildMethod;
-/**
- *
- * Get the number of queued call of a run-exclusive function.
- * Note that if you call a runExclusive function and call this
- * directly after it will return 0 as there is one function call
- * running but 0 queued.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- *
- * */
-function getQueuedCallCount(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.queuedCalls.length : 0;
-}
-exports.getQueuedCallCount = getQueuedCallCount;
-/**
- *
- * Cancel all queued calls of a run-exclusive function.
- * Note that the current running call will not be cancelled.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- *
- */
-function cancelAllQueuedCalls(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.cancelAllQueuedCalls() : 0;
-}
-exports.cancelAllQueuedCalls = cancelAllQueuedCalls;
-/**
- * Tell if a run-exclusive function has an instance of it's call currently being
- * performed.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- */
-function isRunning(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.isRunning : false;
-}
-exports.isRunning = isRunning;
-/**
- * Return a promise that resolve when all the current queued call of a runExclusive functions
- * have completed.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- */
-function getPrComplete(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.prComplete : Promise.resolve();
-}
-exports.getPrComplete = getPrComplete;
-var groupByRunExclusiveFunction = new WeakMap_1.Polyfill();
-function getExecQueueByFunctionAndContext(runExclusiveFunction, context) {
-    if (context === void 0) { context = globalContext; }
-    var groupRef = groupByRunExclusiveFunction.get(runExclusiveFunction);
-    if (!groupRef) {
-        throw Error("Not a run exclusiveFunction");
-    }
-    var execQueueByGroup = clusters.get(context);
-    if (!execQueueByGroup) {
-        return undefined;
-    }
-    return execQueueByGroup.get(groupRef);
-}
-function buildFnPromise(isGlobal, groupRef, fun) {
-    var execQueue;
-    var runExclusiveFunction = (function () {
-        var _this = this;
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        if (!isGlobal) {
-            if (!(this instanceof Object)) {
-                throw new Error("Run exclusive, <this> should be an object");
-            }
-            execQueue = getOrCreateExecQueue(this, groupRef);
-        }
-        return new Promise(function (resolve, reject) {
-            var onPrCompleteResolve;
-            execQueue.prComplete = new Promise(function (resolve) {
-                return onPrCompleteResolve = function () { return resolve(); };
-            });
-            var onComplete = function (result) {
-                onPrCompleteResolve();
-                execQueue.isRunning = false;
-                if (execQueue.queuedCalls.length) {
-                    execQueue.queuedCalls.shift()();
-                }
-                if ("data" in result) {
-                    resolve(result.data);
-                }
-                else {
-                    reject(result.reason);
-                }
-            };
-            (function callee() {
-                var _this = this;
-                var inputs = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    inputs[_i] = arguments[_i];
-                }
-                if (execQueue.isRunning) {
-                    execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
-                    return;
-                }
-                execQueue.isRunning = true;
-                try {
-                    fun.apply(this, inputs)
-                        .then(function (data) { return onComplete({ data: data }); })["catch"](function (reason) { return onComplete({ reason: reason }); });
-                }
-                catch (error) {
-                    onComplete({ "reason": error });
-                }
-            }).apply(_this, inputs);
-        });
-    });
-    if (isGlobal) {
-        execQueue = getOrCreateExecQueue(globalContext, groupRef);
-    }
-    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
-    return runExclusiveFunction;
-}
-function buildCb() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnCallback(true, createGroupRef(), inputs[0]);
-        case 2: return buildFnCallback(true, inputs[0], inputs[1]);
-    }
-}
-exports.buildCb = buildCb;
-function buildMethodCb() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnCallback(false, createGroupRef(), inputs[0]);
-        case 2: return buildFnCallback(false, inputs[0], inputs[1]);
-    }
-}
-exports.buildMethodCb = buildMethodCb;
-function buildFnCallback(isGlobal, groupRef, fun) {
-    var execQueue;
-    var runExclusiveFunction = (function () {
-        var _this = this;
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        if (!isGlobal) {
-            if (!(this instanceof Object)) {
-                throw new Error("Run exclusive, <this> should be an object");
-            }
-            execQueue = getOrCreateExecQueue(this, groupRef);
-        }
-        var callback = undefined;
-        if (inputs.length && typeof inputs[inputs.length - 1] === "function") {
-            callback = inputs.pop();
-        }
-        var onPrCompleteResolve;
-        execQueue.prComplete = new Promise(function (resolve) {
-            return onPrCompleteResolve = function () { return resolve(); };
-        });
-        var onComplete = function () {
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            onPrCompleteResolve();
-            execQueue.isRunning = false;
-            if (execQueue.queuedCalls.length) {
-                execQueue.queuedCalls.shift()();
-            }
-            if (callback) {
-                callback.apply(_this, inputs);
-            }
-        };
-        onComplete.hasCallback = !!callback;
-        (function callee() {
-            var _this = this;
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            if (execQueue.isRunning) {
-                execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
-                return;
-            }
-            execQueue.isRunning = true;
-            try {
-                fun.apply(this, __spread(inputs, [onComplete]));
-            }
-            catch (error) {
-                error.message += " ( This exception should not have been thrown, miss use of run-exclusive buildCb )";
-                throw error;
-            }
-        }).apply(this, inputs);
-    });
-    if (isGlobal) {
-        execQueue = getOrCreateExecQueue(globalContext, groupRef);
-    }
-    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
-    return runExclusiveFunction;
-}
-
-},{"minimal-polyfills/dist/lib/WeakMap":60}],62:[function(require,module,exports){
+},{"function-bind":64}],66:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"dup":14}],67:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],68:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"./Map":67,"dup":16}],69:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17,"minimal-polyfills/dist/lib/WeakMap":68}],70:[function(require,module,exports){
 // A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
@@ -8932,7 +9191,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":63,"./lib/tychei":64,"./lib/xor128":65,"./lib/xor4096":66,"./lib/xorshift7":67,"./lib/xorwow":68,"./seedrandom":69}],63:[function(require,module,exports){
+},{"./lib/alea":71,"./lib/tychei":72,"./lib/xor128":73,"./lib/xor4096":74,"./lib/xorshift7":75,"./lib/xorwow":76,"./seedrandom":77}],71:[function(require,module,exports){
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -9048,7 +9307,7 @@ if (module && module.exports) {
 
 
 
-},{}],64:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 // A Javascript implementaion of the "Tyche-i" prng algorithm by
 // Samuel Neves and Filipe Araujo.
 // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
@@ -9153,7 +9412,7 @@ if (module && module.exports) {
 
 
 
-},{}],65:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 // A Javascript implementaion of the "xor128" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -9236,7 +9495,7 @@ if (module && module.exports) {
 
 
 
-},{}],66:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 // A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
 //
 // This fast non-cryptographic random number generator is designed for
@@ -9384,7 +9643,7 @@ if (module && module.exports) {
   (typeof define) == 'function' && define   // present with an AMD loader
 );
 
-},{}],67:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 // A Javascript implementaion of the "xorshift7" algorithm by
 // François Panneton and Pierre L'ecuyer:
 // "On the Xorgshift Random Number Generators"
@@ -9483,7 +9742,7 @@ if (module && module.exports) {
 );
 
 
-},{}],68:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 // A Javascript implementaion of the "xorwow" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -9571,9 +9830,9 @@ if (module && module.exports) {
 
 
 
-},{}],69:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 /*
-Copyright 2014 David Bau.
+Copyright 2019 David Bau.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -9596,15 +9855,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-(function (pool, math) {
+(function (global, pool, math) {
 //
 // The following constants are related to IEEE 754 limits.
 //
 
-// Detect the global object, even if operating in strict mode.
-// http://stackoverflow.com/a/14387057/265298
-var global = (0, eval)('this'),
-    width = 256,        // each RC4 output is 0 <= x < 256
+var width = 256,        // each RC4 output is 0 <= x < 256
     chunks = 6,         // at least six RC4 outputs for each double
     digits = 52,        // there are 52 significant digits in a double
     rngname = 'random', // rngname: name for Math.random and Math.seedrandom
@@ -9822,13 +10078,16 @@ if ((typeof module) == 'object' && module.exports) {
 
 // End anonymous scope, and pass initial values.
 })(
+  // global: `self` in browsers (including strict mode and web workers),
+  // otherwise `this` in Node and other environments
+  (typeof self !== 'undefined') ? self : this,
   [],     // pool: entropy pool starts empty
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":2}],70:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],71:[function(require,module,exports){
+},{"crypto":2}],78:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],79:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -10163,7 +10422,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":56}],72:[function(require,module,exports){
+},{"has":65}],80:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -10213,7 +10472,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":71}],73:[function(require,module,exports){
+},{"super-json":79}],81:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -10225,7 +10484,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":72,"./stringTransform":74,"./stringTransformExt":75,"./testing":76}],74:[function(require,module,exports){
+},{"./JSON_CUSTOM":80,"./stringTransform":82,"./stringTransformExt":83,"./testing":84}],82:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -10287,7 +10546,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3}],75:[function(require,module,exports){
+},{"buffer":3}],83:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -10355,7 +10614,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":74}],76:[function(require,module,exports){
+},{"./stringTransform":82}],84:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -10655,302 +10914,17 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":74,"seedrandom":62}],77:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"./SyncEventBase":78,"dup":16}],78:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":79,"dup":17}],79:[function(require,module,exports){
-"use strict";
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
-exports.__esModule = true;
-var Map_1 = require("minimal-polyfills/dist/lib/Map");
-require("minimal-polyfills/dist/lib/Array.prototype.find");
-var runExclusive = require("run-exclusive");
-var defs_1 = require("./defs");
-/** SyncEvent without evtAttach property and without overload */
-var SyncEventBaseProtected = /** @class */ (function () {
-    function SyncEventBaseProtected() {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        var _this = this;
-        this.tick = 0;
-        this.postCount = 0;
-        this.traceId = null;
-        this.handlers = [];
-        this.handlerTriggers = new Map_1.Polyfill();
-        this.postAsync = runExclusive.buildCb(function (data, postTick, releaseLock) {
-            var isHandled = false;
-            for (var _i = 0, _a = _this.handlers.slice(); _i < _a.length; _i++) {
-                var handler = _a[_i];
-                var async = handler.async, matcher = handler.matcher;
-                if (!async || !matcher(data))
-                    continue;
-                var handlerTrigger = _this.handlerTriggers.get(handler);
-                if (!handlerTrigger)
-                    continue;
-                if (handlerTrigger.handlerTick > postTick)
-                    continue;
-                isHandled = true;
-                handlerTrigger.trigger(data);
-            }
-            if (!isHandled) {
-                releaseLock();
-            }
-            else {
-                var handlersDump_1 = _this.handlers.slice();
-                setTimeout(function () {
-                    for (var _i = 0, _a = _this.handlers; _i < _a.length; _i++) {
-                        var handler = _a[_i];
-                        var async = handler.async;
-                        if (!async)
-                            continue;
-                        if (handlersDump_1.indexOf(handler) >= 0)
-                            continue;
-                        _this.handlerTriggers.get(handler).handlerTick = postTick;
-                    }
-                    releaseLock();
-                }, 0);
-            }
-        });
-        if (!inputs.length)
-            return;
-        var eventEmitter = inputs[0], eventName = inputs[1];
-        var formatter = inputs[2] || this.defaultFormatter;
-        eventEmitter.on(eventName, function () {
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            return _this.post(formatter.apply(null, inputs));
-        });
-    }
-    SyncEventBaseProtected.prototype.defaultFormatter = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return inputs[0];
-    };
-    SyncEventBaseProtected.prototype.enableTrace = function (id, formatter, log) {
-        this.traceId = id;
-        if (!!formatter) {
-            this.traceFormatter = formatter;
-        }
-        else {
-            this.traceFormatter = function (data) {
-                try {
-                    return JSON.stringify(data, null, 2);
-                }
-                catch (_a) {
-                    return "" + data;
-                }
-            };
-        }
-        if (!!log) {
-            this.log = log;
-        }
-        else {
-            this.log = function () {
-                var inputs = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    inputs[_i] = arguments[_i];
-                }
-                return console.log.apply(console, inputs);
-            };
-        }
-    };
-    SyncEventBaseProtected.prototype.disableTrace = function () {
-        this.traceId = null;
-    };
-    SyncEventBaseProtected.prototype.addHandler = function (attachParams, implicitAttachParams) {
-        var _this = this;
-        var handler = __assign({}, attachParams, implicitAttachParams, { "detach": null, "promise": null });
-        handler.promise = new Promise(function (resolve, reject) {
-            var timer = undefined;
-            if (typeof handler.timeout === "number") {
-                timer = setTimeout(function () {
-                    timer = undefined;
-                    handler.detach();
-                    reject(new defs_1.EvtError.Timeout(handler.timeout));
-                }, handler.timeout);
-            }
-            handler.detach = function () {
-                var index = _this.handlers.indexOf(handler);
-                if (index < 0)
-                    return false;
-                _this.handlers.splice(index, 1);
-                _this.handlerTriggers["delete"](handler);
-                if (timer) {
-                    clearTimeout(timer);
-                    reject(new defs_1.EvtError.Detached());
-                }
-                return true;
-            };
-            var handlerTick = _this.tick++;
-            var trigger = function (data) {
-                var callback = handler.callback, once = handler.once;
-                if (timer) {
-                    clearTimeout(timer);
-                    timer = undefined;
-                }
-                if (once)
-                    handler.detach();
-                if (callback)
-                    callback.call(handler.boundTo, data);
-                resolve(data);
-            };
-            _this.handlerTriggers.set(handler, { handlerTick: handlerTick, trigger: trigger });
-        });
-        if (handler.prepend) {
-            var i = void 0;
-            for (i = 0; i < this.handlers.length; i++) {
-                if (this.handlers[i].extract)
-                    continue;
-                else
-                    break;
-            }
-            this.handlers.splice(i, 0, handler);
-        }
-        else {
-            this.handlers.push(handler);
-        }
-        return handler;
-    };
-    SyncEventBaseProtected.prototype.trace = function (data) {
-        if (this.traceId === null) {
-            return;
-        }
-        var message = "(" + this.traceId + ") ";
-        var isExtracted = !!this.handlers.find(function (_a) {
-            var extract = _a.extract, matcher = _a.matcher;
-            return extract && matcher(data);
-        });
-        if (isExtracted) {
-            message += "extracted ";
-        }
-        else {
-            var handlerCount = this.handlers
-                .filter(function (_a) {
-                var extract = _a.extract, matcher = _a.matcher;
-                return !extract && matcher(data);
-            })
-                .length;
-            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
-        }
-        this.log(message + this.traceFormatter(data));
-    };
-    SyncEventBaseProtected.prototype.post = function (data) {
-        this.trace(data);
-        this.postCount++;
-        var postTick = this.tick++;
-        var isExtracted = this.postSync(data);
-        if (!isExtracted) {
-            this.postAsync(data, postTick);
-        }
-        return this.postCount;
-    };
-    SyncEventBaseProtected.prototype.postSync = function (data) {
-        for (var _i = 0, _a = this.handlers.slice(); _i < _a.length; _i++) {
-            var handler = _a[_i];
-            var async = handler.async, matcher = handler.matcher, extract = handler.extract;
-            if (async || !matcher(data))
-                continue;
-            var handlerTrigger = this.handlerTriggers.get(handler);
-            if (!handlerTrigger)
-                continue;
-            handlerTrigger.trigger(data);
-            if (extract)
-                return true;
-        }
-        return false;
-    };
-    SyncEventBaseProtected.prototype.__waitFor = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": true,
-            "extract": false,
-            "once": true,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attach = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": false,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachExtract = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": true,
-            "once": false,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachPrepend = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": false,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOnce = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": true,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOncePrepend = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": true,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOnceExtract = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": true,
-            "once": true,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.getHandlers = function () { return this.handlers.slice(); };
-    /** Detach every handler bound to a given object or all handlers, return the detached handlers */
-    SyncEventBaseProtected.prototype.detach = function (boundTo) {
-        var detachedHandlers = [];
-        for (var _i = 0, _a = this.handlers.slice(); _i < _a.length; _i++) {
-            var handler = _a[_i];
-            if (boundTo === undefined || handler.boundTo === boundTo) {
-                handler.detach();
-                detachedHandlers.push(handler);
-            }
-        }
-        return detachedHandlers;
-    };
-    return SyncEventBaseProtected;
-}());
-exports.SyncEventBaseProtected = SyncEventBaseProtected;
-
-},{"./defs":80,"minimal-polyfills/dist/lib/Array.prototype.find":58,"minimal-polyfills/dist/lib/Map":59,"run-exclusive":61}],80:[function(require,module,exports){
+},{"./stringTransform":82,"seedrandom":70}],85:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"setprototypeof":70}],81:[function(require,module,exports){
+},{"./SyncEventBase":86,"dup":19}],86:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"./SyncEvent":77,"./defs":80,"dup":20}],82:[function(require,module,exports){
+},{"./SyncEventBaseProtected":87,"dup":20}],87:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"./defs":88,"dup":21,"minimal-polyfills/dist/lib/Array.prototype.find":66,"minimal-polyfills/dist/lib/Map":67,"run-exclusive":69}],88:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"dup":22,"setprototypeof":78}],89:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"./SyncEvent":85,"./defs":88,"dup":23}],90:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11122,7 +11096,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3,"ts-events-extended":81}],83:[function(require,module,exports){
+},{"buffer":3,"ts-events-extended":89}],91:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -11434,7 +11408,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":82,"./api/ApiMessage":84,"./core":88,"./misc":92,"colors":46,"ts-events-extended":81}],84:[function(require,module,exports){
+},{"./IConnection":90,"./api/ApiMessage":92,"./core":96,"./misc":100,"colors":55,"ts-events-extended":89}],92:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -11515,7 +11489,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":88,"../misc":92,"buffer":3,"transfer-tools":73}],85:[function(require,module,exports){
+},{"../core":96,"../misc":100,"buffer":3,"transfer-tools":81}],93:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11697,7 +11671,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":92,"./ApiMessage":84,"colors":46,"util":9}],86:[function(require,module,exports){
+},{"../misc":100,"./ApiMessage":92,"colors":55,"util":9}],94:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -11916,7 +11890,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":92,"./ApiMessage":84,"setprototypeof":70}],87:[function(require,module,exports){
+},{"../misc":100,"./ApiMessage":92,"setprototypeof":78}],95:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -11924,7 +11898,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":85,"./client":86}],88:[function(require,module,exports){
+},{"./Server":93,"./client":94}],96:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -12008,7 +11982,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":90,"./legacy/sip":91,"buffer":3,"setprototypeof":70}],89:[function(require,module,exports){
+},{"./legacy/sdp":98,"./legacy/sip":99,"buffer":3,"setprototypeof":78}],97:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -12020,7 +11994,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":83,"./api":87,"./core":88,"./misc":92}],90:[function(require,module,exports){
+},{"./Socket":91,"./api":95,"./core":96,"./misc":100}],98:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -12136,7 +12110,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],91:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -12527,7 +12501,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],92:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -12825,7 +12799,7 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":88,"buffer":3}],93:[function(require,module,exports){
+},{"./core":96,"buffer":3}],101:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var urlSafeBase64encoderDecoder_1 = require("./urlSafeBase64encoderDecoder");
@@ -12844,7 +12818,7 @@ var RegistrationParams;
 })(RegistrationParams = exports.RegistrationParams || (exports.RegistrationParams = {}));
 ;
 
-},{"./urlSafeBase64encoderDecoder":96}],94:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":104}],102:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -12898,7 +12872,7 @@ function extractBundledDataFromHeaders(headers, decryptor) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"./urlSafeBase64encoderDecoder":96,"crypto-lib/dist/async/serializer":110,"transfer-tools/dist/lib/stringTransform":130}],95:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":104,"crypto-lib/dist/async/serializer":118,"transfer-tools/dist/lib/stringTransform":134}],103:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 var __read = (this && this.__read) || function (o, n) {
@@ -12981,7 +12955,7 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"./urlSafeBase64encoderDecoder":96,"ts-sip":145}],96:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":104,"ts-sip":142}],104:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Transpiled to ES3.
@@ -12991,7 +12965,7 @@ exports.urlSafeB64 = stringTransform.transcode("base64", {
     "/": "-"
 });
 
-},{"transfer-tools/dist/lib/stringTransform":130}],97:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":134}],105:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
@@ -13000,31 +12974,319 @@ var version;
     version.methodName = "version";
 })(version = exports.version || (exports.version = {}));
 
-},{}],98:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"./custom/trap":99,"./custom/zalgo":100,"./maps/america":103,"./maps/rainbow":104,"./maps/random":105,"./maps/zebra":106,"./styles":107,"./system/supports-colors":109,"dup":42,"util":9}],99:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],100:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],101:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"./colors":98,"dup":45}],102:[function(require,module,exports){
-arguments[4][46][0].apply(exports,arguments)
-},{"./colors":98,"./extendStringPrototype":101,"dup":46}],103:[function(require,module,exports){
-arguments[4][47][0].apply(exports,arguments)
-},{"dup":47}],104:[function(require,module,exports){
-arguments[4][48][0].apply(exports,arguments)
-},{"dup":48}],105:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"dup":49}],106:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50}],107:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51}],108:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
+/*
+
+The MIT License (MIT)
+
+Original Library
+  - Copyright (c) Marak Squires
+
+Additional functionality
+ - Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+*/
+
+var colors = {};
+module['exports'] = colors;
+
+colors.themes = {};
+
+var util = require('util');
+var ansiStyles = colors.styles = require('./styles');
+var defineProps = Object.defineProperties;
+var newLineRegex = new RegExp(/[\r\n]+/g);
+
+colors.supportsColor = require('./system/supports-colors').supportsColor;
+
+if (typeof colors.enabled === 'undefined') {
+  colors.enabled = colors.supportsColor() !== false;
+}
+
+colors.enable = function() {
+  colors.enabled = true;
+};
+
+colors.disable = function() {
+  colors.enabled = false;
+};
+
+colors.stripColors = colors.strip = function(str) {
+  return ('' + str).replace(/\x1B\[\d+m/g, '');
+};
+
+// eslint-disable-next-line no-unused-vars
+var stylize = colors.stylize = function stylize(str, style) {
+  if (!colors.enabled) {
+    return str+'';
+  }
+
+  return ansiStyles[style].open + str + ansiStyles[style].close;
+};
+
+var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
+var escapeStringRegexp = function(str) {
+  if (typeof str !== 'string') {
+    throw new TypeError('Expected a string');
+  }
+  return str.replace(matchOperatorsRe, '\\$&');
+};
+
+function build(_styles) {
+  var builder = function builder() {
+    return applyStyle.apply(builder, arguments);
+  };
+  builder._styles = _styles;
+  // __proto__ is used because we must return a function, but there is
+  // no way to create a function with a different prototype.
+  builder.__proto__ = proto;
+  return builder;
+}
+
+var styles = (function() {
+  var ret = {};
+  ansiStyles.grey = ansiStyles.gray;
+  Object.keys(ansiStyles).forEach(function(key) {
+    ansiStyles[key].closeRe =
+      new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
+    ret[key] = {
+      get: function() {
+        return build(this._styles.concat(key));
+      },
+    };
+  });
+  return ret;
+})();
+
+var proto = defineProps(function colors() {}, styles);
+
+function applyStyle() {
+  var args = Array.prototype.slice.call(arguments);
+
+  var str = args.map(function(arg) {
+    if (arg !== undefined && arg.constructor === String) {
+      return arg;
+    } else {
+      return util.inspect(arg);
+    }
+  }).join(' ');
+
+  if (!colors.enabled || !str) {
+    return str;
+  }
+
+  var newLinesPresent = str.indexOf('\n') != -1;
+
+  var nestedStyles = this._styles;
+
+  var i = nestedStyles.length;
+  while (i--) {
+    var code = ansiStyles[nestedStyles[i]];
+    str = code.open + str.replace(code.closeRe, code.open) + code.close;
+    if (newLinesPresent) {
+      str = str.replace(newLineRegex, function(match) {
+        return code.close + match + code.open;
+      });
+    }
+  }
+
+  return str;
+}
+
+colors.setTheme = function(theme) {
+  if (typeof theme === 'string') {
+    console.log('colors.setTheme now only accepts an object, not a string.  ' +
+      'If you are trying to set a theme from a file, it is now your (the ' +
+      'caller\'s) responsibility to require the file.  The old syntax ' +
+      'looked like colors.setTheme(__dirname + ' +
+      '\'/../themes/generic-logging.js\'); The new syntax looks like '+
+      'colors.setTheme(require(__dirname + ' +
+      '\'/../themes/generic-logging.js\'));');
+    return;
+  }
+  for (var style in theme) {
+    (function(style) {
+      colors[style] = function(str) {
+        if (typeof theme[style] === 'object') {
+          var out = str;
+          for (var i in theme[style]) {
+            out = colors[theme[style][i]](out);
+          }
+          return out;
+        }
+        return colors[theme[style]](str);
+      };
+    })(style);
+  }
+};
+
+function init() {
+  var ret = {};
+  Object.keys(styles).forEach(function(name) {
+    ret[name] = {
+      get: function() {
+        return build([name]);
+      },
+    };
+  });
+  return ret;
+}
+
+var sequencer = function sequencer(map, str) {
+  var exploded = str.split('');
+  exploded = exploded.map(map);
+  return exploded.join('');
+};
+
+// custom formatter methods
+colors.trap = require('./custom/trap');
+colors.zalgo = require('./custom/zalgo');
+
+// maps
+colors.maps = {};
+colors.maps.america = require('./maps/america')(colors);
+colors.maps.zebra = require('./maps/zebra')(colors);
+colors.maps.rainbow = require('./maps/rainbow')(colors);
+colors.maps.random = require('./maps/random')(colors);
+
+for (var map in colors.maps) {
+  (function(map) {
+    colors[map] = function(str) {
+      return sequencer(colors.maps[map], str);
+    };
+  })(map);
+}
+
+defineProps(colors, init());
+
+},{"./custom/trap":107,"./custom/zalgo":108,"./maps/america":111,"./maps/rainbow":112,"./maps/random":113,"./maps/zebra":114,"./styles":115,"./system/supports-colors":117,"util":9}],107:[function(require,module,exports){
 arguments[4][52][0].apply(exports,arguments)
-},{"_process":6,"dup":52}],109:[function(require,module,exports){
+},{"dup":52}],108:[function(require,module,exports){
 arguments[4][53][0].apply(exports,arguments)
-},{"./has-flag.js":108,"_process":6,"dup":53,"os":5}],110:[function(require,module,exports){
+},{"dup":53}],109:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"./colors":106,"dup":54}],110:[function(require,module,exports){
+arguments[4][55][0].apply(exports,arguments)
+},{"./colors":106,"./extendStringPrototype":109,"dup":55}],111:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"dup":56}],112:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57}],113:[function(require,module,exports){
+module['exports'] = function(colors) {
+  var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
+    'blue', 'white', 'cyan', 'magenta'];
+  return function(letter, i, exploded) {
+    return letter === ' ' ? letter :
+      colors[
+          available[Math.round(Math.random() * (available.length - 2))]
+      ](letter);
+  };
+};
+
+},{}],114:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"dup":59}],115:[function(require,module,exports){
+/*
+The MIT License (MIT)
+
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+*/
+
+var styles = {};
+module['exports'] = styles;
+
+var codes = {
+  reset: [0, 0],
+
+  bold: [1, 22],
+  dim: [2, 22],
+  italic: [3, 23],
+  underline: [4, 24],
+  inverse: [7, 27],
+  hidden: [8, 28],
+  strikethrough: [9, 29],
+
+  black: [30, 39],
+  red: [31, 39],
+  green: [32, 39],
+  yellow: [33, 39],
+  blue: [34, 39],
+  magenta: [35, 39],
+  cyan: [36, 39],
+  white: [37, 39],
+  gray: [90, 39],
+  grey: [90, 39],
+
+  bgBlack: [40, 49],
+  bgRed: [41, 49],
+  bgGreen: [42, 49],
+  bgYellow: [43, 49],
+  bgBlue: [44, 49],
+  bgMagenta: [45, 49],
+  bgCyan: [46, 49],
+  bgWhite: [47, 49],
+
+  // legacy styles for colors pre v1.0.0
+  blackBG: [40, 49],
+  redBG: [41, 49],
+  greenBG: [42, 49],
+  yellowBG: [43, 49],
+  blueBG: [44, 49],
+  magentaBG: [45, 49],
+  cyanBG: [46, 49],
+  whiteBG: [47, 49],
+
+};
+
+Object.keys(codes).forEach(function(key) {
+  var val = codes[key];
+  var style = styles[key] = [];
+  style.open = '\u001b[' + val[0] + 'm';
+  style.close = '\u001b[' + val[1] + 'm';
+});
+
+},{}],116:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"_process":6,"dup":61}],117:[function(require,module,exports){
+arguments[4][62][0].apply(exports,arguments)
+},{"./has-flag.js":116,"_process":6,"dup":62,"os":5}],118:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -13063,80 +13325,341 @@ function decryptThenParseFactory(decryptor) {
 exports.decryptThenParseFactory = decryptThenParseFactory;
 
 }).call(this,require("buffer").Buffer)
-},{"../sync/utils/toBuffer":111,"buffer":3,"transfer-tools/dist/lib/JSON_CUSTOM":128}],111:[function(require,module,exports){
+},{"../sync/utils/toBuffer":119,"buffer":3,"transfer-tools/dist/lib/JSON_CUSTOM":120}],119:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"buffer":3,"dup":13}],112:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],113:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"./implementation":112,"dup":55}],114:[function(require,module,exports){
-arguments[4][56][0].apply(exports,arguments)
-},{"dup":56,"function-bind":113}],115:[function(require,module,exports){
-arguments[4][58][0].apply(exports,arguments)
-},{"dup":58}],116:[function(require,module,exports){
-arguments[4][59][0].apply(exports,arguments)
-},{"dup":59}],117:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],118:[function(require,module,exports){
-arguments[4][62][0].apply(exports,arguments)
-},{"./lib/alea":119,"./lib/tychei":120,"./lib/xor128":121,"./lib/xor4096":122,"./lib/xorshift7":123,"./lib/xorwow":124,"./seedrandom":125,"dup":62}],119:[function(require,module,exports){
+},{"buffer":3,"dup":13}],120:[function(require,module,exports){
+arguments[4][80][0].apply(exports,arguments)
+},{"dup":80,"super-json":133}],121:[function(require,module,exports){
 arguments[4][63][0].apply(exports,arguments)
-},{"dup":63}],120:[function(require,module,exports){
+},{"dup":63}],122:[function(require,module,exports){
 arguments[4][64][0].apply(exports,arguments)
-},{"dup":64}],121:[function(require,module,exports){
+},{"./implementation":121,"dup":64}],123:[function(require,module,exports){
 arguments[4][65][0].apply(exports,arguments)
-},{"dup":65}],122:[function(require,module,exports){
-arguments[4][66][0].apply(exports,arguments)
-},{"dup":66}],123:[function(require,module,exports){
-arguments[4][67][0].apply(exports,arguments)
-},{"dup":67}],124:[function(require,module,exports){
-arguments[4][68][0].apply(exports,arguments)
-},{"dup":68}],125:[function(require,module,exports){
-arguments[4][69][0].apply(exports,arguments)
-},{"crypto":2,"dup":69}],126:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],127:[function(require,module,exports){
+},{"dup":65,"function-bind":122}],124:[function(require,module,exports){
+arguments[4][70][0].apply(exports,arguments)
+},{"./lib/alea":125,"./lib/tychei":126,"./lib/xor128":127,"./lib/xor4096":128,"./lib/xorshift7":129,"./lib/xorwow":130,"./seedrandom":131,"dup":70}],125:[function(require,module,exports){
 arguments[4][71][0].apply(exports,arguments)
-},{"dup":71,"has":114}],128:[function(require,module,exports){
+},{"dup":71}],126:[function(require,module,exports){
 arguments[4][72][0].apply(exports,arguments)
-},{"dup":72,"super-json":127}],129:[function(require,module,exports){
+},{"dup":72}],127:[function(require,module,exports){
 arguments[4][73][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":128,"./stringTransform":130,"./stringTransformExt":131,"./testing":132,"dup":73}],130:[function(require,module,exports){
+},{"dup":73}],128:[function(require,module,exports){
 arguments[4][74][0].apply(exports,arguments)
-},{"buffer":3,"dup":74}],131:[function(require,module,exports){
+},{"dup":74}],129:[function(require,module,exports){
 arguments[4][75][0].apply(exports,arguments)
-},{"./stringTransform":130,"dup":75}],132:[function(require,module,exports){
+},{"dup":75}],130:[function(require,module,exports){
 arguments[4][76][0].apply(exports,arguments)
-},{"./stringTransform":130,"dup":76,"seedrandom":118}],133:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"./SyncEventBase":134,"dup":16}],134:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":135,"dup":17}],135:[function(require,module,exports){
+},{"dup":76}],131:[function(require,module,exports){
+/*
+Copyright 2019 David Bau.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+*/
+
+(function (pool, math) {
+//
+// The following constants are related to IEEE 754 limits.
+//
+
+// Detect the global object, even if operating in strict mode.
+// http://stackoverflow.com/a/14387057/265298
+var global = (0, eval)('this'),
+    width = 256,        // each RC4 output is 0 <= x < 256
+    chunks = 6,         // at least six RC4 outputs for each double
+    digits = 52,        // there are 52 significant digits in a double
+    rngname = 'random', // rngname: name for Math.random and Math.seedrandom
+    startdenom = math.pow(width, chunks),
+    significance = math.pow(2, digits),
+    overflow = significance * 2,
+    mask = width - 1,
+    nodecrypto;         // node.js crypto module, initialized at the bottom.
+
+//
+// seedrandom()
+// This is the seedrandom function described above.
+//
+function seedrandom(seed, options, callback) {
+  var key = [];
+  options = (options == true) ? { entropy: true } : (options || {});
+
+  // Flatten the seed string or build one from local entropy if needed.
+  var shortseed = mixkey(flatten(
+    options.entropy ? [seed, tostring(pool)] :
+    (seed == null) ? autoseed() : seed, 3), key);
+
+  // Use the seed to initialize an ARC4 generator.
+  var arc4 = new ARC4(key);
+
+  // This function returns a random double in [0, 1) that contains
+  // randomness in every bit of the mantissa of the IEEE 754 value.
+  var prng = function() {
+    var n = arc4.g(chunks),             // Start with a numerator n < 2 ^ 48
+        d = startdenom,                 //   and denominator d = 2 ^ 48.
+        x = 0;                          //   and no 'extra last byte'.
+    while (n < significance) {          // Fill up all significant digits by
+      n = (n + x) * width;              //   shifting numerator and
+      d *= width;                       //   denominator and generating a
+      x = arc4.g(1);                    //   new least-significant-byte.
+    }
+    while (n >= overflow) {             // To avoid rounding up, before adding
+      n /= 2;                           //   last byte, shift everything
+      d /= 2;                           //   right using integer math until
+      x >>>= 1;                         //   we have exactly the desired bits.
+    }
+    return (n + x) / d;                 // Form the number within [0, 1).
+  };
+
+  prng.int32 = function() { return arc4.g(4) | 0; }
+  prng.quick = function() { return arc4.g(4) / 0x100000000; }
+  prng.double = prng;
+
+  // Mix the randomness into accumulated entropy.
+  mixkey(tostring(arc4.S), pool);
+
+  // Calling convention: what to return as a function of prng, seed, is_math.
+  return (options.pass || callback ||
+      function(prng, seed, is_math_call, state) {
+        if (state) {
+          // Load the arc4 state from the given state if it has an S array.
+          if (state.S) { copy(state, arc4); }
+          // Only provide the .state method if requested via options.state.
+          prng.state = function() { return copy(arc4, {}); }
+        }
+
+        // If called as a method of Math (Math.seedrandom()), mutate
+        // Math.random because that is how seedrandom.js has worked since v1.0.
+        if (is_math_call) { math[rngname] = prng; return seed; }
+
+        // Otherwise, it is a newer calling convention, so return the
+        // prng directly.
+        else return prng;
+      })(
+  prng,
+  shortseed,
+  'global' in options ? options.global : (this == math),
+  options.state);
+}
+
+//
+// ARC4
+//
+// An ARC4 implementation.  The constructor takes a key in the form of
+// an array of at most (width) integers that should be 0 <= x < (width).
+//
+// The g(count) method returns a pseudorandom integer that concatenates
+// the next (count) outputs from ARC4.  Its return value is a number x
+// that is in the range 0 <= x < (width ^ count).
+//
+function ARC4(key) {
+  var t, keylen = key.length,
+      me = this, i = 0, j = me.i = me.j = 0, s = me.S = [];
+
+  // The empty key [] is treated as [0].
+  if (!keylen) { key = [keylen++]; }
+
+  // Set up S using the standard key scheduling algorithm.
+  while (i < width) {
+    s[i] = i++;
+  }
+  for (i = 0; i < width; i++) {
+    s[i] = s[j = mask & (j + key[i % keylen] + (t = s[i]))];
+    s[j] = t;
+  }
+
+  // The "g" method returns the next (count) outputs as one number.
+  (me.g = function(count) {
+    // Using instance members instead of closure state nearly doubles speed.
+    var t, r = 0,
+        i = me.i, j = me.j, s = me.S;
+    while (count--) {
+      t = s[i = mask & (i + 1)];
+      r = r * width + s[mask & ((s[i] = s[j = mask & (j + t)]) + (s[j] = t))];
+    }
+    me.i = i; me.j = j;
+    return r;
+    // For robust unpredictability, the function call below automatically
+    // discards an initial batch of values.  This is called RC4-drop[256].
+    // See http://google.com/search?q=rsa+fluhrer+response&btnI
+  })(width);
+}
+
+//
+// copy()
+// Copies internal state of ARC4 to or from a plain object.
+//
+function copy(f, t) {
+  t.i = f.i;
+  t.j = f.j;
+  t.S = f.S.slice();
+  return t;
+};
+
+//
+// flatten()
+// Converts an object tree to nested arrays of strings.
+//
+function flatten(obj, depth) {
+  var result = [], typ = (typeof obj), prop;
+  if (depth && typ == 'object') {
+    for (prop in obj) {
+      try { result.push(flatten(obj[prop], depth - 1)); } catch (e) {}
+    }
+  }
+  return (result.length ? result : typ == 'string' ? obj : obj + '\0');
+}
+
+//
+// mixkey()
+// Mixes a string seed into a key that is an array of integers, and
+// returns a shortened string seed that is equivalent to the result key.
+//
+function mixkey(seed, key) {
+  var stringseed = seed + '', smear, j = 0;
+  while (j < stringseed.length) {
+    key[mask & j] =
+      mask & ((smear ^= key[mask & j] * 19) + stringseed.charCodeAt(j++));
+  }
+  return tostring(key);
+}
+
+//
+// autoseed()
+// Returns an object for autoseeding, using window.crypto and Node crypto
+// module if available.
+//
+function autoseed() {
+  try {
+    var out;
+    if (nodecrypto && (out = nodecrypto.randomBytes)) {
+      // The use of 'out' to remember randomBytes makes tight minified code.
+      out = out(width);
+    } else {
+      out = new Uint8Array(width);
+      (global.crypto || global.msCrypto).getRandomValues(out);
+    }
+    return tostring(out);
+  } catch (e) {
+    var browser = global.navigator,
+        plugins = browser && browser.plugins;
+    return [+new Date, global, plugins, global.screen, tostring(pool)];
+  }
+}
+
+//
+// tostring()
+// Converts an array of charcodes to a string
+//
+function tostring(a) {
+  return String.fromCharCode.apply(0, a);
+}
+
+//
+// When seedrandom.js is loaded, we immediately mix a few bits
+// from the built-in RNG into the entropy pool.  Because we do
+// not want to interfere with deterministic PRNG state later,
+// seedrandom will not call math.random on its own again after
+// initialization.
+//
+mixkey(math.random(), pool);
+
+//
+// Nodejs and AMD support: export the implementation as a module using
+// either convention.
+//
+if ((typeof module) == 'object' && module.exports) {
+  module.exports = seedrandom;
+  // When in node.js, try using crypto package for autoseeding.
+  try {
+    nodecrypto = require('crypto');
+  } catch (ex) {}
+} else if ((typeof define) == 'function' && define.amd) {
+  define(function() { return seedrandom; });
+} else {
+  // When included as a plain script, set up Math.seedrandom global.
+  math['seed' + rngname] = seedrandom;
+}
+
+
+// End anonymous scope, and pass initial values.
+})(
+  [],     // pool: entropy pool starts empty
+  Math    // math: package containing random, pow, and seedrandom
+);
+
+},{"crypto":2}],132:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],133:[function(require,module,exports){
 arguments[4][79][0].apply(exports,arguments)
-},{"./defs":136,"dup":79,"minimal-polyfills/dist/lib/Array.prototype.find":115,"minimal-polyfills/dist/lib/Map":116,"run-exclusive":117}],136:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"dup":19,"setprototypeof":126}],137:[function(require,module,exports){
-arguments[4][20][0].apply(exports,arguments)
-},{"./SyncEvent":133,"./defs":136,"dup":20}],138:[function(require,module,exports){
+},{"dup":79,"has":123}],134:[function(require,module,exports){
 arguments[4][82][0].apply(exports,arguments)
-},{"buffer":3,"dup":82,"ts-events-extended":137}],139:[function(require,module,exports){
-arguments[4][83][0].apply(exports,arguments)
-},{"./IConnection":138,"./api/ApiMessage":140,"./core":144,"./misc":148,"colors":102,"dup":83,"ts-events-extended":137}],140:[function(require,module,exports){
-arguments[4][84][0].apply(exports,arguments)
-},{"../core":144,"../misc":148,"buffer":3,"dup":84,"transfer-tools":129}],141:[function(require,module,exports){
-arguments[4][85][0].apply(exports,arguments)
-},{"../misc":148,"./ApiMessage":140,"colors":102,"dup":85,"util":9}],142:[function(require,module,exports){
-arguments[4][86][0].apply(exports,arguments)
-},{"../misc":148,"./ApiMessage":140,"dup":86,"setprototypeof":126}],143:[function(require,module,exports){
-arguments[4][87][0].apply(exports,arguments)
-},{"./Server":141,"./client":142,"dup":87}],144:[function(require,module,exports){
-arguments[4][88][0].apply(exports,arguments)
-},{"./legacy/sdp":146,"./legacy/sip":147,"buffer":3,"dup":88,"setprototypeof":126}],145:[function(require,module,exports){
-arguments[4][89][0].apply(exports,arguments)
-},{"./Socket":139,"./api":143,"./core":144,"./misc":148,"dup":89}],146:[function(require,module,exports){
+},{"buffer":3,"dup":82}],135:[function(require,module,exports){
 arguments[4][90][0].apply(exports,arguments)
-},{"dup":90}],147:[function(require,module,exports){
+},{"buffer":3,"dup":90,"ts-events-extended":160}],136:[function(require,module,exports){
 arguments[4][91][0].apply(exports,arguments)
-},{"dup":91}],148:[function(require,module,exports){
+},{"./IConnection":135,"./api/ApiMessage":137,"./core":141,"./misc":145,"colors":110,"dup":91,"ts-events-extended":160}],137:[function(require,module,exports){
 arguments[4][92][0].apply(exports,arguments)
-},{"./core":144,"buffer":3,"dup":92}]},{},[12]);
+},{"../core":141,"../misc":145,"buffer":3,"dup":92,"transfer-tools":152}],138:[function(require,module,exports){
+arguments[4][93][0].apply(exports,arguments)
+},{"../misc":145,"./ApiMessage":137,"colors":110,"dup":93,"util":9}],139:[function(require,module,exports){
+arguments[4][94][0].apply(exports,arguments)
+},{"../misc":145,"./ApiMessage":137,"dup":94,"setprototypeof":132}],140:[function(require,module,exports){
+arguments[4][95][0].apply(exports,arguments)
+},{"./Server":138,"./client":139,"dup":95}],141:[function(require,module,exports){
+arguments[4][96][0].apply(exports,arguments)
+},{"./legacy/sdp":143,"./legacy/sip":144,"buffer":3,"dup":96,"setprototypeof":132}],142:[function(require,module,exports){
+arguments[4][97][0].apply(exports,arguments)
+},{"./Socket":136,"./api":140,"./core":141,"./misc":145,"dup":97}],143:[function(require,module,exports){
+arguments[4][98][0].apply(exports,arguments)
+},{"dup":98}],144:[function(require,module,exports){
+arguments[4][99][0].apply(exports,arguments)
+},{"dup":99}],145:[function(require,module,exports){
+arguments[4][100][0].apply(exports,arguments)
+},{"./core":141,"buffer":3,"dup":100}],146:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"dup":14}],147:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],148:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17,"minimal-polyfills/dist/lib/WeakMap":150}],149:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],150:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"./Map":149,"dup":16}],151:[function(require,module,exports){
+arguments[4][80][0].apply(exports,arguments)
+},{"dup":80,"super-json":133}],152:[function(require,module,exports){
+arguments[4][81][0].apply(exports,arguments)
+},{"./JSON_CUSTOM":151,"./stringTransform":153,"./stringTransformExt":154,"./testing":155,"dup":81}],153:[function(require,module,exports){
+arguments[4][82][0].apply(exports,arguments)
+},{"buffer":3,"dup":82}],154:[function(require,module,exports){
+arguments[4][83][0].apply(exports,arguments)
+},{"./stringTransform":153,"dup":83}],155:[function(require,module,exports){
+arguments[4][84][0].apply(exports,arguments)
+},{"./stringTransform":153,"dup":84,"seedrandom":124}],156:[function(require,module,exports){
+arguments[4][19][0].apply(exports,arguments)
+},{"./SyncEventBase":157,"dup":19}],157:[function(require,module,exports){
+arguments[4][20][0].apply(exports,arguments)
+},{"./SyncEventBaseProtected":158,"dup":20}],158:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"./defs":159,"dup":21,"minimal-polyfills/dist/lib/Array.prototype.find":146,"minimal-polyfills/dist/lib/Map":147,"run-exclusive":148}],159:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"dup":22,"setprototypeof":132}],160:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"./SyncEvent":156,"./defs":159,"dup":23}]},{},[12]);
