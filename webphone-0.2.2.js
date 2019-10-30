@@ -6236,6 +6236,13 @@ var core = require("../core");
 var misc = require("../misc");
 var transfer_tools_1 = require("transfer-tools");
 var JSON_CUSTOM = transfer_tools_1.JSON_CUSTOM.get();
+var assert = function (value, message) {
+    if (message === void 0) { message = "assert error"; }
+    if (!!value) {
+        return;
+    }
+    throw new Error(message);
+};
 exports.sipMethodName = "API";
 var ApiMessage;
 (function (ApiMessage) {
@@ -6247,8 +6254,8 @@ var ApiMessage;
             "\r\n"
         ].join("\r\n"), "utf8"));
         sipRequest.headers[actionIdKey] = "" + actionId++;
-        console.assert(payload !== null, "null is not stringifiable");
-        console.assert(!(typeof payload === "number" && isNaN(payload)), "NaN is not stringifiable");
+        assert(payload !== null, "null is not stringifiable");
+        assert(!(typeof payload === "number" && isNaN(payload)), "NaN is not stringifiable");
         misc.setPacketContent(sipRequest, JSON_CUSTOM.stringify(payload));
         return sipRequest;
     }
@@ -6264,7 +6271,7 @@ var ApiMessage;
     ApiMessage.readActionId = readActionId;
     function parsePayload(sipRequest, sanityCheck) {
         var payload = JSON_CUSTOM.parse(misc.getPacketContent(sipRequest).toString("utf8"));
-        console.assert(!sanityCheck || sanityCheck(payload));
+        assert(!sanityCheck || sanityCheck(payload));
         return payload;
     }
     ApiMessage.parsePayload = parsePayload;
@@ -6627,7 +6634,7 @@ function enableKeepAlive(socket, interval) {
     if (interval === void 0) { interval = 120 * 1000; }
     var methodName = ApiMessage_1.keepAlive.methodName;
     (function () { return __awaiter(_this, void 0, void 0, function () {
-        var _a, before, _b;
+        var whereTimerDelayed, _a, before, _b;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -6637,43 +6644,53 @@ function enableKeepAlive(socket, interval) {
                     _c.sent();
                     _c.label = 2;
                 case 2:
-                    if (!true) return [3 /*break*/, 11];
+                    whereTimerDelayed = false;
                     _c.label = 3;
                 case 3:
-                    _c.trys.push([3, 5, , 6]);
+                    if (!true) return [3 /*break*/, 12];
+                    _c.label = 4;
+                case 4:
+                    _c.trys.push([4, 6, , 7]);
                     return [4 /*yield*/, sendRequest(socket, methodName, "PING", {
-                            "timeout": 5 * 1000,
+                            //"timeout": 5 * 1000,
+                            "timeout": (function () {
+                                if (!whereTimerDelayed) {
+                                    return 5 * 1000;
+                                }
+                                whereTimerDelayed = false;
+                                return 500;
+                            })(),
                             "sanityCheck": function (response) { return response === "PONG"; }
                         })];
-                case 4:
-                    _c.sent();
-                    return [3 /*break*/, 6];
                 case 5:
-                    _a = _c.sent();
-                    return [3 /*break*/, 11];
-                case 6:
-                    before = Date.now();
-                    _c.label = 7;
-                case 7:
-                    _c.trys.push([7, 9, , 10]);
-                    return [4 /*yield*/, socket.evtClose.waitFor(interval)];
-                case 8:
                     _c.sent();
-                    return [3 /*break*/, 11];
+                    return [3 /*break*/, 7];
+                case 6:
+                    _a = _c.sent();
+                    return [3 /*break*/, 12];
+                case 7:
+                    before = Date.now();
+                    _c.label = 8;
+                case 8:
+                    _c.trys.push([8, 10, , 11]);
+                    return [4 /*yield*/, socket.evtClose.waitFor(interval)];
                 case 9:
-                    _b = _c.sent();
-                    return [3 /*break*/, 10];
+                    _c.sent();
+                    return [3 /*break*/, 12];
                 case 10:
-                    if (Math.abs(Date.now() - before - interval) > 10000) {
-                        socket.destroy([
-                            "A keep alive 'PING' haven't been sent as scheduled, we prefer closing the connection.",
-                            "This happen for example while running in react native and the app is in the background.",
-                            "The setTimeout callbacks are called only when the app is woke up"
-                        ].join(" "));
-                        return [3 /*break*/, 11];
+                    _b = _c.sent();
+                    return [3 /*break*/, 11];
+                case 11:
+                    if (Math.abs(Date.now() - before - interval) > 500) {
+                        /*NOTE: If the timeout was delayed ( happens when react-native app in background on android )
+                        we want to quickly see if the connection is still usable so next ping we send we do not
+                        wait 5 second for the server to respond, if the server did not responded "PONG" within the
+                        next 0.5 second we close the connection.
+                        */
+                        whereTimerDelayed = true;
                     }
-                    return [3 /*break*/, 2];
-                case 11: return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 12: return [2 /*return*/];
             }
         });
     }); })();
@@ -11022,27 +11039,26 @@ var UiHeader_1 = require("./UiHeader");
 var UiPhonebook_1 = require("./UiPhonebook");
 var UiConversation_1 = require("./UiConversation");
 var UiVoiceCall_1 = require("./UiVoiceCall");
-var Ua_1 = require("frontend-shared/dist/lib/Ua");
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
-var remoteApiCaller = require("frontend-shared/dist/lib/toBackend/remoteApiCaller");
-var backendEvents = require("frontend-shared/dist/lib/toBackend/events");
+//import * as remoteApiCaller from "frontend-shared/dist/lib/toBackend/remoteApiCaller";
 var lib_1 = require("../../../local_modules/phone-number/dist/lib");
 var dialog_1 = require("frontend-shared/dist/tools/modal/dialog");
-var setupEncryptorDecryptors = require("frontend-shared/dist/lib/crypto/setupEncryptorDecryptors");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiWebphoneController.html"), "UiWebphoneController");
 var UiWebphoneController = /** @class */ (function () {
-    function UiWebphoneController(userSim, wdInstance) {
+    function UiWebphoneController(ua, userSim, wdInstance, events, remoteApiCaller) {
         var _this = this;
         this.userSim = userSim;
         this.wdInstance = wdInstance;
+        this.events = events;
+        this.remoteApiCaller = remoteApiCaller;
         this.structure = html.structure.clone();
         this._uiConversations = new Map();
-        this.ua = new Ua_1.Ua(userSim.sim.imsi, userSim.password, setupEncryptorDecryptors.getTowardSimEncryptor(userSim));
+        this.uaSim = ua.newUaSim(userSim);
         this.uiVoiceCall = new UiVoiceCall_1.UiVoiceCall(userSim);
-        this.uiHeader = new UiHeader_1.UiHeader(userSim, function () { return _this.ua.isRegistered; });
-        this.uiQuickAction = new UiQuickAction_1.UiQuickAction(userSim, function () { return _this.ua.isRegistered; });
+        this.uiHeader = new UiHeader_1.UiHeader(userSim, function () { return _this.uaSim.isRegistered; });
+        this.uiQuickAction = new UiQuickAction_1.UiQuickAction(userSim, function () { return _this.uaSim.isRegistered; });
         this.uiPhonebook = new UiPhonebook_1.UiPhonebook(userSim, wdInstance);
-        this.registerRemoteNotifyHandlers();
+        this.attachEventHandlers();
         this.initUa();
         this.initUiHeader();
         this.initUiQuickAction();
@@ -11050,16 +11066,9 @@ var UiWebphoneController = /** @class */ (function () {
         $("body").data("dynamic").panels();
         setTimeout(function () { return _this.uiPhonebook.triggerClickOnLastSeenChat(); }, 0);
     }
-    UiWebphoneController.prototype.registerRemoteNotifyHandlers = function () {
+    UiWebphoneController.prototype.attachEventHandlers = function () {
         var _this = this;
-        backendEvents.evtSimPermissionLost.attachOnce(function (userSim) { return userSim === _this.userSim; }, function () {
-            //TODO: Terminate UA.
-            _this.structure.detach();
-        });
-        backendEvents.evtContactCreatedOrUpdated.attach(function (_a) {
-            var userSim = _a.userSim;
-            return userSim === _this.userSim;
-        }, function (_a) {
+        this.events.evtContactCreatedOrUpdated.attach(function (_a) {
             var contact = _a.contact;
             return __awaiter(_this, void 0, void 0, function () {
                 var wdChat, isUpdated;
@@ -11071,12 +11080,12 @@ var UiWebphoneController = /** @class */ (function () {
                                 return lib_1.phoneNumber.areSame(contactNumber, contact.number_raw);
                             });
                             if (!!wdChat) return [3 /*break*/, 2];
-                            return [4 /*yield*/, remoteApiCaller.newWdChat(this.wdInstance, lib_1.phoneNumber.build(contact.number_raw, this.userSim.sim.country ? this.userSim.sim.country.iso : undefined), contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
+                            return [4 /*yield*/, this.remoteApiCaller.newWdChat(this.wdInstance, lib_1.phoneNumber.build(contact.number_raw, this.userSim.sim.country ? this.userSim.sim.country.iso : undefined), contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
                         case 1:
                             wdChat = _b.sent();
                             this.getOrCreateUiConversation(wdChat);
                             return [3 /*break*/, 4];
-                        case 2: return [4 /*yield*/, remoteApiCaller.updateWdChatContactInfos(wdChat, contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
+                        case 2: return [4 /*yield*/, this.remoteApiCaller.updateWdChatContactInfos(wdChat, contact.name, contact.mem_index !== undefined ? contact.mem_index : null)];
                         case 3:
                             isUpdated = _b.sent();
                             if (!isUpdated) {
@@ -11091,10 +11100,7 @@ var UiWebphoneController = /** @class */ (function () {
                 });
             });
         });
-        backendEvents.evtContactDeleted.attach(function (_a) {
-            var userSim = _a.userSim;
-            return userSim === _this.userSim;
-        }, function (_a) {
+        this.events.evtContactDeleted.attach(function (_a) {
             var contact = _a.contact;
             return __awaiter(_this, void 0, void 0, function () {
                 var wdChat, isUpdated;
@@ -11105,7 +11111,7 @@ var UiWebphoneController = /** @class */ (function () {
                                 var contactNumber = _a.contactNumber;
                                 return lib_1.phoneNumber.areSame(contactNumber, contact.number_raw);
                             });
-                            return [4 /*yield*/, remoteApiCaller.updateWdChatContactInfos(wdChat, "", null)];
+                            return [4 /*yield*/, this.remoteApiCaller.updateWdChatContactInfos(wdChat, "", null)];
                         case 1:
                             isUpdated = _b.sent();
                             if (!isUpdated) {
@@ -11119,17 +11125,12 @@ var UiWebphoneController = /** @class */ (function () {
                 });
             });
         });
-        backendEvents.evtSimIsOnlineStatusChange.attach(function (userSim) { return userSim === _this.userSim; }, function () { return __awaiter(_this, void 0, void 0, function () {
+        this.events.evtSimReachabilityStatusChange.attach(function () { return __awaiter(_this, void 0, void 0, function () {
             var _a, _b, uiConversation;
             var e_1, _c;
             return __generator(this, function (_d) {
-                if (!this.userSim.reachableSimState) {
-                    if (this.ua.isRegistered) {
-                        this.ua.unregister();
-                    }
-                }
-                else {
-                    this.ua.register();
+                if (!!this.userSim.reachableSimState) {
+                    this.uaSim.register();
                 }
                 this.uiHeader.notify();
                 this.uiQuickAction.notify();
@@ -11149,7 +11150,7 @@ var UiWebphoneController = /** @class */ (function () {
                 return [2 /*return*/];
             });
         }); });
-        backendEvents.evtSimGsmConnectivityChange.attach(function (userSim) { return userSim === _this.userSim; }, function () {
+        this.events.evtSimGsmConnectivityChange.attach(function () {
             var e_2, _a;
             _this.uiHeader.notify();
             _this.uiQuickAction.notify();
@@ -11167,8 +11168,8 @@ var UiWebphoneController = /** @class */ (function () {
                 finally { if (e_2) throw e_2.error; }
             }
         });
-        backendEvents.evtSimCellSignalStrengthChange.attach(function (userSim) { return userSim === _this.userSim; }, function () { return _this.uiHeader.notify(); });
-        backendEvents.evtOngoingCall.attach(function (userSim) { return userSim === _this.userSim; }, function () {
+        this.events.evtSimCellSignalStrengthChange.attach(function () { return _this.uiHeader.notify(); });
+        this.events.evtOngoingCall.attach(function () {
             var e_3, _a;
             _this.uiHeader.notify();
             _this.uiQuickAction.notify();
@@ -11189,7 +11190,7 @@ var UiWebphoneController = /** @class */ (function () {
     };
     UiWebphoneController.prototype.initUa = function () {
         var _this = this;
-        this.ua.evtRegistrationStateChanged.attach(function () {
+        this.uaSim.evtRegistrationStateChanged.attach(function () {
             var e_4, _a;
             _this.uiHeader.notify();
             _this.uiQuickAction.notify();
@@ -11207,7 +11208,7 @@ var UiWebphoneController = /** @class */ (function () {
                 finally { if (e_4) throw e_4.error; }
             }
         });
-        this.ua.evtIncomingMessage.attach(function (_a) {
+        this.uaSim.evtIncomingMessage.attach(function (_a) {
             var fromNumber = _a.fromNumber, bundledData = _a.bundledData, onProcessed = _a.onProcessed;
             return __awaiter(_this, void 0, void 0, function () {
                 var wdChat, prWdMessage, wdMessage;
@@ -11228,14 +11229,14 @@ var UiWebphoneController = /** @class */ (function () {
                                             "time": bundledData.pduDateTime,
                                             "text": Buffer.from(bundledData.textB64, "base64").toString("utf8")
                                         };
-                                        return remoteApiCaller.newWdMessage(wdChat, message);
+                                        return _this.remoteApiCaller.newWdMessage(wdChat, message);
                                     }
                                     case "SEND REPORT": {
-                                        return remoteApiCaller.notifySendReportReceived(wdChat, bundledData);
+                                        return _this.remoteApiCaller.notifySendReportReceived(wdChat, bundledData);
                                     }
                                     case "STATUS REPORT": {
-                                        if (bundledData.messageTowardGsm.uaSim.ua.instance === Ua_1.Ua.session.instanceId) {
-                                            return remoteApiCaller.notifyStatusReportReceived(wdChat, bundledData);
+                                        if (bundledData.messageTowardGsm.uaSim.ua.instance === _this.uaSim.uaDescriptor.instance) {
+                                            return _this.remoteApiCaller.notifyStatusReportReceived(wdChat, bundledData);
                                         }
                                         else {
                                             var message = {
@@ -11243,7 +11244,7 @@ var UiWebphoneController = /** @class */ (function () {
                                                 "direction": "OUTGOING",
                                                 "text": Buffer.from(bundledData.messageTowardGsm.textB64, "base64").toString("utf8"),
                                                 "sentBy": (function () {
-                                                    return (bundledData.messageTowardGsm.uaSim.ua.userEmail === Ua_1.Ua.session.email) ?
+                                                    return (bundledData.messageTowardGsm.uaSim.ua.userEmail === _this.uaSim.uaDescriptor.userEmail) ?
                                                         ({ "who": "USER" }) :
                                                         ({ "who": "OTHER", "email": bundledData.messageTowardGsm.uaSim.ua.userEmail });
                                                 })(),
@@ -11251,7 +11252,7 @@ var UiWebphoneController = /** @class */ (function () {
                                                 "deliveredTime": bundledData.statusReport.isDelivered ?
                                                     bundledData.statusReport.dischargeDateTime : null
                                             };
-                                            return remoteApiCaller.newWdMessage(wdChat, message);
+                                            return _this.remoteApiCaller.newWdMessage(wdChat, message);
                                         }
                                     }
                                     case "MMS NOTIFICATION":
@@ -11275,7 +11276,7 @@ var UiWebphoneController = /** @class */ (function () {
                                             })(),
                                             "text": Buffer.from(bundledData.textB64, "base64").toString("utf8")
                                         };
-                                        return remoteApiCaller.newWdMessage(wdChat, message);
+                                        return _this.remoteApiCaller.newWdMessage(wdChat, message);
                                     }
                                     case "CONVERSATION CHECKED OUT FROM OTHER UA": {
                                         console.log("conversation checked out from other ua !");
@@ -11310,7 +11311,7 @@ var UiWebphoneController = /** @class */ (function () {
                 });
             });
         });
-        this.ua.evtIncomingCall.attach(function (_a) {
+        this.uaSim.evtIncomingCall.attach(function (_a) {
             var fromNumber = _a.fromNumber, terminate = _a.terminate, prTerminated = _a.prTerminated, onAccepted = _a.onAccepted;
             return __awaiter(_this, void 0, void 0, function () {
                 var wdChat, _b, onTerminated, prUserInput;
@@ -11352,7 +11353,7 @@ var UiWebphoneController = /** @class */ (function () {
             });
         });
         if (!!this.userSim.reachableSimState) {
-            this.ua.register();
+            this.uaSim.register();
         }
     };
     UiWebphoneController.prototype.initUiHeader = function () {
@@ -11415,14 +11416,14 @@ var UiWebphoneController = /** @class */ (function () {
         if (this._uiConversations.has(wdChat)) {
             return this._uiConversations.get(wdChat);
         }
-        var uiConversation = new UiConversation_1.UiConversation(this.userSim, function () { return _this.ua.isRegistered; }, wdChat);
+        var uiConversation = new UiConversation_1.UiConversation(this.userSim, function () { return _this.uaSim.isRegistered; }, wdChat);
         this._uiConversations.set(wdChat, uiConversation);
         this.structure.find("div.id_colRight").append(uiConversation.structure);
         uiConversation.evtChecked.attach(function (data) { return __awaiter(_this, void 0, void 0, function () {
             var isUpdated;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, remoteApiCaller.updateWdChatIdOfLastMessageSeen(wdChat)];
+                    case 0: return [4 /*yield*/, this.remoteApiCaller.updateWdChatIdOfLastMessageSeen(wdChat)];
                     case 1:
                         isUpdated = _a.sent();
                         if (data.from === "OTHER UA") {
@@ -11464,7 +11465,7 @@ var UiWebphoneController = /** @class */ (function () {
                 switch (_d.label) {
                     case 0:
                         exactSendDate = new Date();
-                        return [4 /*yield*/, remoteApiCaller.newWdMessage(uiConversation.wdChat, (function () {
+                        return [4 /*yield*/, this.remoteApiCaller.newWdMessage(uiConversation.wdChat, (function () {
                                 var message = {
                                     "time": exactSendDate.getTime(),
                                     "direction": "OUTGOING",
@@ -11479,7 +11480,7 @@ var UiWebphoneController = /** @class */ (function () {
                         _d.label = 2;
                     case 2:
                         _d.trys.push([2, 5, , 7]);
-                        _b = (_a = this.ua).sendMessage;
+                        _b = (_a = this.uaSim).sendMessage;
                         _c = [uiConversation.wdChat.contactNumber];
                         return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
                                 var out, _a, _b;
@@ -11492,7 +11493,7 @@ var UiWebphoneController = /** @class */ (function () {
                                                 "exactSendDateTime": exactSendDate.getTime()
                                             };
                                             _b = "appendPromotionalMessage";
-                                            return [4 /*yield*/, remoteApiCaller.shouldAppendPromotionalMessage()];
+                                            return [4 /*yield*/, this.remoteApiCaller.shouldAppendPromotionalMessage()];
                                         case 1:
                                             out = (_a[_b] = _c.sent(),
                                                 _a);
@@ -11507,7 +11508,7 @@ var UiWebphoneController = /** @class */ (function () {
                     case 5:
                         error_1 = _d.sent();
                         console.log("ua send message error", error_1);
-                        return [4 /*yield*/, remoteApiCaller.notifyUaFailedToSendMessage(uiConversation.wdChat, wdMessage)];
+                        return [4 /*yield*/, this.remoteApiCaller.notifyUaFailedToSendMessage(uiConversation.wdChat, wdMessage)];
                     case 6:
                         wdMessageUpdated = _d.sent();
                         uiConversation.newMessage(wdMessageUpdated);
@@ -11520,7 +11521,7 @@ var UiWebphoneController = /** @class */ (function () {
             var _a, terminate, prTerminated, prNextState, _b, onTerminated, onRingback, prUserInput;
             return __generator(this, function (_c) {
                 switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.ua.placeOutgoingCall(wdChat.contactNumber)];
+                    case 0: return [4 /*yield*/, this.uaSim.placeOutgoingCall(wdChat.contactNumber)];
                     case 1:
                         _a = _c.sent(), terminate = _a.terminate, prTerminated = _a.prTerminated, prNextState = _a.prNextState;
                         _b = this.uiVoiceCall.onOutgoing(wdChat), onTerminated = _b.onTerminated, onRingback = _b.onRingback, prUserInput = _b.prUserInput;
@@ -11572,15 +11573,15 @@ var UiWebphoneController = /** @class */ (function () {
                             return lib_1.phoneNumber.areSame(wdChat.contactNumber, number_raw);
                         });
                         if (!!!contact) return [3 /*break*/, 3];
-                        return [4 /*yield*/, remoteApiCaller.updateContactName(this.userSim, contact, name)];
+                        return [4 /*yield*/, this.remoteApiCaller.updateContactName(this.userSim, contact, name)];
                     case 2:
                         _a.sent();
                         return [3 /*break*/, 5];
-                    case 3: return [4 /*yield*/, remoteApiCaller.createContact(this.userSim, name, wdChat.contactNumber)];
+                    case 3: return [4 /*yield*/, this.remoteApiCaller.createContact(this.userSim, name, wdChat.contactNumber)];
                     case 4:
                         contact = _a.sent();
                         _a.label = 5;
-                    case 5: return [4 /*yield*/, remoteApiCaller.updateWdChatContactInfos(wdChat, name, contact.mem_index !== undefined ? contact.mem_index : null)];
+                    case 5: return [4 /*yield*/, this.remoteApiCaller.updateWdChatContactInfos(wdChat, name, contact.mem_index !== undefined ? contact.mem_index : null)];
                     case 6:
                         isUpdated = _a.sent();
                         dialog_1.dialogApi.dismissLoading();
@@ -11616,11 +11617,11 @@ var UiWebphoneController = /** @class */ (function () {
                             return lib_1.phoneNumber.areSame(wdChat.contactNumber, number_raw);
                         });
                         if (!!!contact) return [3 /*break*/, 3];
-                        return [4 /*yield*/, remoteApiCaller.deleteContact(this.userSim, contact)];
+                        return [4 /*yield*/, this.remoteApiCaller.deleteContact(this.userSim, contact)];
                     case 2:
                         _a.sent();
                         _a.label = 3;
-                    case 3: return [4 /*yield*/, remoteApiCaller.destroyWdChat(this.wdInstance, wdChat)];
+                    case 3: return [4 /*yield*/, this.remoteApiCaller.destroyWdChat(this.wdInstance, wdChat)];
                     case 4:
                         _a.sent();
                         dialog_1.dialogApi.dismissLoading();
@@ -11634,7 +11635,7 @@ var UiWebphoneController = /** @class */ (function () {
         }); });
         uiConversation.evtLoadMore.attach(function (_a) {
             var onLoaded = _a.onLoaded;
-            return remoteApiCaller.fetchOlderWdMessages(wdChat)
+            return _this.remoteApiCaller.fetchOlderWdMessages(wdChat)
                 .then(function (wdMessages) { return onLoaded(wdMessages); });
         });
         return uiConversation;
@@ -11650,7 +11651,7 @@ var UiWebphoneController = /** @class */ (function () {
                             return contactNumber === number;
                         });
                         if (!!wdChat) return [3 /*break*/, 2];
-                        return [4 /*yield*/, remoteApiCaller.newWdChat(this.wdInstance, number, "", null)];
+                        return [4 /*yield*/, this.remoteApiCaller.newWdChat(this.wdInstance, number, "", null)];
                     case 1:
                         wdChat = _a.sent();
                         this.uiPhonebook.insertContact(wdChat);
@@ -11666,8 +11667,19 @@ var UiWebphoneController = /** @class */ (function () {
 exports.UiWebphoneController = UiWebphoneController;
 
 }).call(this,require("buffer").Buffer)
-},{"../../../local_modules/phone-number/dist/lib":46,"../templates/UiWebphoneController.html":113,"./UiConversation":97,"./UiHeader":98,"./UiPhonebook":99,"./UiQuickAction":100,"./UiVoiceCall":101,"buffer":3,"frontend-shared/dist/lib/Ua":118,"frontend-shared/dist/lib/crypto/setupEncryptorDecryptors":123,"frontend-shared/dist/lib/loadUiClassHtml":126,"frontend-shared/dist/lib/toBackend/events":140,"frontend-shared/dist/lib/toBackend/remoteApiCaller":143,"frontend-shared/dist/tools/modal/dialog":155}],103:[function(require,module,exports){
+},{"../../../local_modules/phone-number/dist/lib":46,"../templates/UiWebphoneController.html":113,"./UiConversation":97,"./UiHeader":98,"./UiPhonebook":99,"./UiQuickAction":100,"./UiVoiceCall":101,"buffer":3,"frontend-shared/dist/lib/loadUiClassHtml":126,"frontend-shared/dist/tools/modal/dialog":155}],103:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11704,6 +11716,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -11731,14 +11754,16 @@ var wd = require("frontend-shared/dist/lib/types/webphoneData/logic");
 var AuthenticatedSessionDescriptorSharedData_1 = require("frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData");
 var availablePages = require("frontend-shared/dist/lib/availablePages");
 var observer = require("frontend-shared/dist/tools/observer");
-var setupEncryptorDecryptors = require("frontend-shared/dist/lib/crypto/setupEncryptorDecryptors");
+var setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa_1 = require("frontend-shared/dist/lib/crypto/setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa");
+var Ua_1 = require("frontend-shared/dist/lib/Ua");
+var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
 var overrideWebRTCImplementation = require("frontend-shared/dist/tools/overrideWebRTCImplementation");
 overrideWebRTCImplementation.testOverrideWebRTCImplementation();
 observer.observeWebRTC();
 $(document).ready(function () { return __awaiter(void 0, void 0, void 0, function () {
-    var userSims, wdInstances;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    var ua, _a, _b, _c, userSims, wdInstances;
+    return __generator(this, function (_d) {
+        switch (_d.label) {
             case 0:
                 $("#logout").click(function () { return __awaiter(void 0, void 0, void 0, function () {
                     return __generator(this, function (_a) {
@@ -11754,20 +11779,26 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
                 return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
             case 1:
                 //TODO: Do this in every page that require the user to be logged in.
-                if (!(_a.sent())) {
+                if (!(_d.sent())) {
                     //NOTE: User have deleted local storage but still have cookie.
                     $("#logout").trigger("click");
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, setupEncryptorDecryptors.globalSetup()];
-            case 2:
-                _a.sent();
+                _a = Ua_1.uaInstantiationHelper;
+                _b = {};
+                _c = "cryptoRelatedParams";
+                return [4 /*yield*/, setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa_1.setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa()];
+            case 2: return [4 /*yield*/, _a.apply(void 0, [(_b[_c] = _d.sent(),
+                        _b["pushNotificationToken"] = "",
+                        _b)])];
+            case 3:
+                ua = _d.sent();
                 connection.connect("REQUEST TURN CRED", undefined);
                 $("#page-payload").html("");
                 dialog_1.dialogApi.loading("Decrypting your conversation history 🔐", 0);
                 return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
-            case 3:
-                userSims = _a.sent();
+            case 4:
+                userSims = _d.sent();
                 if (userSims.length === 0) {
                     window.location.href = "/manager";
                 }
@@ -11785,8 +11816,8 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
                             }
                         });
                     }); })()];
-            case 4:
-                wdInstances = _a.sent();
+            case 5:
+                wdInstances = _d.sent();
                 //NOTE: Sort user sims so we always have the most relevant at the top of the page.
                 userSims
                     .sort(function (s1, s2) {
@@ -11805,15 +11836,38 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
                     return wd.compareChat(c1, c2);
                 })
                     .reverse()
-                    .forEach(function (userSim) { return $("#page-payload").append((new UiWebphoneController_1.UiWebphoneController(userSim, wdInstances.get(userSim))).structure); });
+                    .forEach(function (userSim) { return $("#page-payload").append((new UiWebphoneController_1.UiWebphoneController(ua, userSim, wdInstances.get(userSim), buildUiWebphoneControllerBackendEvents(userSim), uiWebphoneControllerRemoteApiCaller)).structure); });
                 dialog_1.dialogApi.dismissLoading();
-                backendEvents.evtSimPermissionLost.attachOnce(function (userSim) {
-                    dialog_1.dialogApi.create("alert", {
-                        "message": userSim.ownership.ownerEmail + " revoked your access to " + userSim.friendlyName
+                backendEvents.evtSimPermissionLost.attach(function (userSim) { return __awaiter(void 0, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, dialog_1.dialogApi.create("alert", {
+                                    "message": userSim.ownership.ownerEmail + " revoked your access to " + userSim.friendlyName
+                                })];
+                            case 1:
+                                _a.sent();
+                                //TODO: Improve
+                                location.reload();
+                                return [2 /*return*/];
+                        }
                     });
-                    //TODO: Improve
-                    location.reload();
-                });
+                }); });
+                backendEvents.evtSimPasswordChanged.attach(function (userSim) { return __awaiter(void 0, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: 
+                            //TODO: Improve
+                            return [4 /*yield*/, dialog_1.dialogApi.create("alert", {
+                                    "message": "Sim password changed for " + userSim.friendlyName + ", need page reload"
+                                })];
+                            case 1:
+                                //TODO: Improve
+                                _a.sent();
+                                location.reload();
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
                 backendEvents.evtUsableSim.attach(function (userSim) { return __awaiter(void 0, void 0, void 0, function () {
                     var _a, _b, _c, _d;
                     return __generator(this, function (_e) {
@@ -11821,9 +11875,12 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
                             case 0:
                                 _b = (_a = $("#page-payload")).append;
                                 _c = UiWebphoneController_1.UiWebphoneController.bind;
-                                _d = [void 0, userSim];
+                                _d = [void 0, ua,
+                                    userSim];
                                 return [4 /*yield*/, remoteApiCaller.getOrCreateWdInstance(userSim)];
-                            case 1: return [2 /*return*/, _b.apply(_a, [(new (_c.apply(UiWebphoneController_1.UiWebphoneController, _d.concat([_e.sent()])))()).structure])];
+                            case 1: return [2 /*return*/, _b.apply(_a, [(new (_c.apply(UiWebphoneController_1.UiWebphoneController, _d.concat([_e.sent(),
+                                        buildUiWebphoneControllerBackendEvents(userSim),
+                                        uiWebphoneControllerRemoteApiCaller])))()).structure])];
                         }
                     });
                 }); });
@@ -11831,8 +11888,66 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
         }
     });
 }); });
+var uiWebphoneControllerRemoteApiCaller = (function () {
+    var newWdChat = remoteApiCaller.newWdChat, updateWdChatContactInfos = remoteApiCaller.updateWdChatContactInfos, newWdMessage = remoteApiCaller.newWdMessage, notifySendReportReceived = remoteApiCaller.notifySendReportReceived, notifyStatusReportReceived = remoteApiCaller.notifyStatusReportReceived, updateWdChatIdOfLastMessageSeen = remoteApiCaller.updateWdChatIdOfLastMessageSeen, shouldAppendPromotionalMessage = remoteApiCaller.shouldAppendPromotionalMessage, notifyUaFailedToSendMessage = remoteApiCaller.notifyUaFailedToSendMessage, updateContactName = remoteApiCaller.updateContactName, createContact = remoteApiCaller.createContact, deleteContact = remoteApiCaller.deleteContact, destroyWdChat = remoteApiCaller.destroyWdChat, fetchOlderWdMessages = remoteApiCaller.fetchOlderWdMessages;
+    return {
+        newWdChat: newWdChat,
+        updateWdChatContactInfos: updateWdChatContactInfos,
+        newWdMessage: newWdMessage,
+        notifySendReportReceived: notifySendReportReceived,
+        notifyStatusReportReceived: notifyStatusReportReceived,
+        updateWdChatIdOfLastMessageSeen: updateWdChatIdOfLastMessageSeen,
+        shouldAppendPromotionalMessage: shouldAppendPromotionalMessage,
+        notifyUaFailedToSendMessage: notifyUaFailedToSendMessage,
+        updateContactName: updateContactName,
+        createContact: createContact,
+        deleteContact: deleteContact,
+        destroyWdChat: destroyWdChat,
+        fetchOlderWdMessages: fetchOlderWdMessages
+    };
+})();
+function buildUiWebphoneControllerBackendEvents(userSim) {
+    function clone1(evt, userSim) {
+        var out = new ts_events_extended_1.SyncEvent();
+        evt.attach(function (evtData) { return evtData.userSim === userSim; }, function (_a) {
+            var userSim = _a.userSim, rest = __rest(_a, ["userSim"]);
+            return out.post(rest);
+        });
+        return out;
+    }
+    function clone2(evt, userSim) {
+        var out = new ts_events_extended_1.VoidSyncEvent();
+        evt.attach(function (evtData) { return evtData === userSim; }, function () { return out.post(); });
+        return out;
+    }
+    return __assign(__assign(__assign(__assign(__assign(__assign({}, (function () {
+        var _a;
+        var key = "evtContactCreatedOrUpdated";
+        return _a = {}, _a[key] = clone1(backendEvents[key], userSim), _a;
+    })()), (function () {
+        var _a;
+        var key = "evtContactDeleted";
+        return _a = {}, _a[key] = clone1(backendEvents[key], userSim), _a;
+    })()), (function () {
+        var _a;
+        var key = "evtSimReachabilityStatusChange";
+        return _a = {}, _a[key] = clone2(backendEvents[key], userSim), _a;
+    })()), (function () {
+        var _a;
+        var key = "evtSimGsmConnectivityChange";
+        return _a = {}, _a[key] = clone2(backendEvents[key], userSim), _a;
+    })()), (function () {
+        var _a;
+        var key = "evtSimCellSignalStrengthChange";
+        return _a = {}, _a[key] = clone2(backendEvents[key], userSim), _a;
+    })()), (function () {
+        var _a;
+        var key = "evtOngoingCall";
+        return _a = {}, _a[key] = clone2(backendEvents[key], userSim), _a;
+    })());
+}
 
-},{"./UiWebphoneController":102,"frontend-shared/dist/lib/availablePages":119,"frontend-shared/dist/lib/crypto/setupEncryptorDecryptors":123,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":127,"frontend-shared/dist/lib/toBackend/connection":139,"frontend-shared/dist/lib/toBackend/events":140,"frontend-shared/dist/lib/toBackend/remoteApiCaller":143,"frontend-shared/dist/lib/types/webphoneData/logic":147,"frontend-shared/dist/lib/webApiCaller":148,"frontend-shared/dist/tools/modal/dialog":155,"frontend-shared/dist/tools/observer":160,"frontend-shared/dist/tools/overrideWebRTCImplementation":161}],104:[function(require,module,exports){
+},{"./UiWebphoneController":102,"frontend-shared/dist/lib/Ua":118,"frontend-shared/dist/lib/availablePages":119,"frontend-shared/dist/lib/crypto/setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa":123,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":127,"frontend-shared/dist/lib/toBackend/connection":138,"frontend-shared/dist/lib/toBackend/events":139,"frontend-shared/dist/lib/toBackend/remoteApiCaller":142,"frontend-shared/dist/lib/types/webphoneData/logic":147,"frontend-shared/dist/lib/webApiCaller":148,"frontend-shared/dist/tools/modal/dialog":155,"frontend-shared/dist/tools/observer":160,"frontend-shared/dist/tools/overrideWebRTCImplementation":161,"frontend-shared/node_modules/ts-events-extended":179}],104:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -16495,23 +16610,25 @@ module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div cl
 },{}],114:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var RegistrationParams_1 = require("semasim-gateway/dist/lib/misc/RegistrationParams");
-exports.RegistrationParams = RegistrationParams_1.RegistrationParams;
-
-},{"semasim-gateway/dist/lib/misc/RegistrationParams":180}],115:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 var bundledData_1 = require("semasim-gateway/dist/lib/misc/bundledData");
 exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 
-},{"semasim-gateway/dist/lib/misc/bundledData":181}],116:[function(require,module,exports){
+},{"semasim-gateway/dist/lib/misc/bundledData":180}],115:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var sipRouting_1 = require("semasim-gateway/dist/lib/misc/sipRouting");
 exports.readImsi = sipRouting_1.readImsi;
 
-},{"semasim-gateway/dist/lib/misc/sipRouting":182}],117:[function(require,module,exports){
+},{"semasim-gateway/dist/lib/misc/sipRouting":182}],116:[function(require,module,exports){
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+__export(require("semasim-gateway/dist/lib/misc/serializedUaObjectCarriedOverSipContactParameter"));
+
+},{"semasim-gateway/dist/lib/misc/serializedUaObjectCarriedOverSipContactParameter":181}],117:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
@@ -16592,18 +16709,110 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var bundledData_1 = require("../gateway/bundledData");
 var readImsi_1 = require("../gateway/readImsi");
-var RegistrationParams_1 = require("../gateway/RegistrationParams");
+var serializedUaObjectCarriedOverSipContactParameter = require("../gateway/serializedUaObjectCarriedOverSipContactParameter");
 var sip = require("ts-sip");
 var runExclusive = require("run-exclusive");
-var connection = require("./toBackend/connection");
-var events_1 = require("./toBackend/events");
 var env_1 = require("./env");
 //JsSIP.debug.enable("JsSIP:*");
 JsSIP.debug.disable("JsSIP:*");
-var Ua = /** @class */ (function () {
-    function Ua(imsi, sipPassword, towardSimEncryptor, disabledMessage) {
+function uaInstantiationHelper(params) {
+    return __awaiter(this, void 0, void 0, function () {
+        var _a, towardUserDecryptor, towardUserEncryptKeyStr, getTowardSimEncryptor, pushNotificationToken, _b, AuthenticatedSessionDescriptorSharedData, backendEvents, connection, _c;
         var _this = this;
-        if (disabledMessage === void 0) { disabledMessage = false; }
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0:
+                    _a = params.cryptoRelatedParams, towardUserDecryptor = _a.towardUserDecryptor, towardUserEncryptKeyStr = _a.towardUserEncryptKeyStr, getTowardSimEncryptor = _a.getTowardSimEncryptor, pushNotificationToken = params.pushNotificationToken;
+                    return [4 /*yield*/, Promise.all([
+                            Promise.resolve().then(function () { return require("./localStorage/AuthenticatedSessionDescriptorSharedData"); }),
+                            Promise.resolve().then(function () { return require("./toBackend/events"); }),
+                            Promise.resolve().then(function () { return require("./toBackend/connection"); })
+                        ])];
+                case 1:
+                    _b = __read.apply(void 0, [_d.sent(), 3]), AuthenticatedSessionDescriptorSharedData = _b[0].AuthenticatedSessionDescriptorSharedData, backendEvents = _b[1], connection = _b[2];
+                    _c = Ua.bind;
+                    return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                            var _a, email, uaInstanceId;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.get()];
+                                    case 1:
+                                        _a = _b.sent(), email = _a.email, uaInstanceId = _a.uaInstanceId;
+                                        return [2 /*return*/, {
+                                                "instance": uaInstanceId,
+                                                "pushToken": pushNotificationToken,
+                                                towardUserEncryptKeyStr: towardUserEncryptKeyStr,
+                                                "userEmail": email
+                                            }];
+                                }
+                            });
+                        }); })()];
+                case 2: return [2 /*return*/, new (_c.apply(Ua, [void 0, _d.sent(),
+                        towardUserDecryptor,
+                        (function () {
+                            var evtUnregisteredByGateway = new ts_events_extended_1.SyncEvent();
+                            var onEvt = function (_a) {
+                                var imsi = _a.sim.imsi;
+                                return evtUnregisteredByGateway.post({ imsi: imsi });
+                            };
+                            backendEvents.evtSimPasswordChanged.attach(onEvt);
+                            backendEvents.evtSimPermissionLost.attach(onEvt);
+                            backendEvents.evtSimReachabilityStatusChange.attach(function (_a) {
+                                var reachableSimState = _a.reachableSimState;
+                                return reachableSimState === undefined;
+                            }, onEvt);
+                            return evtUnregisteredByGateway;
+                        })(),
+                        getTowardSimEncryptor,
+                        function (imsi) { return new JsSipSocket(imsi, connection); },
+                        function () { return backendEvents.rtcIceEServer.getCurrent(); }]))()];
+            }
+        });
+    });
+}
+exports.uaInstantiationHelper = uaInstantiationHelper;
+var Ua = /** @class */ (function () {
+    /** evtUnregisteredByGateway should post when a sim that was previously
+     * reachable goes unreachable, when this happen SIP packets can no longer be
+     * routed to the gateway and the gateway unregister all the SIP contact
+     * It happen also when an user lose access to sim or need to refresh sim password.
+     * */
+    function Ua(uaDescriptorWithoutPlatform, towardUserDecryptor, evtUnregisteredByGateway, getTowardSimEncryptor, getJsSipSocket, getRtcIceServer) {
+        this.towardUserDecryptor = towardUserDecryptor;
+        this.evtUnregisteredByGateway = evtUnregisteredByGateway;
+        this.getTowardSimEncryptor = getTowardSimEncryptor;
+        this.getJsSipSocket = getJsSipSocket;
+        this.getRtcIceServer = getRtcIceServer;
+        this.descriptor = __assign(__assign({}, uaDescriptorWithoutPlatform), { "platform": (function () {
+                switch (env_1.env.jsRuntimeEnv) {
+                    case "browser": return "web";
+                    case "react-native": return env_1.env.hostOs;
+                }
+            })() });
+    }
+    Ua.prototype.newUaSim = function (usableUserSim) {
+        var _this = this;
+        var sim = usableUserSim.sim;
+        return new UaSim(this.descriptor, this.towardUserDecryptor, this.getRtcIceServer, (function () {
+            var out = new ts_events_extended_1.VoidSyncEvent();
+            _this.evtUnregisteredByGateway.attach(function (_a) {
+                var imsi = _a.imsi;
+                return imsi === sim.imsi;
+            }, function () { return out.post(); });
+            return out;
+        })(), this.getJsSipSocket(sim.imsi), sim.imsi, usableUserSim.password, this.getTowardSimEncryptor(usableUserSim).towardSimEncryptor);
+    };
+    return Ua;
+}());
+exports.Ua = Ua;
+var UaSim = /** @class */ (function () {
+    /** Use UA.prototype.newUaSim to instantiate an UaSim */
+    function UaSim(uaDescriptor, towardUserDecryptor, getRtcIceServer, evtUnregisteredByGateway, jsSipSocket, imsi, sipPassword, towardSimEncryptor) {
+        var _this = this;
+        this.uaDescriptor = uaDescriptor;
+        this.towardUserDecryptor = towardUserDecryptor;
+        this.getRtcIceServer = getRtcIceServer;
+        this.jsSipSocket = jsSipSocket;
         this.towardSimEncryptor = towardSimEncryptor;
         /** post isRegistered */
         this.evtRegistrationStateChanged = new ts_events_extended_1.SyncEvent();
@@ -16649,33 +16858,44 @@ var Ua = /** @class */ (function () {
         */
         /** return exactSendDate to match with sendReport and statusReport */
         this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
-        var uri = "sip:" + imsi + "-webRTC@" + env_1.baseDomain;
-        this.jsSipSocket = new JsSipSocket(imsi, uri);
-        /*
-        NOTE: It is important to call enableKeepAlive with a period shorter than the register_expires
-        so that if the reREGISTER can not be send in time because the app was in the background it
-        does not matter because the connection will be closed anyway.
-        Remember that when the registration has expired the GW will ignore all SIP messages coming from
-        the connection, it is then mandatory to establish a new websocket connection and re register.
-        Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
-        */
+        var uri = this.jsSipSocket.sip_uri;
+        var register_expires = 61;
+        //NOTE: Do not put more less than 60 or less than 7200 for register expire ( asterisk will respond with 60 or 7200 )
         this.jsSipUa = new JsSIP.UA({
             "sockets": this.jsSipSocket,
             uri: uri,
             "authorization_user": imsi,
             "password": sipPassword,
-            "instance_id": Ua.session.instanceId.match(/"<urn:([^>]+)>"$/)[1],
+            //NOTE: The ua instance id is also bundled in the contact uri but
+            //but jsSip does not allow us to not include an instance id
+            //if we don't provide one it will generate one for us.
+            //So we are providing it for consistency.
+            "instance_id": uaDescriptor.instance.match(/"<urn:([^>]+)>"$/)[1],
             "register": false,
-            "contact_uri": [
-                uri,
-                RegistrationParams_1.RegistrationParams.build({
-                    "userEmail": Ua.session.email,
-                    "towardUserEncryptKeyStr": Ua.session.towardUserEncryptKeyStr,
-                    "messagesEnabled": !disabledMessage
-                })
-            ].join(";"),
-            "register_expires": 61
+            "contact_uri": uri + ";" + serializedUaObjectCarriedOverSipContactParameter.buildParameter(uaDescriptor),
+            register_expires: register_expires
         });
+        var lastRegisterTime = 0;
+        this.jsSipUa.on("registrationExpiring", function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (!this.isRegistered) {
+                    return [2 /*return*/];
+                }
+                //NOTE: For react native, jsSIP does not post "unregistered" event when registration
+                //actually expire.
+                if (Date.now() - lastRegisterTime >= register_expires * 1000) {
+                    console.log("Sip registration has expired while app was in the background");
+                    this.jsSipUa.emit("unregistered");
+                }
+                else {
+                    console.log("Ua registration expiring for " + imsi);
+                }
+                console.log("re-registering");
+                this.jsSipUa.register();
+                return [2 /*return*/];
+            });
+        }); });
+        evtUnregisteredByGateway.attach(function () { return _this.jsSipUa.emit("unregistered"); });
         /*
         evt 'registered' is posted only when register change
         so we use this instead.
@@ -16683,39 +16903,44 @@ var Ua = /** @class */ (function () {
         this.jsSipSocket.evtSipPacket.attach(function (sipPacket) { return (!sip.matchRequest(sipPacket) &&
             sipPacket.headers.cseq.method === "REGISTER" &&
             sipPacket.status === 200); }, function () {
+            lastRegisterTime = Date.now();
             _this.isRegistered = true;
             _this.evtRegistrationStateChanged.post(true);
         });
         this.jsSipUa.on("unregistered", function () {
+            console.log("================>unregistered have been emitted");
             _this.isRegistered = false;
             _this.evtRegistrationStateChanged.post(false);
         });
         this.jsSipUa.on("newMessage", function (_a) {
             var originator = _a.originator, request = _a.request;
-            if (originator === "remote") {
-                _this.onMessage(request);
+            if (originator !== "remote") {
+                return;
             }
+            _this.onMessage(request);
         });
         this.jsSipUa.on("newRTCSession", function (_a) {
             var originator = _a.originator, session = _a.session, request = _a.request;
-            if (originator === "remote") {
-                _this.onIncomingCall(session, request);
+            if (originator !== "remote") {
+                return;
             }
+            _this.onIncomingCall(session, request);
         });
         this.jsSipUa.start();
     }
     //TODO: If no response to register do something
-    Ua.prototype.register = function () {
+    UaSim.prototype.register = function () {
+        console.log("====> register called");
         this.jsSipUa.register();
     };
-    /**
-     * Do not actually send a REGISTER expire=0.
-     * Assert no packet will arrive to this UA until next register.
-     * */
-    Ua.prototype.unregister = function () {
-        this.jsSipUa.emit("unregistered");
+    UaSim.prototype.unregister = function () {
+        console.log("=========> unregister called");
+        if (!this.isRegistered) {
+            return;
+        }
+        this.jsSipUa.unregister();
     };
-    Ua.prototype.onMessage = function (request) {
+    UaSim.prototype.onMessage = function (request) {
         return __awaiter(this, void 0, void 0, function () {
             var bundledData, fromNumber, pr;
             return __generator(this, function (_a) {
@@ -16726,7 +16951,7 @@ var Ua = /** @class */ (function () {
                                 out[key] = request.headers[key][0].raw;
                             }
                             return out;
-                        })(), Ua.session.towardUserDecryptor)];
+                        })(), this.towardUserDecryptor)];
                     case 1:
                         bundledData = _a.sent();
                         fromNumber = request.from.uri.user;
@@ -16744,7 +16969,7 @@ var Ua = /** @class */ (function () {
             });
         });
     };
-    Ua.prototype.sendMessage = function (number, bundledData) {
+    UaSim.prototype.sendMessage = function (number, bundledData) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e;
@@ -16752,7 +16977,7 @@ var Ua = /** @class */ (function () {
                 switch (_f.label) {
                     case 0:
                         _b = (_a = this.jsSipUa).sendMessage;
-                        _c = ["sip:" + number + "@" + env_1.baseDomain,
+                        _c = ["sip:" + number + "@" + env_1.env.baseDomain,
                             "| encrypted message bundled in header |"];
                         _d = {
                             "contentType": "text/plain; charset=UTF-8"
@@ -16772,7 +16997,7 @@ var Ua = /** @class */ (function () {
             });
         }); });
     };
-    Ua.prototype.onIncomingCall = function (jsSipRtcSession, request) {
+    UaSim.prototype.onIncomingCall = function (jsSipRtcSession, request) {
         var _this = this;
         var evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
         var evtAccepted = new ts_events_extended_1.VoidSyncEvent();
@@ -16788,7 +17013,7 @@ var Ua = /** @class */ (function () {
             var rtcIceServer;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, events_1.rtcIceEServer.getCurrent()];
+                    case 0: return [4 /*yield*/, this.getRtcIceServer()];
                     case 1:
                         rtcIceServer = _a.sent();
                         jsSipRtcSession.on("icecandidate", newIceCandidateHandler(rtcIceServer));
@@ -16831,7 +17056,7 @@ var Ua = /** @class */ (function () {
             }); }
         });
     };
-    Ua.prototype.placeOutgoingCall = function (number) {
+    UaSim.prototype.placeOutgoingCall = function (number) {
         return __awaiter(this, void 0, void 0, function () {
             var evtEstablished, evtTerminated, evtDtmf, evtRequestTerminate, evtRingback, rtcICEServer;
             var _this = this;
@@ -16843,10 +17068,10 @@ var Ua = /** @class */ (function () {
                         evtDtmf = new ts_events_extended_1.SyncEvent();
                         evtRequestTerminate = new ts_events_extended_1.VoidSyncEvent();
                         evtRingback = new ts_events_extended_1.VoidSyncEvent();
-                        return [4 /*yield*/, events_1.rtcIceEServer.getCurrent()];
+                        return [4 /*yield*/, this.getRtcIceServer()];
                     case 1:
                         rtcICEServer = _a.sent();
-                        this.jsSipUa.call("sip:" + number + "@" + env_1.baseDomain, {
+                        this.jsSipUa.call("sip:" + number + "@" + env_1.env.baseDomain, {
                             "mediaConstraints": { "audio": true, "video": false },
                             "pcConfig": {
                                 "iceServers": [rtcICEServer]
@@ -16928,22 +17153,23 @@ var Ua = /** @class */ (function () {
             });
         });
     };
-    return Ua;
+    return UaSim;
 }());
-exports.Ua = Ua;
+exports.UaSim = UaSim;
 function playAudioStream(stream) {
     var audio = document.createElement("audio");
     audio.autoplay = true;
     audio.srcObject = stream;
 }
 var JsSipSocket = /** @class */ (function () {
-    function JsSipSocket(imsi, sip_uri) {
+    function JsSipSocket(imsi, connection) {
         var _this = this;
-        this.sip_uri = sip_uri;
+        this.connection = connection;
         this.evtSipPacket = new ts_events_extended_1.SyncEvent();
         this.via_transport = "WSS";
-        this.url = connection.url;
+        this.url = this.connection.url;
         this.messageOkDelays = new Map();
+        this.sip_uri = "sip:" + imsi + "@" + env_1.env.baseDomain;
         var onBackedSocketConnect = function (backendSocket) {
             {
                 var onSipPacket = function (sipPacket) {
@@ -17033,7 +17259,7 @@ var JsSipSocket = /** @class */ (function () {
     JsSipSocket.prototype.send = function (data) {
         var _this = this;
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var sipPacket, sipResponse, callId, pr, socketOrPrSocket, socket, _a;
+            var sipPacket, sipResponse, callId, pr, socketOrPrSocket, socket, _a, isSent;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -17050,7 +17276,8 @@ var JsSipSocket = /** @class */ (function () {
                         this.messageOkDelays.delete(callId);
                         _b.label = 2;
                     case 2:
-                        socketOrPrSocket = connection.get();
+                        if (!true) return [3 /*break*/, 7];
+                        socketOrPrSocket = this.connection.get();
                         if (!(socketOrPrSocket instanceof Promise)) return [3 /*break*/, 4];
                         return [4 /*yield*/, socketOrPrSocket];
                     case 3:
@@ -17061,8 +17288,15 @@ var JsSipSocket = /** @class */ (function () {
                         _b.label = 5;
                     case 5:
                         socket = _a;
-                        socket.write(sip.parse(Buffer.from(data, "utf8")));
-                        return [2 /*return*/];
+                        return [4 /*yield*/, socket.write(sip.parse(Buffer.from(data, "utf8")))];
+                    case 6:
+                        isSent = _b.sent();
+                        if (!isSent) {
+                            console.log("==================> WARNING: websocket sip data was not sent successfully", data);
+                            return [3 /*break*/, 2];
+                        }
+                        return [3 /*break*/, 7];
+                    case 7: return [2 /*return*/];
                 }
             });
         }); })();
@@ -17208,7 +17442,7 @@ function newIceCandidateHandler(rtcICEServer) {
 })(newIceCandidateHandler || (newIceCandidateHandler = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../gateway/RegistrationParams":114,"../gateway/bundledData":115,"../gateway/readImsi":116,"./env":124,"./toBackend/connection":139,"./toBackend/events":140,"buffer":3,"run-exclusive":171,"ts-events-extended":179,"ts-sip":54}],119:[function(require,module,exports){
+},{"../gateway/bundledData":114,"../gateway/readImsi":115,"../gateway/serializedUaObjectCarriedOverSipContactParameter":116,"./env":125,"./localStorage/AuthenticatedSessionDescriptorSharedData":127,"./toBackend/connection":138,"./toBackend/events":139,"buffer":3,"run-exclusive":171,"ts-events-extended":179,"ts-sip":54}],119:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -17303,7 +17537,7 @@ var __spread = (this && this.__spread) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var cryptoLib = require("crypto-lib");
 var hostCrypto = require("../nativeModules/hostCryptoLib");
-var env = require("../env");
+var env_1 = require("../env");
 var crypto_lib_1 = require("crypto-lib");
 exports.WorkerThreadId = crypto_lib_1.WorkerThreadId;
 exports.RsaKey = crypto_lib_1.RsaKey;
@@ -17311,13 +17545,13 @@ exports.scrypt = crypto_lib_1.scrypt;
 exports.aes = crypto_lib_1.aes;
 exports.toBuffer = crypto_lib_1.toBuffer;
 exports.workerThreadPool = crypto_lib_1.workerThreadPool;
-if (env.jsRuntimeEnv === "react-native") {
+if (env_1.env.jsRuntimeEnv === "react-native") {
     cryptoLib.disableMultithreading();
 }
 var rsa;
 (function (rsa) {
     var _this = this;
-    rsa.generateKeys = env.jsRuntimeEnv === "browser" ?
+    rsa.generateKeys = env_1.env.jsRuntimeEnv === "browser" ?
         function () {
             var _a;
             var args = [];
@@ -17331,7 +17565,7 @@ var rsa;
                 "publicKey": cryptoLib.RsaKey.parse(keys.publicKeyStr),
                 "privateKey": cryptoLib.RsaKey.parse(keys.privateKeyStr)
             }); }); };
-    rsa.encryptorFactory = env.jsRuntimeEnv === "browser" ?
+    rsa.encryptorFactory = env_1.env.jsRuntimeEnv === "browser" ?
         function () {
             var _a;
             var args = [];
@@ -17347,7 +17581,7 @@ var rsa;
                     return Buffer.from(outputDataB64, "base64");
                 }); }
             }); };
-    rsa.decryptorFactory = env.jsRuntimeEnv === "browser" ?
+    rsa.decryptorFactory = env_1.env.jsRuntimeEnv === "browser" ?
         function () {
             var _a;
             var args = [];
@@ -17370,7 +17604,7 @@ var rsa;
 })(rsa = exports.rsa || (exports.rsa = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../env":124,"../nativeModules/hostCryptoLib":132,"buffer":3,"crypto-lib":16}],121:[function(require,module,exports){
+},{"../env":125,"../nativeModules/hostCryptoLib":132,"buffer":3,"crypto-lib":16}],121:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -17583,10 +17817,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
+var env_1 = require("../env");
 var hostKfd = require("../nativeModules/hostKfd");
 var cryptoLibProxy_1 = require("./cryptoLibProxy");
-exports.kfd = env.jsRuntimeEnv === "browser" ?
+exports.kfd = env_1.env.jsRuntimeEnv === "browser" ?
     (function (password, salt, iterations) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, _b, _c, _d;
         return __generator(this, function (_e) {
@@ -17615,7 +17849,7 @@ exports.kfd = env.jsRuntimeEnv === "browser" ?
     }); };
 
 }).call(this,require("buffer").Buffer)
-},{"../env":124,"../nativeModules/hostKfd":133,"./cryptoLibProxy":120,"buffer":3}],123:[function(require,module,exports){
+},{"../env":125,"../nativeModules/hostKfd":133,"./cryptoLibProxy":120,"buffer":3}],123:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -17659,74 +17893,84 @@ var crypto = require("./keysGeneration");
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
 var TowardUserKeys_1 = require("../localStorage/TowardUserKeys");
 var remoteApiCaller = require("../toBackend/remoteApiCaller");
-var Ua_1 = require("../Ua");
 /** When creating a new Ua instance an encryptor must be provided
  * so we expose the reference of the rsa thread */
 var rsaWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
 /**
  * ASSERT: User logged.
- *
- * -Pre spawn the crypto workers ( aes and rsa )
- * -Provide an aes encryptor/decryptor to remoteApiCaller so that
- *  the webData api can be used.
- * -Statically provide a rsa decryptor to Ua class ( so that incoming
- * message can be decrypted ) */
-function globalSetup() {
+ * */
+function setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa() {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, email, uaInstanceId, encryptedSymmetricKey, towardUserKeys, towardUserDecryptor, aesWorkerThreadPoolId, _b, _c, _d, _e;
-        return __generator(this, function (_f) {
-            switch (_f.label) {
+        var encryptedSymmetricKey, towardUserKeys, towardUserDecryptor, aesWorkerThreadPoolId, _a, _b, _c, _d;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
                 case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
                 case 1:
-                    _a = _f.sent(), email = _a.email, uaInstanceId = _a.uaInstanceId, encryptedSymmetricKey = _a.encryptedSymmetricKey;
+                    encryptedSymmetricKey = (_e.sent()).encryptedSymmetricKey;
                     //NOTE: Only one thread as for rsa we need the encrypt function to be run exclusive.
                     cryptoLib.workerThreadPool.preSpawn(rsaWorkerThreadPoolId, 1);
                     return [4 /*yield*/, TowardUserKeys_1.TowardUserKeys.retrieve()];
                 case 2:
-                    towardUserKeys = _f.sent();
+                    towardUserKeys = _e.sent();
                     towardUserDecryptor = cryptoLib.rsa.decryptorFactory(towardUserKeys.decryptKey, rsaWorkerThreadPoolId);
                     aesWorkerThreadPoolId = cryptoLib.workerThreadPool.Id.generate();
                     cryptoLib.workerThreadPool.preSpawn(aesWorkerThreadPoolId, 3);
-                    _c = (_b = remoteApiCaller).setWebDataEncryptorDescriptor;
-                    _e = (_d = cryptoLib.aes).encryptorDecryptorFactory;
+                    _b = (_a = remoteApiCaller).setWebDataEncryptorDescriptor;
+                    _d = (_c = cryptoLib.aes).encryptorDecryptorFactory;
                     return [4 /*yield*/, crypto.symmetricKey.decryptKey(towardUserDecryptor, encryptedSymmetricKey)];
                 case 3:
-                    _c.apply(_b, [_e.apply(_d, [_f.sent(),
+                    _b.apply(_a, [_d.apply(_c, [_e.sent(),
                             aesWorkerThreadPoolId])]);
-                    Ua_1.Ua.session = {
-                        email: email,
-                        "instanceId": uaInstanceId,
-                        "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserKeys.encryptKey),
-                        towardUserDecryptor: towardUserDecryptor
-                    };
-                    return [2 /*return*/];
+                    return [2 /*return*/, {
+                            "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserKeys.encryptKey),
+                            towardUserDecryptor: towardUserDecryptor,
+                            "getTowardSimEncryptor": function (_a) {
+                                var towardSimEncryptKeyStr = _a.towardSimEncryptKeyStr;
+                                return ({
+                                    "towardSimEncryptor": cryptoLib.rsa.encryptorFactory(cryptoLib.RsaKey.parse(towardSimEncryptKeyStr), rsaWorkerThreadPoolId)
+                                });
+                            }
+                        }];
             }
         });
     });
 }
-exports.globalSetup = globalSetup;
-exports.getTowardSimEncryptor = function (userSim) {
-    return cryptoLib.rsa.encryptorFactory(cryptoLib.RsaKey.parse(userSim.towardSimEncryptKeyStr), rsaWorkerThreadPoolId);
+exports.setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa = setWebDataEncryptorDecryptorAndGetCryptoRelatedParamsNeededToInstantiateUa;
+
+},{"../localStorage/AuthenticatedSessionDescriptorSharedData":127,"../localStorage/TowardUserKeys":129,"../toBackend/remoteApiCaller":142,"./cryptoLibProxy":120,"./keysGeneration":121}],124:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+//NOTE: Defined at ejs building in templates/head_common.ejs
+var default_ = {
+    "assetsRoot": window["assets_root"],
+    "isDevEnv": window["isDevEnv"],
+    "baseDomain": window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1],
+    "jsRuntimeEnv": "browser",
+    "hostOs": undefined
 };
+exports.default = default_;
 
-},{"../Ua":118,"../localStorage/AuthenticatedSessionDescriptorSharedData":127,"../localStorage/TowardUserKeys":129,"../toBackend/remoteApiCaller":143,"./cryptoLibProxy":120,"./keysGeneration":121}],124:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var jsRuntimeEnv_1 = require("./jsRuntimeEnv");
-exports.jsRuntimeEnv = jsRuntimeEnv_1.jsRuntimeEnv;
+/*
+import { jsRuntimeEnv } from "./jsRuntimeEnv";
+
+export { jsRuntimeEnv };
+
 //NOTE: For web Defined at ejs building in templates/head_common.ejs, must be defined for react-native.
-exports.assetsRoot = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
-exports.isDevEnv = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
-exports.baseDomain = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ?
-    (exports.isDevEnv ? "dev.semasim.com" : "semasim.com") :
-    window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
+export const assetsRoot: string = jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
+export const isDevEnv: boolean = jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
 
-},{"./jsRuntimeEnv":125}],125:[function(require,module,exports){
-"use strict";
+export const baseDomain: "semasim.com" | "dev.semasim.com" = jsRuntimeEnv === "react-native" ?
+    (isDevEnv ? "dev.semasim.com" : "semasim.com") :
+    window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1] as any
+    ;
+    */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.jsRuntimeEnv = "browser";
+var impl_1 = require("./impl");
+exports.env = impl_1.default;
 
-},{}],126:[function(require,module,exports){
+},{"./impl":124}],126:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -17781,7 +18025,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
-exports.key = "authenticated-session-descriptor-shared-data";
+var key = "authenticated-session-descriptor-shared-data";
 var AuthenticatedSessionDescriptorSharedData;
 (function (AuthenticatedSessionDescriptorSharedData) {
     function isPresent() {
@@ -17789,7 +18033,7 @@ var AuthenticatedSessionDescriptorSharedData;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         return [2 /*return*/, value !== null];
@@ -17807,7 +18051,7 @@ var AuthenticatedSessionDescriptorSharedData;
                         if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -17822,7 +18066,7 @@ var AuthenticatedSessionDescriptorSharedData;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         if (value === undefined) {
@@ -17838,7 +18082,7 @@ var AuthenticatedSessionDescriptorSharedData;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -17851,7 +18095,6 @@ var AuthenticatedSessionDescriptorSharedData;
 
 }).call(this,require("buffer").Buffer)
 },{"./localStorageApi":131,"buffer":3}],128:[function(require,module,exports){
-(function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -17891,24 +18134,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
-var env = require("../env");
-exports.key = "credentials";
+var key = "credentials";
 var Credentials;
 (function (Credentials) {
-    function throwIfWeb() {
-        if (env.jsRuntimeEnv === "react-native") {
-            return;
-        }
-        throw new Error("Storing credentials in local storage should be done only on react-native");
-    }
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         return [2 /*return*/, value !== null];
@@ -17921,14 +18155,12 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, isPresent()];
+                    case 0: return [4 /*yield*/, isPresent()];
                     case 1:
                         if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -17943,15 +18175,13 @@ var Credentials;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
-                        if (value === undefined) {
+                        if (value === null) {
                             throw new Error("Auth not present in localStorage");
                         }
-                        return [2 /*return*/, JSON.parse(Buffer.from(value, "hex").toString("utf8"))];
+                        return [2 /*return*/, JSON.parse(value)];
                 }
             });
         });
@@ -17961,9 +18191,7 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, JSON.stringify(authenticatedSessionDescriptorSharedData))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -17974,8 +18202,7 @@ var Credentials;
     Credentials.set = set;
 })(Credentials = exports.Credentials || (exports.Credentials = {}));
 
-}).call(this,require("buffer").Buffer)
-},{"../env":124,"./localStorageApi":131,"buffer":3}],129:[function(require,module,exports){
+},{"./localStorageApi":131}],129:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18032,7 +18259,7 @@ var __read = (this && this.__read) || function (o, n) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
 var types_1 = require("crypto-lib/dist/sync/types");
-exports.key = "toward-user-keys";
+var key = "toward-user-keys";
 var TowardUserKeys;
 (function (TowardUserKeys) {
     function stringify(towardUserKeys) {
@@ -18051,7 +18278,7 @@ var TowardUserKeys;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, stringify(towardUserKeys))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, stringify(towardUserKeys))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -18067,7 +18294,7 @@ var TowardUserKeys;
             var towardUserKeysStr;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         towardUserKeysStr = _a.sent();
                         if (towardUserKeysStr === null) {
@@ -18339,147 +18566,23 @@ exports.getApi = impl_1.getApi;
 
 },{"./impl":134}],136:[function(require,module,exports){
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
-var webApiCaller = require("../webApiCaller");
-var Credentials_1 = require("../localStorage/Credentials");
-var prResult = undefined;
-function tryLoginFromStoredCredentials() {
-    if (prResult !== undefined) {
-        return prResult;
-    }
-    prResult = (function callee() {
-        return __awaiter(this, void 0, void 0, function () {
-            var isUserLoggedIn, error_1, _a, email, secret, uaInstanceId, resp_1;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        webApiCaller.setCanRequestThrowToTrueForNextMethodCall();
-                        isUserLoggedIn = void 0;
-                        _b.label = 1;
-                    case 1:
-                        _b.trys.push([1, 3, , 5]);
-                        return [4 /*yield*/, webApiCaller.isUserLoggedIn()];
-                    case 2:
-                        isUserLoggedIn = _b.sent();
-                        return [3 /*break*/, 5];
-                    case 3:
-                        error_1 = _b.sent();
-                        if (!(error_1 instanceof webApiCaller.WebApiError)) {
-                            throw error_1;
-                        }
-                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 2000); })];
-                    case 4:
-                        _b.sent();
-                        return [2 /*return*/, callee()];
-                    case 5:
-                        if (isUserLoggedIn) {
-                            return [2 /*return*/, "LOGGED IN"];
-                        }
-                        if (env.jsRuntimeEnv === "browser") {
-                            return [2 /*return*/, "NO VALID CREDENTIALS"];
-                        }
-                        return [4 /*yield*/, Credentials_1.Credentials.isPresent()];
-                    case 6:
-                        if (!(_b.sent())) {
-                            return [2 /*return*/, "NO VALID CREDENTIALS"];
-                        }
-                        return [4 /*yield*/, Credentials_1.Credentials.get()];
-                    case 7:
-                        _a = _b.sent(), email = _a.email, secret = _a.secret, uaInstanceId = _a.uaInstanceId;
-                        return [4 /*yield*/, webApiCaller.loginUser(email, secret, uaInstanceId)
-                                .catch(function (error) {
-                                if (!(error instanceof webApiCaller.WebApiError)) {
-                                    throw error;
-                                }
-                                return error;
-                            })];
-                    case 8:
-                        resp_1 = _b.sent();
-                        if (!(resp_1 instanceof webApiCaller.WebApiError)) return [3 /*break*/, 10];
-                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 2000); })];
-                    case 9:
-                        _b.sent();
-                        return [2 /*return*/, callee()];
-                    case 10:
-                        if (!(resp_1.status === "RETRY STILL FORBIDDEN")) return [3 /*break*/, 12];
-                        //TODO: some log
-                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, resp_1.retryDelayLeft); })];
-                    case 11:
-                        //TODO: some log
-                        _b.sent();
-                        return [2 /*return*/, callee()];
-                    case 12:
-                        if (!(resp_1.status !== "SUCCESS")) return [3 /*break*/, 14];
-                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
-                    case 13:
-                        _b.sent();
-                        return [2 /*return*/, "NO VALID CREDENTIALS"];
-                    case 14: return [2 /*return*/, "LOGGED IN"];
-                }
-            });
-        });
-    })();
-    prResult.then(function () { return prResult = undefined; });
-    return tryLoginFromStoredCredentials();
-}
-exports.tryLoginFromStoredCredentials = tryLoginFromStoredCredentials;
-
-},{"../env":124,"../localStorage/Credentials":128,"../webApiCaller":148}],137:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
+var env_1 = require("../env");
 var default_ = function () {
-    if (env.isDevEnv) {
+    if (env_1.env.isDevEnv) {
         throw new Error("In prod the app would have been restarted");
     }
     location.reload();
 };
 exports.default = default_;
 
-},{"../env":124}],138:[function(require,module,exports){
+},{"../env":125}],137:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.restartApp = impl_1.default;
 
-},{"./impl":137}],139:[function(require,module,exports){
+},{"./impl":136}],138:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18545,15 +18648,14 @@ var dialog_1 = require("../../tools/modal/dialog");
 var urlGetParameters = require("../../tools/urlGetParameters");
 var env_1 = require("../env");
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
-var env = require("../env");
-var tryLoginFromStoredCredentials_1 = require("../procedure/tryLoginFromStoredCredentials");
+var tryLoginFromStoredCredentials_1 = require("../tryLoginFromStoredCredentials");
 var events_1 = require("./events");
 var restartApp_1 = require("../restartApp");
-exports.url = "wss://web." + env_1.baseDomain;
+exports.url = "wss://web." + env_1.env.baseDomain;
 var idString = "toBackend";
-env_1.isDevEnv;
+env_1.env.isDevEnv;
 /*
-const log: typeof console.log = isDevEnv ?
+const log: typeof console.log = env.isDevEnv ?
     ((...args) => console.log.apply(console, ["[toBackend/connection]", ...args])) :
     (() => { });
     */
@@ -18610,7 +18712,7 @@ exports.connect = (function () {
         hasBeenInvoked = true;
         //We register 'offline' event only on the first call of connect()
         //TODO: React native.
-        if (env.jsRuntimeEnv === "browser") {
+        if (env_1.env.jsRuntimeEnv === "browser") {
             window.addEventListener("offline", function () {
                 var socket = get();
                 if (socket instanceof Promise) {
@@ -18645,7 +18747,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                     notConnectedUserFeedback.setVisibility(true);
                     return [3 /*break*/, 4];
                 case 3:
-                    if (env.jsRuntimeEnv === "react-native") {
+                    if (env_1.env.jsRuntimeEnv === "react-native") {
                         throw new Error("never: getPreLoggedIn is not optional for react native");
                     }
                     restartApp_1.restartApp();
@@ -18671,7 +18773,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                     return [2 /*return*/];
                 case 7:
                     socket = new sip.Socket(webSocket, true, {
-                        "remoteAddress": "web." + env_1.baseDomain,
+                        "remoteAddress": "web." + env_1.env.baseDomain,
                         "remotePort": 443
                     }, 20000);
                     apiServer.startListening(socket);
@@ -18723,7 +18825,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../../tools/modal/dialog":155,"../../tools/urlGetParameters":162,"../env":124,"../localStorage/AuthenticatedSessionDescriptorSharedData":127,"../procedure/tryLoginFromStoredCredentials":136,"../restartApp":138,"./events":140,"./localApiHandlers":141,"ts-events-extended":179,"ts-sip":54}],140:[function(require,module,exports){
+},{"../../tools/modal/dialog":155,"../../tools/urlGetParameters":162,"../env":125,"../localStorage/AuthenticatedSessionDescriptorSharedData":127,"../restartApp":137,"../tryLoginFromStoredCredentials":145,"./events":139,"./localApiHandlers":140,"ts-events-extended":179,"ts-sip":54}],139:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18765,7 +18867,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 exports.evtUsableSim = new ts_events_extended_1.SyncEvent();
-exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
+exports.evtSimReachabilityStatusChange = new ts_events_extended_1.SyncEvent();
+/** NOTE: This is posted when an user lose access to the sim, the password
+ * is then renewed, there is not a special notify event from the server
+ * but the sim is re-notified online */
+exports.evtSimPasswordChanged = new ts_events_extended_1.SyncEvent();
 exports.evtSimGsmConnectivityChange = new ts_events_extended_1.SyncEvent();
 exports.evtOngoingCall = new ts_events_extended_1.SyncEvent();
 exports.evtSimCellSignalStrengthChange = new ts_events_extended_1.SyncEvent();
@@ -18807,7 +18913,7 @@ var rtcIceEServer;
     })();
 })(rtcIceEServer = exports.rtcIceEServer || (exports.rtcIceEServer = {}));
 
-},{"ts-events-extended":179}],141:[function(require,module,exports){
+},{"ts-events-extended":179}],140:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18849,7 +18955,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var apiDeclaration = require("../../sip_api_declarations/uaToBackend");
 var ts_events_extended_1 = require("ts-events-extended");
 var dcTypes = require("chan-dongle-extended-client/dist/lib/types");
-var env = require("../env");
+var env_1 = require("../env");
 var events_1 = require("./events");
 //NOTE: Global JS deps.
 var dialog_1 = require("../../tools/modal/dialog");
@@ -18882,7 +18988,7 @@ var getUsableUserSim = function (imsi) { return getRemoteApiCaller()
                             if (hadOngoingCall) {
                                 events_1.evtOngoingCall.post(userSim);
                             }
-                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            events_1.evtSimReachabilityStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
                 });
@@ -18904,7 +19010,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
         "handler": function (_a) {
             var imsi = _a.imsi, hasInternalSimStorageChanged = _a.hasInternalSimStorageChanged, password = _a.password, simDongle = _a.simDongle, gatewayLocation = _a.gatewayLocation, isGsmConnectivityOk = _a.isGsmConnectivityOk, cellSignalStrength = _a.cellSignalStrength;
             return __awaiter(void 0, void 0, void 0, function () {
-                var userSim;
+                var userSim, wasAlreadyReachable, hasPasswordChanged;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -18917,13 +19023,22 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
                                 restartApp_1.restartApp();
                                 return [2 /*return*/];
                             }
+                            wasAlreadyReachable = userSim.reachableSimState !== undefined;
                             userSim.reachableSimState = isGsmConnectivityOk ?
                                 ({ "isGsmConnectivityOk": true, cellSignalStrength: cellSignalStrength, "ongoingCall": undefined }) :
                                 ({ "isGsmConnectivityOk": false, cellSignalStrength: cellSignalStrength });
+                            hasPasswordChanged = userSim.password !== password;
                             userSim.password = password;
                             userSim.dongle = simDongle;
                             userSim.gatewayLocation = gatewayLocation;
-                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            if (wasAlreadyReachable && hasPasswordChanged) {
+                                events_1.evtSimPasswordChanged.post(userSim);
+                                return [2 /*return*/, undefined];
+                            }
+                            if (wasAlreadyReachable) {
+                                return [2 /*return*/, undefined];
+                            }
+                            events_1.evtSimReachabilityStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
                 });
@@ -19305,7 +19420,7 @@ evtOngoingCall.attach(userSim => {
                     ].join("<br>");
                     return [4 /*yield*/, new Promise(function (resolve) { return dialogApi.create("dialog", {
                             "title": "SIM ready to be registered",
-                            "message": env.jsRuntimeEnv === "browser" ?
+                            "message": env_1.env.jsRuntimeEnv === "browser" ?
                                 "<p class=\"text-center\">" + shouldAdd_message + "</p>" :
                                 shouldAdd_message,
                             "buttons": {
@@ -19607,7 +19722,7 @@ evtOngoingCall.attach(userSim => {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":151,"../../tools/modal/dialog":155,"../env":124,"../restartApp":138,"./events":140,"./remoteApiCaller":143,"chan-dongle-extended-client/dist/lib/types":164,"ts-events-extended":179}],142:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":151,"../../tools/modal/dialog":155,"../env":125,"../restartApp":137,"./events":139,"./remoteApiCaller":142,"chan-dongle-extended-client/dist/lib/types":164,"ts-events-extended":179}],141:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -19713,7 +19828,7 @@ exports.getUsableUserSims = (function () {
             userSim.dongle = newUserSim.dongle;
             userSim.gatewayLocation = newUserSim.gatewayLocation;
             if (!!userSim.reachableSimState) {
-                events_1.evtSimIsOnlineStatusChange.post(userSim);
+                events_1.evtSimReachabilityStatusChange.post(userSim);
             }
         };
         try {
@@ -19750,7 +19865,7 @@ exports.getUsableUserSims = (function () {
                             if (!!_b.done) return [3 /*break*/, 4];
                             userSim = _b.value;
                             userSim.reachableSimState = undefined;
-                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            events_1.evtSimReachabilityStatusChange.post(userSim);
                             _d.label = 3;
                         case 3:
                             _b = _a.next();
@@ -20090,7 +20205,7 @@ exports.shouldAppendPromotionalMessage = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":150,"../../restartApp":138,"../connection":139,"../events":140,"./sendRequest":144}],143:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":150,"../../restartApp":137,"../connection":138,"../events":139,"./sendRequest":143}],142:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -20099,7 +20214,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./base"));
 __export(require("./webphoneData"));
 
-},{"./base":142,"./webphoneData":145}],144:[function(require,module,exports){
+},{"./base":141,"./webphoneData":144}],143:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -20168,7 +20283,7 @@ function sendRequest(methodName, params) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../restartApp":138,"../connection":139,"ts-sip":54}],145:[function(require,module,exports){
+},{"../../restartApp":137,"../connection":138,"ts-sip":54}],144:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -20783,7 +20898,131 @@ exports.notifyStatusReportReceived = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":150,"../../types/webphoneData/logic":147,"./sendRequest":144,"crypto-lib":16,"phone-number/dist/lib":46}],146:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":150,"../../types/webphoneData/logic":147,"./sendRequest":143,"crypto-lib":16,"phone-number/dist/lib":46}],145:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var env_1 = require("./env");
+var webApiCaller = require("./webApiCaller");
+var Credentials_1 = require("./localStorage/Credentials");
+var prResult = undefined;
+function tryLoginFromStoredCredentials() {
+    if (prResult !== undefined) {
+        return prResult;
+    }
+    prResult = (function callee() {
+        return __awaiter(this, void 0, void 0, function () {
+            var isUserLoggedIn, error_1, _a, email, secret, uaInstanceId, resp_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        webApiCaller.setCanRequestThrowToTrueForNextMethodCall();
+                        isUserLoggedIn = void 0;
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 5]);
+                        return [4 /*yield*/, webApiCaller.isUserLoggedIn()];
+                    case 2:
+                        isUserLoggedIn = _b.sent();
+                        return [3 /*break*/, 5];
+                    case 3:
+                        error_1 = _b.sent();
+                        if (!(error_1 instanceof webApiCaller.WebApiError)) {
+                            throw error_1;
+                        }
+                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 2000); })];
+                    case 4:
+                        _b.sent();
+                        return [2 /*return*/, callee()];
+                    case 5:
+                        if (isUserLoggedIn) {
+                            return [2 /*return*/, "LOGGED IN"];
+                        }
+                        if (env_1.env.jsRuntimeEnv === "browser") {
+                            return [2 /*return*/, "NO VALID CREDENTIALS"];
+                        }
+                        return [4 /*yield*/, Credentials_1.Credentials.isPresent()];
+                    case 6:
+                        if (!(_b.sent())) {
+                            return [2 /*return*/, "NO VALID CREDENTIALS"];
+                        }
+                        return [4 /*yield*/, Credentials_1.Credentials.get()];
+                    case 7:
+                        _a = _b.sent(), email = _a.email, secret = _a.secret, uaInstanceId = _a.uaInstanceId;
+                        return [4 /*yield*/, webApiCaller.loginUser(email, secret, uaInstanceId)
+                                .catch(function (error) {
+                                if (!(error instanceof webApiCaller.WebApiError)) {
+                                    throw error;
+                                }
+                                return error;
+                            })];
+                    case 8:
+                        resp_1 = _b.sent();
+                        if (!(resp_1 instanceof webApiCaller.WebApiError)) return [3 /*break*/, 10];
+                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 2000); })];
+                    case 9:
+                        _b.sent();
+                        return [2 /*return*/, callee()];
+                    case 10:
+                        if (!(resp_1.status === "RETRY STILL FORBIDDEN")) return [3 /*break*/, 12];
+                        //TODO: some log
+                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, resp_1.retryDelayLeft); })];
+                    case 11:
+                        //TODO: some log
+                        _b.sent();
+                        return [2 /*return*/, callee()];
+                    case 12:
+                        if (!(resp_1.status !== "SUCCESS")) return [3 /*break*/, 14];
+                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
+                    case 13:
+                        _b.sent();
+                        return [2 /*return*/, "NO VALID CREDENTIALS"];
+                    case 14: return [2 /*return*/, "LOGGED IN"];
+                }
+            });
+        });
+    })();
+    prResult.then(function () { return prResult = undefined; });
+    return tryLoginFromStoredCredentials();
+}
+exports.tryLoginFromStoredCredentials = tryLoginFromStoredCredentials;
+
+},{"./env":125,"./localStorage/Credentials":128,"./webApiCaller":148}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectSidHttpHeaderName = "x-connect-sid";
@@ -21135,14 +21374,14 @@ var sendRequest_1 = require("./sendRequest");
 exports.WebApiError = sendRequest_1.WebApiError;
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
 var Credentials_1 = require("../localStorage/Credentials");
-var env = require("../env");
+var env_1 = require("../env");
 var ts_events_extended_1 = require("ts-events-extended");
 var restartApp_1 = require("../restartApp");
 var networkStateMonitoring = require("../networkStateMonitoring");
 var evtError = new ts_events_extended_1.SyncEvent();
 evtError.attach(function (_a) {
     var methodName = _a.methodName, httpErrorStatus = _a.httpErrorStatus;
-    switch (env.jsRuntimeEnv) {
+    switch (env_1.env.jsRuntimeEnv) {
         case "browser":
             {
                 switch (httpErrorStatus) {
@@ -21193,7 +21432,7 @@ var sendRequest = function (methodName, params) { return __awaiter(void 0, void 
                 _a = sendRequest_1.sendRequest;
                 _b = [methodName,
                     params];
-                _d = env.jsRuntimeEnv === "react-native";
+                _d = env_1.env.jsRuntimeEnv === "react-native";
                 if (!_d) return [3 /*break*/, 5];
                 return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
             case 4:
@@ -21257,7 +21496,7 @@ exports.loginUser = (function () {
                         if (response.status !== "SUCCESS") {
                             return [2 /*return*/, response];
                         }
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
                         return [4 /*yield*/, Credentials_1.Credentials.set({
                                 email: email,
                                 secret: secret,
@@ -21329,7 +21568,7 @@ exports.logoutUser = (function () {
                         return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
                     case 2:
                         _a.sent();
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
                         return [4 /*yield*/, Credentials_1.Credentials.remove()];
                     case 3:
                         _a.sent();
@@ -21442,7 +21681,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":163,"../env":124,"../localStorage/AuthenticatedSessionDescriptorSharedData":127,"../localStorage/Credentials":128,"../networkStateMonitoring":135,"../restartApp":138,"./sendRequest":149,"ts-events-extended":179}],149:[function(require,module,exports){
+},{"../../web_api_declaration":163,"../env":125,"../localStorage/AuthenticatedSessionDescriptorSharedData":127,"../localStorage/Credentials":128,"../networkStateMonitoring":135,"../restartApp":137,"./sendRequest":149,"ts-events-extended":179}],149:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -21506,7 +21745,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var connectSidHttpHeaderName_1 = require("../types/connectSidHttpHeaderName");
-var env = require("../env");
+var env_1 = require("../env");
 var JSON_CUSTOM_1 = require("transfer-tools/dist/lib/JSON_CUSTOM");
 var webApiPath_1 = require("../../gateway/webApiPath");
 var serializer = JSON_CUSTOM_1.get();
@@ -21528,7 +21767,7 @@ function sendRequest(methodName, params, connectSid) {
         var _c;
         return __generator(this, function (_d) {
             switch (_d.label) {
-                case 0: return [4 /*yield*/, fetch("https://web." + env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
+                case 0: return [4 /*yield*/, fetch("https://web." + env_1.env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
                         "method": "POST",
                         "cache": "no-cache",
                         "credentials": "same-origin",
@@ -21561,7 +21800,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":117,"../env":124,"../types/connectSidHttpHeaderName":146,"transfer-tools/dist/lib/JSON_CUSTOM":174}],150:[function(require,module,exports){
+},{"../../gateway/webApiPath":117,"../env":125,"../types/connectSidHttpHeaderName":146,"transfer-tools/dist/lib/JSON_CUSTOM":174}],150:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -23125,25 +23364,6 @@ arguments[4][37][0].apply(exports,arguments)
 arguments[4][38][0].apply(exports,arguments)
 },{"./SyncEvent":175,"./defs":178,"dup":38}],180:[function(require,module,exports){
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var urlSafeBase64encoderDecoder_1 = require("./urlSafeBase64encoderDecoder");
-var RegistrationParams;
-(function (RegistrationParams) {
-    var key = "registration_params";
-    /** returns registration_params=eyJ1c2VyRW1haWwiOiJqb3...cWw__ */
-    function build(registrationParams) {
-        return key + "=" + urlSafeBase64encoderDecoder_1.urlSafeB64.enc(JSON.stringify(registrationParams));
-    }
-    RegistrationParams.build = build;
-    function parse(contactUirParams, contactAorParams) {
-        return JSON.parse(urlSafeBase64encoderDecoder_1.urlSafeB64.dec((contactUirParams[key] || contactAorParams[key])));
-    }
-    RegistrationParams.parse = parse;
-})(RegistrationParams = exports.RegistrationParams || (exports.RegistrationParams = {}));
-;
-
-},{"./urlSafeBase64encoderDecoder":183}],181:[function(require,module,exports){
-"use strict";
 /* NOTE: Used in the browser. */
 Object.defineProperty(exports, "__esModule", { value: true });
 var serializer_1 = require("crypto-lib/dist/async/serializer");
@@ -23196,7 +23416,34 @@ function extractBundledDataFromHeaders(headers, decryptor) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"./urlSafeBase64encoderDecoder":183,"crypto-lib/dist/async/serializer":197,"transfer-tools/dist/lib/stringTransform":213}],182:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":183,"crypto-lib/dist/async/serializer":197,"transfer-tools/dist/lib/stringTransform":213}],181:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var urlSafeBase64encoderDecoder_1 = require("./urlSafeBase64encoderDecoder");
+var key = "ua";
+/**
+ * Returns "ua=eyJ1c2VyRW1haWwiOiJqb3...cWw__"
+ * Need to be called when creating a new jsSip UA instance.
+ *
+ *this.jsSipUa = new JsSIP.UA({
+ *    ...
+ *    "contact_uri": "12..2332@semasim.com" + ";" + buildUaParameter({...})
+ *    ...
+ *});
+ */
+function buildParameter(ua) {
+    return key + "=" + urlSafeBase64encoderDecoder_1.urlSafeB64.enc(JSON.stringify(ua));
+}
+exports.buildParameter = buildParameter;
+/**
+ * contactUirParams=sipLibrary.parseUri(sipLibrary.getContact(sipRequestRegister)!.uri).params
+ */
+function parseFromContactUriParams(contactUirParams) {
+    return JSON.parse(urlSafeBase64encoderDecoder_1.urlSafeB64.dec(contactUirParams[key]));
+}
+exports.parseFromContactUriParams = parseFromContactUriParams;
+
+},{"./urlSafeBase64encoderDecoder":183}],182:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 var __read = (this && this.__read) || function (o, n) {
@@ -23902,8 +24149,87 @@ arguments[4][47][0].apply(exports,arguments)
 },{"buffer":3,"dup":47,"ts-events-extended":239}],215:[function(require,module,exports){
 arguments[4][48][0].apply(exports,arguments)
 },{"./IConnection":214,"./api/ApiMessage":216,"./core":220,"./misc":224,"colors":189,"dup":48,"ts-events-extended":239}],216:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"../core":220,"../misc":224,"buffer":3,"dup":49,"transfer-tools":231}],217:[function(require,module,exports){
+(function (Buffer){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var core = require("../core");
+var misc = require("../misc");
+var transfer_tools_1 = require("transfer-tools");
+var JSON_CUSTOM = transfer_tools_1.JSON_CUSTOM.get();
+exports.sipMethodName = "API";
+var ApiMessage;
+(function (ApiMessage) {
+    var actionIdKey = "api-action-id";
+    function buildSip(actionId, payload) {
+        var sipRequest = core.parse(Buffer.from([
+            exports.sipMethodName + " _ SIP/2.0",
+            "Max-Forwards: 0",
+            "\r\n"
+        ].join("\r\n"), "utf8"));
+        sipRequest.headers[actionIdKey] = "" + actionId++;
+        console.assert(payload !== null, "null is not stringifiable");
+        console.assert(!(typeof payload === "number" && isNaN(payload)), "NaN is not stringifiable");
+        misc.setPacketContent(sipRequest, JSON_CUSTOM.stringify(payload));
+        return sipRequest;
+    }
+    ApiMessage.buildSip = buildSip;
+    function matchSip(sipRequest) {
+        return (!!sipRequest.headers &&
+            !isNaN(parseInt(sipRequest.headers[actionIdKey])));
+    }
+    ApiMessage.matchSip = matchSip;
+    function readActionId(sipRequest) {
+        return parseInt(sipRequest.headers[actionIdKey]);
+    }
+    ApiMessage.readActionId = readActionId;
+    function parsePayload(sipRequest, sanityCheck) {
+        var payload = JSON_CUSTOM.parse(misc.getPacketContent(sipRequest).toString("utf8"));
+        console.assert(!sanityCheck || sanityCheck(payload));
+        return payload;
+    }
+    ApiMessage.parsePayload = parsePayload;
+    var methodNameKey = "method";
+    var Request;
+    (function (Request) {
+        var actionIdCounter = 0;
+        function buildSip(methodName, params) {
+            var sipRequest = ApiMessage.buildSip(actionIdCounter++, params);
+            sipRequest.headers[methodNameKey] = methodName;
+            return sipRequest;
+        }
+        Request.buildSip = buildSip;
+        function matchSip(sipRequest) {
+            return (ApiMessage.matchSip(sipRequest) &&
+                !!sipRequest.headers[methodNameKey]);
+        }
+        Request.matchSip = matchSip;
+        function readMethodName(sipRequest) {
+            return sipRequest.headers[methodNameKey];
+        }
+        Request.readMethodName = readMethodName;
+    })(Request = ApiMessage.Request || (ApiMessage.Request = {}));
+    var Response;
+    (function (Response) {
+        function buildSip(actionId, response) {
+            var sipRequest = ApiMessage.buildSip(actionId, response);
+            return sipRequest;
+        }
+        Response.buildSip = buildSip;
+        function matchSip(sipRequest, actionId) {
+            return (ApiMessage.matchSip(sipRequest) &&
+                sipRequest.headers[methodNameKey] === undefined &&
+                ApiMessage.readActionId(sipRequest) === actionId);
+        }
+        Response.matchSip = matchSip;
+    })(Response = ApiMessage.Response || (ApiMessage.Response = {}));
+})(ApiMessage = exports.ApiMessage || (exports.ApiMessage = {}));
+var keepAlive;
+(function (keepAlive) {
+    keepAlive.methodName = "__keepAlive__";
+})(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
+
+}).call(this,require("buffer").Buffer)
+},{"../core":220,"../misc":224,"buffer":3,"transfer-tools":231}],217:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {

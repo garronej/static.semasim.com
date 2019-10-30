@@ -2091,7 +2091,7 @@ var UiController = /** @class */ (function () {
             var handler;
             AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get().then(function (email) { return handler = StripeCheckout.configure({
                 "key": subscriptionInfos.stripePublicApiKey,
-                "image": env_1.assetsRoot + "img/shop.png",
+                "image": env_1.env.assetsRoot + "img/shop.png",
                 "locale": "auto",
                 "allowRememberMe": false,
                 "name": 'Semasim',
@@ -2278,7 +2278,7 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../templates/UiController.html":15,"../templates/UiController.less":16,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"frontend-shared/dist/lib/env":26,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":29,"frontend-shared/dist/lib/webApiCaller":39,"frontend-shared/dist/tools/currency":41,"frontend-shared/dist/tools/modal/dialog":44,"frontend-shared/node_modules/ts-events-extended":63}],5:[function(require,module,exports){
+},{"../templates/UiController.html":15,"../templates/UiController.less":16,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"frontend-shared/dist/lib/env":27,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":29,"frontend-shared/dist/lib/webApiCaller":39,"frontend-shared/dist/tools/currency":41,"frontend-shared/dist/tools/modal/dialog":44,"frontend-shared/node_modules/ts-events-extended":63}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -7234,21 +7234,37 @@ var PageName;
 },{}],26:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var jsRuntimeEnv_1 = require("./jsRuntimeEnv");
-exports.jsRuntimeEnv = jsRuntimeEnv_1.jsRuntimeEnv;
-//NOTE: For web Defined at ejs building in templates/head_common.ejs, must be defined for react-native.
-exports.assetsRoot = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
-exports.isDevEnv = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
-exports.baseDomain = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ?
-    (exports.isDevEnv ? "dev.semasim.com" : "semasim.com") :
-    window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
+//NOTE: Defined at ejs building in templates/head_common.ejs
+var default_ = {
+    "assetsRoot": window["assets_root"],
+    "isDevEnv": window["isDevEnv"],
+    "baseDomain": window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1],
+    "jsRuntimeEnv": "browser",
+    "hostOs": undefined
+};
+exports.default = default_;
 
-},{"./jsRuntimeEnv":27}],27:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.jsRuntimeEnv = "browser";
+/*
+import { jsRuntimeEnv } from "./jsRuntimeEnv";
 
-},{}],28:[function(require,module,exports){
+export { jsRuntimeEnv };
+
+//NOTE: For web Defined at ejs building in templates/head_common.ejs, must be defined for react-native.
+export const assetsRoot: string = jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
+export const isDevEnv: boolean = jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
+
+export const baseDomain: "semasim.com" | "dev.semasim.com" = jsRuntimeEnv === "react-native" ?
+    (isDevEnv ? "dev.semasim.com" : "semasim.com") :
+    window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1] as any
+    ;
+    */
+Object.defineProperty(exports, "__esModule", { value: true });
+var impl_1 = require("./impl");
+exports.env = impl_1.default;
+
+},{"./impl":26}],28:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -7303,7 +7319,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
-exports.key = "authenticated-session-descriptor-shared-data";
+var key = "authenticated-session-descriptor-shared-data";
 var AuthenticatedSessionDescriptorSharedData;
 (function (AuthenticatedSessionDescriptorSharedData) {
     function isPresent() {
@@ -7311,7 +7327,7 @@ var AuthenticatedSessionDescriptorSharedData;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         return [2 /*return*/, value !== null];
@@ -7329,7 +7345,7 @@ var AuthenticatedSessionDescriptorSharedData;
                         if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -7344,7 +7360,7 @@ var AuthenticatedSessionDescriptorSharedData;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         if (value === undefined) {
@@ -7360,7 +7376,7 @@ var AuthenticatedSessionDescriptorSharedData;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -7373,7 +7389,6 @@ var AuthenticatedSessionDescriptorSharedData;
 
 }).call(this,require("buffer").Buffer)
 },{"./localStorageApi":32,"buffer":2}],30:[function(require,module,exports){
-(function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -7413,24 +7428,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
-var env = require("../env");
-exports.key = "credentials";
+var key = "credentials";
 var Credentials;
 (function (Credentials) {
-    function throwIfWeb() {
-        if (env.jsRuntimeEnv === "react-native") {
-            return;
-        }
-        throw new Error("Storing credentials in local storage should be done only on react-native");
-    }
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         return [2 /*return*/, value !== null];
@@ -7443,14 +7449,12 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, isPresent()];
+                    case 0: return [4 /*yield*/, isPresent()];
                     case 1:
                         if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -7465,15 +7469,13 @@ var Credentials;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
-                        if (value === undefined) {
+                        if (value === null) {
                             throw new Error("Auth not present in localStorage");
                         }
-                        return [2 /*return*/, JSON.parse(Buffer.from(value, "hex").toString("utf8"))];
+                        return [2 /*return*/, JSON.parse(value)];
                 }
             });
         });
@@ -7483,9 +7485,7 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, JSON.stringify(authenticatedSessionDescriptorSharedData))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -7496,8 +7496,7 @@ var Credentials;
     Credentials.set = set;
 })(Credentials = exports.Credentials || (exports.Credentials = {}));
 
-}).call(this,require("buffer").Buffer)
-},{"../env":26,"./localStorageApi":32,"buffer":2}],31:[function(require,module,exports){
+},{"./localStorageApi":32}],31:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = localStorage;
@@ -7599,16 +7598,16 @@ exports.notifyHostWhenPageIsReady = notifyHostWhenPageIsReady;
 },{}],36:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
+var env_1 = require("../env");
 var default_ = function () {
-    if (env.isDevEnv) {
+    if (env_1.env.isDevEnv) {
         throw new Error("In prod the app would have been restarted");
     }
     location.reload();
 };
 exports.default = default_;
 
-},{"../env":26}],37:[function(require,module,exports){
+},{"../env":27}],37:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
@@ -7663,14 +7662,14 @@ var sendRequest_1 = require("./sendRequest");
 exports.WebApiError = sendRequest_1.WebApiError;
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
 var Credentials_1 = require("../localStorage/Credentials");
-var env = require("../env");
+var env_1 = require("../env");
 var ts_events_extended_1 = require("ts-events-extended");
 var restartApp_1 = require("../restartApp");
 var networkStateMonitoring = require("../networkStateMonitoring");
 var evtError = new ts_events_extended_1.SyncEvent();
 evtError.attach(function (_a) {
     var methodName = _a.methodName, httpErrorStatus = _a.httpErrorStatus;
-    switch (env.jsRuntimeEnv) {
+    switch (env_1.env.jsRuntimeEnv) {
         case "browser":
             {
                 switch (httpErrorStatus) {
@@ -7721,7 +7720,7 @@ var sendRequest = function (methodName, params) { return __awaiter(void 0, void 
                 _a = sendRequest_1.sendRequest;
                 _b = [methodName,
                     params];
-                _d = env.jsRuntimeEnv === "react-native";
+                _d = env_1.env.jsRuntimeEnv === "react-native";
                 if (!_d) return [3 /*break*/, 5];
                 return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
             case 4:
@@ -7785,7 +7784,7 @@ exports.loginUser = (function () {
                         if (response.status !== "SUCCESS") {
                             return [2 /*return*/, response];
                         }
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
                         return [4 /*yield*/, Credentials_1.Credentials.set({
                                 email: email,
                                 secret: secret,
@@ -7857,7 +7856,7 @@ exports.logoutUser = (function () {
                         return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
                     case 2:
                         _a.sent();
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
                         return [4 /*yield*/, Credentials_1.Credentials.remove()];
                     case 3:
                         _a.sent();
@@ -7970,7 +7969,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":48,"../env":26,"../localStorage/AuthenticatedSessionDescriptorSharedData":29,"../localStorage/Credentials":30,"../networkStateMonitoring":34,"../restartApp":37,"./sendRequest":40,"ts-events-extended":63}],40:[function(require,module,exports){
+},{"../../web_api_declaration":48,"../env":27,"../localStorage/AuthenticatedSessionDescriptorSharedData":29,"../localStorage/Credentials":30,"../networkStateMonitoring":34,"../restartApp":37,"./sendRequest":40,"ts-events-extended":63}],40:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -8034,7 +8033,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var connectSidHttpHeaderName_1 = require("../types/connectSidHttpHeaderName");
-var env = require("../env");
+var env_1 = require("../env");
 var JSON_CUSTOM_1 = require("transfer-tools/dist/lib/JSON_CUSTOM");
 var webApiPath_1 = require("../../gateway/webApiPath");
 var serializer = JSON_CUSTOM_1.get();
@@ -8056,7 +8055,7 @@ function sendRequest(methodName, params, connectSid) {
         var _c;
         return __generator(this, function (_d) {
             switch (_d.label) {
-                case 0: return [4 /*yield*/, fetch("https://web." + env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
+                case 0: return [4 /*yield*/, fetch("https://web." + env_1.env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
                         "method": "POST",
                         "cache": "no-cache",
                         "credentials": "same-origin",
@@ -8089,7 +8088,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":24,"../env":26,"../types/connectSidHttpHeaderName":38,"transfer-tools/dist/lib/JSON_CUSTOM":58}],41:[function(require,module,exports){
+},{"../../gateway/webApiPath":24,"../env":27,"../types/connectSidHttpHeaderName":38,"transfer-tools/dist/lib/JSON_CUSTOM":58}],41:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }

@@ -4939,7 +4939,7 @@ require("frontend-shared/dist/tools/polyfills/Object.assign");
 var urlGetParameters = require("frontend-shared/dist/tools/urlGetParameters");
 var availablePages = require("frontend-shared/dist/lib/availablePages");
 var hostKfd = require("frontend-shared/dist/lib/nativeModules/hostKfd");
-var procedure = require("frontend-shared/dist/lib/procedure/register");
+var registerPageLogic = require("frontend-shared/dist/lib/pageLogic/registerPageLogic");
 var apiExposedToHost = __assign({}, hostKfd.apiExposedToHost);
 Object.assign(window, { apiExposedToHost: apiExposedToHost });
 function setHandlers() {
@@ -4997,7 +4997,7 @@ function setHandlers() {
                         .map(function (sel) { return $(sel).val(); }), email = _a[0], password = _a[1];
                     return [email, password];
                 })(), email = _a[0], password = _a[1];
-                procedure.register(email, password, {
+                registerPageLogic.register(email, password, {
                     "resetEmail": function () { return $("#email").val(""); },
                     "redirectToLogin": function () {
                         return window.location.href = urlGetParameters.buildUrl("/" + availablePages.PageName.login, { email: email });
@@ -5010,7 +5010,7 @@ function setHandlers() {
 }
 $(document).ready(function () {
     setHandlers();
-    procedure.init(urlGetParameters.parseUrl(), {
+    registerPageLogic.init(urlGetParameters.parseUrl(), {
         "setEmailReadonly": function (email) {
             $("#email").val(email);
             $("#email").prop("readonly", true);
@@ -5018,7 +5018,7 @@ $(document).ready(function () {
     });
 });
 
-},{"frontend-shared/dist/lib/availablePages":43,"frontend-shared/dist/lib/nativeModules/hostKfd":56,"frontend-shared/dist/lib/procedure/register":59,"frontend-shared/dist/tools/polyfills/Object.assign":70,"frontend-shared/dist/tools/urlGetParameters":71,"minimal-polyfills/dist/lib/ArrayBuffer.isView":41}],41:[function(require,module,exports){
+},{"frontend-shared/dist/lib/availablePages":43,"frontend-shared/dist/lib/nativeModules/hostKfd":56,"frontend-shared/dist/lib/pageLogic/registerPageLogic":59,"frontend-shared/dist/tools/polyfills/Object.assign":70,"frontend-shared/dist/tools/urlGetParameters":71,"minimal-polyfills/dist/lib/ArrayBuffer.isView":41}],41:[function(require,module,exports){
 if (!ArrayBuffer["isView"]) {
     ArrayBuffer.isView = function isView(a) {
         return a !== null && typeof (a) === "object" && a["buffer"] instanceof ArrayBuffer;
@@ -5126,7 +5126,7 @@ var __spread = (this && this.__spread) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var cryptoLib = require("crypto-lib");
 var hostCrypto = require("../nativeModules/hostCryptoLib");
-var env = require("../env");
+var env_1 = require("../env");
 var crypto_lib_1 = require("crypto-lib");
 exports.WorkerThreadId = crypto_lib_1.WorkerThreadId;
 exports.RsaKey = crypto_lib_1.RsaKey;
@@ -5134,13 +5134,13 @@ exports.scrypt = crypto_lib_1.scrypt;
 exports.aes = crypto_lib_1.aes;
 exports.toBuffer = crypto_lib_1.toBuffer;
 exports.workerThreadPool = crypto_lib_1.workerThreadPool;
-if (env.jsRuntimeEnv === "react-native") {
+if (env_1.env.jsRuntimeEnv === "react-native") {
     cryptoLib.disableMultithreading();
 }
 var rsa;
 (function (rsa) {
     var _this = this;
-    rsa.generateKeys = env.jsRuntimeEnv === "browser" ?
+    rsa.generateKeys = env_1.env.jsRuntimeEnv === "browser" ?
         function () {
             var _a;
             var args = [];
@@ -5154,7 +5154,7 @@ var rsa;
                 "publicKey": cryptoLib.RsaKey.parse(keys.publicKeyStr),
                 "privateKey": cryptoLib.RsaKey.parse(keys.privateKeyStr)
             }); }); };
-    rsa.encryptorFactory = env.jsRuntimeEnv === "browser" ?
+    rsa.encryptorFactory = env_1.env.jsRuntimeEnv === "browser" ?
         function () {
             var _a;
             var args = [];
@@ -5170,7 +5170,7 @@ var rsa;
                     return Buffer.from(outputDataB64, "base64");
                 }); }
             }); };
-    rsa.decryptorFactory = env.jsRuntimeEnv === "browser" ?
+    rsa.decryptorFactory = env_1.env.jsRuntimeEnv === "browser" ?
         function () {
             var _a;
             var args = [];
@@ -5193,7 +5193,7 @@ var rsa;
 })(rsa = exports.rsa || (exports.rsa = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../env":47,"../nativeModules/hostCryptoLib":55,"buffer":2,"crypto-lib":11}],45:[function(require,module,exports){
+},{"../env":48,"../nativeModules/hostCryptoLib":55,"buffer":2,"crypto-lib":11}],45:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -5406,10 +5406,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
+var env_1 = require("../env");
 var hostKfd = require("../nativeModules/hostKfd");
 var cryptoLibProxy_1 = require("./cryptoLibProxy");
-exports.kfd = env.jsRuntimeEnv === "browser" ?
+exports.kfd = env_1.env.jsRuntimeEnv === "browser" ?
     (function (password, salt, iterations) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, _b, _c, _d;
         return __generator(this, function (_e) {
@@ -5438,24 +5438,40 @@ exports.kfd = env.jsRuntimeEnv === "browser" ?
     }); };
 
 }).call(this,require("buffer").Buffer)
-},{"../env":47,"../nativeModules/hostKfd":56,"./cryptoLibProxy":44,"buffer":2}],47:[function(require,module,exports){
+},{"../env":48,"../nativeModules/hostKfd":56,"./cryptoLibProxy":44,"buffer":2}],47:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var jsRuntimeEnv_1 = require("./jsRuntimeEnv");
-exports.jsRuntimeEnv = jsRuntimeEnv_1.jsRuntimeEnv;
+//NOTE: Defined at ejs building in templates/head_common.ejs
+var default_ = {
+    "assetsRoot": window["assets_root"],
+    "isDevEnv": window["isDevEnv"],
+    "baseDomain": window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1],
+    "jsRuntimeEnv": "browser",
+    "hostOs": undefined
+};
+exports.default = default_;
+
+},{}],48:[function(require,module,exports){
+"use strict";
+/*
+import { jsRuntimeEnv } from "./jsRuntimeEnv";
+
+export { jsRuntimeEnv };
+
 //NOTE: For web Defined at ejs building in templates/head_common.ejs, must be defined for react-native.
-exports.assetsRoot = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
-exports.isDevEnv = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
-exports.baseDomain = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ?
-    (exports.isDevEnv ? "dev.semasim.com" : "semasim.com") :
-    window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
+export const assetsRoot: string = jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
+export const isDevEnv: boolean = jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
 
-},{"./jsRuntimeEnv":48}],48:[function(require,module,exports){
-"use strict";
+export const baseDomain: "semasim.com" | "dev.semasim.com" = jsRuntimeEnv === "react-native" ?
+    (isDevEnv ? "dev.semasim.com" : "semasim.com") :
+    window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1] as any
+    ;
+    */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.jsRuntimeEnv = "browser";
+var impl_1 = require("./impl");
+exports.env = impl_1.default;
 
-},{}],49:[function(require,module,exports){
+},{"./impl":47}],49:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -5496,7 +5512,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
-exports.key = "authenticated-session-descriptor-shared-data";
+var key = "authenticated-session-descriptor-shared-data";
 var AuthenticatedSessionDescriptorSharedData;
 (function (AuthenticatedSessionDescriptorSharedData) {
     function isPresent() {
@@ -5504,7 +5520,7 @@ var AuthenticatedSessionDescriptorSharedData;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         return [2 /*return*/, value !== null];
@@ -5522,7 +5538,7 @@ var AuthenticatedSessionDescriptorSharedData;
                         if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -5537,7 +5553,7 @@ var AuthenticatedSessionDescriptorSharedData;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         if (value === undefined) {
@@ -5553,7 +5569,7 @@ var AuthenticatedSessionDescriptorSharedData;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -5566,7 +5582,6 @@ var AuthenticatedSessionDescriptorSharedData;
 
 }).call(this,require("buffer").Buffer)
 },{"./localStorageApi":54,"buffer":2}],50:[function(require,module,exports){
-(function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -5606,24 +5621,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
-var env = require("../env");
-exports.key = "credentials";
+var key = "credentials";
 var Credentials;
 (function (Credentials) {
-    function throwIfWeb() {
-        if (env.jsRuntimeEnv === "react-native") {
-            return;
-        }
-        throw new Error("Storing credentials in local storage should be done only on react-native");
-    }
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         return [2 /*return*/, value !== null];
@@ -5636,14 +5642,12 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, isPresent()];
+                    case 0: return [4 /*yield*/, isPresent()];
                     case 1:
                         if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -5658,15 +5662,13 @@ var Credentials;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
-                        if (value === undefined) {
+                        if (value === null) {
                             throw new Error("Auth not present in localStorage");
                         }
-                        return [2 /*return*/, JSON.parse(Buffer.from(value, "hex").toString("utf8"))];
+                        return [2 /*return*/, JSON.parse(value)];
                 }
             });
         });
@@ -5676,9 +5678,7 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, JSON.stringify(authenticatedSessionDescriptorSharedData))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -5689,8 +5689,7 @@ var Credentials;
     Credentials.set = set;
 })(Credentials = exports.Credentials || (exports.Credentials = {}));
 
-}).call(this,require("buffer").Buffer)
-},{"../env":47,"./localStorageApi":54,"buffer":2}],51:[function(require,module,exports){
+},{"./localStorageApi":54}],51:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -5731,14 +5730,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
 var TowardUserKeys_1 = require("./TowardUserKeys");
-exports.key = "just-registered";
+var key = "just-registered";
 var JustRegistered;
 (function (JustRegistered) {
     function store(justRegistered) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, JSON.stringify(justRegistered, function (key, value) { return key === "towardUserKeys" ?
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, JSON.stringify(justRegistered, function (key, value) { return key === "towardUserKeys" ?
                             TowardUserKeys_1.TowardUserKeys.stringify(value) :
                             value; }))];
                     case 1:
@@ -5755,13 +5754,13 @@ var JustRegistered;
             var justRegisteredStr;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         justRegisteredStr = _a.sent();
                         if (justRegisteredStr === null) {
                             return [2 /*return*/, undefined];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/, JSON.parse(justRegisteredStr, function (key, value) { return key === "towardUserKeys" ?
@@ -5831,7 +5830,7 @@ var __read = (this && this.__read) || function (o, n) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
 var types_1 = require("crypto-lib/dist/sync/types");
-exports.key = "toward-user-keys";
+var key = "toward-user-keys";
 var TowardUserKeys;
 (function (TowardUserKeys) {
     function stringify(towardUserKeys) {
@@ -5850,7 +5849,7 @@ var TowardUserKeys;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, stringify(towardUserKeys))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, stringify(towardUserKeys))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -5866,7 +5865,7 @@ var TowardUserKeys;
             var towardUserKeysStr;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         towardUserKeysStr = _a.sent();
                         if (towardUserKeysStr === null) {
@@ -6247,16 +6246,16 @@ exports.register = register;
 },{"../../tools/modal/dialog":67,"../crypto/cryptoLibProxy":44,"../crypto/keysGeneration":45,"../localStorage/JustRegistered":51,"../webApiCaller":63}],60:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
+var env_1 = require("../env");
 var default_ = function () {
-    if (env.isDevEnv) {
+    if (env_1.env.isDevEnv) {
         throw new Error("In prod the app would have been restarted");
     }
     location.reload();
 };
 exports.default = default_;
 
-},{"../env":47}],61:[function(require,module,exports){
+},{"../env":48}],61:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
@@ -6311,14 +6310,14 @@ var sendRequest_1 = require("./sendRequest");
 exports.WebApiError = sendRequest_1.WebApiError;
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
 var Credentials_1 = require("../localStorage/Credentials");
-var env = require("../env");
+var env_1 = require("../env");
 var ts_events_extended_1 = require("ts-events-extended");
 var restartApp_1 = require("../restartApp");
 var networkStateMonitoring = require("../networkStateMonitoring");
 var evtError = new ts_events_extended_1.SyncEvent();
 evtError.attach(function (_a) {
     var methodName = _a.methodName, httpErrorStatus = _a.httpErrorStatus;
-    switch (env.jsRuntimeEnv) {
+    switch (env_1.env.jsRuntimeEnv) {
         case "browser":
             {
                 switch (httpErrorStatus) {
@@ -6369,7 +6368,7 @@ var sendRequest = function (methodName, params) { return __awaiter(void 0, void 
                 _a = sendRequest_1.sendRequest;
                 _b = [methodName,
                     params];
-                _d = env.jsRuntimeEnv === "react-native";
+                _d = env_1.env.jsRuntimeEnv === "react-native";
                 if (!_d) return [3 /*break*/, 5];
                 return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
             case 4:
@@ -6433,7 +6432,7 @@ exports.loginUser = (function () {
                         if (response.status !== "SUCCESS") {
                             return [2 /*return*/, response];
                         }
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
                         return [4 /*yield*/, Credentials_1.Credentials.set({
                                 email: email,
                                 secret: secret,
@@ -6505,7 +6504,7 @@ exports.logoutUser = (function () {
                         return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
                     case 2:
                         _a.sent();
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
                         return [4 /*yield*/, Credentials_1.Credentials.remove()];
                     case 3:
                         _a.sent();
@@ -6618,7 +6617,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":72,"../env":47,"../localStorage/AuthenticatedSessionDescriptorSharedData":49,"../localStorage/Credentials":50,"../networkStateMonitoring":58,"../restartApp":61,"./sendRequest":64,"ts-events-extended":87}],64:[function(require,module,exports){
+},{"../../web_api_declaration":72,"../env":48,"../localStorage/AuthenticatedSessionDescriptorSharedData":49,"../localStorage/Credentials":50,"../networkStateMonitoring":58,"../restartApp":61,"./sendRequest":64,"ts-events-extended":87}],64:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -6682,7 +6681,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var connectSidHttpHeaderName_1 = require("../types/connectSidHttpHeaderName");
-var env = require("../env");
+var env_1 = require("../env");
 var JSON_CUSTOM_1 = require("transfer-tools/dist/lib/JSON_CUSTOM");
 var webApiPath_1 = require("../../gateway/webApiPath");
 var serializer = JSON_CUSTOM_1.get();
@@ -6704,7 +6703,7 @@ function sendRequest(methodName, params, connectSid) {
         var _c;
         return __generator(this, function (_d) {
             switch (_d.label) {
-                case 0: return [4 /*yield*/, fetch("https://web." + env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
+                case 0: return [4 /*yield*/, fetch("https://web." + env_1.env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
                         "method": "POST",
                         "cache": "no-cache",
                         "credentials": "same-origin",
@@ -6737,7 +6736,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":42,"../env":47,"../types/connectSidHttpHeaderName":62,"transfer-tools/dist/lib/JSON_CUSTOM":82}],65:[function(require,module,exports){
+},{"../../gateway/webApiPath":42,"../env":48,"../types/connectSidHttpHeaderName":62,"transfer-tools/dist/lib/JSON_CUSTOM":82}],65:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");

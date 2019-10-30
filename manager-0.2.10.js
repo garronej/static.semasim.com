@@ -6165,6 +6165,13 @@ var core = require("../core");
 var misc = require("../misc");
 var transfer_tools_1 = require("transfer-tools");
 var JSON_CUSTOM = transfer_tools_1.JSON_CUSTOM.get();
+var assert = function (value, message) {
+    if (message === void 0) { message = "assert error"; }
+    if (!!value) {
+        return;
+    }
+    throw new Error(message);
+};
 exports.sipMethodName = "API";
 var ApiMessage;
 (function (ApiMessage) {
@@ -6176,8 +6183,8 @@ var ApiMessage;
             "\r\n"
         ].join("\r\n"), "utf8"));
         sipRequest.headers[actionIdKey] = "" + actionId++;
-        console.assert(payload !== null, "null is not stringifiable");
-        console.assert(!(typeof payload === "number" && isNaN(payload)), "NaN is not stringifiable");
+        assert(payload !== null, "null is not stringifiable");
+        assert(!(typeof payload === "number" && isNaN(payload)), "NaN is not stringifiable");
         misc.setPacketContent(sipRequest, JSON_CUSTOM.stringify(payload));
         return sipRequest;
     }
@@ -6193,7 +6200,7 @@ var ApiMessage;
     ApiMessage.readActionId = readActionId;
     function parsePayload(sipRequest, sanityCheck) {
         var payload = JSON_CUSTOM.parse(misc.getPacketContent(sipRequest).toString("utf8"));
-        console.assert(!sanityCheck || sanityCheck(payload));
+        assert(!sanityCheck || sanityCheck(payload));
         return payload;
     }
     ApiMessage.parsePayload = parsePayload;
@@ -6556,7 +6563,7 @@ function enableKeepAlive(socket, interval) {
     if (interval === void 0) { interval = 120 * 1000; }
     var methodName = ApiMessage_1.keepAlive.methodName;
     (function () { return __awaiter(_this, void 0, void 0, function () {
-        var _a, before, _b;
+        var whereTimerDelayed, _a, before, _b;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -6566,43 +6573,53 @@ function enableKeepAlive(socket, interval) {
                     _c.sent();
                     _c.label = 2;
                 case 2:
-                    if (!true) return [3 /*break*/, 11];
+                    whereTimerDelayed = false;
                     _c.label = 3;
                 case 3:
-                    _c.trys.push([3, 5, , 6]);
+                    if (!true) return [3 /*break*/, 12];
+                    _c.label = 4;
+                case 4:
+                    _c.trys.push([4, 6, , 7]);
                     return [4 /*yield*/, sendRequest(socket, methodName, "PING", {
-                            "timeout": 5 * 1000,
+                            //"timeout": 5 * 1000,
+                            "timeout": (function () {
+                                if (!whereTimerDelayed) {
+                                    return 5 * 1000;
+                                }
+                                whereTimerDelayed = false;
+                                return 500;
+                            })(),
                             "sanityCheck": function (response) { return response === "PONG"; }
                         })];
-                case 4:
-                    _c.sent();
-                    return [3 /*break*/, 6];
                 case 5:
-                    _a = _c.sent();
-                    return [3 /*break*/, 11];
-                case 6:
-                    before = Date.now();
-                    _c.label = 7;
-                case 7:
-                    _c.trys.push([7, 9, , 10]);
-                    return [4 /*yield*/, socket.evtClose.waitFor(interval)];
-                case 8:
                     _c.sent();
-                    return [3 /*break*/, 11];
+                    return [3 /*break*/, 7];
+                case 6:
+                    _a = _c.sent();
+                    return [3 /*break*/, 12];
+                case 7:
+                    before = Date.now();
+                    _c.label = 8;
+                case 8:
+                    _c.trys.push([8, 10, , 11]);
+                    return [4 /*yield*/, socket.evtClose.waitFor(interval)];
                 case 9:
-                    _b = _c.sent();
-                    return [3 /*break*/, 10];
+                    _c.sent();
+                    return [3 /*break*/, 12];
                 case 10:
-                    if (Math.abs(Date.now() - before - interval) > 10000) {
-                        socket.destroy([
-                            "A keep alive 'PING' haven't been sent as scheduled, we prefer closing the connection.",
-                            "This happen for example while running in react native and the app is in the background.",
-                            "The setTimeout callbacks are called only when the app is woke up"
-                        ].join(" "));
-                        return [3 /*break*/, 11];
+                    _b = _c.sent();
+                    return [3 /*break*/, 11];
+                case 11:
+                    if (Math.abs(Date.now() - before - interval) > 500) {
+                        /*NOTE: If the timeout was delayed ( happens when react-native app in background on android )
+                        we want to quickly see if the connection is still usable so next ping we send we do not
+                        wait 5 second for the server to respond, if the server did not responded "PONG" within the
+                        next 0.5 second we close the connection.
+                        */
+                        whereTimerDelayed = true;
                     }
-                    return [3 /*break*/, 2];
-                case 11: return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 12: return [2 /*return*/];
             }
         });
     }); })();
@@ -10024,7 +10041,7 @@ var UiController = /** @class */ (function () {
                 "isSimReachable": !!userSim.reachableSimState
             });
         });
-        backendEvents.evtSimIsOnlineStatusChange.attach(function (userSim_) { return userSim_ === userSim; }, function () {
+        backendEvents.evtSimReachabilityStatusChange.attach(function (userSim_) { return userSim_ === userSim; }, function () {
             uiSimRow.populate();
             if (uiSimRow.isSelected) {
                 _this.uiButtonBar.setState({ "isSimReachable": !!userSim.reachableSimState });
@@ -10450,7 +10467,7 @@ function interact_getUserSimContainingNumber(userSims, number) {
     });
 }
 
-},{"../templates/UiController.html":109,"./UiButtonBar":96,"./UiPhonebook":98,"./UiShareSim":99,"./UiSimRow":100,"frontend-shared/dist/lib/loadUiClassHtml":119,"frontend-shared/dist/lib/toBackend/events":131,"frontend-shared/dist/lib/toBackend/remoteApiCaller/base":133,"frontend-shared/dist/lib/types/userSim":138,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/phone-number":45,"frontend-shared/node_modules/ts-events-extended":170}],98:[function(require,module,exports){
+},{"../templates/UiController.html":109,"./UiButtonBar":96,"./UiPhonebook":98,"./UiShareSim":99,"./UiSimRow":100,"frontend-shared/dist/lib/loadUiClassHtml":119,"frontend-shared/dist/lib/toBackend/events":130,"frontend-shared/dist/lib/toBackend/remoteApiCaller/base":132,"frontend-shared/dist/lib/types/userSim":138,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/phone-number":45,"frontend-shared/node_modules/ts-events-extended":170}],98:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -10550,7 +10567,7 @@ var UiPhonebook = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         console.assert(!this.isPhoneNumberUtilityScriptLoaded);
-                        return [4 /*yield*/, phone_number_1.phoneNumber.remoteLoadUtil(env_1.assetsRoot + "plugins/ui/intl-tel-input/js/utils.js")];
+                        return [4 /*yield*/, phone_number_1.phoneNumber.remoteLoadUtil(env_1.env.assetsRoot + "plugins/ui/intl-tel-input/js/utils.js")];
                     case 1:
                         _a.sent();
                         this.isPhoneNumberUtilityScriptLoaded = true;
@@ -11086,7 +11103,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../templates/UiPhonebook.html":110,"frontend-shared/dist/lib/env":117,"frontend-shared/dist/lib/loadUiClassHtml":119,"frontend-shared/dist/tools/isAscendingAlphabeticalOrder":144,"frontend-shared/dist/tools/modal":150,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/phone-number":45,"frontend-shared/node_modules/ts-events-extended":170,"minimal-polyfills/dist/lib/Map":106}],99:[function(require,module,exports){
+},{"../templates/UiPhonebook.html":110,"frontend-shared/dist/lib/env":118,"frontend-shared/dist/lib/loadUiClassHtml":119,"frontend-shared/dist/tools/isAscendingAlphabeticalOrder":144,"frontend-shared/dist/tools/modal":150,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/phone-number":45,"frontend-shared/node_modules/ts-events-extended":170,"minimal-polyfills/dist/lib/Map":106}],99:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11674,7 +11691,7 @@ $(document).ready(function () {
     onLoggedIn();
 });
 
-},{"./UiController":97,"frontend-shared/dist/lib/availablePages":116,"frontend-shared/dist/lib/notifyHostWhenPageIsReady":126,"frontend-shared/dist/lib/toBackend/connection":130,"frontend-shared/dist/lib/toBackend/remoteApiCaller/base":133,"frontend-shared/dist/lib/webApiCaller":140,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/dist/tools/polyfills/Object.assign":152,"minimal-polyfills/dist/lib/Array.from":104,"minimal-polyfills/dist/lib/ArrayBuffer.isView":105,"minimal-polyfills/dist/lib/String.prototype.startsWith":107}],102:[function(require,module,exports){
+},{"./UiController":97,"frontend-shared/dist/lib/availablePages":116,"frontend-shared/dist/lib/notifyHostWhenPageIsReady":126,"frontend-shared/dist/lib/toBackend/connection":129,"frontend-shared/dist/lib/toBackend/remoteApiCaller/base":132,"frontend-shared/dist/lib/webApiCaller":140,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/dist/tools/polyfills/Object.assign":152,"minimal-polyfills/dist/lib/Array.from":104,"minimal-polyfills/dist/lib/ArrayBuffer.isView":105,"minimal-polyfills/dist/lib/String.prototype.startsWith":107}],102:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -11790,21 +11807,37 @@ var PageName;
 },{}],117:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var jsRuntimeEnv_1 = require("./jsRuntimeEnv");
-exports.jsRuntimeEnv = jsRuntimeEnv_1.jsRuntimeEnv;
-//NOTE: For web Defined at ejs building in templates/head_common.ejs, must be defined for react-native.
-exports.assetsRoot = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
-exports.isDevEnv = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
-exports.baseDomain = jsRuntimeEnv_1.jsRuntimeEnv === "react-native" ?
-    (exports.isDevEnv ? "dev.semasim.com" : "semasim.com") :
-    window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1];
+//NOTE: Defined at ejs building in templates/head_common.ejs
+var default_ = {
+    "assetsRoot": window["assets_root"],
+    "isDevEnv": window["isDevEnv"],
+    "baseDomain": window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1],
+    "jsRuntimeEnv": "browser",
+    "hostOs": undefined
+};
+exports.default = default_;
 
-},{"./jsRuntimeEnv":118}],118:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.jsRuntimeEnv = "browser";
+/*
+import { jsRuntimeEnv } from "./jsRuntimeEnv";
 
-},{}],119:[function(require,module,exports){
+export { jsRuntimeEnv };
+
+//NOTE: For web Defined at ejs building in templates/head_common.ejs, must be defined for react-native.
+export const assetsRoot: string = jsRuntimeEnv === "react-native" ? "https://static.semasim.com/" : window["assets_root"];
+export const isDevEnv: boolean = jsRuntimeEnv === "react-native" ? true : window["isDevEnv"];
+
+export const baseDomain: "semasim.com" | "dev.semasim.com" = jsRuntimeEnv === "react-native" ?
+    (isDevEnv ? "dev.semasim.com" : "semasim.com") :
+    window.location.href.match(/^https:\/\/web\.([^\/]+)/)![1] as any
+    ;
+    */
+Object.defineProperty(exports, "__esModule", { value: true });
+var impl_1 = require("./impl");
+exports.env = impl_1.default;
+
+},{"./impl":117}],119:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -11859,7 +11892,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
-exports.key = "authenticated-session-descriptor-shared-data";
+var key = "authenticated-session-descriptor-shared-data";
 var AuthenticatedSessionDescriptorSharedData;
 (function (AuthenticatedSessionDescriptorSharedData) {
     function isPresent() {
@@ -11867,7 +11900,7 @@ var AuthenticatedSessionDescriptorSharedData;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         return [2 /*return*/, value !== null];
@@ -11885,7 +11918,7 @@ var AuthenticatedSessionDescriptorSharedData;
                         if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -11900,7 +11933,7 @@ var AuthenticatedSessionDescriptorSharedData;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         if (value === undefined) {
@@ -11916,7 +11949,7 @@ var AuthenticatedSessionDescriptorSharedData;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -11929,7 +11962,6 @@ var AuthenticatedSessionDescriptorSharedData;
 
 }).call(this,require("buffer").Buffer)
 },{"./localStorageApi":123,"buffer":3}],121:[function(require,module,exports){
-(function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11969,24 +12001,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var localStorageApi = require("./localStorageApi");
-var env = require("../env");
-exports.key = "credentials";
+var key = "credentials";
 var Credentials;
 (function (Credentials) {
-    function throwIfWeb() {
-        if (env.jsRuntimeEnv === "react-native") {
-            return;
-        }
-        throw new Error("Storing credentials in local storage should be done only on react-native");
-    }
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
                         return [2 /*return*/, value !== null];
@@ -11999,14 +12022,12 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, isPresent()];
+                    case 0: return [4 /*yield*/, isPresent()];
                     case 1:
                         if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, localStorageApi.removeItem(exports.key)];
+                        return [4 /*yield*/, localStorageApi.removeItem(key)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -12021,15 +12042,13 @@ var Credentials;
             var value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.getItem(exports.key)];
+                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
                     case 1:
                         value = _a.sent();
-                        if (value === undefined) {
+                        if (value === null) {
                             throw new Error("Auth not present in localStorage");
                         }
-                        return [2 /*return*/, JSON.parse(Buffer.from(value, "hex").toString("utf8"))];
+                        return [2 /*return*/, JSON.parse(value)];
                 }
             });
         });
@@ -12039,9 +12058,7 @@ var Credentials;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        throwIfWeb();
-                        return [4 /*yield*/, localStorageApi.setItem(exports.key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
+                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, JSON.stringify(authenticatedSessionDescriptorSharedData))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -12052,8 +12069,7 @@ var Credentials;
     Credentials.set = set;
 })(Credentials = exports.Credentials || (exports.Credentials = {}));
 
-}).call(this,require("buffer").Buffer)
-},{"../env":117,"./localStorageApi":123,"buffer":3}],122:[function(require,module,exports){
+},{"./localStorageApi":123}],122:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = localStorage;
@@ -12154,147 +12170,23 @@ exports.notifyHostWhenPageIsReady = notifyHostWhenPageIsReady;
 
 },{}],127:[function(require,module,exports){
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
-var webApiCaller = require("../webApiCaller");
-var Credentials_1 = require("../localStorage/Credentials");
-var prResult = undefined;
-function tryLoginFromStoredCredentials() {
-    if (prResult !== undefined) {
-        return prResult;
-    }
-    prResult = (function callee() {
-        return __awaiter(this, void 0, void 0, function () {
-            var isUserLoggedIn, error_1, _a, email, secret, uaInstanceId, resp_1;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        webApiCaller.setCanRequestThrowToTrueForNextMethodCall();
-                        isUserLoggedIn = void 0;
-                        _b.label = 1;
-                    case 1:
-                        _b.trys.push([1, 3, , 5]);
-                        return [4 /*yield*/, webApiCaller.isUserLoggedIn()];
-                    case 2:
-                        isUserLoggedIn = _b.sent();
-                        return [3 /*break*/, 5];
-                    case 3:
-                        error_1 = _b.sent();
-                        if (!(error_1 instanceof webApiCaller.WebApiError)) {
-                            throw error_1;
-                        }
-                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 2000); })];
-                    case 4:
-                        _b.sent();
-                        return [2 /*return*/, callee()];
-                    case 5:
-                        if (isUserLoggedIn) {
-                            return [2 /*return*/, "LOGGED IN"];
-                        }
-                        if (env.jsRuntimeEnv === "browser") {
-                            return [2 /*return*/, "NO VALID CREDENTIALS"];
-                        }
-                        return [4 /*yield*/, Credentials_1.Credentials.isPresent()];
-                    case 6:
-                        if (!(_b.sent())) {
-                            return [2 /*return*/, "NO VALID CREDENTIALS"];
-                        }
-                        return [4 /*yield*/, Credentials_1.Credentials.get()];
-                    case 7:
-                        _a = _b.sent(), email = _a.email, secret = _a.secret, uaInstanceId = _a.uaInstanceId;
-                        return [4 /*yield*/, webApiCaller.loginUser(email, secret, uaInstanceId)
-                                .catch(function (error) {
-                                if (!(error instanceof webApiCaller.WebApiError)) {
-                                    throw error;
-                                }
-                                return error;
-                            })];
-                    case 8:
-                        resp_1 = _b.sent();
-                        if (!(resp_1 instanceof webApiCaller.WebApiError)) return [3 /*break*/, 10];
-                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 2000); })];
-                    case 9:
-                        _b.sent();
-                        return [2 /*return*/, callee()];
-                    case 10:
-                        if (!(resp_1.status === "RETRY STILL FORBIDDEN")) return [3 /*break*/, 12];
-                        //TODO: some log
-                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, resp_1.retryDelayLeft); })];
-                    case 11:
-                        //TODO: some log
-                        _b.sent();
-                        return [2 /*return*/, callee()];
-                    case 12:
-                        if (!(resp_1.status !== "SUCCESS")) return [3 /*break*/, 14];
-                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
-                    case 13:
-                        _b.sent();
-                        return [2 /*return*/, "NO VALID CREDENTIALS"];
-                    case 14: return [2 /*return*/, "LOGGED IN"];
-                }
-            });
-        });
-    })();
-    prResult.then(function () { return prResult = undefined; });
-    return tryLoginFromStoredCredentials();
-}
-exports.tryLoginFromStoredCredentials = tryLoginFromStoredCredentials;
-
-},{"../env":117,"../localStorage/Credentials":121,"../webApiCaller":140}],128:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var env = require("../env");
+var env_1 = require("../env");
 var default_ = function () {
-    if (env.isDevEnv) {
+    if (env_1.env.isDevEnv) {
         throw new Error("In prod the app would have been restarted");
     }
     location.reload();
 };
 exports.default = default_;
 
-},{"../env":117}],129:[function(require,module,exports){
+},{"../env":118}],128:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.restartApp = impl_1.default;
 
-},{"./impl":128}],130:[function(require,module,exports){
+},{"./impl":127}],129:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12360,15 +12252,14 @@ var dialog_1 = require("../../tools/modal/dialog");
 var urlGetParameters = require("../../tools/urlGetParameters");
 var env_1 = require("../env");
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
-var env = require("../env");
-var tryLoginFromStoredCredentials_1 = require("../procedure/tryLoginFromStoredCredentials");
+var tryLoginFromStoredCredentials_1 = require("../tryLoginFromStoredCredentials");
 var events_1 = require("./events");
 var restartApp_1 = require("../restartApp");
-exports.url = "wss://web." + env_1.baseDomain;
+exports.url = "wss://web." + env_1.env.baseDomain;
 var idString = "toBackend";
-env_1.isDevEnv;
+env_1.env.isDevEnv;
 /*
-const log: typeof console.log = isDevEnv ?
+const log: typeof console.log = env.isDevEnv ?
     ((...args) => console.log.apply(console, ["[toBackend/connection]", ...args])) :
     (() => { });
     */
@@ -12425,7 +12316,7 @@ exports.connect = (function () {
         hasBeenInvoked = true;
         //We register 'offline' event only on the first call of connect()
         //TODO: React native.
-        if (env.jsRuntimeEnv === "browser") {
+        if (env_1.env.jsRuntimeEnv === "browser") {
             window.addEventListener("offline", function () {
                 var socket = get();
                 if (socket instanceof Promise) {
@@ -12460,7 +12351,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                     notConnectedUserFeedback.setVisibility(true);
                     return [3 /*break*/, 4];
                 case 3:
-                    if (env.jsRuntimeEnv === "react-native") {
+                    if (env_1.env.jsRuntimeEnv === "react-native") {
                         throw new Error("never: getPreLoggedIn is not optional for react native");
                     }
                     restartApp_1.restartApp();
@@ -12486,7 +12377,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                     return [2 /*return*/];
                 case 7:
                     socket = new sip.Socket(webSocket, true, {
-                        "remoteAddress": "web." + env_1.baseDomain,
+                        "remoteAddress": "web." + env_1.env.baseDomain,
                         "remotePort": 443
                     }, 20000);
                     apiServer.startListening(socket);
@@ -12538,7 +12429,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../../tools/modal/dialog":147,"../../tools/urlGetParameters":153,"../env":117,"../localStorage/AuthenticatedSessionDescriptorSharedData":120,"../procedure/tryLoginFromStoredCredentials":127,"../restartApp":129,"./events":131,"./localApiHandlers":132,"ts-events-extended":170,"ts-sip":53}],131:[function(require,module,exports){
+},{"../../tools/modal/dialog":147,"../../tools/urlGetParameters":153,"../env":118,"../localStorage/AuthenticatedSessionDescriptorSharedData":120,"../restartApp":128,"../tryLoginFromStoredCredentials":136,"./events":130,"./localApiHandlers":131,"ts-events-extended":170,"ts-sip":53}],130:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12580,7 +12471,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 /** Posted when user register a new sim on he's LAN or accept a sharing request */
 exports.evtUsableSim = new ts_events_extended_1.SyncEvent();
-exports.evtSimIsOnlineStatusChange = new ts_events_extended_1.SyncEvent();
+exports.evtSimReachabilityStatusChange = new ts_events_extended_1.SyncEvent();
+/** NOTE: This is posted when an user lose access to the sim, the password
+ * is then renewed, there is not a special notify event from the server
+ * but the sim is re-notified online */
+exports.evtSimPasswordChanged = new ts_events_extended_1.SyncEvent();
 exports.evtSimGsmConnectivityChange = new ts_events_extended_1.SyncEvent();
 exports.evtOngoingCall = new ts_events_extended_1.SyncEvent();
 exports.evtSimCellSignalStrengthChange = new ts_events_extended_1.SyncEvent();
@@ -12622,7 +12517,7 @@ var rtcIceEServer;
     })();
 })(rtcIceEServer = exports.rtcIceEServer || (exports.rtcIceEServer = {}));
 
-},{"ts-events-extended":170}],132:[function(require,module,exports){
+},{"ts-events-extended":170}],131:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12664,7 +12559,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var apiDeclaration = require("../../sip_api_declarations/uaToBackend");
 var ts_events_extended_1 = require("ts-events-extended");
 var dcTypes = require("chan-dongle-extended-client/dist/lib/types");
-var env = require("../env");
+var env_1 = require("../env");
 var events_1 = require("./events");
 //NOTE: Global JS deps.
 var dialog_1 = require("../../tools/modal/dialog");
@@ -12697,7 +12592,7 @@ var getUsableUserSim = function (imsi) { return getRemoteApiCaller()
                             if (hadOngoingCall) {
                                 events_1.evtOngoingCall.post(userSim);
                             }
-                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            events_1.evtSimReachabilityStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
                 });
@@ -12719,7 +12614,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
         "handler": function (_a) {
             var imsi = _a.imsi, hasInternalSimStorageChanged = _a.hasInternalSimStorageChanged, password = _a.password, simDongle = _a.simDongle, gatewayLocation = _a.gatewayLocation, isGsmConnectivityOk = _a.isGsmConnectivityOk, cellSignalStrength = _a.cellSignalStrength;
             return __awaiter(void 0, void 0, void 0, function () {
-                var userSim;
+                var userSim, wasAlreadyReachable, hasPasswordChanged;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -12732,13 +12627,22 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
                                 restartApp_1.restartApp();
                                 return [2 /*return*/];
                             }
+                            wasAlreadyReachable = userSim.reachableSimState !== undefined;
                             userSim.reachableSimState = isGsmConnectivityOk ?
                                 ({ "isGsmConnectivityOk": true, cellSignalStrength: cellSignalStrength, "ongoingCall": undefined }) :
                                 ({ "isGsmConnectivityOk": false, cellSignalStrength: cellSignalStrength });
+                            hasPasswordChanged = userSim.password !== password;
                             userSim.password = password;
                             userSim.dongle = simDongle;
                             userSim.gatewayLocation = gatewayLocation;
-                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            if (wasAlreadyReachable && hasPasswordChanged) {
+                                events_1.evtSimPasswordChanged.post(userSim);
+                                return [2 /*return*/, undefined];
+                            }
+                            if (wasAlreadyReachable) {
+                                return [2 /*return*/, undefined];
+                            }
+                            events_1.evtSimReachabilityStatusChange.post(userSim);
                             return [2 /*return*/, undefined];
                     }
                 });
@@ -13120,7 +13024,7 @@ evtOngoingCall.attach(userSim => {
                     ].join("<br>");
                     return [4 /*yield*/, new Promise(function (resolve) { return dialogApi.create("dialog", {
                             "title": "SIM ready to be registered",
-                            "message": env.jsRuntimeEnv === "browser" ?
+                            "message": env_1.env.jsRuntimeEnv === "browser" ?
                                 "<p class=\"text-center\">" + shouldAdd_message + "</p>" :
                                 shouldAdd_message,
                             "buttons": {
@@ -13422,7 +13326,7 @@ evtOngoingCall.attach(userSim => {
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":143,"../../tools/modal/dialog":147,"../env":117,"../restartApp":129,"./events":131,"./remoteApiCaller":134,"chan-dongle-extended-client/dist/lib/types":155,"ts-events-extended":170}],133:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":143,"../../tools/modal/dialog":147,"../env":118,"../restartApp":128,"./events":130,"./remoteApiCaller":133,"chan-dongle-extended-client/dist/lib/types":155,"ts-events-extended":170}],132:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13528,7 +13432,7 @@ exports.getUsableUserSims = (function () {
             userSim.dongle = newUserSim.dongle;
             userSim.gatewayLocation = newUserSim.gatewayLocation;
             if (!!userSim.reachableSimState) {
-                events_1.evtSimIsOnlineStatusChange.post(userSim);
+                events_1.evtSimReachabilityStatusChange.post(userSim);
             }
         };
         try {
@@ -13565,7 +13469,7 @@ exports.getUsableUserSims = (function () {
                             if (!!_b.done) return [3 /*break*/, 4];
                             userSim = _b.value;
                             userSim.reachableSimState = undefined;
-                            events_1.evtSimIsOnlineStatusChange.post(userSim);
+                            events_1.evtSimReachabilityStatusChange.post(userSim);
                             _d.label = 3;
                         case 3:
                             _b = _a.next();
@@ -13905,7 +13809,7 @@ exports.shouldAppendPromotionalMessage = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":142,"../../restartApp":129,"../connection":130,"../events":131,"./sendRequest":135}],134:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":142,"../../restartApp":128,"../connection":129,"../events":130,"./sendRequest":134}],133:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -13914,7 +13818,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./base"));
 __export(require("./webphoneData"));
 
-},{"./base":133,"./webphoneData":136}],135:[function(require,module,exports){
+},{"./base":132,"./webphoneData":135}],134:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13983,7 +13887,7 @@ function sendRequest(methodName, params) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../restartApp":129,"../connection":130,"ts-sip":53}],136:[function(require,module,exports){
+},{"../../restartApp":128,"../connection":129,"ts-sip":53}],135:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -14598,7 +14502,131 @@ exports.notifyStatusReportReceived = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":142,"../../types/webphoneData/logic":139,"./sendRequest":135,"crypto-lib":16,"phone-number/dist/lib":45}],137:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":142,"../../types/webphoneData/logic":139,"./sendRequest":134,"crypto-lib":16,"phone-number/dist/lib":45}],136:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var env_1 = require("./env");
+var webApiCaller = require("./webApiCaller");
+var Credentials_1 = require("./localStorage/Credentials");
+var prResult = undefined;
+function tryLoginFromStoredCredentials() {
+    if (prResult !== undefined) {
+        return prResult;
+    }
+    prResult = (function callee() {
+        return __awaiter(this, void 0, void 0, function () {
+            var isUserLoggedIn, error_1, _a, email, secret, uaInstanceId, resp_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        webApiCaller.setCanRequestThrowToTrueForNextMethodCall();
+                        isUserLoggedIn = void 0;
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 5]);
+                        return [4 /*yield*/, webApiCaller.isUserLoggedIn()];
+                    case 2:
+                        isUserLoggedIn = _b.sent();
+                        return [3 /*break*/, 5];
+                    case 3:
+                        error_1 = _b.sent();
+                        if (!(error_1 instanceof webApiCaller.WebApiError)) {
+                            throw error_1;
+                        }
+                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 2000); })];
+                    case 4:
+                        _b.sent();
+                        return [2 /*return*/, callee()];
+                    case 5:
+                        if (isUserLoggedIn) {
+                            return [2 /*return*/, "LOGGED IN"];
+                        }
+                        if (env_1.env.jsRuntimeEnv === "browser") {
+                            return [2 /*return*/, "NO VALID CREDENTIALS"];
+                        }
+                        return [4 /*yield*/, Credentials_1.Credentials.isPresent()];
+                    case 6:
+                        if (!(_b.sent())) {
+                            return [2 /*return*/, "NO VALID CREDENTIALS"];
+                        }
+                        return [4 /*yield*/, Credentials_1.Credentials.get()];
+                    case 7:
+                        _a = _b.sent(), email = _a.email, secret = _a.secret, uaInstanceId = _a.uaInstanceId;
+                        return [4 /*yield*/, webApiCaller.loginUser(email, secret, uaInstanceId)
+                                .catch(function (error) {
+                                if (!(error instanceof webApiCaller.WebApiError)) {
+                                    throw error;
+                                }
+                                return error;
+                            })];
+                    case 8:
+                        resp_1 = _b.sent();
+                        if (!(resp_1 instanceof webApiCaller.WebApiError)) return [3 /*break*/, 10];
+                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 2000); })];
+                    case 9:
+                        _b.sent();
+                        return [2 /*return*/, callee()];
+                    case 10:
+                        if (!(resp_1.status === "RETRY STILL FORBIDDEN")) return [3 /*break*/, 12];
+                        //TODO: some log
+                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, resp_1.retryDelayLeft); })];
+                    case 11:
+                        //TODO: some log
+                        _b.sent();
+                        return [2 /*return*/, callee()];
+                    case 12:
+                        if (!(resp_1.status !== "SUCCESS")) return [3 /*break*/, 14];
+                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
+                    case 13:
+                        _b.sent();
+                        return [2 /*return*/, "NO VALID CREDENTIALS"];
+                    case 14: return [2 /*return*/, "LOGGED IN"];
+                }
+            });
+        });
+    })();
+    prResult.then(function () { return prResult = undefined; });
+    return tryLoginFromStoredCredentials();
+}
+exports.tryLoginFromStoredCredentials = tryLoginFromStoredCredentials;
+
+},{"./env":118,"./localStorage/Credentials":121,"./webApiCaller":140}],137:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectSidHttpHeaderName = "x-connect-sid";
@@ -14992,14 +15020,14 @@ var sendRequest_1 = require("./sendRequest");
 exports.WebApiError = sendRequest_1.WebApiError;
 var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
 var Credentials_1 = require("../localStorage/Credentials");
-var env = require("../env");
+var env_1 = require("../env");
 var ts_events_extended_1 = require("ts-events-extended");
 var restartApp_1 = require("../restartApp");
 var networkStateMonitoring = require("../networkStateMonitoring");
 var evtError = new ts_events_extended_1.SyncEvent();
 evtError.attach(function (_a) {
     var methodName = _a.methodName, httpErrorStatus = _a.httpErrorStatus;
-    switch (env.jsRuntimeEnv) {
+    switch (env_1.env.jsRuntimeEnv) {
         case "browser":
             {
                 switch (httpErrorStatus) {
@@ -15050,7 +15078,7 @@ var sendRequest = function (methodName, params) { return __awaiter(void 0, void 
                 _a = sendRequest_1.sendRequest;
                 _b = [methodName,
                     params];
-                _d = env.jsRuntimeEnv === "react-native";
+                _d = env_1.env.jsRuntimeEnv === "react-native";
                 if (!_d) return [3 /*break*/, 5];
                 return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
             case 4:
@@ -15114,7 +15142,7 @@ exports.loginUser = (function () {
                         if (response.status !== "SUCCESS") {
                             return [2 /*return*/, response];
                         }
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
                         return [4 /*yield*/, Credentials_1.Credentials.set({
                                 email: email,
                                 secret: secret,
@@ -15186,7 +15214,7 @@ exports.logoutUser = (function () {
                         return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
                     case 2:
                         _a.sent();
-                        if (!(env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
                         return [4 /*yield*/, Credentials_1.Credentials.remove()];
                     case 3:
                         _a.sent();
@@ -15299,7 +15327,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":154,"../env":117,"../localStorage/AuthenticatedSessionDescriptorSharedData":120,"../localStorage/Credentials":121,"../networkStateMonitoring":125,"../restartApp":129,"./sendRequest":141,"ts-events-extended":170}],141:[function(require,module,exports){
+},{"../../web_api_declaration":154,"../env":118,"../localStorage/AuthenticatedSessionDescriptorSharedData":120,"../localStorage/Credentials":121,"../networkStateMonitoring":125,"../restartApp":128,"./sendRequest":141,"ts-events-extended":170}],141:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -15363,7 +15391,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var connectSidHttpHeaderName_1 = require("../types/connectSidHttpHeaderName");
-var env = require("../env");
+var env_1 = require("../env");
 var JSON_CUSTOM_1 = require("transfer-tools/dist/lib/JSON_CUSTOM");
 var webApiPath_1 = require("../../gateway/webApiPath");
 var serializer = JSON_CUSTOM_1.get();
@@ -15385,7 +15413,7 @@ function sendRequest(methodName, params, connectSid) {
         var _c;
         return __generator(this, function (_d) {
             switch (_d.label) {
-                case 0: return [4 /*yield*/, fetch("https://web." + env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
+                case 0: return [4 /*yield*/, fetch("https://web." + env_1.env.baseDomain + webApiPath_1.webApiPath + "/" + methodName, {
                         "method": "POST",
                         "cache": "no-cache",
                         "credentials": "same-origin",
@@ -15418,7 +15446,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":115,"../env":117,"../types/connectSidHttpHeaderName":137,"transfer-tools/dist/lib/JSON_CUSTOM":165}],142:[function(require,module,exports){
+},{"../../gateway/webApiPath":115,"../env":118,"../types/connectSidHttpHeaderName":137,"transfer-tools/dist/lib/JSON_CUSTOM":165}],142:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
