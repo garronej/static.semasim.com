@@ -11793,7 +11793,7 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
                         _b)])];
             case 3:
                 ua = _d.sent();
-                connection.connect("REQUEST TURN CRED", undefined);
+                connection.connect({ "requestTurnCred": true });
                 $("#page-payload").html("");
                 dialog_1.dialogApi.loading("Decrypting your conversation history 🔐", 0);
                 return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
@@ -16825,38 +16825,6 @@ var UaSim = /** @class */ (function () {
             _this.evtIncomingMessage.post(__assign(__assign({}, evtData), { "onProcessed": onProcessed }));
             return pr;
         });
-        /*
-        public sendMessage(
-            number: phoneNumber,
-            text: string,
-            exactSendDate: Date,
-            appendPromotionalMessage: boolean
-        ): Promise<void> {
-            return new Promise<void>(
-                async (resolve, reject) => this.jsSipUa.sendMessage(
-                    `sip:${number}@${baseDomain}`,
-                    "| encrypted message bundled in header |",
-                    {
-                        "contentType": "text/plain; charset=UTF-8",
-                        "extraHeaders": await smuggleBundledDataInHeaders<gwTypes.BundledData.ClientToServer.Message>(
-                            {
-                                "type": "MESSAGE",
-                                "textB64": Buffer.from(text, "utf8").toString("base64"),
-                                "exactSendDateTime": exactSendDate.getTime(),
-                                appendPromotionalMessage
-                            },
-                            this.towardSimEncryptor
-                        ).then(headers => Object.keys(headers).map(key => `${key}: ${headers[key]}`)),
-                        "eventHandlers": {
-                            "succeeded": () => resolve(),
-                            "failed": ({ cause }) => reject(new Error(`Send message failed ${cause}`))
-                        }
-                    }
-                )
-            );
-        }
-        */
-        /** return exactSendDate to match with sendReport and statusReport */
         this.evtIncomingCall = new ts_events_extended_1.SyncEvent();
         var uri = this.jsSipSocket.sip_uri;
         var register_expires = 61;
@@ -16908,7 +16876,7 @@ var UaSim = /** @class */ (function () {
             _this.evtRegistrationStateChanged.post(true);
         });
         this.jsSipUa.on("unregistered", function () {
-            console.log("================>unregistered have been emitted");
+            console.log("ua sim unregistered");
             _this.isRegistered = false;
             _this.evtRegistrationStateChanged.post(false);
         });
@@ -16930,11 +16898,9 @@ var UaSim = /** @class */ (function () {
     }
     //TODO: If no response to register do something
     UaSim.prototype.register = function () {
-        console.log("====> register called");
         this.jsSipUa.register();
     };
     UaSim.prototype.unregister = function () {
-        console.log("=========> unregister called");
         if (!this.isRegistered) {
             return;
         }
@@ -17292,7 +17258,7 @@ var JsSipSocket = /** @class */ (function () {
                     case 6:
                         isSent = _b.sent();
                         if (!isSent) {
-                            console.log("==================> WARNING: websocket sip data was not sent successfully", data);
+                            console.log("WARNING: websocket sip data was not sent successfully", data);
                             return [3 /*break*/, 2];
                         }
                         return [3 /*break*/, 7];
@@ -18697,7 +18663,7 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
     log: log,
     "hideKeepAlive": true
 }));
-/** getPrLoggedIn is called when the user
+/** login is called when the user
  * is no longer logged in, it should return a Promise
  * that resolve when the user is logged back in
  * if not provided and if in browser the page will be reloaded
@@ -18705,7 +18671,7 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
  */
 exports.connect = (function () {
     var hasBeenInvoked = false;
-    return function (requestTurnCred, getPrLoggedIn) {
+    return function (params) {
         if (hasBeenInvoked) {
             return;
         }
@@ -18721,13 +18687,12 @@ exports.connect = (function () {
                 socket.destroy("Browser is offline");
             });
         }
-        //connectRecursive(requestTurnCred, getPrLoggedIn, false);
-        connectRecursive(requestTurnCred, getPrLoggedIn);
+        connectRecursive(params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED", params.login);
     };
 })();
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
 var socketCurrent = undefined;
-function connectRecursive(requestTurnCred, getPrLoggedIn) {
+function connectRecursive(requestTurnCred, login) {
     return __awaiter(this, void 0, void 0, function () {
         var result, webSocket, _a, _b, _c, _d, _e, _f, error_1, socket;
         var _this = this;
@@ -18739,16 +18704,16 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                 case 1:
                     result = _g.sent();
                     if (!(result === "NO VALID CREDENTIALS")) return [3 /*break*/, 4];
-                    if (!!!getPrLoggedIn) return [3 /*break*/, 3];
+                    if (!!!login) return [3 /*break*/, 3];
                     notConnectedUserFeedback.setVisibility(false);
-                    return [4 /*yield*/, getPrLoggedIn()];
+                    return [4 /*yield*/, login()];
                 case 2:
                     _g.sent();
                     notConnectedUserFeedback.setVisibility(true);
                     return [3 /*break*/, 4];
                 case 3:
                     if (env_1.env.jsRuntimeEnv === "react-native") {
-                        throw new Error("never: getPreLoggedIn is not optional for react native");
+                        throw new Error("never: no login function provided");
                     }
                     restartApp_1.restartApp();
                     return [2 /*return*/];
@@ -18769,7 +18734,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                     error_1 = _g.sent();
                     log("WebSocket construction error: " + error_1.message);
                     //connectRecursive(requestTurnCred, getPrLoggedIn, isReconnect);
-                    connectRecursive(requestTurnCred, getPrLoggedIn);
+                    connectRecursive(requestTurnCred, login);
                     return [2 /*return*/];
                 case 7:
                     socket = new sip.Socket(webSocket, true, {
@@ -18804,7 +18769,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                             if (events_1.evtOpenElsewhere.postCount !== 0) {
                                 return [2 /*return*/];
                             }
-                            connectRecursive(requestTurnCred, getPrLoggedIn);
+                            connectRecursive(requestTurnCred, login);
                             return [2 /*return*/];
                         });
                     }); });

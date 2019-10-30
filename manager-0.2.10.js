@@ -11586,7 +11586,7 @@ function onLoggedIn() {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    connection.connect("DO NOT REQUEST TURN CRED", undefined);
+                    connection.connect({ "requestTurnCred": false });
                     _a = UiController_1.UiController.bind;
                     return [4 /*yield*/, remoteApiCaller.getUsableUserSims()];
                 case 1:
@@ -12301,7 +12301,7 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
     log: log,
     "hideKeepAlive": true
 }));
-/** getPrLoggedIn is called when the user
+/** login is called when the user
  * is no longer logged in, it should return a Promise
  * that resolve when the user is logged back in
  * if not provided and if in browser the page will be reloaded
@@ -12309,7 +12309,7 @@ var apiServer = new sip.api.Server(localApiHandlers.handlers, sip.api.Server.get
  */
 exports.connect = (function () {
     var hasBeenInvoked = false;
-    return function (requestTurnCred, getPrLoggedIn) {
+    return function (params) {
         if (hasBeenInvoked) {
             return;
         }
@@ -12325,13 +12325,12 @@ exports.connect = (function () {
                 socket.destroy("Browser is offline");
             });
         }
-        //connectRecursive(requestTurnCred, getPrLoggedIn, false);
-        connectRecursive(requestTurnCred, getPrLoggedIn);
+        connectRecursive(params.requestTurnCred ? "REQUEST TURN CRED" : "DO NOT REQUEST TURN CRED", params.login);
     };
 })();
 exports.evtConnect = new ts_events_extended_1.SyncEvent();
 var socketCurrent = undefined;
-function connectRecursive(requestTurnCred, getPrLoggedIn) {
+function connectRecursive(requestTurnCred, login) {
     return __awaiter(this, void 0, void 0, function () {
         var result, webSocket, _a, _b, _c, _d, _e, _f, error_1, socket;
         var _this = this;
@@ -12343,16 +12342,16 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                 case 1:
                     result = _g.sent();
                     if (!(result === "NO VALID CREDENTIALS")) return [3 /*break*/, 4];
-                    if (!!!getPrLoggedIn) return [3 /*break*/, 3];
+                    if (!!!login) return [3 /*break*/, 3];
                     notConnectedUserFeedback.setVisibility(false);
-                    return [4 /*yield*/, getPrLoggedIn()];
+                    return [4 /*yield*/, login()];
                 case 2:
                     _g.sent();
                     notConnectedUserFeedback.setVisibility(true);
                     return [3 /*break*/, 4];
                 case 3:
                     if (env_1.env.jsRuntimeEnv === "react-native") {
-                        throw new Error("never: getPreLoggedIn is not optional for react native");
+                        throw new Error("never: no login function provided");
                     }
                     restartApp_1.restartApp();
                     return [2 /*return*/];
@@ -12373,7 +12372,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                     error_1 = _g.sent();
                     log("WebSocket construction error: " + error_1.message);
                     //connectRecursive(requestTurnCred, getPrLoggedIn, isReconnect);
-                    connectRecursive(requestTurnCred, getPrLoggedIn);
+                    connectRecursive(requestTurnCred, login);
                     return [2 /*return*/];
                 case 7:
                     socket = new sip.Socket(webSocket, true, {
@@ -12408,7 +12407,7 @@ function connectRecursive(requestTurnCred, getPrLoggedIn) {
                             if (events_1.evtOpenElsewhere.postCount !== 0) {
                                 return [2 /*return*/];
                             }
-                            connectRecursive(requestTurnCred, getPrLoggedIn);
+                            connectRecursive(requestTurnCred, login);
                             return [2 /*return*/];
                         });
                     }); });
