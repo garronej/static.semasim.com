@@ -66,7 +66,8 @@ function toByteArray (b64) {
     ? validLen - 4
     : validLen
 
-  for (var i = 0; i < len; i += 4) {
+  var i
+  for (i = 0; i < len; i += 4) {
     tmp =
       (revLookup[b64.charCodeAt(i)] << 18) |
       (revLookup[b64.charCodeAt(i + 1)] << 12) |
@@ -165,6 +166,10 @@ function fromByteArray (uint8) {
 
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
+var customInspectSymbol =
+  (typeof Symbol === 'function' && typeof Symbol.for === 'function')
+    ? Symbol.for('nodejs.util.inspect.custom')
+    : null
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -201,7 +206,9 @@ function typedArraySupport () {
   // Can typed array instances can be augmented?
   try {
     var arr = new Uint8Array(1)
-    arr.__proto__ = { __proto__: Uint8Array.prototype, foo: function () { return 42 } }
+    var proto = { foo: function () { return 42 } }
+    Object.setPrototypeOf(proto, Uint8Array.prototype)
+    Object.setPrototypeOf(arr, proto)
     return arr.foo() === 42
   } catch (e) {
     return false
@@ -230,7 +237,7 @@ function createBuffer (length) {
   }
   // Return an augmented `Uint8Array` instance
   var buf = new Uint8Array(length)
-  buf.__proto__ = Buffer.prototype
+  Object.setPrototypeOf(buf, Buffer.prototype)
   return buf
 }
 
@@ -280,7 +287,7 @@ function from (value, encodingOrOffset, length) {
   }
 
   if (value == null) {
-    throw TypeError(
+    throw new TypeError(
       'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
       'or Array-like Object. Received type ' + (typeof value)
     )
@@ -332,8 +339,8 @@ Buffer.from = function (value, encodingOrOffset, length) {
 
 // Note: Change prototype *after* Buffer.from is defined to workaround Chrome bug:
 // https://github.com/feross/buffer/pull/148
-Buffer.prototype.__proto__ = Uint8Array.prototype
-Buffer.__proto__ = Uint8Array
+Object.setPrototypeOf(Buffer.prototype, Uint8Array.prototype)
+Object.setPrototypeOf(Buffer, Uint8Array)
 
 function assertSize (size) {
   if (typeof size !== 'number') {
@@ -437,7 +444,8 @@ function fromArrayBuffer (array, byteOffset, length) {
   }
 
   // Return an augmented `Uint8Array` instance
-  buf.__proto__ = Buffer.prototype
+  Object.setPrototypeOf(buf, Buffer.prototype)
+
   return buf
 }
 
@@ -759,6 +767,9 @@ Buffer.prototype.inspect = function inspect () {
   if (this.length > max) str += ' ... '
   return '<Buffer ' + str + '>'
 }
+if (customInspectSymbol) {
+  Buffer.prototype[customInspectSymbol] = Buffer.prototype.inspect
+}
 
 Buffer.prototype.compare = function compare (target, start, end, thisStart, thisEnd) {
   if (isInstance(target, Uint8Array)) {
@@ -884,7 +895,7 @@ function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
         return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset)
       }
     }
-    return arrayIndexOf(buffer, [ val ], byteOffset, encoding, dir)
+    return arrayIndexOf(buffer, [val], byteOffset, encoding, dir)
   }
 
   throw new TypeError('val must be string, number or Buffer')
@@ -1213,7 +1224,7 @@ function hexSlice (buf, start, end) {
 
   var out = ''
   for (var i = start; i < end; ++i) {
-    out += toHex(buf[i])
+    out += hexSliceLookupTable[buf[i]]
   }
   return out
 }
@@ -1250,7 +1261,8 @@ Buffer.prototype.slice = function slice (start, end) {
 
   var newBuf = this.subarray(start, end)
   // Return an augmented `Uint8Array` instance
-  newBuf.__proto__ = Buffer.prototype
+  Object.setPrototypeOf(newBuf, Buffer.prototype)
+
   return newBuf
 }
 
@@ -1739,6 +1751,8 @@ Buffer.prototype.fill = function fill (val, start, end, encoding) {
     }
   } else if (typeof val === 'number') {
     val = val & 255
+  } else if (typeof val === 'boolean') {
+    val = Number(val)
   }
 
   // Invalid ranges are not set to a default, so can range check early.
@@ -1794,11 +1808,6 @@ function base64clean (str) {
     str = str + '='
   }
   return str
-}
-
-function toHex (n) {
-  if (n < 16) return '0' + n.toString(16)
-  return n.toString(16)
 }
 
 function utf8ToBytes (string, units) {
@@ -1930,6 +1939,20 @@ function numberIsNaN (obj) {
   // For IE11 support
   return obj !== obj // eslint-disable-line no-self-compare
 }
+
+// Create lookup table for `toString('hex')`
+// See: https://github.com/feross/buffer/issues/219
+var hexSliceLookupTable = (function () {
+  var alphabet = '0123456789abcdef'
+  var table = new Array(256)
+  for (var i = 0; i < 16; ++i) {
+    var i16 = i * 16
+    for (var j = 0; j < 16; ++j) {
+      table[i16 + j] = alphabet[i] + alphabet[j]
+    }
+  }
+  return table
+})()
 
 }).call(this,require("buffer").Buffer)
 },{"base64-js":1,"buffer":2,"ieee754":3}],3:[function(require,module,exports){
@@ -2155,7 +2178,7 @@ var UiCartEntry = /** @class */ (function () {
     return UiCartEntry;
 }());
 
-},{"../templates/UiCart.html":13,"../templates/UiCart.less":14,"frontend-shared/dist/lib/env":27,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/shipping":37,"frontend-shared/dist/lib/types/shop":40,"frontend-shared/dist/tools/currency":43,"frontend-shared/node_modules/ts-events-extended":66}],5:[function(require,module,exports){
+},{"../templates/UiCart.html":13,"../templates/UiCart.less":14,"frontend-shared/dist/lib/env":27,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/shipping":38,"frontend-shared/dist/lib/types/shop":41,"frontend-shared/dist/tools/currency":44,"frontend-shared/node_modules/ts-events-extended":67}],5:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -2289,7 +2312,7 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../templates/UiController.html":15,"./UiCart":4,"./UiCurrency":6,"./UiProduct":7,"./UiShipTo":8,"./UiShippingForm":9,"frontend-shared/dist/lib/env":27,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/shopProducts":38,"frontend-shared/dist/lib/webApiCaller":41,"frontend-shared/dist/tools/currency":43,"frontend-shared/dist/tools/modal/dialog":46}],6:[function(require,module,exports){
+},{"../templates/UiController.html":15,"./UiCart":4,"./UiCurrency":6,"./UiProduct":7,"./UiShipTo":8,"./UiShippingForm":9,"frontend-shared/dist/lib/env":27,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/shopProducts":39,"frontend-shared/dist/lib/webApiCaller":42,"frontend-shared/dist/tools/currency":44,"frontend-shared/dist/tools/modal/dialog":47}],6:[function(require,module,exports){
 "use strict";
 //NOTE: Assert Select2 v4.0.6-rc.0 loaded.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -2444,7 +2467,7 @@ var UiCurrency = /** @class */ (function () {
 }());
 exports.UiCurrency = UiCurrency;
 
-},{"../templates/UiCurrency.html":16,"../templates/UiCurrency.less":17,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/currency":43,"frontend-shared/dist/tools/modal/dialog":46,"frontend-shared/node_modules/ts-events-extended":66}],7:[function(require,module,exports){
+},{"../templates/UiCurrency.html":16,"../templates/UiCurrency.less":17,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/currency":44,"frontend-shared/dist/tools/modal/dialog":47,"frontend-shared/node_modules/ts-events-extended":67}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -2516,7 +2539,7 @@ var UiProduct = /** @class */ (function () {
 }());
 exports.UiProduct = UiProduct;
 
-},{"../templates/UiProduct.html":18,"../templates/UiProduct.less":19,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/types/shop":40,"frontend-shared/dist/tools/currency":43,"frontend-shared/node_modules/ts-events-extended":66}],8:[function(require,module,exports){
+},{"../templates/UiProduct.html":18,"../templates/UiProduct.less":19,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/types/shop":41,"frontend-shared/dist/tools/currency":44,"frontend-shared/node_modules/ts-events-extended":67}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -2564,7 +2587,7 @@ var UiShipTo = /** @class */ (function () {
 }());
 exports.UiShipTo = UiShipTo;
 
-},{"../templates/UiShipTo.html":20,"../templates/UiShipTo.less":21,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/node_modules/ts-events-extended":66}],9:[function(require,module,exports){
+},{"../templates/UiShipTo.html":20,"../templates/UiShipTo.less":21,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/node_modules/ts-events-extended":67}],9:[function(require,module,exports){
 "use strict";
 //NOTE: assert maps.googleapis.com/maps/api/js?libraries=places loaded ( or loading ) on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -2763,7 +2786,7 @@ var UiShippingForm = /** @class */ (function () {
 }());
 exports.UiShippingForm = UiShippingForm;
 
-},{"../templates/UiShippingForm.html":22,"../templates/UiShippingForm.less":23,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/modal":49,"frontend-shared/node_modules/ts-events-extended":66}],10:[function(require,module,exports){
+},{"../templates/UiShippingForm.html":22,"../templates/UiShippingForm.less":23,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/modal":50,"frontend-shared/node_modules/ts-events-extended":67}],10:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -2837,7 +2860,7 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
     });
 }); });
 
-},{"./UiController":5,"frontend-shared/dist/lib/availablePages":25,"frontend-shared/dist/lib/webApiCaller":41,"frontend-shared/dist/tools/currency":43}],11:[function(require,module,exports){
+},{"./UiController":5,"frontend-shared/dist/lib/availablePages":25,"frontend-shared/dist/lib/webApiCaller":42,"frontend-shared/dist/tools/currency":44}],11:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -2907,7 +2930,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"semasim-gateway/dist/web_api_declaration":68}],25:[function(require,module,exports){
+},{"semasim-gateway/dist/web_api_declaration":69}],25:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -2944,13 +2967,20 @@ var PageName;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Defined at ejs building in templates/head_common.ejs
-var default_ = {
+//NOTE: If windows is not defined it mean that we are running on node, performing some integration tests.
+var default_ = typeof window !== "undefined" ? ({
     "assetsRoot": window["assets_root"],
     "isDevEnv": window["isDevEnv"],
     "baseDomain": window.location.href.match(/^https:\/\/web\.([^\/]+)/)[1],
     "jsRuntimeEnv": "browser",
     "hostOs": undefined
-};
+}) : ({
+    "assetsRoot": "https://static.semasim.com/",
+    "isDevEnv": false,
+    "baseDomain": "dev.semasim.com",
+    "jsRuntimeEnv": "browser",
+    "hostOs": undefined
+});
 exports.default = default_;
 
 },{}],27:[function(require,module,exports){
@@ -3027,10 +3057,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var ts_events_extended_1 = require("ts-events-extended");
 var localStorageApi = require("./localStorageApi");
 var key = "authenticated-session-descriptor-shared-data";
 var AuthenticatedSessionDescriptorSharedData;
 (function (AuthenticatedSessionDescriptorSharedData) {
+    /** Can be used to track when the user is logged in */
+    AuthenticatedSessionDescriptorSharedData.evtChange = new ts_events_extended_1.SyncEvent();
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
             var value;
@@ -3049,7 +3082,9 @@ var AuthenticatedSessionDescriptorSharedData;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, isPresent()];
+                    case 0:
+                        AuthenticatedSessionDescriptorSharedData.evtChange.post(undefined);
+                        return [4 /*yield*/, isPresent()];
                     case 1:
                         if (!(_a.sent())) {
                             return [2 /*return*/];
@@ -3088,6 +3123,7 @@ var AuthenticatedSessionDescriptorSharedData;
                     case 0: return [4 /*yield*/, localStorageApi.setItem(key, Buffer.from(JSON.stringify(authenticatedSessionDescriptorSharedData), "utf8").toString("hex"))];
                     case 1:
                         _a.sent();
+                        AuthenticatedSessionDescriptorSharedData.evtChange.post(authenticatedSessionDescriptorSharedData);
                         return [2 /*return*/];
                 }
             });
@@ -3097,7 +3133,7 @@ var AuthenticatedSessionDescriptorSharedData;
 })(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./localStorageApi":32,"buffer":2}],30:[function(require,module,exports){
+},{"./localStorageApi":33,"buffer":2,"ts-events-extended":67}],30:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -3205,12 +3241,105 @@ var Credentials;
     Credentials.set = set;
 })(Credentials = exports.Credentials || (exports.Credentials = {}));
 
-},{"./localStorageApi":32}],31:[function(require,module,exports){
+},{"./localStorageApi":33}],31:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var localStorageApi = require("./localStorageApi");
+var key = "declaredPushNotificationToken";
+function get() {
+    return __awaiter(this, void 0, void 0, function () {
+        var value;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
+                case 1:
+                    value = _a.sent();
+                    if (value === null) {
+                        return [2 /*return*/, undefined];
+                    }
+                    return [2 /*return*/, value];
+            }
+        });
+    });
+}
+exports.get = get;
+function set(value) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, localStorageApi.setItem(key, value)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.set = set;
+function remove() {
+    return __awaiter(this, void 0, void 0, function () {
+        var _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _a = null;
+                    return [4 /*yield*/, get()];
+                case 1:
+                    if (_a === (_b.sent())) {
+                        return [2 /*return*/];
+                    }
+                    return [4 /*yield*/, localStorageApi.removeItem(key)];
+                case 2:
+                    _b.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.remove = remove;
+
+},{"./localStorageApi":33}],32:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = localStorage;
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -3275,7 +3404,7 @@ function removeItem(key) {
 }
 exports.removeItem = removeItem;
 
-},{"./asyncOrSyncLocalStorage":31}],33:[function(require,module,exports){
+},{"./asyncOrSyncLocalStorage":32}],34:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -3290,31 +3419,32 @@ var api = {
 };
 exports.getApi = function () { return Promise.resolve(api); };
 
-},{"ts-events-extended":66}],34:[function(require,module,exports){
+},{"ts-events-extended":67}],35:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.getApi = impl_1.getApi;
 
-},{"./impl":33}],35:[function(require,module,exports){
+},{"./impl":34}],36:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("../env");
-var default_ = function () {
+var default_ = function (reason) {
     if (env_1.env.isDevEnv) {
-        throw new Error("In prod the app would have been restarted");
+        alert("About to restart app, reason: " + reason);
     }
     location.reload();
+    return new Promise(function () { });
 };
 exports.default = default_;
 
-},{"../env":27}],36:[function(require,module,exports){
+},{"../env":27}],37:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.restartApp = impl_1.default;
 
-},{"./impl":35}],37:[function(require,module,exports){
+},{"./impl":36}],38:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -3537,7 +3667,7 @@ function solve(destinationCountryIso, footprint, weight) {
 }
 exports.solve = solve;
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function getProducts(assetsRoot) {
@@ -3593,12 +3723,12 @@ function getProducts(assetsRoot) {
 exports.getProducts = getProducts;
 ;
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectSidHttpHeaderName = "x-connect-sid";
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -3777,7 +3907,7 @@ var ShippingFormData;
     ShippingFormData.toStripeShippingInformation = toStripeShippingInformation;
 })(ShippingFormData = exports.ShippingFormData || (exports.ShippingFormData = {}));
 
-},{"../../tools/currency":43}],41:[function(require,module,exports){
+},{"../../tools/currency":44}],42:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -3824,6 +3954,7 @@ var Credentials_1 = require("../localStorage/Credentials");
 var env_1 = require("../env");
 var ts_events_extended_1 = require("ts-events-extended");
 var restartApp_1 = require("../restartApp");
+var declaredPushNotificationToken = require("../localStorage/declaredPushNotificationToken");
 var networkStateMonitoring = require("../networkStateMonitoring");
 var evtError = new ts_events_extended_1.SyncEvent();
 evtError.attach(function (_a) {
@@ -3833,7 +3964,7 @@ evtError.attach(function (_a) {
             {
                 switch (httpErrorStatus) {
                     case 401:
-                        restartApp_1.restartApp();
+                        restartApp_1.restartApp("Wep api 401");
                         break;
                         ;
                     case 500:
@@ -3851,8 +3982,7 @@ evtError.attach(function (_a) {
             break;
         case "react-native":
             {
-                console.log("WebApi Error: " + methodName + " " + httpErrorStatus);
-                restartApp_1.restartApp();
+                restartApp_1.restartApp("WebApi Error: " + methodName + " " + httpErrorStatus);
             }
             break;
     }
@@ -3927,12 +4057,13 @@ exports.validateEmail = (function () {
         return sendRequest(methodName, { email: email, activationCode: activationCode });
     };
 })();
-/** uaInstanceId should be provided on android/iOS and undefined on the web */
+/** uaInstanceId should be provided on android/ios and undefined on the web */
 exports.loginUser = (function () {
     var methodName = apiDeclaration.loginUser.methodName;
     return function (email, secret, uaInstanceId) {
         return __awaiter(this, void 0, void 0, function () {
             var response;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -3940,26 +4071,62 @@ exports.loginUser = (function () {
                         return [4 /*yield*/, sendRequest(methodName, { email: email, secret: secret, uaInstanceId: uaInstanceId })];
                     case 1:
                         response = _a.sent();
-                        if (response.status !== "SUCCESS") {
-                            return [2 /*return*/, response];
-                        }
-                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
-                        return [4 /*yield*/, Credentials_1.Credentials.set({
-                                email: email,
-                                secret: secret,
-                                "uaInstanceId": uaInstanceId
-                            })];
+                        if (!(response.status !== "SUCCESS")) return [3 /*break*/, 4];
+                        if (!(response.status !== "RETRY STILL FORBIDDEN")) return [3 /*break*/, 3];
+                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
                     case 2:
                         _a.sent();
                         _a.label = 3;
-                    case 3: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.set({
+                    case 3: return [2 /*return*/, response];
+                    case 4:
+                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 6];
+                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                                var previousCred, _a;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0: return [4 /*yield*/, Credentials_1.Credentials.isPresent()];
+                                        case 1:
+                                            if (!(_b.sent())) return [3 /*break*/, 3];
+                                            return [4 /*yield*/, Credentials_1.Credentials.get()];
+                                        case 2:
+                                            _a = _b.sent();
+                                            return [3 /*break*/, 4];
+                                        case 3:
+                                            _a = undefined;
+                                            _b.label = 4;
+                                        case 4:
+                                            previousCred = _a;
+                                            if (!!previousCred &&
+                                                previousCred.email === email &&
+                                                previousCred.secret === secret &&
+                                                previousCred.uaInstanceId === uaInstanceId) {
+                                                return [2 /*return*/];
+                                            }
+                                            return [4 /*yield*/, Promise.all([
+                                                    Credentials_1.Credentials.set({
+                                                        email: email,
+                                                        secret: secret,
+                                                        "uaInstanceId": uaInstanceId
+                                                    }),
+                                                    declaredPushNotificationToken.remove()
+                                                ])];
+                                        case 5:
+                                            _b.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); })()];
+                    case 5:
+                        _a.sent();
+                        _a.label = 6;
+                    case 6: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.set({
                             "connect_sid": response.connect_sid,
                             email: email,
                             "encryptedSymmetricKey": response.encryptedSymmetricKey,
                             "uaInstanceId": uaInstanceId === undefined ?
                                 response.webUaInstanceId : uaInstanceId
                         })];
-                    case 4:
+                    case 7:
                         _a.sent();
                         return [2 /*return*/, { "status": response.status }];
                 }
@@ -3974,15 +4141,20 @@ exports.isUserLoggedIn = (function () {
             var isLoggedIn;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
+                    case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
                     case 1:
-                        isLoggedIn = _a.sent();
-                        if (!!isLoggedIn) return [3 /*break*/, 3];
-                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
+                        if (!(_a.sent())) {
+                            return [2 /*return*/, false];
+                        }
+                        return [4 /*yield*/, sendRequest(methodName, undefined)];
                     case 2:
+                        isLoggedIn = _a.sent();
+                        if (!!isLoggedIn) return [3 /*break*/, 4];
+                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
+                    case 3:
                         _a.sent();
-                        _a.label = 3;
-                    case 3: return [2 /*return*/, isLoggedIn];
+                        _a.label = 4;
+                    case 4: return [2 /*return*/, isLoggedIn];
                 }
             });
         });
@@ -4128,7 +4300,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":51,"../env":27,"../localStorage/AuthenticatedSessionDescriptorSharedData":29,"../localStorage/Credentials":30,"../networkStateMonitoring":34,"../restartApp":36,"./sendRequest":42,"ts-events-extended":66}],42:[function(require,module,exports){
+},{"../../web_api_declaration":52,"../env":27,"../localStorage/AuthenticatedSessionDescriptorSharedData":29,"../localStorage/Credentials":30,"../localStorage/declaredPushNotificationToken":31,"../networkStateMonitoring":35,"../restartApp":37,"./sendRequest":43,"ts-events-extended":67}],43:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -4239,7 +4411,7 @@ function sendRequest(methodName, params, connectSid) {
                     return [4 /*yield*/, fetchResp.text()];
                 case 2:
                     resp = _b.apply(_a, [_d.sent()]);
-                    console.log(methodName, { params: params, resp: resp });
+                    console.log("(webApi call) methodName: " + methodName, { params: params, resp: resp });
                     return [2 /*return*/, resp];
             }
         });
@@ -4247,7 +4419,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":24,"../env":27,"../types/connectSidHttpHeaderName":39,"transfer-tools/dist/lib/JSON_CUSTOM":61}],43:[function(require,module,exports){
+},{"../../gateway/webApiPath":24,"../env":27,"../types/connectSidHttpHeaderName":40,"transfer-tools/dist/lib/JSON_CUSTOM":62}],44:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -4447,7 +4619,7 @@ function prettyPrint(amount, currency) {
 }
 exports.prettyPrint = prettyPrint;
 
-},{"../../res/currency.json":67}],44:[function(require,module,exports){
+},{"../../res/currency.json":68}],45:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -4480,7 +4652,7 @@ function createGenericProxyForBootstrapModal($initializedModalDiv) {
 }
 exports.createGenericProxyForBootstrapModal = createGenericProxyForBootstrapModal;
 
-},{"ts-events-extended":66}],45:[function(require,module,exports){
+},{"ts-events-extended":67}],46:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
@@ -4514,7 +4686,7 @@ var loading;
 })(loading || (loading = {}));
 exports.getApi = function () { return customImplementationOfApi || bootboxBasedImplementationOfBaseApi; };
 
-},{"../createGenericProxyForBootstrapModal":44}],46:[function(require,module,exports){
+},{"../createGenericProxyForBootstrapModal":45}],47:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -4737,11 +4909,11 @@ exports.dialogApi = {
     }
 };
 
-},{"../stack":50,"./getApi":45,"./types":47,"run-exclusive":58}],47:[function(require,module,exports){
+},{"../stack":51,"./getApi":46,"./types":48,"run-exclusive":59}],48:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("./createGenericProxyForBootstrapModal");
@@ -4759,7 +4931,7 @@ var bootstrapBasedImplementationOfApi = {
 };
 exports.getApi = function () { return customImplementationOfApi || bootstrapBasedImplementationOfApi; };
 
-},{"./createGenericProxyForBootstrapModal":44}],49:[function(require,module,exports){
+},{"./createGenericProxyForBootstrapModal":45}],50:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -4783,7 +4955,7 @@ function createModal(structure, options) {
 }
 exports.createModal = createModal;
 
-},{"./getApi":48,"./stack":50}],50:[function(require,module,exports){
+},{"./getApi":49,"./stack":51}],51:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -4908,7 +5080,7 @@ function add(modal) {
 }
 exports.add = add;
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
@@ -4976,7 +5148,7 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -5030,21 +5202,21 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":52}],54:[function(require,module,exports){
+},{"./implementation":53}],55:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":53}],55:[function(require,module,exports){
+},{"function-bind":54}],56:[function(require,module,exports){
 // https://tc39.github.io/ecma262/#sec-array.prototype.find
 if (!Array.prototype.find) {
     Object.defineProperty(Array.prototype, 'find', {
@@ -5085,7 +5257,7 @@ if (!Array.prototype.find) {
     });
 }
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var LightMapImpl = /** @class */ (function () {
@@ -5146,13 +5318,13 @@ var LightMapImpl = /** @class */ (function () {
 }());
 exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var Map_1 = require("./Map");
 exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
 
-},{"./Map":56}],58:[function(require,module,exports){
+},{"./Map":57}],59:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -5445,7 +5617,7 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{"minimal-polyfills/dist/lib/WeakMap":57}],59:[function(require,module,exports){
+},{"minimal-polyfills/dist/lib/WeakMap":58}],60:[function(require,module,exports){
 'use strict'
 /* eslint no-proto: 0 */
 module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
@@ -5464,7 +5636,7 @@ function mixinProperties (obj, proto) {
   return obj
 }
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -5799,7 +5971,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":54}],61:[function(require,module,exports){
+},{"has":55}],62:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -5849,7 +6021,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":60}],62:[function(require,module,exports){
+},{"super-json":61}],63:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -5890,7 +6062,7 @@ var VoidSyncEvent = /** @class */ (function (_super) {
 }(SyncEvent));
 exports.VoidSyncEvent = VoidSyncEvent;
 
-},{"./SyncEventBase":63}],63:[function(require,module,exports){
+},{"./SyncEventBase":64}],64:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -6108,7 +6280,7 @@ var SyncEventBase = /** @class */ (function (_super) {
 }(SyncEventBaseProtected_1.SyncEventBaseProtected));
 exports.SyncEventBase = SyncEventBase;
 
-},{"./SyncEventBaseProtected":64}],64:[function(require,module,exports){
+},{"./SyncEventBaseProtected":65}],65:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -6395,7 +6567,7 @@ var SyncEventBaseProtected = /** @class */ (function () {
 }());
 exports.SyncEventBaseProtected = SyncEventBaseProtected;
 
-},{"./defs":65,"minimal-polyfills/dist/lib/Array.prototype.find":55,"minimal-polyfills/dist/lib/Map":56,"run-exclusive":58}],65:[function(require,module,exports){
+},{"./defs":66,"minimal-polyfills/dist/lib/Array.prototype.find":56,"minimal-polyfills/dist/lib/Map":57,"run-exclusive":59}],66:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -6436,7 +6608,7 @@ var EvtError;
     EvtError.Detached = Detached;
 })(EvtError = exports.EvtError || (exports.EvtError = {}));
 
-},{"setprototypeof":59}],66:[function(require,module,exports){
+},{"setprototypeof":60}],67:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var SyncEvent_1 = require("./SyncEvent");
@@ -6445,7 +6617,7 @@ exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
 var defs_1 = require("./defs");
 exports.EvtError = defs_1.EvtError;
 
-},{"./SyncEvent":62,"./defs":65}],67:[function(require,module,exports){
+},{"./SyncEvent":63,"./defs":66}],68:[function(require,module,exports){
 module.exports={
   "usd": {
     "symbol": "$",
@@ -7354,7 +7526,7 @@ module.exports={
   }
 }
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
