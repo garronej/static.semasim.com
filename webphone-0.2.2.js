@@ -10444,7 +10444,6 @@ var UiHeader = /** @class */ (function () {
                 _this.userSim.reachableSimState.isGsmConnectivityOk &&
                 cellSignalStrength === _this.userSim.reachableSimState.cellSignalStrength) ? "show" : "hide"]();
         });
-        console.log(JSON.stringify(this.userSim, null, 2));
         (function () {
             var divConf = _this.structure.find(".id_conf");
             if (!_this.userSim.reachableSimState ||
@@ -11249,7 +11248,12 @@ exports.phoneCallUiCreateFactory = function (params) {
     if (params.assertJsRuntimeEnv !== "browser") {
         throw new Error("wrong assertion");
     }
-    return Promise.resolve(function (userSim) { return new PhoneCallUiImpl(userSim); });
+    return Promise.resolve(function (params) {
+        if (params.assertJsRuntimeEnv !== "browser") {
+            throw new Error("wrong assertion");
+        }
+        return new PhoneCallUiImpl(params.userSim);
+    });
 };
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiVoiceCall.html"), "UiVoiceCall");
 var PhoneCallUiImpl = /** @class */ (function () {
@@ -11263,7 +11267,7 @@ var PhoneCallUiImpl = /** @class */ (function () {
         this.evtBtnClick = new ts_events_extended_1.SyncEvent();
         this.evtNumpadDtmf = new ts_events_extended_1.SyncEvent();
         this.state = "TERMINATED";
-        this.onIncoming = function (wdChat) {
+        this.openUiForIncomingCall = function (wdChat) {
             _this.setContact(wdChat);
             _this.setArrows("INCOMING");
             _this.setState("RINGING", "Incoming call");
@@ -11284,11 +11288,13 @@ var PhoneCallUiImpl = /** @class */ (function () {
                 }); })
             };
         };
-        this.onOutgoing = function (wdChat) {
+        this.evtUiOpenedForOutgoingCall = new ts_events_extended_1.SyncEvent();
+        this.openUiForOutgoingCall = function (wdChat) {
             _this.setContact(wdChat);
             _this.setArrows("OUTGOING");
             _this.setState("LOADING", "Loading...");
-            return {
+            _this.evtUiOpenedForOutgoingCall.post({
+                "phoneNumber": wdChat.contactNumber,
                 "onTerminated": function (message) { return _this.setState("TERMINATED", message); },
                 "onRingback": function () {
                     _this.setState("RINGBACK", "Remote is ringing");
@@ -11304,7 +11310,7 @@ var PhoneCallUiImpl = /** @class */ (function () {
                     _this.setState("TERMINATED", "You canceled the call before remote was ringing");
                     resolve({ "userAction": "CANCEL" });
                 }); })
-            };
+            });
         };
         this.countryIso = (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso;
         {
@@ -16186,303 +16192,297 @@ var Webphone;
 (function (Webphone) {
     function createFactory(params) {
         return __awaiter(this, void 0, void 0, function () {
-            var sipUserAgentCreate, appEvts, getWdApiCallerForSpecificSim, coreApiCaller, phoneCallUiCreateFactory, obsSipRegistrationCount, phoneCallUiCreate;
+            var sipUserAgentCreate, appEvts, getWdApiCallerForSpecificSim, coreApiCaller, phoneCallUiCreate;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        sipUserAgentCreate = params.sipUserAgentCreate, appEvts = params.appEvts, getWdApiCallerForSpecificSim = params.getWdApiCallerForSpecificSim, coreApiCaller = params.coreApiCaller, phoneCallUiCreateFactory = params.phoneCallUiCreateFactory;
-                        obsSipRegistrationCount = new Observable_1.ObservableImpl(0);
-                        return [4 /*yield*/, phoneCallUiCreateFactory((function () {
-                                switch (env_1.env.jsRuntimeEnv) {
-                                    case "browser": {
-                                        return id_1.id({
-                                            "assertJsRuntimeEnv": "browser"
-                                        });
-                                    }
-                                    case "react-native": {
-                                        return id_1.id({
-                                            "assertJsRuntimeEnv": "react-native",
-                                            "obsIsAtLeastOneSipRegistration": (function () {
-                                                var getIsAtLeastOneSipRegistration = function () { return obsSipRegistrationCount.value !== 0; };
-                                                var out = new Observable_1.ObservableImpl(getIsAtLeastOneSipRegistration());
-                                                obsSipRegistrationCount.evtChange.attach(function () { return out.onPotentialChange(getIsAtLeastOneSipRegistration()); });
-                                                return out;
-                                            })()
-                                        });
-                                    }
-                                }
-                            })())];
-                    case 1:
-                        phoneCallUiCreate = _a.sent();
-                        return [2 /*return*/, function create(userSim) {
-                                return __awaiter(this, void 0, void 0, function () {
-                                    var phoneCallUi, sipUserAgent, wdApiCallerForSpecificSim, _a, wdChats, wdEvts, obsIsSipRegistered, webphone;
-                                    var _this = this;
-                                    return __generator(this, function (_b) {
-                                        switch (_b.label) {
-                                            case 0:
-                                                phoneCallUi = phoneCallUiCreate(userSim);
-                                                sipUserAgent = sipUserAgentCreate(userSim);
-                                                wdApiCallerForSpecificSim = getWdApiCallerForSpecificSim(userSim.sim.imsi);
-                                                return [4 /*yield*/, wdApiCallerForSpecificSim.getUserSimChats(20)];
-                                            case 1:
-                                                _a = _b.sent(), wdChats = _a.wdChats, wdEvts = _a.wdEvts;
-                                                return [4 /*yield*/, synchronizeUserSimAndWdInstance(userSim, wdChats, wdApiCallerForSpecificSim)];
-                                            case 2:
-                                                _b.sent();
-                                                obsIsSipRegistered = new Observable_1.ObservableImpl(sipUserAgent.isRegistered);
-                                                obsIsSipRegistered.evtChange.attach(function (isRegistered) {
-                                                    return obsSipRegistrationCount.onPotentialChange(obsSipRegistrationCount.value + (isRegistered ? 1 : -1));
-                                                });
-                                                webphone = {
-                                                    userSim: userSim,
-                                                    "evtUserSimUpdated": new ts_events_extended_1.SyncEvent(),
-                                                    wdChats: wdChats,
-                                                    wdEvts: wdEvts,
-                                                    obsIsSipRegistered: obsIsSipRegistered,
-                                                    "sendMessage": function (wdChat, text) { return __awaiter(_this, void 0, void 0, function () {
-                                                        var bundledData, _a, _b, onUaFailedToSendMessage, error_1;
-                                                        return __generator(this, function (_c) {
-                                                            switch (_c.label) {
-                                                                case 0:
-                                                                    _a = {
-                                                                        "type": "MESSAGE",
-                                                                        "text": text,
-                                                                        "exactSendDateTime": Date.now()
-                                                                    };
-                                                                    _b = "appendPromotionalMessage";
-                                                                    return [4 /*yield*/, coreApiCaller.shouldAppendPromotionalMessage()];
-                                                                case 1:
-                                                                    bundledData = (_a[_b] = _c.sent(),
-                                                                        _a);
-                                                                    return [4 /*yield*/, wdApiCallerForSpecificSim.newMessage(wdChat, {
-                                                                            "type": "CLIENT TO SERVER",
-                                                                            bundledData: bundledData
-                                                                        })];
-                                                                case 2:
-                                                                    onUaFailedToSendMessage = (_c.sent()).onUaFailedToSendMessage;
-                                                                    _c.label = 3;
-                                                                case 3:
-                                                                    _c.trys.push([3, 5, , 7]);
-                                                                    return [4 /*yield*/, sipUserAgent.sendMessage(wdChat.contactNumber, bundledData)];
-                                                                case 4:
-                                                                    _c.sent();
-                                                                    return [3 /*break*/, 7];
-                                                                case 5:
-                                                                    error_1 = _c.sent();
-                                                                    console.log("ua send message error", error_1);
-                                                                    return [4 /*yield*/, onUaFailedToSendMessage()];
-                                                                case 6:
-                                                                    _c.sent();
-                                                                    return [3 /*break*/, 7];
-                                                                case 7: return [2 /*return*/];
-                                                            }
-                                                        });
-                                                    }); },
-                                                    "placeOutgoingCall": function (wdChat) { return __awaiter(_this, void 0, void 0, function () {
-                                                        var _a, logic_prNextState, logic_prTerminated, logic_terminate, _b, ui_onTerminated, ui_prUserInput, ui_onRingback;
-                                                        return __generator(this, function (_c) {
-                                                            switch (_c.label) {
-                                                                case 0: return [4 /*yield*/, sipUserAgent.placeOutgoingCall(wdChat.contactNumber)];
-                                                                case 1:
-                                                                    _a = _c.sent(), logic_prNextState = _a.prNextState, logic_prTerminated = _a.prTerminated, logic_terminate = _a.terminate;
-                                                                    _b = phoneCallUi.onOutgoing(wdChat), ui_onTerminated = _b.onTerminated, ui_prUserInput = _b.prUserInput, ui_onRingback = _b.onRingback;
-                                                                    logic_prTerminated.then(function () { return ui_onTerminated("Call terminated"); });
-                                                                    ui_prUserInput.then(function () { return logic_terminate(); });
-                                                                    logic_prNextState.then(function (_a) {
-                                                                        var logic_prNextState = _a.prNextState;
-                                                                        var _b = ui_onRingback(), ui_onEstablished = _b.onEstablished, ui_prUserInput = _b.prUserInput;
-                                                                        ui_prUserInput.then(function () { return logic_terminate(); });
-                                                                        logic_prNextState.then(function (_a) {
-                                                                            var logic_sendDtmf = _a.sendDtmf;
-                                                                            var ui_evtUserInput = ui_onEstablished().evtUserInput;
-                                                                            ui_evtUserInput.attach(function (eventData) {
-                                                                                return eventData.userAction === "DTMF";
-                                                                            }, function (_a) {
-                                                                                var signal = _a.signal, duration = _a.duration;
-                                                                                return logic_sendDtmf(signal, duration);
-                                                                            });
-                                                                            ui_evtUserInput.attachOnce(function (_a) {
-                                                                                var userAction = _a.userAction;
-                                                                                return userAction === "HANGUP";
-                                                                            }, function () { return logic_terminate(); });
-                                                                        });
-                                                                    });
-                                                                    return [2 /*return*/];
-                                                            }
-                                                        });
-                                                    }); },
-                                                    "fetchOlderWdMessages": wdApiCallerForSpecificSim.fetchOlderMessages,
-                                                    "updateWdChatLastMessageSeen": wdApiCallerForSpecificSim.updateChatLastMessageSeen,
-                                                    "getAndOrCreateAndOrUpdateWdChat": function (number, contactName, contactIndexInSim) { return __awaiter(_this, void 0, void 0, function () {
-                                                        var wdChat, contactNumber_1;
-                                                        return __generator(this, function (_a) {
-                                                            switch (_a.label) {
-                                                                case 0:
-                                                                    wdChat = wdChats.find(function (_a) {
-                                                                        var contactNumber = _a.contactNumber;
-                                                                        return lib_1.phoneNumber.areSame(contactNumber, number);
-                                                                    });
-                                                                    if (!!wdChat) return [3 /*break*/, 2];
-                                                                    contactNumber_1 = lib_1.phoneNumber.build(number, userSim.sim.country ? userSim.sim.country.iso : undefined);
-                                                                    wdApiCallerForSpecificSim.newChat(wdChats, contactNumber_1, contactName === undefined ? "" : contactName, contactIndexInSim === undefined ? null : contactIndexInSim);
-                                                                    return [4 /*yield*/, wdEvts.evtNewUpdatedOrDeletedWdChat.waitFor(function (_a) {
-                                                                            var wdChat = _a.wdChat, eventType = _a.eventType;
-                                                                            return (eventType === "NEW" &&
-                                                                                wdChat.contactNumber === contactNumber_1);
-                                                                        })];
-                                                                case 1:
-                                                                    wdChat = (_a.sent()).wdChat;
-                                                                    return [3 /*break*/, 4];
-                                                                case 2: return [4 /*yield*/, wdApiCallerForSpecificSim.updateChatContactInfos(wdChat, contactName !== undefined ? contactName : wdChat.contactName, contactIndexInSim !== undefined ? contactIndexInSim : wdChat.contactIndexInSim)];
-                                                                case 3:
-                                                                    _a.sent();
-                                                                    _a.label = 4;
-                                                                case 4: return [2 /*return*/, wdChat];
-                                                            }
-                                                        });
-                                                    }); },
-                                                    "updateNameOfWdChatAndCreateOrUpdateCorespondingContactInSim": function (wdChat, name) { return __awaiter(_this, void 0, void 0, function () {
-                                                        var contact;
-                                                        return __generator(this, function (_a) {
-                                                            switch (_a.label) {
-                                                                case 0:
-                                                                    contact = findCorrespondingContactInUserSim(userSim, wdChat);
-                                                                    if (!!!contact) return [3 /*break*/, 2];
-                                                                    return [4 /*yield*/, coreApiCaller.updateContactName(userSim, contact, name)];
-                                                                case 1:
-                                                                    _a.sent();
-                                                                    return [3 /*break*/, 4];
-                                                                case 2: return [4 /*yield*/, coreApiCaller.createContact(userSim, name, wdChat.contactNumber)];
-                                                                case 3:
-                                                                    contact = _a.sent();
-                                                                    _a.label = 4;
-                                                                case 4: return [4 /*yield*/, webphone.getAndOrCreateAndOrUpdateWdChat(wdChat.contactNumber, name, contact.mem_index !== undefined ? contact.mem_index : null)];
-                                                                case 5:
-                                                                    _a.sent();
-                                                                    return [2 /*return*/];
-                                                            }
-                                                        });
-                                                    }); },
-                                                    "deleteWdChatAndCorrespondingContactInSim": function (wdChat) { return __awaiter(_this, void 0, void 0, function () {
-                                                        var contact;
-                                                        return __generator(this, function (_a) {
-                                                            switch (_a.label) {
-                                                                case 0:
-                                                                    contact = findCorrespondingContactInUserSim(userSim, wdChat);
-                                                                    if (!!!contact) return [3 /*break*/, 2];
-                                                                    return [4 /*yield*/, coreApiCaller.deleteContact(userSim, contact)];
-                                                                case 1:
-                                                                    _a.sent();
-                                                                    _a.label = 2;
-                                                                case 2: return [4 /*yield*/, wdApiCallerForSpecificSim.destroyWdChat(wdChats, wdChat.ref)];
-                                                                case 3:
-                                                                    _a.sent();
-                                                                    return [2 /*return*/];
-                                                            }
-                                                        });
-                                                    }); }
-                                                };
-                                                sipUserAgent.evtIncomingMessage.attach(function (_a) {
-                                                    var fromNumber = _a.fromNumber, bundledData = _a.bundledData, handlerCb = _a.handlerCb;
-                                                    return __awaiter(_this, void 0, void 0, function () {
-                                                        var wdChat;
-                                                        return __generator(this, function (_b) {
-                                                            switch (_b.label) {
-                                                                case 0: return [4 /*yield*/, webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber)];
-                                                                case 1:
-                                                                    wdChat = _b.sent();
-                                                                    return [4 /*yield*/, (function () {
-                                                                            switch (bundledData.type) {
-                                                                                case "MESSAGE":
-                                                                                case "CALL ANSWERED BY":
-                                                                                case "FROM SIP CALL SUMMARY":
-                                                                                case "MISSED CALL":
-                                                                                case "MMS NOTIFICATION":
-                                                                                    return wdApiCallerForSpecificSim.newMessage(wdChat, { "type": "SERVER TO CLIENT", bundledData: bundledData });
-                                                                                case "SEND REPORT":
-                                                                                    return wdApiCallerForSpecificSim.notifySendReportReceived(wdChat, bundledData);
-                                                                                case "STATUS REPORT":
-                                                                                    return wdApiCallerForSpecificSim.notifyStatusReportReceived(wdChat, bundledData);
-                                                                            }
-                                                                        })()];
-                                                                case 2:
-                                                                    _b.sent();
-                                                                    handlerCb();
-                                                                    return [2 /*return*/];
-                                                            }
-                                                        });
+                sipUserAgentCreate = params.sipUserAgentCreate, appEvts = params.appEvts, getWdApiCallerForSpecificSim = params.getWdApiCallerForSpecificSim, coreApiCaller = params.coreApiCaller, phoneCallUiCreate = params.phoneCallUiCreate;
+                return [2 /*return*/, function create(userSim) {
+                        return __awaiter(this, void 0, void 0, function () {
+                            var obsIsSipRegistered, sipUserAgent, wdApiCallerForSpecificSim, _a, wdChats, wdEvts, phoneCallUi, webphone;
+                            var _this = this;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0:
+                                        obsIsSipRegistered = new Observable_1.ObservableImpl(false);
+                                        sipUserAgent = sipUserAgentCreate(userSim);
+                                        wdApiCallerForSpecificSim = getWdApiCallerForSpecificSim(userSim.sim.imsi);
+                                        return [4 /*yield*/, wdApiCallerForSpecificSim.getUserSimChats(20)];
+                                    case 1:
+                                        _a = _b.sent(), wdChats = _a.wdChats, wdEvts = _a.wdEvts;
+                                        return [4 /*yield*/, synchronizeUserSimAndWdInstance(userSim, wdChats, wdApiCallerForSpecificSim)];
+                                    case 2:
+                                        _b.sent();
+                                        phoneCallUi = phoneCallUiCreate((function () {
+                                            switch (env_1.env.jsRuntimeEnv) {
+                                                case "browser": {
+                                                    return id_1.id({
+                                                        "assertJsRuntimeEnv": "browser",
+                                                        userSim: userSim
                                                     });
-                                                });
-                                                sipUserAgent.evtIncomingCall.attach(function (evtData) { return __awaiter(_this, void 0, void 0, function () {
-                                                    var fromNumber, logic_terminate, logic_prTerminated, logic_onAccepted, _a, ui_onTerminated, ui_prUserInput, _b, _c;
-                                                    return __generator(this, function (_d) {
-                                                        switch (_d.label) {
-                                                            case 0:
-                                                                fromNumber = evtData.fromNumber, logic_terminate = evtData.terminate, logic_prTerminated = evtData.prTerminated, logic_onAccepted = evtData.onAccepted;
-                                                                _c = (_b = phoneCallUi).onIncoming;
-                                                                return [4 /*yield*/, webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber)];
-                                                            case 1:
-                                                                _a = _c.apply(_b, [_d.sent()]), ui_onTerminated = _a.onTerminated, ui_prUserInput = _a.prUserInput;
-                                                                logic_prTerminated.then(function () { return ui_onTerminated("Call ended"); });
-                                                                ui_prUserInput.then(function (ui_userInput) {
-                                                                    if (ui_userInput.userAction === "REJECT") {
-                                                                        logic_terminate();
-                                                                        return;
-                                                                    }
-                                                                    var ui_onEstablished = ui_userInput.onEstablished;
-                                                                    logic_onAccepted().then(function (_a) {
-                                                                        var logic_sendDtmf = _a.sendDtmf;
-                                                                        var ui_evtUserInput = ui_onEstablished().evtUserInput;
-                                                                        ui_evtUserInput.attach(function (eventData) {
-                                                                            return eventData.userAction === "DTMF";
-                                                                        }, function (_a) {
-                                                                            var signal = _a.signal, duration = _a.duration;
-                                                                            return logic_sendDtmf(signal, duration);
-                                                                        });
-                                                                        ui_evtUserInput.attachOnce(function (_a) {
-                                                                            var userAction = _a.userAction;
-                                                                            return userAction === "HANGUP";
-                                                                        }, function () { return logic_terminate(); });
-                                                                    });
-                                                                });
-                                                                return [2 /*return*/];
-                                                        }
-                                                    });
-                                                }); });
-                                                sipUserAgent.evtRegistrationStateChange.attach(function () { return obsIsSipRegistered.onPotentialChange(sipUserAgent.isRegistered); });
-                                                appEvts.evtContactCreatedOrUpdated.attach(function (_a) {
-                                                    var userSim = _a.userSim;
-                                                    return userSim === webphone.userSim;
-                                                }, function (_a) {
-                                                    var contact = _a.contact;
-                                                    return webphone.getAndOrCreateAndOrUpdateWdChat(contact.number_raw, contact.name, contact.mem_index !== undefined ? contact.mem_index : null);
-                                                });
-                                                appEvts.evtContactDeleted.attach(function (_a) {
-                                                    var userSim = _a.userSim;
-                                                    return userSim === webphone.userSim;
-                                                }, function (_a) {
-                                                    var contact = _a.contact;
-                                                    return webphone.getAndOrCreateAndOrUpdateWdChat(contact.number_raw, "", null);
-                                                });
-                                                appEvts.evtSimReachabilityStatusChange.attach(function (userSim) { return userSim === webphone.userSim; }, function () {
-                                                    if (!!userSim.reachableSimState) {
-                                                        sipUserAgent.register();
-                                                    }
-                                                    webphone.evtUserSimUpdated.post("reachabilityStatusChange");
-                                                });
-                                                appEvts.evtSimGsmConnectivityChange.attach(function (userSim) { return userSim === webphone.userSim; }, function () { return webphone.evtUserSimUpdated.post("gsmConnectivityChange"); });
-                                                appEvts.evtSimCellSignalStrengthChange.attach(function (userSim) { return userSim === webphone.userSim; }, function () { return webphone.evtUserSimUpdated.post("cellSignalStrengthChange"); });
-                                                appEvts.evtOngoingCall.attach(function (userSim) { return userSim === webphone.userSim; }, function () { return webphone.evtUserSimUpdated.post("ongoingCall"); });
-                                                if (!!userSim.reachableSimState) {
-                                                    sipUserAgent.register();
                                                 }
-                                                return [2 /*return*/, webphone];
+                                                case "react-native": {
+                                                    return id_1.id({
+                                                        "assertJsRuntimeEnv": "react-native",
+                                                        userSim: userSim,
+                                                        obsIsSipRegistered: obsIsSipRegistered
+                                                    });
+                                                }
+                                            }
+                                        })());
+                                        webphone = {
+                                            userSim: userSim,
+                                            "evtUserSimUpdated": new ts_events_extended_1.SyncEvent(),
+                                            wdChats: wdChats,
+                                            wdEvts: wdEvts,
+                                            obsIsSipRegistered: obsIsSipRegistered,
+                                            "sendMessage": function (wdChat, text) { return __awaiter(_this, void 0, void 0, function () {
+                                                var bundledData, _a, _b, onUaFailedToSendMessage, error_1;
+                                                return __generator(this, function (_c) {
+                                                    switch (_c.label) {
+                                                        case 0:
+                                                            _a = {
+                                                                "type": "MESSAGE",
+                                                                "text": text,
+                                                                "exactSendDateTime": Date.now()
+                                                            };
+                                                            _b = "appendPromotionalMessage";
+                                                            return [4 /*yield*/, coreApiCaller.shouldAppendPromotionalMessage()];
+                                                        case 1:
+                                                            bundledData = (_a[_b] = _c.sent(),
+                                                                _a);
+                                                            return [4 /*yield*/, wdApiCallerForSpecificSim.newMessage(wdChat, {
+                                                                    "type": "CLIENT TO SERVER",
+                                                                    bundledData: bundledData
+                                                                })];
+                                                        case 2:
+                                                            onUaFailedToSendMessage = (_c.sent()).onUaFailedToSendMessage;
+                                                            _c.label = 3;
+                                                        case 3:
+                                                            _c.trys.push([3, 5, , 7]);
+                                                            return [4 /*yield*/, sipUserAgent.sendMessage(wdChat.contactNumber, bundledData)];
+                                                        case 4:
+                                                            _c.sent();
+                                                            return [3 /*break*/, 7];
+                                                        case 5:
+                                                            error_1 = _c.sent();
+                                                            console.log("ua send message error", error_1);
+                                                            return [4 /*yield*/, onUaFailedToSendMessage()];
+                                                        case 6:
+                                                            _c.sent();
+                                                            return [3 /*break*/, 7];
+                                                        case 7: return [2 /*return*/];
+                                                    }
+                                                });
+                                            }); },
+                                            "placeOutgoingCall": function (wdChat) { return __awaiter(_this, void 0, void 0, function () {
+                                                return __generator(this, function (_a) {
+                                                    phoneCallUi.openUiForOutgoingCall(wdChat);
+                                                    return [2 /*return*/];
+                                                });
+                                            }); },
+                                            "fetchOlderWdMessages": wdApiCallerForSpecificSim.fetchOlderMessages,
+                                            "updateWdChatLastMessageSeen": wdApiCallerForSpecificSim.updateChatLastMessageSeen,
+                                            "getAndOrCreateAndOrUpdateWdChat": function (number, contactName, contactIndexInSim) { return __awaiter(_this, void 0, void 0, function () {
+                                                var wdChat, contactNumber_1;
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0:
+                                                            wdChat = wdChats.find(function (_a) {
+                                                                var contactNumber = _a.contactNumber;
+                                                                return lib_1.phoneNumber.areSame(contactNumber, number);
+                                                            });
+                                                            if (!!wdChat) return [3 /*break*/, 2];
+                                                            contactNumber_1 = lib_1.phoneNumber.build(number, userSim.sim.country ? userSim.sim.country.iso : undefined);
+                                                            wdApiCallerForSpecificSim.newChat(wdChats, contactNumber_1, contactName === undefined ? "" : contactName, contactIndexInSim === undefined ? null : contactIndexInSim);
+                                                            return [4 /*yield*/, wdEvts.evtNewUpdatedOrDeletedWdChat.waitFor(function (_a) {
+                                                                    var wdChat = _a.wdChat, eventType = _a.eventType;
+                                                                    return (eventType === "NEW" &&
+                                                                        wdChat.contactNumber === contactNumber_1);
+                                                                })];
+                                                        case 1:
+                                                            wdChat = (_a.sent()).wdChat;
+                                                            return [3 /*break*/, 4];
+                                                        case 2: return [4 /*yield*/, wdApiCallerForSpecificSim.updateChatContactInfos(wdChat, contactName !== undefined ? contactName : wdChat.contactName, contactIndexInSim !== undefined ? contactIndexInSim : wdChat.contactIndexInSim)];
+                                                        case 3:
+                                                            _a.sent();
+                                                            _a.label = 4;
+                                                        case 4: return [2 /*return*/, wdChat];
+                                                    }
+                                                });
+                                            }); },
+                                            "updateNameOfWdChatAndCreateOrUpdateCorespondingContactInSim": function (wdChat, name) { return __awaiter(_this, void 0, void 0, function () {
+                                                var contact;
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0:
+                                                            contact = findCorrespondingContactInUserSim(userSim, wdChat);
+                                                            if (!!!contact) return [3 /*break*/, 2];
+                                                            return [4 /*yield*/, coreApiCaller.updateContactName(userSim, contact, name)];
+                                                        case 1:
+                                                            _a.sent();
+                                                            return [3 /*break*/, 4];
+                                                        case 2: return [4 /*yield*/, coreApiCaller.createContact(userSim, name, wdChat.contactNumber)];
+                                                        case 3:
+                                                            contact = _a.sent();
+                                                            _a.label = 4;
+                                                        case 4: return [4 /*yield*/, webphone.getAndOrCreateAndOrUpdateWdChat(wdChat.contactNumber, name, contact.mem_index !== undefined ? contact.mem_index : null)];
+                                                        case 5:
+                                                            _a.sent();
+                                                            return [2 /*return*/];
+                                                    }
+                                                });
+                                            }); },
+                                            "deleteWdChatAndCorrespondingContactInSim": function (wdChat) { return __awaiter(_this, void 0, void 0, function () {
+                                                var contact;
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0:
+                                                            contact = findCorrespondingContactInUserSim(userSim, wdChat);
+                                                            if (!!!contact) return [3 /*break*/, 2];
+                                                            return [4 /*yield*/, coreApiCaller.deleteContact(userSim, contact)];
+                                                        case 1:
+                                                            _a.sent();
+                                                            _a.label = 2;
+                                                        case 2: return [4 /*yield*/, wdApiCallerForSpecificSim.destroyWdChat(wdChats, wdChat.ref)];
+                                                        case 3:
+                                                            _a.sent();
+                                                            return [2 /*return*/];
+                                                    }
+                                                });
+                                            }); }
+                                        };
+                                        sipUserAgent.evtIncomingMessage.attach(function (_a) {
+                                            var fromNumber = _a.fromNumber, bundledData = _a.bundledData, handlerCb = _a.handlerCb;
+                                            return __awaiter(_this, void 0, void 0, function () {
+                                                var wdChat;
+                                                return __generator(this, function (_b) {
+                                                    switch (_b.label) {
+                                                        case 0: return [4 /*yield*/, webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber)];
+                                                        case 1:
+                                                            wdChat = _b.sent();
+                                                            return [4 /*yield*/, (function () {
+                                                                    switch (bundledData.type) {
+                                                                        case "MESSAGE":
+                                                                        case "CALL ANSWERED BY":
+                                                                        case "FROM SIP CALL SUMMARY":
+                                                                        case "MISSED CALL":
+                                                                        case "MMS NOTIFICATION":
+                                                                            return wdApiCallerForSpecificSim.newMessage(wdChat, { "type": "SERVER TO CLIENT", bundledData: bundledData });
+                                                                        case "SEND REPORT":
+                                                                            return wdApiCallerForSpecificSim.notifySendReportReceived(wdChat, bundledData);
+                                                                        case "STATUS REPORT":
+                                                                            return wdApiCallerForSpecificSim.notifyStatusReportReceived(wdChat, bundledData);
+                                                                    }
+                                                                })()];
+                                                        case 2:
+                                                            _b.sent();
+                                                            handlerCb();
+                                                            return [2 /*return*/];
+                                                    }
+                                                });
+                                            });
+                                        });
+                                        sipUserAgent.evtIncomingCall.attach(function (evtData) { return __awaiter(_this, void 0, void 0, function () {
+                                            var fromNumber, logic_terminate, logic_prTerminated, logic_onAccepted, _a, ui_onTerminated, ui_prUserInput, _b, _c;
+                                            return __generator(this, function (_d) {
+                                                switch (_d.label) {
+                                                    case 0:
+                                                        fromNumber = evtData.fromNumber, logic_terminate = evtData.terminate, logic_prTerminated = evtData.prTerminated, logic_onAccepted = evtData.onAccepted;
+                                                        _c = (_b = phoneCallUi).openUiForIncomingCall;
+                                                        return [4 /*yield*/, webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber)];
+                                                    case 1:
+                                                        _a = _c.apply(_b, [_d.sent()]), ui_onTerminated = _a.onTerminated, ui_prUserInput = _a.prUserInput;
+                                                        logic_prTerminated.then(function () { return ui_onTerminated("Call ended"); });
+                                                        ui_prUserInput.then(function (ui_userInput) {
+                                                            if (ui_userInput.userAction === "REJECT") {
+                                                                logic_terminate();
+                                                                return;
+                                                            }
+                                                            var ui_onEstablished = ui_userInput.onEstablished;
+                                                            logic_onAccepted().then(function (_a) {
+                                                                var logic_sendDtmf = _a.sendDtmf;
+                                                                var ui_evtUserInput = ui_onEstablished().evtUserInput;
+                                                                ui_evtUserInput.attach(function (eventData) {
+                                                                    return eventData.userAction === "DTMF";
+                                                                }, function (_a) {
+                                                                    var signal = _a.signal, duration = _a.duration;
+                                                                    return logic_sendDtmf(signal, duration);
+                                                                });
+                                                                ui_evtUserInput.attachOnce(function (_a) {
+                                                                    var userAction = _a.userAction;
+                                                                    return userAction === "HANGUP";
+                                                                }, function () { return logic_terminate(); });
+                                                            });
+                                                        });
+                                                        return [2 /*return*/];
+                                                }
+                                            });
+                                        }); });
+                                        phoneCallUi.evtUiOpenedForOutgoingCall.attach(function (evtData) { return __awaiter(_this, void 0, void 0, function () {
+                                            var phoneNumber, ui_onTerminated, ui_prUserInput, ui_onRingback, _a, logic_prNextState, logic_prTerminated, logic_terminate;
+                                            return __generator(this, function (_b) {
+                                                switch (_b.label) {
+                                                    case 0:
+                                                        phoneNumber = evtData.phoneNumber, ui_onTerminated = evtData.onTerminated, ui_prUserInput = evtData.prUserInput, ui_onRingback = evtData.onRingback;
+                                                        return [4 /*yield*/, sipUserAgent.placeOutgoingCall(phoneNumber)];
+                                                    case 1:
+                                                        _a = _b.sent(), logic_prNextState = _a.prNextState, logic_prTerminated = _a.prTerminated, logic_terminate = _a.terminate;
+                                                        logic_prTerminated.then(function () { return ui_onTerminated("Call terminated"); });
+                                                        ui_prUserInput.then(function () { return logic_terminate(); });
+                                                        logic_prNextState.then(function (_a) {
+                                                            var logic_prNextState = _a.prNextState;
+                                                            var _b = ui_onRingback(), ui_onEstablished = _b.onEstablished, ui_prUserInput = _b.prUserInput;
+                                                            ui_prUserInput.then(function () { return logic_terminate(); });
+                                                            logic_prNextState.then(function (_a) {
+                                                                var logic_sendDtmf = _a.sendDtmf;
+                                                                var ui_evtUserInput = ui_onEstablished().evtUserInput;
+                                                                ui_evtUserInput.attach(function (eventData) {
+                                                                    return eventData.userAction === "DTMF";
+                                                                }, function (_a) {
+                                                                    var signal = _a.signal, duration = _a.duration;
+                                                                    return logic_sendDtmf(signal, duration);
+                                                                });
+                                                                ui_evtUserInput.attachOnce(function (_a) {
+                                                                    var userAction = _a.userAction;
+                                                                    return userAction === "HANGUP";
+                                                                }, function () { return logic_terminate(); });
+                                                            });
+                                                        });
+                                                        return [2 /*return*/];
+                                                }
+                                            });
+                                        }); });
+                                        sipUserAgent.evtRegistrationStateChange.attach(function () { return obsIsSipRegistered.onPotentialChange(sipUserAgent.isRegistered); });
+                                        appEvts.evtContactCreatedOrUpdated.attach(function (_a) {
+                                            var userSim = _a.userSim;
+                                            return userSim === webphone.userSim;
+                                        }, function (_a) {
+                                            var contact = _a.contact;
+                                            return webphone.getAndOrCreateAndOrUpdateWdChat(contact.number_raw, contact.name, contact.mem_index !== undefined ? contact.mem_index : null);
+                                        });
+                                        appEvts.evtContactDeleted.attach(function (_a) {
+                                            var userSim = _a.userSim;
+                                            return userSim === webphone.userSim;
+                                        }, function (_a) {
+                                            var contact = _a.contact;
+                                            return webphone.getAndOrCreateAndOrUpdateWdChat(contact.number_raw, "", null);
+                                        });
+                                        appEvts.evtSimReachabilityStatusChange.attach(function (userSim) { return userSim === webphone.userSim; }, function () {
+                                            if (!!userSim.reachableSimState) {
+                                                sipUserAgent.register();
+                                            }
+                                            webphone.evtUserSimUpdated.post("reachabilityStatusChange");
+                                        });
+                                        appEvts.evtSimGsmConnectivityChange.attach(function (userSim) { return userSim === webphone.userSim; }, function () { return webphone.evtUserSimUpdated.post("gsmConnectivityChange"); });
+                                        appEvts.evtSimCellSignalStrengthChange.attach(function (userSim) { return userSim === webphone.userSim; }, function () { return webphone.evtUserSimUpdated.post("cellSignalStrengthChange"); });
+                                        appEvts.evtOngoingCall.attach(function (userSim) { return userSim === webphone.userSim; }, function () { return webphone.evtUserSimUpdated.post("ongoingCall"); });
+                                        if (!!userSim.reachableSimState) {
+                                            sipUserAgent.register();
                                         }
-                                    });
-                                });
-                            }];
-                }
+                                        return [2 /*return*/, webphone];
+                                }
+                            });
+                        });
+                    }];
             });
         });
     }
@@ -16741,21 +16741,21 @@ function appLauncher(params) {
 exports.appLauncher = appLauncher;
 function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedData) {
     return __awaiter(this, void 0, void 0, function () {
-        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, pushNotificationToken, prCreateWebphone, _e, _f;
+        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, pushNotificationToken, userSims, prCreateWebphone, _e, _f, _g, _h;
         var _this = this;
-        return __generator(this, function (_g) {
-            switch (_g.label) {
+        return __generator(this, function (_j) {
+            switch (_j.label) {
                 case 0:
                     encryptedSymmetricKey = authenticatedSessionDescriptorSharedData.encryptedSymmetricKey, email = authenticatedSessionDescriptorSharedData.email, uaInstanceId = authenticatedSessionDescriptorSharedData.uaInstanceId;
                     _b = appCryptoSetupHelper_1.appCryptoSetupHelper;
                     _c = {};
                     _d = "towardUserKeys";
                     return [4 /*yield*/, TowardUserKeys_1.TowardUserKeys.retrieve()];
-                case 1: return [4 /*yield*/, _b.apply(void 0, [(_c[_d] = _g.sent(),
+                case 1: return [4 /*yield*/, _b.apply(void 0, [(_c[_d] = _j.sent(),
                             _c.encryptedSymmetricKey = encryptedSymmetricKey,
                             _c)])];
                 case 2:
-                    _a = _g.sent(), paramsNeededToEncryptDecryptWebphoneData = _a.paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa = _a.paramsNeededToInstantiateUa;
+                    _a = _j.sent(), paramsNeededToEncryptDecryptWebphoneData = _a.paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa = _a.paramsNeededToInstantiateUa;
                     return [4 /*yield*/, (function () {
                             switch (params.assertJsRuntimeEnv) {
                                 case "browser": return undefined;
@@ -16763,7 +16763,7 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                             }
                         })()];
                 case 3:
-                    pushNotificationToken = _g.sent();
+                    pushNotificationToken = _j.sent();
                     //TODO: If user delete and re create an account with same email and password
                     //and to not re-open the app while the account was deleted the it will result
                     //into the UA not being declared.
@@ -16803,7 +16803,7 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                     //into the UA not being declared.
                     //To fix this backend might return user.id_ so we can detect when it is not
                     //the same user account. ( change need to be made in webApiCaller.loginUser )
-                    _g.sent();
+                    _j.sent();
                     connection.connect((function () {
                         var requestTurnCred = true;
                         switch (params.assertJsRuntimeEnv) {
@@ -16826,7 +16826,11 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                     appEvts_1.appEvts.evtSimPermissionLost.attach(function () { return restartApp_1.restartApp("Permission lost for a Sim"); });
                     appEvts_1.appEvts.evtSimPasswordChanged.attach(function () { return restartApp_1.restartApp("One sim password have changed"); });
                     interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(appEvts_1.appEvts, remoteApiCaller.core, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
-                    prCreateWebphone = Webphone_1.Webphone.createFactory({
+                    return [4 /*yield*/, remoteApiCaller.core.getUsableUserSims()];
+                case 5:
+                    userSims = _j.sent();
+                    _f = (_e = Webphone_1.Webphone).createFactory;
+                    _g = {
                         "sipUserAgentCreate": sipUserAgent_1.sipUserAgentCreateFactory({
                             email: email,
                             uaInstanceId: uaInstanceId,
@@ -16837,14 +16841,29 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                         }),
                         appEvts: appEvts_1.appEvts,
                         "getWdApiCallerForSpecificSim": remoteApiCaller.getWdApiCallerForSpecificSimFactory(paramsNeededToEncryptDecryptWebphoneData.encryptorDecryptor, email),
-                        "coreApiCaller": remoteApiCaller.core,
-                        "phoneCallUiCreateFactory": params.phoneCallUiCreateFactory
-                    });
-                    _f = (_e = Promise).all;
-                    return [4 /*yield*/, remoteApiCaller.core.getUsableUserSims()];
-                case 5: return [4 /*yield*/, _f.apply(_e, [(_g.sent())
-                            .map(function (userSim) { return prCreateWebphone.then(function (createWebphone) { return createWebphone(userSim); }); })])];
-                case 6: return [2 /*return*/, (_g.sent()).sort(Webphone_1.Webphone.sortPutingFirstTheOnesWithMoreRecentActivity)];
+                        "coreApiCaller": remoteApiCaller.core
+                    };
+                    _h = "phoneCallUiCreate";
+                    return [4 /*yield*/, params.phoneCallUiCreateFactory((function () {
+                            switch (env_1.env.jsRuntimeEnv) {
+                                case "browser": {
+                                    return id_1.id({
+                                        "assertJsRuntimeEnv": "browser"
+                                    });
+                                }
+                                case "react-native": {
+                                    return id_1.id({
+                                        "assertJsRuntimeEnv": "react-native",
+                                        userSims: userSims,
+                                    });
+                                }
+                            }
+                        })())];
+                case 6:
+                    prCreateWebphone = _f.apply(_e, [(_g[_h] = _j.sent(),
+                            _g)]);
+                    return [4 /*yield*/, Promise.all(userSims.map(function (userSim) { return prCreateWebphone.then(function (createWebphone) { return createWebphone(userSim); }); }))];
+                case 7: return [2 /*return*/, (_j.sent()).sort(Webphone_1.Webphone.sortPutingFirstTheOnesWithMoreRecentActivity)];
             }
         });
     });
