@@ -9952,7 +9952,7 @@ var UiButtonBar = /** @class */ (function () {
 }());
 exports.UiButtonBar = UiButtonBar;
 
-},{"../templates/UiButtonBar.html":104,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/node_modules/ts-events-extended":174}],93:[function(require,module,exports){
+},{"../templates/UiButtonBar.html":104,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/node_modules/ts-events-extended":175}],93:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -10493,7 +10493,7 @@ function interact_getUserSimContainingNumber(userSims, number) {
     });
 }
 
-},{"../templates/UiController.html":105,"./UiButtonBar":92,"./UiPhonebook":94,"./UiShareSim":95,"./UiSimRow":96,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/dist/lib/toBackend/appEvts":127,"frontend-shared/dist/lib/toBackend/remoteApiCaller/core":130,"frontend-shared/dist/lib/types/userSim":136,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/phone-number":40,"frontend-shared/node_modules/ts-events-extended":174}],94:[function(require,module,exports){
+},{"../templates/UiController.html":105,"./UiButtonBar":92,"./UiPhonebook":94,"./UiShareSim":95,"./UiSimRow":96,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/dist/lib/toBackend/appEvts":127,"frontend-shared/dist/lib/toBackend/remoteApiCaller/core":130,"frontend-shared/dist/lib/types/userSim":136,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/node_modules/phone-number":40,"frontend-shared/node_modules/ts-events-extended":175}],94:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -11129,7 +11129,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../templates/UiPhonebook.html":106,"frontend-shared/dist/lib/env":114,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/dist/tools/isAscendingAlphabeticalOrder":144,"frontend-shared/dist/tools/modal":150,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/phone-number":40,"frontend-shared/node_modules/ts-events-extended":174,"minimal-polyfills/dist/lib/Map":102}],95:[function(require,module,exports){
+},{"../templates/UiPhonebook.html":106,"frontend-shared/dist/lib/env":114,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/dist/tools/isAscendingAlphabeticalOrder":145,"frontend-shared/dist/tools/modal":151,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/node_modules/phone-number":40,"frontend-shared/node_modules/ts-events-extended":175,"minimal-polyfills/dist/lib/Map":102}],95:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11367,7 +11367,7 @@ var UiShareSim = /** @class */ (function () {
 }());
 exports.UiShareSim = UiShareSim;
 
-},{"../templates/UiShareSim.html":107,"../templates/UiShareSim.less":108,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/dist/tools/modal":150,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/node_modules/ts-events-extended":174}],96:[function(require,module,exports){
+},{"../templates/UiShareSim.html":107,"../templates/UiShareSim.less":108,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/dist/tools/modal":151,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/node_modules/ts-events-extended":175}],96:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
@@ -11544,7 +11544,7 @@ var UiSimRow = /** @class */ (function () {
 }());
 exports.UiSimRow = UiSimRow;
 
-},{"../templates/UiSimRow.html":109,"../templates/UiSimRow.less":110,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/node_modules/ts-events-extended":174}],97:[function(require,module,exports){
+},{"../templates/UiSimRow.html":109,"../templates/UiSimRow.less":110,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/node_modules/ts-events-extended":175}],97:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11714,7 +11714,7 @@ $(document).ready(function () {
     onLoggedIn();
 });
 
-},{"./UiController":93,"frontend-shared/dist/lib/interactiveAppEvtHandlers":115,"frontend-shared/dist/lib/restartApp":126,"frontend-shared/dist/lib/toBackend/appEvts":127,"frontend-shared/dist/lib/toBackend/connection":128,"frontend-shared/dist/lib/toBackend/remoteApiCaller/core":130,"frontend-shared/dist/lib/webApiCaller":138,"frontend-shared/dist/tools/modal/dialog":147,"frontend-shared/dist/tools/polyfills/Object.assign":152,"minimal-polyfills/dist/lib/Array.from":100,"minimal-polyfills/dist/lib/ArrayBuffer.isView":101,"minimal-polyfills/dist/lib/String.prototype.startsWith":103}],98:[function(require,module,exports){
+},{"./UiController":93,"frontend-shared/dist/lib/interactiveAppEvtHandlers":115,"frontend-shared/dist/lib/restartApp":126,"frontend-shared/dist/lib/toBackend/appEvts":127,"frontend-shared/dist/lib/toBackend/connection":128,"frontend-shared/dist/lib/toBackend/remoteApiCaller/core":130,"frontend-shared/dist/lib/webApiCaller":138,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/dist/tools/polyfills/Object.assign":153,"minimal-polyfills/dist/lib/Array.from":100,"minimal-polyfills/dist/lib/ArrayBuffer.isView":101,"minimal-polyfills/dist/lib/String.prototype.startsWith":103}],98:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -11794,7 +11794,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"semasim-gateway/dist/web_api_declaration":175}],112:[function(require,module,exports){
+},{"semasim-gateway/dist/web_api_declaration":176}],112:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
@@ -12396,7 +12396,7 @@ var AuthenticatedSessionDescriptorSharedData;
 })(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./localStorageApi":121,"buffer":3,"ts-events-extended":174}],118:[function(require,module,exports){
+},{"./localStorageApi":121,"buffer":3,"ts-events-extended":175}],118:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12786,7 +12786,7 @@ function rsaGenerateKeys(seedB64, keysLengthBytes) {
 }
 exports.rsaGenerateKeys = rsaGenerateKeys;
 
-},{"ts-events-extended":174}],123:[function(require,module,exports){
+},{"ts-events-extended":175}],123:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -12801,7 +12801,7 @@ var api = {
 };
 exports.getApi = function () { return Promise.resolve(api); };
 
-},{"ts-events-extended":174}],124:[function(require,module,exports){
+},{"ts-events-extended":175}],124:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
@@ -12822,11 +12822,40 @@ exports.default = default_;
 
 },{"../env":114}],126:[function(require,module,exports){
 "use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var impl_1 = require("./impl");
-exports.restartApp = impl_1.default;
+var ts_events_extended_1 = require("ts-events-extended");
+var impl = require("./impl");
+exports.evtAppAboutToRestart = new ts_events_extended_1.VoidSyncEvent();
+exports.restartApp = function () {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+    exports.evtAppAboutToRestart.post();
+    return impl.default.apply(impl, __spread(args));
+};
 
-},{"./impl":125}],127:[function(require,module,exports){
+},{"./impl":125,"ts-events-extended":175}],127:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12973,7 +13002,7 @@ export type HelperType<K extends keyof TypeofImport> = HelperType2<Pick<TypeofIm
 }
 */
 
-},{"ts-events-extended":174}],128:[function(require,module,exports){
+},{"ts-events-extended":175}],128:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13211,7 +13240,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../../tools/modal/dialog":147,"../../tools/urlGetParameters":153,"../env":114,"../localStorage/AuthenticatedSessionDescriptorSharedData":117,"../networkStateMonitoring":124,"../restartApp":126,"../tryLoginFromStoredCredentials":134,"./appEvts":127,"./localApiHandlers":129,"ts-events-extended":174,"ts-sip":48}],129:[function(require,module,exports){
+},{"../../tools/modal/dialog":148,"../../tools/urlGetParameters":154,"../env":114,"../localStorage/AuthenticatedSessionDescriptorSharedData":117,"../networkStateMonitoring":124,"../restartApp":126,"../tryLoginFromStoredCredentials":134,"./appEvts":127,"./localApiHandlers":129,"ts-events-extended":175,"ts-sip":48}],129:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13740,7 +13769,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":141,"../restartApp":126,"./appEvts":127,"./remoteApiCaller":131,"chan-dongle-extended-client/dist/lib/types":155,"ts-events-extended":174}],130:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":141,"../restartApp":126,"./appEvts":127,"./remoteApiCaller":131,"chan-dongle-extended-client/dist/lib/types":156,"ts-events-extended":175}],130:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -14388,6 +14417,7 @@ var cryptoLib = require("../../crypto/cryptoLibProxy");
 var ts_events_extended_1 = require("ts-events-extended");
 var createObjectWithGivenRef_1 = require("../../../tools/createObjectWithGivenRef");
 var id_1 = require("../../../tools/id");
+var assert_1 = require("../../../tools/assert");
 var hash = md5;
 //NOTE: time and direction are plain in db, ref does not need to be secure.
 var buildWdMessageRef = function (time, direction) { return hash("" + time + direction); };
@@ -14415,9 +14445,7 @@ function getApiCallerForSpecificSimFactory(sendRequest, appEvts, encryptorDecryp
                         var matcher = _a.matcher;
                         return matcher(evtData);
                     }).length;
-                    if (handlerCount === 0) {
-                        throw new Error("wrong assertion");
-                    }
+                    assert_1.assert(handlerCount !== 0);
                     evtRequestProcessedByBackend.post(evtData);
                 })];
         });
@@ -15254,7 +15282,7 @@ evtRequestProcessedByBackend) {
     };
 }
 
-},{"../../../sip_api_declarations/backendToUa":140,"../../../tools/createObjectWithGivenRef":142,"../../../tools/id":143,"../../crypto/cryptoLibProxy":112,"../../types/webphoneData/logic":137,"md5":162,"ts-events-extended":174}],134:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":140,"../../../tools/assert":142,"../../../tools/createObjectWithGivenRef":143,"../../../tools/id":144,"../../crypto/cryptoLibProxy":112,"../../types/webphoneData/logic":137,"md5":163,"ts-events-extended":175}],134:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -15713,7 +15741,7 @@ function getUnreadMessagesCount(wdChat) {
 }
 exports.getUnreadMessagesCount = getUnreadMessagesCount;
 
-},{"../../../tools/isAscendingAlphabeticalOrder":144,"crypto-lib/dist/async/serializer":17}],138:[function(require,module,exports){
+},{"../../../tools/isAscendingAlphabeticalOrder":145,"crypto-lib/dist/async/serializer":17}],138:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -16106,7 +16134,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":154,"../env":114,"../localStorage/AuthenticatedSessionDescriptorSharedData":117,"../localStorage/Credentials":118,"../localStorage/declaredPushNotificationToken":119,"../networkStateMonitoring":124,"../restartApp":126,"./sendRequest":139,"ts-events-extended":174}],139:[function(require,module,exports){
+},{"../../web_api_declaration":155,"../env":114,"../localStorage/AuthenticatedSessionDescriptorSharedData":117,"../localStorage/Credentials":118,"../localStorage/declaredPushNotificationToken":119,"../networkStateMonitoring":124,"../restartApp":126,"./sendRequest":139,"ts-events-extended":175}],139:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -16225,7 +16253,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":111,"../env":114,"../types/connectSidHttpHeaderName":135,"transfer-tools/dist/lib/JSON_CUSTOM":169}],140:[function(require,module,exports){
+},{"../../gateway/webApiPath":111,"../env":114,"../types/connectSidHttpHeaderName":135,"transfer-tools/dist/lib/JSON_CUSTOM":170}],140:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -16395,6 +16423,86 @@ var wd_notifyActionFromOtherUa;
 
 },{}],142:[function(require,module,exports){
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+function assert(condition, msg) {
+    if (!condition) {
+        throw new assert.AssertError(msg);
+    }
+}
+exports.assert = assert;
+(function (assert) {
+    var AssertError = /** @class */ (function (_super) {
+        __extends(AssertError, _super);
+        function AssertError(msg) {
+            var _newTarget = this.constructor;
+            var _this = _super.call(this, __spread([
+                "Wrong assertion"
+            ], (msg !== undefined ? [msg] : [])).join(": ")) || this;
+            Object.setPrototypeOf(_this, _newTarget.prototype);
+            return _this;
+        }
+        return AssertError;
+    }(Error));
+    assert.AssertError = AssertError;
+})(assert = exports.assert || (exports.assert = {}));
+/*
+(()=>{
+
+    const x: number | string = null as any;
+
+    assert(typeof x === "number");
+
+    x;
+
+    const y: {
+        type: "A";
+    } | {
+        type: "B";
+        p: number;
+    }= null as any;
+
+    assert( y.type === "B");
+
+    y.p
+
+})();
+*/
+
+},{}],143:[function(require,module,exports){
+"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** changeRef(ref, o) === ref */
 function createObjectWithGivenRef(ref, o) {
@@ -16404,13 +16512,13 @@ function createObjectWithGivenRef(ref, o) {
 }
 exports.createObjectWithGivenRef = createObjectWithGivenRef;
 
-},{}],143:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Return the value passed as argument, helper type for avoiding declaring variable */
 exports.id = function (o) { return o; };
 
-},{}],144:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -16434,7 +16542,7 @@ function isAscendingAlphabeticalOrder(a, b) {
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
 exports.isForWeb = true;
 
-},{}],145:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -16467,7 +16575,7 @@ function createGenericProxyForBootstrapModal($initializedModalDiv) {
 }
 exports.createGenericProxyForBootstrapModal = createGenericProxyForBootstrapModal;
 
-},{"ts-events-extended":174}],146:[function(require,module,exports){
+},{"ts-events-extended":175}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
@@ -16501,7 +16609,7 @@ var loading;
 })(loading || (loading = {}));
 exports.getApi = function () { return customImplementationOfApi || bootboxBasedImplementationOfBaseApi; };
 
-},{"../createGenericProxyForBootstrapModal":145}],147:[function(require,module,exports){
+},{"../createGenericProxyForBootstrapModal":146}],148:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -16724,11 +16832,11 @@ exports.dialogApi = {
     }
 };
 
-},{"../stack":151,"./getApi":146,"./types":148,"run-exclusive":166}],148:[function(require,module,exports){
+},{"../stack":152,"./getApi":147,"./types":149,"run-exclusive":167}],149:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],149:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("./createGenericProxyForBootstrapModal");
@@ -16746,7 +16854,7 @@ var bootstrapBasedImplementationOfApi = {
 };
 exports.getApi = function () { return customImplementationOfApi || bootstrapBasedImplementationOfApi; };
 
-},{"./createGenericProxyForBootstrapModal":145}],150:[function(require,module,exports){
+},{"./createGenericProxyForBootstrapModal":146}],151:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -16770,7 +16878,7 @@ function createModal(structure, options) {
 }
 exports.createModal = createModal;
 
-},{"./getApi":149,"./stack":151}],151:[function(require,module,exports){
+},{"./getApi":150,"./stack":152}],152:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -16895,7 +17003,7 @@ function add(modal) {
 }
 exports.add = add;
 
-},{}],152:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 if (typeof Object.assign !== 'function') {
     // Must be writable: true, enumerable: false, configurable: true
     Object.defineProperty(Object, "assign", {
@@ -16923,7 +17031,7 @@ if (typeof Object.assign !== 'function') {
     });
 }
 
-},{}],153:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function buildUrl(urlPath, params) {
@@ -16949,7 +17057,7 @@ function parseUrl(url) {
 }
 exports.parseUrl = parseUrl;
 
-},{}],154:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
@@ -17017,7 +17125,7 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],155:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -17038,7 +17146,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],156:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 var charenc = {
   // UTF-8 encoding
   utf8: {
@@ -17073,7 +17181,7 @@ var charenc = {
 
 module.exports = charenc;
 
-},{}],157:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 (function() {
   var base64map
       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
@@ -17171,13 +17279,13 @@ module.exports = charenc;
   module.exports = crypt;
 })();
 
-},{}],158:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],159:[function(require,module,exports){
+},{"dup":22}],160:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"./implementation":158,"dup":23}],160:[function(require,module,exports){
+},{"./implementation":159,"dup":23}],161:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"function-bind":159}],161:[function(require,module,exports){
+},{"dup":24,"function-bind":160}],162:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -17200,7 +17308,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],162:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 (function(){
   var crypt = require('crypt'),
       utf8 = require('charenc').utf8,
@@ -17362,31 +17470,31 @@ function isSlowBuffer (obj) {
 
 })();
 
-},{"charenc":156,"crypt":157,"is-buffer":161}],163:[function(require,module,exports){
+},{"charenc":157,"crypt":158,"is-buffer":162}],164:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],164:[function(require,module,exports){
+},{"dup":26}],165:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],165:[function(require,module,exports){
+},{"dup":27}],166:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"./Map":164,"dup":29}],166:[function(require,module,exports){
+},{"./Map":165,"dup":29}],167:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30,"minimal-polyfills/dist/lib/WeakMap":165}],167:[function(require,module,exports){
+},{"dup":30,"minimal-polyfills/dist/lib/WeakMap":166}],168:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"dup":31}],168:[function(require,module,exports){
+},{"dup":31}],169:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32,"has":160}],169:[function(require,module,exports){
+},{"dup":32,"has":161}],170:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"dup":33,"super-json":168}],170:[function(require,module,exports){
+},{"dup":33,"super-json":169}],171:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"./SyncEventBase":171,"dup":34}],171:[function(require,module,exports){
+},{"./SyncEventBase":172,"dup":34}],172:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":172,"dup":35}],172:[function(require,module,exports){
+},{"./SyncEventBaseProtected":173,"dup":35}],173:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"./defs":173,"dup":36,"minimal-polyfills/dist/lib/Array.prototype.find":163,"minimal-polyfills/dist/lib/Map":164,"run-exclusive":166}],173:[function(require,module,exports){
+},{"./defs":174,"dup":36,"minimal-polyfills/dist/lib/Array.prototype.find":164,"minimal-polyfills/dist/lib/Map":165,"run-exclusive":167}],174:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"dup":37,"setprototypeof":167}],174:[function(require,module,exports){
+},{"dup":37,"setprototypeof":168}],175:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"./SyncEvent":170,"./defs":173,"dup":38}],175:[function(require,module,exports){
+},{"./SyncEvent":171,"./defs":174,"dup":38}],176:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
