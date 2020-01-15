@@ -5776,6 +5776,775 @@ var phoneNumber;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./importUtilScript":40}],42:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var SyncEvent_1 = require("./SyncEvent");
+var ObservableImpl = /** @class */ (function () {
+    function ObservableImpl(value, areSame) {
+        if (areSame === void 0) { areSame = function (oldValue, newValue) { return oldValue === newValue; }; }
+        this.value = value;
+        this.areSame = areSame;
+        this.evtChange = new SyncEvent_1.SyncEvent();
+    }
+    ObservableImpl.prototype.onPotentialChange = function (newValue) {
+        if (this.areSame(this.value, newValue)) {
+            return;
+        }
+        this.value = newValue;
+        this.evtChange.post(this.value);
+    };
+    return ObservableImpl;
+}());
+exports.ObservableImpl = ObservableImpl;
+
+},{"./SyncEvent":43}],43:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+exports.__esModule = true;
+var SyncEventBase_1 = require("./SyncEventBase");
+var SyncEvent = /** @class */ (function (_super) {
+    __extends(SyncEvent, _super);
+    function SyncEvent() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.evtAttach = new SyncEventBase_1.SyncEventBase();
+        return _this;
+    }
+    SyncEvent.prototype.addHandler = function (attachParams, implicitAttachParams) {
+        var handler = _super.prototype.addHandler.call(this, attachParams, implicitAttachParams);
+        this.evtAttach.post(handler);
+        return handler;
+    };
+    /** Wait until an handler that match the event data have been attached
+     * return a promise that resolve with post count */
+    SyncEvent.prototype.postOnceMatched = function (eventData) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!!this.getHandlers().find(function (handler) { return handler.matcher(eventData); })) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.evtAttach.waitFor(function (handler) { return handler.matcher(eventData); })];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, this.post(eventData)];
+                }
+            });
+        });
+    };
+    return SyncEvent;
+}(SyncEventBase_1.SyncEventBase));
+exports.SyncEvent = SyncEvent;
+var VoidSyncEvent = /** @class */ (function (_super) {
+    __extends(VoidSyncEvent, _super);
+    function VoidSyncEvent() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    VoidSyncEvent.prototype.post = function () {
+        return _super.prototype.post.call(this, undefined);
+    };
+    VoidSyncEvent.prototype.postOnceMatched = function () {
+        return _super.prototype.postOnceMatched.call(this, undefined);
+    };
+    return VoidSyncEvent;
+}(SyncEvent));
+exports.VoidSyncEvent = VoidSyncEvent;
+
+},{"./SyncEventBase":44}],44:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+exports.__esModule = true;
+var SyncEventBaseProtected_1 = require("./SyncEventBaseProtected");
+function matchPostable(o) {
+    return o instanceof Object && typeof o.post === "function";
+}
+function isCallable(o) {
+    if (typeof o !== "function")
+        return false;
+    var prototype = o["prototype"];
+    if (!prototype)
+        return true;
+    var methods = Object.getOwnPropertyNames(prototype);
+    if (methods.length !== 1)
+        return false;
+    var name = o.name;
+    if (!name)
+        return true;
+    if (name[0].toUpperCase() === name[0])
+        return false;
+    return true;
+}
+/** SyncEvent without evtAttach property */
+var SyncEventBase = /** @class */ (function (_super) {
+    __extends(SyncEventBase, _super);
+    function SyncEventBase() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.defaultParams = {
+            "matcher": function matchAll() { return true; },
+            "boundTo": _this,
+            "timeout": undefined,
+            "callback": undefined
+        };
+        return _this;
+    }
+    SyncEventBase.prototype.getDefaultParams = function () {
+        return __assign({}, this.defaultParams);
+    };
+    SyncEventBase.prototype.readParams = function (inputs) {
+        var out = this.getDefaultParams();
+        var n = inputs.length;
+        if (!n)
+            return out;
+        //[ matcher, boundTo, timeout, callback ]
+        //[ matcher, boundTo, callback ]
+        //[ matcher, timeout, callback ]
+        //[ boundTo, timeout, callback ]
+        //[ matcher, callback ]
+        //[ boundTo, callback ]
+        //[ timeout, callback ]
+        //[ callback ]
+        //[ matcher, timeout, evt ]
+        //[ matcher, evt ]
+        //[ timeout, evt ]
+        //[ evt ]
+        if (matchPostable(inputs[n - 1])) {
+            out.boundTo = inputs[n - 1];
+            inputs[n - 1] = inputs[n - 1].post;
+        }
+        //[ matcher, boundTo, timeout, callback ]
+        //[ matcher, boundTo, callback ]
+        //[ matcher, timeout, callback ]
+        //[ boundTo, timeout, callback ]
+        //[ matcher, callback ]
+        //[ boundTo, callback ]
+        //[ timeout, callback ]
+        //[ callback ]
+        if (n === 4) {
+            //[ matcher, boundTo, timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2], p4 = inputs[3];
+            out.matcher = p1;
+            out.boundTo = p2;
+            out.timeout = p3;
+            out.callback = p4;
+        }
+        else if (n === 3) {
+            //[ matcher, boundTo, callback ]
+            //[ matcher, timeout, callback ]
+            //[ boundTo, timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2];
+            if (typeof p2 === "number") {
+                //[ matcher, timeout, callback ]
+                //[ boundTo, timeout, callback ]
+                out.timeout = p2;
+                out.callback = p3;
+                if (isCallable(p1)) {
+                    //[ matcher, timeout, callback ]
+                    out.matcher = p1;
+                }
+                else {
+                    //[ boundTo, timeout, callback ]
+                    out.boundTo = p1;
+                }
+            }
+            else {
+                //[ matcher, boundTo, callback ]
+                out.matcher = p1;
+                out.boundTo = p2;
+                out.callback = p3;
+            }
+        }
+        else if (n === 2) {
+            //[ matcher, callback ]
+            //[ boundTo, callback ]
+            //[ timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1];
+            if (typeof p1 === "number") {
+                //[ timeout, callback ]
+                out.timeout = p1;
+                out.callback = p2;
+            }
+            else {
+                //[ matcher, callback ]
+                //[ boundTo, callback ]
+                out.callback = p2;
+                if (isCallable(p1)) {
+                    out.matcher = p1;
+                }
+                else {
+                    out.boundTo = p1;
+                }
+            }
+        }
+        else if (n === 1) {
+            //[ callback ]
+            var p = inputs[0];
+            out.callback = p;
+        }
+        return out;
+    };
+    SyncEventBase.prototype.waitFor = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        var params = this.getDefaultParams();
+        var n = inputs.length;
+        if (n === 2) {
+            var p1 = inputs[0], p2 = inputs[1];
+            params.matcher = p1;
+            params.timeout = p2;
+        }
+        else {
+            var p = inputs[0];
+            if (isCallable(p)) {
+                params.matcher = p;
+            }
+            else {
+                params.timeout = p;
+            }
+        }
+        return _super.prototype.__waitFor.call(this, params);
+    };
+    SyncEventBase.prototype.attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attach(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnce(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachExtract(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachPrepend(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOncePrepend(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnceExtract(this.readParams(inputs));
+    };
+    return SyncEventBase;
+}(SyncEventBaseProtected_1.SyncEventBaseProtected));
+exports.SyncEventBase = SyncEventBase;
+
+},{"./SyncEventBaseProtected":45}],45:[function(require,module,exports){
+"use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
+exports.__esModule = true;
+var Map_1 = require("minimal-polyfills/dist/lib/Map");
+require("minimal-polyfills/dist/lib/Array.prototype.find");
+var runExclusive = require("run-exclusive");
+var defs_1 = require("./defs");
+/** SyncEvent without evtAttach property and without overload */
+var SyncEventBaseProtected = /** @class */ (function () {
+    function SyncEventBaseProtected() {
+        var _this = this;
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        this.postCount = 0;
+        this.traceId = null;
+        this.handlers = [];
+        this.handlerTriggers = new Map_1.Polyfill();
+        //NOTE: An async handler ( attached with waitFor ) is only eligible to handle a post if the post
+        //occurred after the handler was set. We don't want to waitFor event from the past.
+        //private readonly asyncHandlerChronologyMark = new WeakMap<ImplicitParams.Async, number>();
+        this.asyncHandlerChronologyMark = typeof WeakMap !== "undefined" ?
+            new WeakMap() :
+            new Map_1.Polyfill();
+        //NOTE: There is an exception to the above rule, we want to allow async waitFor loop 
+        //do so we have to handle the case where multiple event would be posted synchronously.
+        this.asyncHandlerChronologyExceptionRange = typeof WeakMap !== "undefined" ?
+            new WeakMap() :
+            new Map_1.Polyfill();
+        /*
+        NOTE: Used as Date.now() would be used to compare if an event is anterior
+        or posterior to an other. We don't use Date.now() because two call within
+        less than a ms will return the same value unlike this function.
+        */
+        this.getChronologyMark = (function () {
+            var currentChronologyMark = 0;
+            return function () { return currentChronologyMark++; };
+        })();
+        this.postAsync = runExclusive.buildCb(function (data, postChronologyMark, releaseLock) {
+            var promises = [];
+            var chronologyMarkStartResolveTick;
+            //NOTE: Must be before handlerTrigger call.
+            Promise.resolve().then(function () { return chronologyMarkStartResolveTick = _this.getChronologyMark(); });
+            var _loop_1 = function (handler) {
+                if (!handler.async) {
+                    return "continue";
+                }
+                if (!handler.matcher(data)) {
+                    return "continue";
+                }
+                var handlerTrigger = _this.handlerTriggers.get(handler);
+                if (!handlerTrigger) {
+                    return "continue";
+                }
+                var shouldCallHandlerTrigger = (function () {
+                    var handlerMark = _this.asyncHandlerChronologyMark.get(handler);
+                    if (postChronologyMark > handlerMark) {
+                        return true;
+                    }
+                    var exceptionRange = _this.asyncHandlerChronologyExceptionRange.get(handler);
+                    if (exceptionRange === undefined) {
+                        return false;
+                    }
+                    if (exceptionRange.lowerMark < postChronologyMark &&
+                        postChronologyMark < exceptionRange.upperMark) {
+                        return true;
+                    }
+                    return false;
+                })();
+                if (!shouldCallHandlerTrigger) {
+                    return "continue";
+                }
+                promises.push(handler.promise);
+                handlerTrigger(data);
+            };
+            for (var _i = 0, _a = __spreadArrays(_this.handlers); _i < _a.length; _i++) {
+                var handler = _a[_i];
+                _loop_1(handler);
+            }
+            if (promises.length !== 0) {
+                var handlersDump_1 = __spreadArrays(_this.handlers);
+                Promise.all(promises).then(function () {
+                    for (var _i = 0, _a = _this.handlers; _i < _a.length; _i++) {
+                        var handler = _a[_i];
+                        if (!handler.async) {
+                            continue;
+                        }
+                        if (handlersDump_1.indexOf(handler) >= 0) {
+                            continue;
+                        }
+                        _this.asyncHandlerChronologyExceptionRange.set(handler, {
+                            "lowerMark": postChronologyMark,
+                            "upperMark": chronologyMarkStartResolveTick
+                        });
+                    }
+                    releaseLock();
+                });
+            }
+            else {
+                releaseLock();
+            }
+        });
+        if (!inputs.length)
+            return;
+        var eventEmitter = inputs[0], eventName = inputs[1];
+        var formatter = inputs[2] || this.defaultFormatter;
+        eventEmitter.on(eventName, function () {
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            return _this.post(formatter.apply(null, inputs));
+        });
+    }
+    SyncEventBaseProtected.prototype.defaultFormatter = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return inputs[0];
+    };
+    SyncEventBaseProtected.prototype.enableTrace = function (id, formatter, log //NOTE: we don't want to expose types from node
+    ) {
+        this.traceId = id;
+        if (!!formatter) {
+            this.traceFormatter = formatter;
+        }
+        else {
+            this.traceFormatter = function (data) {
+                try {
+                    return JSON.stringify(data, null, 2);
+                }
+                catch (_a) {
+                    return "" + data;
+                }
+            };
+        }
+        if (!!log) {
+            this.log = log;
+        }
+        else {
+            this.log = function () {
+                var inputs = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    inputs[_i] = arguments[_i];
+                }
+                return console.log.apply(console, inputs);
+            };
+        }
+    };
+    SyncEventBaseProtected.prototype.disableTrace = function () {
+        this.traceId = null;
+    };
+    SyncEventBaseProtected.prototype.addHandler = function (attachParams, implicitAttachParams) {
+        var _this = this;
+        var handler = __assign(__assign(__assign({}, attachParams), implicitAttachParams), { "detach": null, "promise": null });
+        if (handler.async) {
+            this.asyncHandlerChronologyMark.set(handler, this.getChronologyMark());
+        }
+        handler.promise = new Promise(function (resolve, reject) {
+            var timer = undefined;
+            if (typeof handler.timeout === "number") {
+                timer = setTimeout(function () {
+                    timer = undefined;
+                    handler.detach();
+                    reject(new defs_1.EvtError.Timeout(handler.timeout));
+                }, handler.timeout);
+            }
+            handler.detach = function () {
+                var index = _this.handlers.indexOf(handler);
+                if (index < 0)
+                    return false;
+                _this.handlers.splice(index, 1);
+                _this.handlerTriggers["delete"](handler);
+                if (timer) {
+                    clearTimeout(timer);
+                    reject(new defs_1.EvtError.Detached());
+                }
+                return true;
+            };
+            _this.handlerTriggers.set(handler, function (data) {
+                var _a;
+                var callback = handler.callback, once = handler.once;
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = undefined;
+                }
+                if (once)
+                    handler.detach();
+                (_a = callback) === null || _a === void 0 ? void 0 : _a.call(handler.boundTo, data);
+                resolve(data);
+            });
+        });
+        if (handler.prepend) {
+            var i = void 0;
+            for (i = 0; i < this.handlers.length; i++) {
+                if (this.handlers[i].extract) {
+                    continue;
+                }
+                break;
+            }
+            this.handlers.splice(i, 0, handler);
+        }
+        else {
+            this.handlers.push(handler);
+        }
+        return handler;
+    };
+    SyncEventBaseProtected.prototype.trace = function (data) {
+        if (this.traceId === null) {
+            return;
+        }
+        var message = "(" + this.traceId + ") ";
+        var isExtracted = !!this.handlers.find(function (_a) {
+            var extract = _a.extract, matcher = _a.matcher;
+            return extract && matcher(data);
+        });
+        if (isExtracted) {
+            message += "extracted ";
+        }
+        else {
+            var handlerCount = this.handlers
+                .filter(function (_a) {
+                var extract = _a.extract, matcher = _a.matcher;
+                return !extract && matcher(data);
+            })
+                .length;
+            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
+        }
+        this.log(message + this.traceFormatter(data));
+    };
+    /** Returns post count */
+    SyncEventBaseProtected.prototype.post = function (data) {
+        this.trace(data);
+        this.postCount++;
+        //NOTE: Must be before postSync.
+        var postChronologyMark = this.getChronologyMark();
+        var isExtracted = this.postSync(data);
+        if (!isExtracted) {
+            this.postAsync(data, postChronologyMark);
+        }
+        return this.postCount;
+    };
+    /** Return isExtracted */
+    SyncEventBaseProtected.prototype.postSync = function (data) {
+        for (var _i = 0, _a = __spreadArrays(this.handlers); _i < _a.length; _i++) {
+            var handler = _a[_i];
+            var async = handler.async, matcher = handler.matcher, extract = handler.extract;
+            if (async) {
+                continue;
+            }
+            if (!matcher(data)) {
+                continue;
+            }
+            var handlerTrigger = this.handlerTriggers.get(handler);
+            //NOTE: Possible if detached while in the loop.
+            if (!handlerTrigger) {
+                continue;
+            }
+            handlerTrigger(data);
+            if (extract) {
+                return true;
+            }
+        }
+        return false;
+    };
+    SyncEventBaseProtected.prototype.__waitFor = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": true,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attach = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachPrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOnce = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOncePrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOnceExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.getHandlers = function () { return __spreadArrays(this.handlers); };
+    /** Detach every handler bound to a given object or all handlers, return the detached handlers */
+    SyncEventBaseProtected.prototype.detach = function (boundTo) {
+        var detachedHandlers = [];
+        for (var _i = 0, _a = __spreadArrays(this.handlers); _i < _a.length; _i++) {
+            var handler = _a[_i];
+            if (boundTo === undefined || handler.boundTo === boundTo) {
+                handler.detach();
+                detachedHandlers.push(handler);
+            }
+        }
+        return detachedHandlers;
+    };
+    return SyncEventBaseProtected;
+}());
+exports.SyncEventBaseProtected = SyncEventBaseProtected;
+
+},{"./defs":46,"minimal-polyfills/dist/lib/Array.prototype.find":48,"minimal-polyfills/dist/lib/Map":49,"run-exclusive":51}],46:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+exports.__esModule = true;
+var setPrototypeOf = require("setprototypeof");
+var EvtError;
+(function (EvtError) {
+    var Timeout = /** @class */ (function (_super) {
+        __extends(Timeout, _super);
+        function Timeout(timeout) {
+            var _newTarget = this.constructor;
+            var _this = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
+            _this.timeout = timeout;
+            setPrototypeOf(_this, _newTarget.prototype);
+            return _this;
+        }
+        return Timeout;
+    }(Error));
+    EvtError.Timeout = Timeout;
+    var Detached = /** @class */ (function (_super) {
+        __extends(Detached, _super);
+        function Detached() {
+            var _newTarget = this.constructor;
+            var _this = _super.call(this, "Evt handler detached") || this;
+            setPrototypeOf(_this, _newTarget.prototype);
+            return _this;
+        }
+        return Detached;
+    }(Error));
+    EvtError.Detached = Detached;
+})(EvtError = exports.EvtError || (exports.EvtError = {}));
+
+},{"setprototypeof":52}],47:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var SyncEvent_1 = require("./SyncEvent");
+exports.SyncEvent = SyncEvent_1.SyncEvent;
+exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
+var defs_1 = require("./defs");
+exports.EvtError = defs_1.EvtError;
+var Observable_1 = require("./Observable");
+exports.ObservableImpl = Observable_1.ObservableImpl;
+
+},{"./Observable":42,"./SyncEvent":43,"./defs":46}],48:[function(require,module,exports){
+arguments[4][27][0].apply(exports,arguments)
+},{"dup":27}],49:[function(require,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"dup":28}],50:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./Map":49,"dup":30}],51:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31,"minimal-polyfills/dist/lib/WeakMap":50}],52:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"dup":32}],53:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -5947,7 +6716,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3,"ts-events-extended":87}],43:[function(require,module,exports){
+},{"buffer":3,"ts-events-extended":98}],54:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -6259,7 +7028,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":42,"./api/ApiMessage":44,"./core":48,"./misc":52,"colors":57,"ts-events-extended":87}],44:[function(require,module,exports){
+},{"./IConnection":53,"./api/ApiMessage":55,"./core":59,"./misc":63,"colors":68,"ts-events-extended":98}],55:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -6347,7 +7116,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":48,"../misc":52,"buffer":3,"transfer-tools":79}],45:[function(require,module,exports){
+},{"../core":59,"../misc":63,"buffer":3,"transfer-tools":90}],56:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -6530,7 +7299,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":52,"./ApiMessage":44,"colors":57,"util":10}],46:[function(require,module,exports){
+},{"../misc":63,"./ApiMessage":55,"colors":68,"util":10}],57:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -6772,7 +7541,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":52,"./ApiMessage":44,"setprototypeof":76}],47:[function(require,module,exports){
+},{"../misc":63,"./ApiMessage":55,"setprototypeof":87}],58:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -6780,7 +7549,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":45,"./client":46}],48:[function(require,module,exports){
+},{"./Server":56,"./client":57}],59:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -6864,7 +7633,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":50,"./legacy/sip":51,"buffer":3,"setprototypeof":76}],49:[function(require,module,exports){
+},{"./legacy/sdp":61,"./legacy/sip":62,"buffer":3,"setprototypeof":87}],60:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -6876,7 +7645,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":43,"./api":47,"./core":48,"./misc":52}],50:[function(require,module,exports){
+},{"./Socket":54,"./api":58,"./core":59,"./misc":63}],61:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -6992,7 +7761,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],51:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -7383,7 +8152,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],52:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -7682,7 +8451,7 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":48,"buffer":3}],53:[function(require,module,exports){
+},{"./core":59,"buffer":3}],64:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -7895,7 +8664,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":54,"./custom/zalgo":55,"./maps/america":58,"./maps/rainbow":59,"./maps/random":60,"./maps/zebra":61,"./styles":62,"./system/supports-colors":64,"util":10}],54:[function(require,module,exports){
+},{"./custom/trap":65,"./custom/zalgo":66,"./maps/america":69,"./maps/rainbow":70,"./maps/random":71,"./maps/zebra":72,"./styles":73,"./system/supports-colors":75,"util":10}],65:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -7943,7 +8712,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],55:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -8055,7 +8824,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],56:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -8167,7 +8936,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":53}],57:[function(require,module,exports){
+},{"./colors":64}],68:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -8182,7 +8951,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":53,"./extendStringPrototype":56}],58:[function(require,module,exports){
+},{"./colors":64,"./extendStringPrototype":67}],69:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -8194,7 +8963,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],59:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -8208,7 +8977,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],60:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta', 'brightYellow', 'brightRed',
@@ -8221,14 +8990,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],61:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],62:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -8325,7 +9094,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],63:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -8364,7 +9133,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":8}],64:[function(require,module,exports){
+},{"_process":8}],75:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -8519,13 +9288,13 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":63,"_process":8,"os":6}],65:[function(require,module,exports){
+},{"./has-flag.js":74,"_process":8,"os":6}],76:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],66:[function(require,module,exports){
+},{"dup":23}],77:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./implementation":65,"dup":24}],67:[function(require,module,exports){
+},{"./implementation":76,"dup":24}],78:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25,"function-bind":66}],68:[function(require,module,exports){
+},{"dup":25,"function-bind":77}],79:[function(require,module,exports){
 // A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
@@ -8587,7 +9356,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":69,"./lib/tychei":70,"./lib/xor128":71,"./lib/xor4096":72,"./lib/xorshift7":73,"./lib/xorwow":74,"./seedrandom":75}],69:[function(require,module,exports){
+},{"./lib/alea":80,"./lib/tychei":81,"./lib/xor128":82,"./lib/xor4096":83,"./lib/xorshift7":84,"./lib/xorwow":85,"./seedrandom":86}],80:[function(require,module,exports){
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -8703,7 +9472,7 @@ if (module && module.exports) {
 
 
 
-},{}],70:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 // A Javascript implementaion of the "Tyche-i" prng algorithm by
 // Samuel Neves and Filipe Araujo.
 // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
@@ -8808,7 +9577,7 @@ if (module && module.exports) {
 
 
 
-},{}],71:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 // A Javascript implementaion of the "xor128" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -8891,7 +9660,7 @@ if (module && module.exports) {
 
 
 
-},{}],72:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 // A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
 //
 // This fast non-cryptographic random number generator is designed for
@@ -9039,7 +9808,7 @@ if (module && module.exports) {
   (typeof define) == 'function' && define   // present with an AMD loader
 );
 
-},{}],73:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 // A Javascript implementaion of the "xorshift7" algorithm by
 // François Panneton and Pierre L'ecuyer:
 // "On the Xorgshift Random Number Generators"
@@ -9138,7 +9907,7 @@ if (module && module.exports) {
 );
 
 
-},{}],74:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 // A Javascript implementaion of the "xorwow" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -9226,7 +9995,7 @@ if (module && module.exports) {
 
 
 
-},{}],75:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 /*
 Copyright 2019 David Bau.
 
@@ -9481,13 +10250,13 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":2}],76:[function(require,module,exports){
+},{"crypto":2}],87:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32}],77:[function(require,module,exports){
+},{"dup":32}],88:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"dup":33,"has":67}],78:[function(require,module,exports){
+},{"dup":33,"has":78}],89:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"dup":34,"super-json":77}],79:[function(require,module,exports){
+},{"dup":34,"super-json":88}],90:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -9499,7 +10268,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":78,"./stringTransform":80,"./stringTransformExt":81,"./testing":82}],80:[function(require,module,exports){
+},{"./JSON_CUSTOM":89,"./stringTransform":91,"./stringTransformExt":92,"./testing":93}],91:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -9561,7 +10330,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3}],81:[function(require,module,exports){
+},{"buffer":3}],92:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -9629,7 +10398,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":80}],82:[function(require,module,exports){
+},{"./stringTransform":91}],93:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -9929,27 +10698,27 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":80,"seedrandom":68}],83:[function(require,module,exports){
+},{"./stringTransform":91,"seedrandom":79}],94:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./SyncEventBase":84,"dup":35}],84:[function(require,module,exports){
+},{"./SyncEventBase":95,"dup":35}],95:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":85,"dup":36}],85:[function(require,module,exports){
+},{"./SyncEventBaseProtected":96,"dup":36}],96:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"./defs":86,"dup":37,"minimal-polyfills/dist/lib/Array.prototype.find":88,"minimal-polyfills/dist/lib/Map":89,"run-exclusive":90}],86:[function(require,module,exports){
+},{"./defs":97,"dup":37,"minimal-polyfills/dist/lib/Array.prototype.find":99,"minimal-polyfills/dist/lib/Map":100,"run-exclusive":101}],97:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"dup":38,"setprototypeof":76}],87:[function(require,module,exports){
+},{"dup":38,"setprototypeof":87}],98:[function(require,module,exports){
 arguments[4][39][0].apply(exports,arguments)
-},{"./SyncEvent":83,"./defs":86,"dup":39}],88:[function(require,module,exports){
+},{"./SyncEvent":94,"./defs":97,"dup":39}],99:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],89:[function(require,module,exports){
+},{"dup":27}],100:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],90:[function(require,module,exports){
+},{"dup":28}],101:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"dup":31,"minimal-polyfills/dist/lib/WeakMap":92}],91:[function(require,module,exports){
+},{"dup":31,"minimal-polyfills/dist/lib/WeakMap":103}],102:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],92:[function(require,module,exports){
+},{"dup":28}],103:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"./Map":91,"dup":30}],93:[function(require,module,exports){
+},{"./Map":102,"dup":30}],104:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -10353,7 +11122,7 @@ var UiBubble = /** @class */ (function () {
 })(UiBubble || (UiBubble = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../../../local_modules/phone-number/dist/lib":41,"../templates/UiConversation.html":103,"../templates/UiConversation.less":104,"buffer":3,"frontend-shared/dist/lib/loadUiClassHtml":125,"frontend-shared/dist/lib/types/webphoneData/logic":148,"frontend-shared/node_modules/ts-events-extended":188,"moment":102}],94:[function(require,module,exports){
+},{"../../../local_modules/phone-number/dist/lib":41,"../templates/UiConversation.html":114,"../templates/UiConversation.less":115,"buffer":3,"frontend-shared/dist/lib/loadUiClassHtml":136,"frontend-shared/dist/lib/types/webphoneData/logic":159,"frontend-shared/node_modules/ts-events-extended":47,"moment":113}],105:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -10501,7 +11270,7 @@ var UiHeader = /** @class */ (function () {
 }());
 exports.UiHeader = UiHeader;
 
-},{"../../../local_modules/phone-number/dist/lib":41,"../templates/UiHeader.html":105,"frontend-shared/dist/lib/loadUiClassHtml":125,"frontend-shared/node_modules/ts-events-extended":188}],95:[function(require,module,exports){
+},{"../../../local_modules/phone-number/dist/lib":41,"../templates/UiHeader.html":116,"frontend-shared/dist/lib/loadUiClassHtml":136,"frontend-shared/node_modules/ts-events-extended":47}],106:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __values = (this && this.__values) || function(o) {
@@ -10739,7 +11508,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../local_modules/phone-number/dist/lib":41,"../templates/UiPhonebook.html":106,"frontend-shared/dist/lib/loadUiClassHtml":125,"frontend-shared/dist/lib/types/webphoneData/logic":148,"frontend-shared/node_modules/ts-events-extended":188}],96:[function(require,module,exports){
+},{"../../../local_modules/phone-number/dist/lib":41,"../templates/UiPhonebook.html":117,"frontend-shared/dist/lib/loadUiClassHtml":136,"frontend-shared/dist/lib/types/webphoneData/logic":159,"frontend-shared/node_modules/ts-events-extended":47}],107:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
@@ -10868,7 +11637,7 @@ var UiQuickAction = /** @class */ (function () {
 }());
 exports.UiQuickAction = UiQuickAction;
 
-},{"../../../local_modules/phone-number/dist/lib":41,"../templates/UiQuickAction.html":107,"frontend-shared/dist/lib/loadUiClassHtml":125,"frontend-shared/dist/tools/modal/dialog":160,"frontend-shared/node_modules/ts-events-extended":188}],97:[function(require,module,exports){
+},{"../../../local_modules/phone-number/dist/lib":41,"../templates/UiQuickAction.html":118,"frontend-shared/dist/lib/loadUiClassHtml":136,"frontend-shared/dist/tools/modal/dialog":170,"frontend-shared/node_modules/ts-events-extended":47}],108:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11135,7 +11904,7 @@ var UiWebphoneController = /** @class */ (function () {
 }());
 exports.UiWebphoneController = UiWebphoneController;
 
-},{"../templates/UiWebphoneController.html":109,"./UiConversation":93,"./UiHeader":94,"./UiPhonebook":95,"./UiQuickAction":96,"frontend-shared/dist/lib/loadUiClassHtml":125,"frontend-shared/dist/tools/modal/dialog":160}],98:[function(require,module,exports){
+},{"../templates/UiWebphoneController.html":120,"./UiConversation":104,"./UiHeader":105,"./UiPhonebook":106,"./UiQuickAction":107,"frontend-shared/dist/lib/loadUiClassHtml":136,"frontend-shared/dist/tools/modal/dialog":170}],109:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11236,39 +12005,42 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
     });
 }); });
 
-},{"./UiWebphoneController":97,"./phoneCallUiCreateFactory":99,"frontend-shared/dist/lib/appLauncher":115,"frontend-shared/dist/lib/webApiCaller":149,"frontend-shared/dist/tools/id":156,"frontend-shared/dist/tools/modal/dialog":160,"frontend-shared/dist/tools/observer":165,"frontend-shared/dist/tools/overrideWebRTCImplementation":166}],99:[function(require,module,exports){
+},{"./UiWebphoneController":108,"./phoneCallUiCreateFactory":110,"frontend-shared/dist/lib/appLauncher":126,"frontend-shared/dist/lib/webApiCaller":160,"frontend-shared/dist/tools/id":166,"frontend-shared/dist/tools/modal/dialog":170,"frontend-shared/dist/tools/observer":175,"frontend-shared/dist/tools/overrideWebRTCImplementation":176}],110:[function(require,module,exports){
 "use strict";
 //NOTE: Require ion sound loaded on the page.
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
-var phone_number_1 = require("frontend-shared/node_modules/phone-number");
 var modalApi = require("frontend-shared/dist/tools/modal");
+var assert_1 = require("frontend-shared/dist/tools/assert");
 exports.phoneCallUiCreateFactory = function (params) {
-    if (params.assertJsRuntimeEnv !== "browser") {
-        throw new Error("wrong assertion");
-    }
+    var sims = params.sims;
     return Promise.resolve(function (params) {
-        if (params.assertJsRuntimeEnv !== "browser") {
-            throw new Error("wrong assertion");
-        }
-        return new PhoneCallUiImpl(params.userSim);
+        assert_1.assert(params.assertJsRuntimeEnv === "browser");
+        return new PhoneCallUiImpl({
+            "sim": sims.find(function (_a) {
+                var imsi = _a.imsi;
+                return imsi === params.imsi;
+            }),
+            "getContactName": params.getContactName,
+            "getPhoneNumberPrettyPrint": params.getPhoneNumberPrettyPrint
+        });
     });
 };
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiVoiceCall.html"), "UiVoiceCall");
 var PhoneCallUiImpl = /** @class */ (function () {
-    function PhoneCallUiImpl(userSim) {
+    function PhoneCallUiImpl(params) {
         var _this = this;
         var _a;
-        this.userSim = userSim;
+        this.params = params;
         this.structure = html.structure.clone();
         this.btnGreen = this.structure.find(".id_btn-green");
         this.btnRed = this.structure.find(".id_btn-red");
         this.evtBtnClick = new ts_events_extended_1.SyncEvent();
         this.evtNumpadDtmf = new ts_events_extended_1.SyncEvent();
         this.state = "TERMINATED";
-        this.openUiForIncomingCall = function (wdChat) {
-            _this.setContact(wdChat);
+        this.openUiForIncomingCall = function (phoneNumberRaw) {
+            _this.setContact(phoneNumberRaw);
             _this.setArrows("INCOMING");
             _this.setState("RINGING", "Incoming call");
             return {
@@ -11289,12 +12061,12 @@ var PhoneCallUiImpl = /** @class */ (function () {
             };
         };
         this.evtUiOpenedForOutgoingCall = new ts_events_extended_1.SyncEvent();
-        this.openUiForOutgoingCall = function (wdChat) {
-            _this.setContact(wdChat);
+        this.openUiForOutgoingCall = function (phoneNumberRaw) {
+            _this.setContact(phoneNumberRaw);
             _this.setArrows("OUTGOING");
             _this.setState("LOADING", "Loading...");
             _this.evtUiOpenedForOutgoingCall.post({
-                "phoneNumber": wdChat.contactNumber,
+                phoneNumberRaw: phoneNumberRaw,
                 "onTerminated": function (message) { return _this.setState("TERMINATED", message); },
                 "onRingback": function () {
                     _this.setState("RINGBACK", "Remote is ringing");
@@ -11312,7 +12084,6 @@ var PhoneCallUiImpl = /** @class */ (function () {
                 }); })
             });
         };
-        this.countryIso = (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso;
         {
             var _b = modalApi.createModal(this.structure, {
                 "keyboard": false,
@@ -11321,9 +12092,8 @@ var PhoneCallUiImpl = /** @class */ (function () {
             this.hideModal = hide;
             this.showModal = show;
         }
-        this.structure.find("span.id_me").html(userSim.friendlyName);
-        this.structure.find("span.id_me_under").html(!!this.userSim.sim.storage.number ?
-            phone_number_1.phoneNumber.prettyPrint(phone_number_1.phoneNumber.build(this.userSim.sim.storage.number, this.countryIso), this.countryIso) : "");
+        this.structure.find("span.id_me").html(params.sim.friendlyName);
+        this.structure.find("span.id_me_under").html(params.getPhoneNumberPrettyPrint((_a = params.sim.phoneNumber, (_a !== null && _a !== void 0 ? _a : ""))));
         this.btnGreen.on("click", function () { return _this.evtBtnClick.post("GREEN"); });
         this.btnRed.on("click", function () { return _this.evtBtnClick.post("RED"); });
         var mouseDownStart = {};
@@ -11348,11 +12118,12 @@ var PhoneCallUiImpl = /** @class */ (function () {
             _loop_1(i);
         }
     }
-    PhoneCallUiImpl.prototype.setContact = function (wdChat) {
+    PhoneCallUiImpl.prototype.setContact = function (phoneNumberRaw) {
+        var _a;
         this.structure.find("span.id_contact")
-            .html(wdChat.contactName ? wdChat.contactName : "");
+            .html((_a = this.params.getContactName(phoneNumberRaw), (_a !== null && _a !== void 0 ? _a : "")));
         this.structure.find("span.id_contact_under")
-            .html(phone_number_1.phoneNumber.prettyPrint(wdChat.contactNumber, this.countryIso));
+            .html(this.params.getPhoneNumberPrettyPrint(phoneNumberRaw));
     };
     PhoneCallUiImpl.prototype.setArrows = function (direction) {
         this.structure.find("[class^='sel_arrow-']").addClass("hide");
@@ -11429,7 +12200,7 @@ var PhoneCallUiImpl = /** @class */ (function () {
     return PhoneCallUiImpl;
 }());
 
-},{"../templates/UiVoiceCall.html":108,"frontend-shared/dist/lib/loadUiClassHtml":125,"frontend-shared/dist/tools/modal":163,"frontend-shared/node_modules/phone-number":41,"frontend-shared/node_modules/ts-events-extended":188}],100:[function(require,module,exports){
+},{"../templates/UiVoiceCall.html":119,"frontend-shared/dist/lib/loadUiClassHtml":136,"frontend-shared/dist/tools/assert":164,"frontend-shared/dist/tools/modal":173,"frontend-shared/node_modules/ts-events-extended":47}],111:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -11468,10 +12239,10 @@ module.exports.byUrl = function(url) {
   }
 };
 
-},{}],101:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 module.exports = require('cssify');
 
-},{"cssify":100}],102:[function(require,module,exports){
+},{"cssify":111}],113:[function(require,module,exports){
 //! moment.js
 
 ;(function (global, factory) {
@@ -16075,34 +16846,34 @@ module.exports = require('cssify');
 
 })));
 
-},{}],103:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 module.exports = "<div class=\"id_UiConversation panel panel-default\">\r\n    <div class=\"panel-heading pr5\">\r\n        <h4 class=\"panel-title\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-chat\"></use>\r\n                </svg>\r\n            </i>\r\n            <span class=\"id_name\"></span>\r\n            <span class=\"id_number ml10\"></span>\r\n        </h4>\r\n        <button class=\"id_updateContact btn btn-primary ml10\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n            <i>\r\n                <svg class=\"custom-icon\">\r\n                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                </svg>\r\n            </i>\r\n        </button>\r\n        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n            <i class=\"glyphicon glyphicon-trash\"></i>\r\n        </button>\r\n        <div class=\"pull-right mt5\">\r\n            <button class=\"id_call btn btn-primary\" type=\"button\">\r\n                <i>\r\n                    <svg class=\"custom-icon\">\r\n                        <use xlink:href=\"#icon-call\"></use>\r\n                    </svg>\r\n                </i>\r\n                <span>Call</span>\r\n            </button>\r\n        </div>\r\n    </div>\r\n    <div class=\"panel-body bnb\">\r\n        <ul></ul>\r\n    </div>\r\n    <div class=\"panel-footer white-bg\">\r\n        <form action=\"#\" role=\"form\" class=\"mb5 mr5 ml5\">\r\n                <textarea class=\"form-control elastic\" rows=\"1\"> </textarea>\r\n                <a class=\"id_send\" href=\"javascript:void(0);\">\r\n                    <i class=\"fa fa-send s20\"></i>\r\n                </a>\r\n        </form>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div class=\"message\">\r\n            <p class=\"id_emitter\"></p>\r\n            <div class=\"id_status\">\r\n                <span class=\"id_date\"></span>\r\n                <span class=\"id_check\"></span>\r\n            </div>\r\n            <p class=\"id_content\">\r\n            </p>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
-},{}],104:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 var css = ".id_UiConversation .panel-heading {\n  cursor: default;\n}\n.id_UiConversation .panel-title {\n  display: inline-block;\n}\n.id_UiConversation .panel-title span {\n  cursor: text;\n}\n.id_UiConversation .panel-body {\n  padding: 0;\n}\n.id_UiConversation .panel-footer {\n  padding: 0;\n}\n.id_UiConversation form {\n  position: relative;\n}\n.id_UiConversation textarea {\n  padding-right: 36px;\n}\n.id_UiConversation a.id_send {\n  position: absolute;\n  top: 7px;\n  right: 0px;\n  left: auto;\n  width: 33px;\n}\n.id_UiConversation ul {\n  margin: 0 10px 0;\n  padding: 0;\n  list-style: none;\n}\n.id_UiConversation ul li {\n  margin-bottom: 5px;\n  margin-top: 5px;\n}\n.id_UiConversation ul li div.message {\n  border-radius: 4px;\n  padding: 5px 10px;\n  border: 1px solid #ecf0f1;\n  position: relative;\n}\n.id_UiConversation ul li div.message.notification {\n  background-color: #ecefde;\n  text-align: center;\n  font-style: italic;\n  margin-left: 80px;\n  margin-right: 80px;\n}\n.id_UiConversation ul li div.message.in,\n.id_UiConversation ul li div.message.out {\n  background-color: #ecf0f1;\n}\n.id_UiConversation ul li div.message.in:after,\n.id_UiConversation ul li div.message.out:after,\n.id_UiConversation ul li div.message.in:before,\n.id_UiConversation ul li div.message.out:before {\n  top: 20px;\n  border: solid transparent;\n  content: '';\n  position: absolute;\n}\n.id_UiConversation ul li div.message.in:after,\n.id_UiConversation ul li div.message.out:after {\n  border-width: 8px;\n  margin-top: -8px;\n}\n.id_UiConversation ul li div.message.in {\n  margin-left: 7px;\n  margin-right: 60px;\n}\n.id_UiConversation ul li div.message.in:after,\n.id_UiConversation ul li div.message.in:before {\n  right: 100%;\n}\n.id_UiConversation ul li div.message.in:after {\n  border-right-color: #ecf0f1;\n}\n.id_UiConversation ul li div.message.out {\n  margin-left: 60px;\n  margin-right: 7px;\n}\n.id_UiConversation ul li div.message.out:after,\n.id_UiConversation ul li div.message.out:before {\n  left: 100%;\n}\n.id_UiConversation ul li div.message.out:after {\n  border-left-color: #ecf0f1;\n}\n.id_UiConversation ul li div.message p.id_emitter {\n  color: #95a5a6;\n  margin-bottom: 2px;\n}\n.id_UiConversation ul li div.message div.id_status {\n  float: right;\n  padding: 2px 0;\n  position: absolute;\n  right: 10px;\n  bottom: 2px;\n}\n.id_UiConversation ul li div.message span.id_date {\n  font-size: 75%;\n  font-style: italic;\n}\n.id_UiConversation ul li div.message span.id_check {\n  font-size: 75%;\n  font-style: italic;\n}\n.id_UiConversation ul li div.message p.id_content {\n  font-size: 13px;\n  line-height: 18px;\n  margin-bottom: 0;\n  padding-bottom: 15px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":101}],105:[function(require,module,exports){
+},{"lessify":112}],116:[function(require,module,exports){
 module.exports = "\r\n<div class=\"id_UiHeader page-header\">\r\n    <h4>\r\n        <i class=\"id_icon_sim_up\">\r\n            <svg class=\"custom-icon\">\r\n                <use xlink:href=\"#icon-sim_card\"></use>\r\n            </svg>\r\n        </i>\r\n        <a href=\"#\" class=\"id_friendly_name\">\r\n            <span></span>\r\n        </a>\r\n        &nbsp;\r\n        <span class=\"id_number\"></span>\r\n        &nbsp;\r\n\r\n        <span class=\"id_offline color-red\"><b>Offline</b></span>\r\n\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"NULL\">NULL</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"VERY WEAK\">VERY WEAK</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"WEAK\">WEAK</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"GOOD\">GOOD</i>\r\n        <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"EXCELLENT\">EXCELLENT</i>\r\n\r\n        <i class=\"id_sip_registration_in_progress fa fa-spin fa-spinner\"></i>\r\n\r\n        &nbsp;\r\n        <div class=\"id_conf\" style=\"display: inline-block;\">\r\n            <span style=\"font-size:70%;\"> </span>\r\n            <button type=\"button\" class=\"btn btn-primary btn-sm\">Join call</button>\r\n        </div>\r\n\r\n    </h4>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <strong>Sim country:&nbsp;</strong>\r\n        <div class=\"id_flag iti-flag\" style=\"display: inline-block;\"></div>\r\n        <br>\r\n        <strong>Operator: </strong>\r\n        <span class=\"id_network\"></span>\r\n        <br>\r\n        <strong>Current location: </strong>\r\n        <span class=\"id_geoInfo\"></span>\r\n    </div>\r\n\r\n</div>\r\n";
-},{}],106:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 module.exports = "<style>\r\n    .id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    .id_UiPhonebook ul li .id_number {\r\n        cursor: text !important;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.selected > div,\r\n    .id_UiPhonebook ul li > div:hover {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.has-messages > div {\r\n        background-color: #f4f5f5;\r\n    }\r\n</style>\r\n\r\n\r\n<div class=\"id_UiPhonebook panel\">\r\n    <div class=\"panel-body p0\">\r\n        <div class=\"p15\">\r\n            <form action=\"javascript:void(0);\">\r\n                <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search contacts... \">\r\n            </form>\r\n        </div>\r\n        <ul class=\"nav \">\r\n        </ul>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates \">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <span class=\"id_number pl15\"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_notifications label blue-light-bg\"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>";
-},{}],107:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 module.exports = "<style>\r\n    .id_UiQuickAction .intl-tel-input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction .intl-tel-input input {\r\n        width: 100%;\r\n    }\r\n\r\n    .id_UiQuickAction span.id_error-message {\r\n        color: red;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiQuickAction .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n</style>\r\n\r\n\r\n<div class=\"id_UiQuickAction panel\">\r\n    <div class=\"panel-body\">\r\n        <form class=\"id_form form-vertical\" action=\"javascript:void(0);\">\r\n            <fieldset>\r\n                <div class=\"row\">\r\n\r\n                    <div class=\"col-xs-12 mt5 mb10 pl20 pr20\">\r\n                        <input name=\"tel-input\" class=\"id_tel-input form-control\" type=\"text\" required>\r\n                    </div>\r\n\r\n                    <div class=\"col-xs-12\">\r\n\r\n                        <div class=\"st_flex\">\r\n\r\n                            <button type=\"button\" class=\"id_call btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-call\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">Call</span>\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_sms btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-sms\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">SMS</span>\r\n\r\n                            </button>\r\n                            <button type=\"button\" class=\"id_contact btn btn-primary\">\r\n                                <i>\r\n                                    <svg class=\"custom-icon\">\r\n                                        <use xlink:href=\"#icon-add_contact\"></use>\r\n                                    </svg>\r\n                                </i>\r\n                                <span class=\"visible-lg-inline \">New Contact</span>\r\n                            </button>\r\n\r\n                        </div>\r\n\r\n                    </div>\r\n\r\n                </div>\r\n            </fieldset>\r\n\r\n    </div>\r\n    <!-- .panel-body-->\r\n</div>\r\n\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_popover\">\r\n        <span class=\"id_error-message\"></span>\r\n    </div>\r\n</div>";
-},{}],108:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 module.exports = "<style>\r\n\r\n    @keyframes ring {\r\n        5%,\r\n        45% {\r\n            transform: translate3d(-1px, 0, 0);\r\n        }\r\n\r\n        10%,\r\n        40% {\r\n            transform: translate3d(2px, 0, 0);\r\n        }\r\n\r\n        15%,\r\n        25%,\r\n        35% {\r\n            transform: translate3d(-3px, 0, 0);\r\n        }\r\n\r\n        20%,\r\n        30% {\r\n            transform: translate3d(3px, 0, 0);\r\n        }\r\n    }\r\n\r\n    .id_UiVoiceCall .icon-ring {\r\n        animation-name: ring;\r\n        animation-duration: 2s;\r\n        animation-iteration-count: infinite;\r\n    }\r\n\r\n    .id_UiVoiceCall.modal {\r\n        text-align: center;\r\n        padding: 0!important;\r\n    }\r\n    \r\n    /*\r\n\r\n    NOTE: To center vertically but create \r\n    big margin on small screens so commented.\r\n\r\n    .id_UiVoiceCall.modal:before {\r\n        content: '';\r\n        display: inline-block;\r\n        height: 100%;\r\n        vertical-align: middle;\r\n        margin-right: -4px;\r\n    }\r\n\r\n    .id_UiVoiceCall .modal-dialog {\r\n        display: inline-block;\r\n        text-align: left;\r\n        vertical-align: middle;\r\n    }\r\n    */\r\n\r\n    .id_UiVoiceCall .id_numpad {\r\n        text-align: center;\r\n        margin-top: 20px;\r\n    }\r\n\r\n    .id_UiVoiceCall .id_numpad .btn {\r\n        margin-bottom: 10px !important;\r\n        margin-right: 5px !important;\r\n    }\r\n\r\n    .id_UiVoiceCall .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiVoiceCall .st_flex > div {\r\n        width: 100%;\r\n    }\r\n\r\n</style>\r\n\r\n<div class=\"id_UiVoiceCall modal\" role=\"dialog\">\r\n    <div class=\"modal-dialog\" role=\"document\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n\r\n                <div class=\"panel panel-dark mb0\">\r\n                    <div class=\"panel-heading pt10\">\r\n                        <div class=\"row\">\r\n\r\n                            <div class=\"col-xs-12\">\r\n\r\n                                <div class=\"st_flex\">\r\n\r\n                                    <div class=\"text-center\">\r\n                                            <p><span class=\"id_me\"></span></p>\r\n                                            <p><span class=\"id_me_under\"></span></p>\r\n                                    </div>\r\n                                    <div class=\"mt10\" style=\"width: 10% !important; margin-right: 5px;\">\r\n                                        <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                        <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                                    </div>\r\n                                    <div class=\"text-center mt10\" style=\"width: 10% !important;\">\r\n                                        <span class=\"id_timer\"></span>\r\n                                        <span class=\"id_icon-ring fa fa-phone icon-ring\"></span>\r\n                                        <span class=\"id_icon-spin fa fa-spinner icon-spin\"></span>\r\n                                        <span class=\"id_icon-hangup glyphicon glyphicon-phone-alt\"></span>\r\n                                    </div>\r\n                                    <div class=\"mt10\" style=\"width: 10% !important; margin-left: 5px;\">\r\n                                        <i class=\"sel_arrow-right l-arrows-right\"></i>\r\n                                        <i class=\"sel_arrow-left l-arrows-left\"></i>\r\n                                    </div>\r\n                                    <div class=\"text-center\">\r\n                                            <p><span class=\"id_contact\"> <span></p>\r\n                                            <p><span class=\"id_contact_under\"></span></p>\r\n                                    </div>\r\n\r\n\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n                        </div>\r\n                    </div>\r\n\r\n                    <div class=\"panel-body\">\r\n\r\n                        <div class=\"text-center\">\r\n                            <span class=\"id_status well well-sm\"></span>\r\n                        </div>\r\n\r\n                        <div class=\"row id_numpad\">\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key1 btn btn-success\">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key2 btn btn-success\">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key3 btn btn-success\">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key4 btn btn-success\">&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key5 btn btn-success\">&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key6 btn btn-success\">&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_key7 btn btn-success\">&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key8 btn btn-success\">&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key9 btn btn-success\">&nbsp;&nbsp;&nbsp;9&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                            <div class=\"col-sm-12\">\r\n                                <button type=\"button\" class=\"id_keyAst btn btn-default\">&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_key0 btn btn-success\">&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>\r\n                                <button type=\"button\" class=\"id_keySharp btn btn-default\">&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;</button>\r\n                            </div>\r\n\r\n                        </div>\r\n\r\n                        <div class=\"row\">\r\n                            <div class=\"pull-left\">\r\n                                <button class=\"id_btn-green btn btn-success ml10\" type=\"button\">\r\n                                    <i class=\"im-phone2\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                            <div class=\"pull-right\">\r\n                                <button class=\"id_btn-red btn btn-danger mr10\" type=\"button\">\r\n                                    <i class=\"glyphicon glyphicon-phone-alt\"></i>\r\n                                    <span></span>\r\n                                </button>\r\n                            </div>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <!-- .panel-body-->\r\n                </div>\r\n\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>";
-},{}],109:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 module.exports = "<div class=\"id_UiWebphoneController row\">\r\n\r\n    <div class=\"id_header col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_staticNotifications col-lg-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colLeft col-lg-5 col-md-4 col-sm-4 col-xs-12\">\r\n    </div>\r\n    \r\n    <div class=\"id_colRight col-lg-7 col-md-8 col-sm-8 col-xs-12 sortable-layout\">\r\n    </div>\r\n\r\n</div>";
-},{}],110:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var bundledData_1 = require("semasim-gateway/dist/lib/misc/bundledData");
 exports.smuggleBundledDataInHeaders = bundledData_1.smuggleBundledDataInHeaders;
 exports.extractBundledDataFromHeaders = bundledData_1.extractBundledDataFromHeaders;
 
-},{"semasim-gateway/dist/lib/misc/bundledData":189}],111:[function(require,module,exports){
+},{"semasim-gateway/dist/lib/misc/bundledData":192}],122:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var sipRouting_1 = require("semasim-gateway/dist/lib/misc/sipRouting");
 exports.readImsi = sipRouting_1.readImsi;
 
-},{"semasim-gateway/dist/lib/misc/sipRouting":191}],112:[function(require,module,exports){
+},{"semasim-gateway/dist/lib/misc/sipRouting":194}],123:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -16110,14 +16881,25 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("semasim-gateway/dist/lib/misc/serializedUaObjectCarriedOverSipContactParameter"));
 
-},{"semasim-gateway/dist/lib/misc/serializedUaObjectCarriedOverSipContactParameter":190}],113:[function(require,module,exports){
+},{"semasim-gateway/dist/lib/misc/serializedUaObjectCarriedOverSipContactParameter":193}],124:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"semasim-gateway/dist/web_api_declaration":193}],114:[function(require,module,exports){
+},{"semasim-gateway/dist/web_api_declaration":196}],125:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -16185,7 +16967,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
 var wd = require("./types/webphoneData/logic");
 var lib_1 = require("phone-number/dist/lib");
-var Observable_1 = require("../tools/Observable");
 var env_1 = require("./env");
 var id_1 = require("../tools/id");
 var Webphone;
@@ -16202,7 +16983,7 @@ var Webphone;
                             return __generator(this, function (_b) {
                                 switch (_b.label) {
                                     case 0:
-                                        obsIsSipRegistered = new Observable_1.ObservableImpl(false);
+                                        obsIsSipRegistered = new ts_events_extended_1.ObservableImpl(false);
                                         sipUserAgent = sipUserAgentCreate(userSim);
                                         wdApiCallerForSpecificSim = getWdApiCallerForSpecificSim(userSim.sim.imsi);
                                         return [4 /*yield*/, wdApiCallerForSpecificSim.getUserSimChats(20)];
@@ -16212,19 +16993,32 @@ var Webphone;
                                     case 2:
                                         _b.sent();
                                         phoneCallUi = phoneCallUiCreate((function () {
+                                            var _common = (function () {
+                                                var buildPhoneNumber = function (phoneNumberRaw) {
+                                                    var _a;
+                                                    return lib_1.phoneNumber.build(phoneNumberRaw, (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso);
+                                                };
+                                                return id_1.id({
+                                                    "imsi": userSim.sim.imsi,
+                                                    "getContactName": function (phoneNumberRaw) { var _a; return (_a = userSim.phonebook.find((function () {
+                                                        var validPhoneNumber = buildPhoneNumber(phoneNumberRaw);
+                                                        return function (_a) {
+                                                            var number_raw = _a.number_raw;
+                                                            return lib_1.phoneNumber.areSame(validPhoneNumber, number_raw);
+                                                        };
+                                                    })())) === null || _a === void 0 ? void 0 : _a.name; },
+                                                    "getPhoneNumberPrettyPrint": function (phoneNumberRaw) {
+                                                        var _a;
+                                                        return lib_1.phoneNumber.prettyPrint(buildPhoneNumber(phoneNumberRaw), (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso);
+                                                    }
+                                                });
+                                            })();
                                             switch (env_1.env.jsRuntimeEnv) {
                                                 case "browser": {
-                                                    return id_1.id({
-                                                        "assertJsRuntimeEnv": "browser",
-                                                        userSim: userSim
-                                                    });
+                                                    return id_1.id(__assign({ "assertJsRuntimeEnv": "browser" }, _common));
                                                 }
                                                 case "react-native": {
-                                                    return id_1.id({
-                                                        "assertJsRuntimeEnv": "react-native",
-                                                        userSim: userSim,
-                                                        obsIsSipRegistered: obsIsSipRegistered
-                                                    });
+                                                    return id_1.id(__assign({ "assertJsRuntimeEnv": "react-native", obsIsSipRegistered: obsIsSipRegistered }, _common));
                                                 }
                                             }
                                         })());
@@ -16273,12 +17067,7 @@ var Webphone;
                                                     }
                                                 });
                                             }); },
-                                            "placeOutgoingCall": function (wdChat) { return __awaiter(_this, void 0, void 0, function () {
-                                                return __generator(this, function (_a) {
-                                                    phoneCallUi.openUiForOutgoingCall(wdChat);
-                                                    return [2 /*return*/];
-                                                });
-                                            }); },
+                                            "placeOutgoingCall": function (wdChat) { return phoneCallUi.openUiForOutgoingCall(wdChat.contactNumber); },
                                             "fetchOlderWdMessages": wdApiCallerForSpecificSim.fetchOlderMessages,
                                             "updateWdChatLastMessageSeen": wdApiCallerForSpecificSim.updateChatLastMessageSeen,
                                             "getAndOrCreateAndOrUpdateWdChat": function (number, contactName, contactIndexInSim) { return __awaiter(_this, void 0, void 0, function () {
@@ -16382,50 +17171,45 @@ var Webphone;
                                             });
                                         });
                                         sipUserAgent.evtIncomingCall.attach(function (evtData) { return __awaiter(_this, void 0, void 0, function () {
-                                            var fromNumber, logic_terminate, logic_prTerminated, logic_onAccepted, _a, ui_onTerminated, ui_prUserInput, _b, _c;
-                                            return __generator(this, function (_d) {
-                                                switch (_d.label) {
-                                                    case 0:
-                                                        fromNumber = evtData.fromNumber, logic_terminate = evtData.terminate, logic_prTerminated = evtData.prTerminated, logic_onAccepted = evtData.onAccepted;
-                                                        _c = (_b = phoneCallUi).openUiForIncomingCall;
-                                                        return [4 /*yield*/, webphone.getAndOrCreateAndOrUpdateWdChat(fromNumber)];
-                                                    case 1:
-                                                        _a = _c.apply(_b, [_d.sent()]), ui_onTerminated = _a.onTerminated, ui_prUserInput = _a.prUserInput;
-                                                        logic_prTerminated.then(function () { return ui_onTerminated("Call ended"); });
-                                                        ui_prUserInput.then(function (ui_userInput) {
-                                                            if (ui_userInput.userAction === "REJECT") {
-                                                                logic_terminate();
-                                                                return;
-                                                            }
-                                                            var ui_onEstablished = ui_userInput.onEstablished;
-                                                            logic_onAccepted().then(function (_a) {
-                                                                var logic_sendDtmf = _a.sendDtmf;
-                                                                var ui_evtUserInput = ui_onEstablished().evtUserInput;
-                                                                ui_evtUserInput.attach(function (eventData) {
-                                                                    return eventData.userAction === "DTMF";
-                                                                }, function (_a) {
-                                                                    var signal = _a.signal, duration = _a.duration;
-                                                                    return logic_sendDtmf(signal, duration);
-                                                                });
-                                                                ui_evtUserInput.attachOnce(function (_a) {
-                                                                    var userAction = _a.userAction;
-                                                                    return userAction === "HANGUP";
-                                                                }, function () { return logic_terminate(); });
-                                                            });
+                                            var fromNumber, logic_terminate, logic_prTerminated, logic_onAccepted, _a, ui_onTerminated, ui_prUserInput;
+                                            return __generator(this, function (_b) {
+                                                fromNumber = evtData.fromNumber, logic_terminate = evtData.terminate, logic_prTerminated = evtData.prTerminated, logic_onAccepted = evtData.onAccepted;
+                                                _a = phoneCallUi.openUiForIncomingCall(fromNumber), ui_onTerminated = _a.onTerminated, ui_prUserInput = _a.prUserInput;
+                                                logic_prTerminated.then(function () { return ui_onTerminated("Call ended"); });
+                                                ui_prUserInput.then(function (ui_userInput) {
+                                                    if (ui_userInput.userAction === "REJECT") {
+                                                        logic_terminate();
+                                                        return;
+                                                    }
+                                                    var ui_onEstablished = ui_userInput.onEstablished;
+                                                    logic_onAccepted().then(function (_a) {
+                                                        var logic_sendDtmf = _a.sendDtmf;
+                                                        var ui_evtUserInput = ui_onEstablished().evtUserInput;
+                                                        ui_evtUserInput.attach(function (eventData) {
+                                                            return eventData.userAction === "DTMF";
+                                                        }, function (_a) {
+                                                            var signal = _a.signal, duration = _a.duration;
+                                                            return logic_sendDtmf(signal, duration);
                                                         });
-                                                        return [2 /*return*/];
-                                                }
+                                                        ui_evtUserInput.attachOnce(function (_a) {
+                                                            var userAction = _a.userAction;
+                                                            return userAction === "HANGUP";
+                                                        }, function () { return logic_terminate(); });
+                                                    });
+                                                });
+                                                return [2 /*return*/];
                                             });
                                         }); });
                                         phoneCallUi.evtUiOpenedForOutgoingCall.attach(function (evtData) { return __awaiter(_this, void 0, void 0, function () {
-                                            var phoneNumber, ui_onTerminated, ui_prUserInput, ui_onRingback, _a, logic_prNextState, logic_prTerminated, logic_terminate;
-                                            return __generator(this, function (_b) {
-                                                switch (_b.label) {
+                                            var phoneNumberRaw, ui_onTerminated, ui_prUserInput, ui_onRingback, _a, logic_prNextState, logic_prTerminated, logic_terminate;
+                                            var _b;
+                                            return __generator(this, function (_c) {
+                                                switch (_c.label) {
                                                     case 0:
-                                                        phoneNumber = evtData.phoneNumber, ui_onTerminated = evtData.onTerminated, ui_prUserInput = evtData.prUserInput, ui_onRingback = evtData.onRingback;
-                                                        return [4 /*yield*/, sipUserAgent.placeOutgoingCall(phoneNumber)];
+                                                        phoneNumberRaw = evtData.phoneNumberRaw, ui_onTerminated = evtData.onTerminated, ui_prUserInput = evtData.prUserInput, ui_onRingback = evtData.onRingback;
+                                                        return [4 /*yield*/, sipUserAgent.placeOutgoingCall(lib_1.phoneNumber.build(phoneNumberRaw, (_b = userSim.sim.country) === null || _b === void 0 ? void 0 : _b.iso))];
                                                     case 1:
-                                                        _a = _b.sent(), logic_prNextState = _a.prNextState, logic_prTerminated = _a.prTerminated, logic_terminate = _a.terminate;
+                                                        _a = _c.sent(), logic_prNextState = _a.prNextState, logic_prTerminated = _a.prTerminated, logic_terminate = _a.terminate;
                                                         logic_prTerminated.then(function () { return ui_onTerminated("Call terminated"); });
                                                         ui_prUserInput.then(function () { return logic_terminate(); });
                                                         logic_prNextState.then(function (_a) {
@@ -16607,7 +17391,7 @@ function synchronizeUserSimAndWdInstance(userSim, wdChats, wdApiCallerForSpecifi
     });
 }
 
-},{"../tools/Observable":153,"../tools/id":156,"./env":121,"./types/webphoneData/logic":148,"phone-number/dist/lib":41,"ts-events-extended":188}],115:[function(require,module,exports){
+},{"../tools/id":166,"./env":132,"./types/webphoneData/logic":159,"phone-number/dist/lib":41,"ts-events-extended":47}],126:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -16683,6 +17467,7 @@ var webApiCaller = require("./webApiCaller");
 var interactiveAppEvtHandlers_1 = require("./interactiveAppEvtHandlers");
 var getPushToken_1 = require("./getPushToken");
 var id_1 = require("../tools/id");
+var lib_1 = require("phone-number/dist/lib");
 var log = true ?
     (function () {
         var args = [];
@@ -16703,7 +17488,7 @@ function appLauncher(params) {
                         throw new Error("Wrong params for js runtime environnement");
                     }
                     if (params.assertJsRuntimeEnv === "react-native") {
-                        restartApp_1.evtAppAboutToRestart.attachOnce(function () { return params.notifyAppAboutToRestart(); });
+                        restartApp_1.registerActionToPerformBeforeAppRestart(function () { return params.actionToPerformBeforeAppRestart(); });
                         dialog_1.provideCustomImplementationOfBaseApi(params.dialogBaseApi);
                     }
                     _a = "NO VALID CREDENTIALS";
@@ -16742,7 +17527,7 @@ function appLauncher(params) {
 exports.appLauncher = appLauncher;
 function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedData) {
     return __awaiter(this, void 0, void 0, function () {
-        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, pushNotificationToken, userSims, prCreateWebphone, _e, _f, _g, _h;
+        var encryptedSymmetricKey, email, uaInstanceId, _a, paramsNeededToEncryptDecryptWebphoneData, paramsNeededToInstantiateUa, _b, _c, _d, pushNotificationToken, resolvePrReadyToInteract, userSims, prCreateWebphone, _e, _f, _g, _h;
         var _this = this;
         return __generator(this, function (_j) {
             switch (_j.label) {
@@ -16826,7 +17611,7 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                     appEvts_1.appEvts.evtUsableSim.attachOnce(function () { return restartApp_1.restartApp("New usable sim"); });
                     appEvts_1.appEvts.evtSimPermissionLost.attach(function () { return restartApp_1.restartApp("Permission lost for a Sim"); });
                     appEvts_1.appEvts.evtSimPasswordChanged.attach(function () { return restartApp_1.restartApp("One sim password have changed"); });
-                    interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(appEvts_1.appEvts, remoteApiCaller.core, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
+                    interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(new Promise(function (resolve) { return resolvePrReadyToInteract = resolve; }), appEvts_1.appEvts, remoteApiCaller.core, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
                     return [4 /*yield*/, remoteApiCaller.core.getUsableUserSims()];
                 case 5:
                     userSims = _j.sent();
@@ -16845,24 +17630,26 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
                         "coreApiCaller": remoteApiCaller.core
                     };
                     _h = "phoneCallUiCreate";
-                    return [4 /*yield*/, params.phoneCallUiCreateFactory((function () {
-                            switch (env_1.env.jsRuntimeEnv) {
-                                case "browser": {
-                                    return id_1.id({
-                                        "assertJsRuntimeEnv": "browser"
-                                    });
-                                }
-                                case "react-native": {
-                                    return id_1.id({
-                                        "assertJsRuntimeEnv": "react-native",
-                                        userSims: userSims,
-                                    });
-                                }
-                            }
-                        })())];
+                    return [4 /*yield*/, params.phoneCallUiCreateFactory({
+                            "sims": userSims.map(function (userSim) { return ({
+                                "imsi": userSim.sim.imsi,
+                                "friendlyName": userSim.friendlyName,
+                                "phoneNumber": (function () {
+                                    var _a;
+                                    var number = userSim.sim.storage.number;
+                                    return number !== undefined ? lib_1.phoneNumber.build(number, (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso) : undefined;
+                                })(),
+                                "serviceProvider": (function () {
+                                    var _a;
+                                    var _b = userSim.sim.serviceProvider, fromImsi = _b.fromImsi, fromNetwork = _b.fromNetwork;
+                                    return _a = (fromImsi !== null && fromImsi !== void 0 ? fromImsi : fromNetwork), (_a !== null && _a !== void 0 ? _a : "");
+                                })()
+                            }); })
+                        })];
                 case 6:
                     prCreateWebphone = _f.apply(_e, [(_g[_h] = _j.sent(),
                             _g)]);
+                    resolvePrReadyToInteract();
                     return [4 /*yield*/, Promise.all(userSims.map(function (userSim) { return prCreateWebphone.then(function (createWebphone) { return createWebphone(userSim); }); }))];
                 case 7: return [2 /*return*/, (_j.sent()).sort(Webphone_1.Webphone.sortPutingFirstTheOnesWithMoreRecentActivity)];
             }
@@ -16870,7 +17657,7 @@ function appLauncher_onceLoggedIn(params, authenticatedSessionDescriptorSharedDa
     });
 }
 
-},{"../tools/id":156,"../tools/modal/dialog":160,"./Webphone":114,"./crypto/appCryptoSetupHelper":116,"./env":121,"./getPushToken":123,"./interactiveAppEvtHandlers":124,"./localStorage/AuthenticatedSessionDescriptorSharedData":126,"./localStorage/TowardUserKeys":128,"./localStorage/declaredPushNotificationToken":129,"./restartApp":137,"./sipUserAgent":138,"./toBackend/appEvts":139,"./toBackend/connection":140,"./toBackend/remoteApiCaller":143,"./tryLoginFromStoredCredentials":146,"./webApiCaller":149}],116:[function(require,module,exports){
+},{"../tools/id":166,"../tools/modal/dialog":170,"./Webphone":125,"./crypto/appCryptoSetupHelper":127,"./env":132,"./getPushToken":134,"./interactiveAppEvtHandlers":135,"./localStorage/AuthenticatedSessionDescriptorSharedData":137,"./localStorage/TowardUserKeys":139,"./localStorage/declaredPushNotificationToken":140,"./restartApp":148,"./sipUserAgent":149,"./toBackend/appEvts":150,"./toBackend/connection":151,"./toBackend/remoteApiCaller":154,"./tryLoginFromStoredCredentials":157,"./webApiCaller":160,"phone-number/dist/lib":41}],127:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -16964,7 +17751,7 @@ function appCryptoSetupHelper(params) {
 }
 exports.appCryptoSetupHelper = appCryptoSetupHelper;
 
-},{"./cryptoLibProxy":117,"./keysGeneration":118}],117:[function(require,module,exports){
+},{"./cryptoLibProxy":128,"./keysGeneration":129}],128:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
@@ -17078,7 +17865,7 @@ var rsa;
 })(rsa = exports.rsa || (exports.rsa = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../env":121,"../nativeModules/hostCryptoLib":132,"buffer":3,"crypto-lib":16}],118:[function(require,module,exports){
+},{"../env":132,"../nativeModules/hostCryptoLib":143,"buffer":3,"crypto-lib":16}],129:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -17250,7 +18037,7 @@ var symmetricKey;
 })(symmetricKey = exports.symmetricKey || (exports.symmetricKey = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../../tools/modal/dialog":160,"./cryptoLibProxy":117,"./kfd":119,"buffer":3,"crypto-lib/dist/sync/utils/binaryDataManipulations":20}],119:[function(require,module,exports){
+},{"../../tools/modal/dialog":170,"./cryptoLibProxy":128,"./kfd":130,"buffer":3,"crypto-lib/dist/sync/utils/binaryDataManipulations":20}],130:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 //export const kfdIterations = 100000;
@@ -17323,7 +18110,7 @@ exports.kfd = env_1.env.jsRuntimeEnv === "browser" ?
     }); };
 
 }).call(this,require("buffer").Buffer)
-},{"../env":121,"../nativeModules/hostKfd":133,"./cryptoLibProxy":117,"buffer":3}],120:[function(require,module,exports){
+},{"../env":132,"../nativeModules/hostKfd":144,"./cryptoLibProxy":128,"buffer":3}],131:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Defined at ejs building in templates/head_common.ejs
@@ -17343,7 +18130,7 @@ var default_ = typeof window !== "undefined" ? ({
 });
 exports.default = default_;
 
-},{}],121:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 "use strict";
 /*
 import { jsRuntimeEnv } from "./jsRuntimeEnv";
@@ -17363,19 +18150,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.env = impl_1.default;
 
-},{"./impl":120}],122:[function(require,module,exports){
+},{"./impl":131}],133:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var default_ = function () { return Promise.reject(new Error("Push notification token not available for web client")); };
 exports.default = default_;
 
-},{}],123:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.getPushToken = impl_1.default;
 
-},{"./impl":122}],124:[function(require,module,exports){
+},{"./impl":133}],135:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -17415,10 +18202,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("./env");
-function registerInteractiveAppEvtHandlers(appEvts, remoteCoreApiCaller, dialogApi, startMultiDialogProcess, restartApp) {
+function registerInteractiveAppEvtHandlers(prReadyToInteract, appEvts, remoteCoreApiCaller, dialogApi, startMultiDialogProcess, restartApp) {
     var _this = this;
     var interactiveProcedures = getInteractiveProcedures(remoteCoreApiCaller);
-    appEvts.evtDongleOnLan.attach(function (data) { return __awaiter(_this, void 0, void 0, function () {
+    appEvts.evtDongleOnLan.attach(function (data) { return prReadyToInteract.then(function () { return __awaiter(_this, void 0, void 0, function () {
         var _a, dialogApi, endMultiDialogProcess;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -17432,8 +18219,8 @@ function registerInteractiveAppEvtHandlers(appEvts, remoteCoreApiCaller, dialogA
                     return [2 /*return*/];
             }
         });
-    }); });
-    appEvts.evtSimSharingRequest.attach(function (userSim) { return __awaiter(_this, void 0, void 0, function () {
+    }); }); });
+    appEvts.evtSimSharingRequest.attach(function (userSim) { return prReadyToInteract.then(function () { return __awaiter(_this, void 0, void 0, function () {
         var _a, endMultiDialogProcess, dialogApi;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -17446,18 +18233,20 @@ function registerInteractiveAppEvtHandlers(appEvts, remoteCoreApiCaller, dialogA
                     return [2 /*return*/];
             }
         });
-    }); });
+    }); }); });
     appEvts.evtSharingRequestResponse.attach(function (_a) {
         var userSim = _a.userSim, email = _a.email, isAccepted = _a.isAccepted;
-        return dialogApi.create("alert", { "message": email + " " + (isAccepted ? "accepted" : "rejected") + " sharing request for " + userSim.friendlyName });
+        return prReadyToInteract.then(function () { return dialogApi.create("alert", { "message": email + " " + (isAccepted ? "accepted" : "rejected") + " sharing request for " + userSim.friendlyName }); });
     });
     appEvts.evtOtherSimUserUnregisteredSim.attach(function (_a) {
         var userSim = _a.userSim, email = _a.email;
-        return dialogApi.create("alert", { "message": email + " no longer share " + userSim.friendlyName });
+        return prReadyToInteract.then(function () { return dialogApi.create("alert", { "message": email + " no longer share " + userSim.friendlyName }); });
     });
-    appEvts.evtOpenElsewhere.attach(function () { return dialogApi.create("alert", {
-        "message": "You are connected somewhere else",
-        "callback": function () { return restartApp("Connected somewhere else with uaInstanceId"); }
+    appEvts.evtOpenElsewhere.attach(function () { return prReadyToInteract.then(function () {
+        return dialogApi.create("alert", {
+            "message": "You are connected somewhere else",
+            "callback": function () { return restartApp("Connected somewhere else with uaInstanceId"); }
+        });
     }); });
 }
 exports.registerInteractiveAppEvtHandlers = registerInteractiveAppEvtHandlers;
@@ -17693,7 +18482,7 @@ function getInteractiveProcedures(remoteCoreApiCaller) {
     };
 }
 
-},{"./env":121}],125:[function(require,module,exports){
+},{"./env":132}],136:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -17707,7 +18496,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],126:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -17823,7 +18612,7 @@ var AuthenticatedSessionDescriptorSharedData;
 })(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./localStorageApi":131,"buffer":3,"ts-events-extended":188}],127:[function(require,module,exports){
+},{"./localStorageApi":142,"buffer":3,"ts-events-extended":47}],138:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -17931,7 +18720,7 @@ var Credentials;
     Credentials.set = set;
 })(Credentials = exports.Credentials || (exports.Credentials = {}));
 
-},{"./localStorageApi":131}],128:[function(require,module,exports){
+},{"./localStorageApi":142}],139:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18037,7 +18826,7 @@ var TowardUserKeys;
     TowardUserKeys.retrieve = retrieve;
 })(TowardUserKeys = exports.TowardUserKeys || (exports.TowardUserKeys = {}));
 
-},{"./localStorageApi":131,"crypto-lib/dist/sync/types":19}],129:[function(require,module,exports){
+},{"./localStorageApi":142,"crypto-lib/dist/sync/types":19}],140:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18130,12 +18919,12 @@ function remove() {
 }
 exports.remove = remove;
 
-},{"./localStorageApi":131}],130:[function(require,module,exports){
+},{"./localStorageApi":142}],141:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = localStorage;
 
-},{}],131:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18200,7 +18989,7 @@ function removeItem(key) {
 }
 exports.removeItem = removeItem;
 
-},{"./asyncOrSyncLocalStorage":130}],132:[function(require,module,exports){
+},{"./asyncOrSyncLocalStorage":141}],143:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18319,7 +19108,7 @@ function rsaGenerateKeys(seedB64, keysLengthBytes) {
 }
 exports.rsaGenerateKeys = rsaGenerateKeys;
 
-},{"ts-events-extended":188}],133:[function(require,module,exports){
+},{"ts-events-extended":47}],144:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18389,7 +19178,7 @@ function kfd(password, saltHex, iterations) {
 exports.kfd = kfd;
 ;
 
-},{"ts-events-extended":188}],134:[function(require,module,exports){
+},{"ts-events-extended":47}],145:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -18404,13 +19193,13 @@ var api = {
 };
 exports.getApi = function () { return Promise.resolve(api); };
 
-},{"ts-events-extended":188}],135:[function(require,module,exports){
+},{"ts-events-extended":47}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.getApi = impl_1.getApi;
 
-},{"./impl":134}],136:[function(require,module,exports){
+},{"./impl":145}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("../env");
@@ -18423,8 +19212,55 @@ var default_ = function (reason) {
 };
 exports.default = default_;
 
-},{"../env":121}],137:[function(require,module,exports){
+},{"../env":132}],148:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -18446,19 +19282,57 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
 var impl = require("./impl");
-exports.evtAppAboutToRestart = new ts_events_extended_1.VoidSyncEvent();
+var beforeRestartActions = [];
+function registerActionToPerformBeforeAppRestart(action) {
+    beforeRestartActions.push(action);
+}
+exports.registerActionToPerformBeforeAppRestart = registerActionToPerformBeforeAppRestart;
+function matchPromise(obj) {
+    return (obj instanceof Object &&
+        typeof obj.then === "function");
+}
 exports.restartApp = function () {
     var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         args[_i] = arguments[_i];
     }
-    exports.evtAppAboutToRestart.post();
-    return impl.default.apply(impl, __spread(args));
+    return __awaiter(void 0, void 0, void 0, function () {
+        var tasks, beforeRestartActions_1, beforeRestartActions_1_1, action, prOrVoid;
+        var e_1, _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    tasks = [];
+                    try {
+                        for (beforeRestartActions_1 = __values(beforeRestartActions), beforeRestartActions_1_1 = beforeRestartActions_1.next(); !beforeRestartActions_1_1.done; beforeRestartActions_1_1 = beforeRestartActions_1.next()) {
+                            action = beforeRestartActions_1_1.value;
+                            prOrVoid = action();
+                            if (!matchPromise(prOrVoid)) {
+                                continue;
+                            }
+                            tasks.push(prOrVoid);
+                        }
+                    }
+                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    finally {
+                        try {
+                            if (beforeRestartActions_1_1 && !beforeRestartActions_1_1.done && (_a = beforeRestartActions_1.return)) _a.call(beforeRestartActions_1);
+                        }
+                        finally { if (e_1) throw e_1.error; }
+                    }
+                    if (!(tasks.length !== 0)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, Promise.all(tasks)];
+                case 1:
+                    _b.sent();
+                    _b.label = 2;
+                case 2: return [2 /*return*/, impl.default.apply(impl, __spread(args))];
+            }
+        });
+    });
 };
 
-},{"./impl":136,"ts-events-extended":188}],138:[function(require,module,exports){
+},{"./impl":147}],149:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 //NOTE: Require jssip_compat loaded on the page.
@@ -18567,7 +19441,7 @@ function sipUserAgentCreateFactory(params) {
         return out;
     })();
     var getJsSipSocket = function (imsi) { return new JsSipSocket(imsi, params.connection); };
-    var getRtcIceServer = function () { return params.appEvts.rtcIceEServer.getCurrent(); };
+    var getRtcIceServer = function () { return params.appEvts.rtcIceServer.getCurrent(); };
     return function sipUserAgentCreate(usableUserSim) {
         var sim = usableUserSim.sim;
         var evtUnregisteredByGateway = (function () {
@@ -19196,7 +20070,7 @@ function newIceCandidateHandler(rtcICEServer) {
 })(newIceCandidateHandler || (newIceCandidateHandler = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../gateway/bundledData":110,"../gateway/readImsi":111,"../gateway/serializedUaObjectCarriedOverSipContactParameter":112,"./env":121,"buffer":3,"run-exclusive":180,"ts-events-extended":188,"ts-sip":49}],139:[function(require,module,exports){
+},{"../gateway/bundledData":121,"../gateway/readImsi":122,"../gateway/serializedUaObjectCarriedOverSipContactParameter":123,"./env":132,"buffer":3,"run-exclusive":189,"ts-events-extended":47,"ts-sip":60}],150:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -19257,15 +20131,16 @@ var appEvts;
     appEvts.evtSharingRequestResponse = new ts_events_extended_1.SyncEvent();
     appEvts.evtOtherSimUserUnregisteredSim = new ts_events_extended_1.SyncEvent();
     appEvts.evtOpenElsewhere = new ts_events_extended_1.VoidSyncEvent();
-    var rtcIceEServer;
-    (function (rtcIceEServer) {
-        rtcIceEServer.evt = new ts_events_extended_1.SyncEvent();
-        rtcIceEServer.getCurrent = (function () {
+    appEvts.evt = new ts_events_extended_1.SyncEvent();
+    var rtcIceServer;
+    (function (rtcIceServer_1) {
+        rtcIceServer_1.evt = new ts_events_extended_1.SyncEvent();
+        rtcIceServer_1.getCurrent = (function () {
             var current = undefined;
             var evtUpdated = new ts_events_extended_1.VoidSyncEvent();
-            rtcIceEServer.evt.attach(function (_a) {
-                var rtcIceServer = _a.rtcIceServer, socket = _a.socket;
-                socket.evtClose.attachOnce(function () { return current = undefined; });
+            rtcIceServer_1.evt.attach(function (_a) {
+                var rtcIceServer = _a.rtcIceServer, attachOnNoLongerValid = _a.attachOnNoLongerValid;
+                attachOnNoLongerValid(function () { return current = undefined; });
                 current = rtcIceServer;
                 evtUpdated.post();
             });
@@ -19286,7 +20161,7 @@ var appEvts;
                 });
             };
         })();
-    })(rtcIceEServer = appEvts.rtcIceEServer || (appEvts.rtcIceEServer = {}));
+    })(rtcIceServer = appEvts.rtcIceServer || (appEvts.rtcIceServer = {}));
     appEvts.evtWdActionFromOtherUa = new ts_events_extended_1.SyncEvent();
 })(appEvts = exports.appEvts || (exports.appEvts = {}));
 /*
@@ -19343,7 +20218,7 @@ export type HelperType<K extends keyof TypeofImport> = HelperType2<Pick<TypeofIm
 }
 */
 
-},{"ts-events-extended":188}],140:[function(require,module,exports){
+},{"ts-events-extended":47}],151:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -19581,7 +20456,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../../tools/modal/dialog":160,"../../tools/urlGetParameters":167,"../env":121,"../localStorage/AuthenticatedSessionDescriptorSharedData":126,"../networkStateMonitoring":135,"../restartApp":137,"../tryLoginFromStoredCredentials":146,"./appEvts":139,"./localApiHandlers":141,"ts-events-extended":188,"ts-sip":49}],141:[function(require,module,exports){
+},{"../../tools/modal/dialog":170,"../../tools/urlGetParameters":177,"../env":132,"../localStorage/AuthenticatedSessionDescriptorSharedData":137,"../networkStateMonitoring":146,"../restartApp":148,"../tryLoginFromStoredCredentials":157,"./appEvts":150,"./localApiHandlers":152,"ts-events-extended":47,"ts-sip":60}],152:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -20082,7 +20957,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     var methodName = apiDeclaration.notifyIceServer.methodName;
     var handler = {
         "handler": function (params, fromSocket) {
-            appEvts_1.appEvts.rtcIceEServer.evt.post({
+            appEvts_1.appEvts.rtcIceServer.evt.post({
                 "rtcIceServer": params !== undefined ? params :
                     ({
                         "urls": [
@@ -20092,7 +20967,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
                             "stun:stun4.l.google.com:19302"
                         ]
                     }),
-                "socket": fromSocket
+                "attachOnNoLongerValid": function (onNoLongerValid) { return fromSocket.evtClose.attachOnce(function () { return onNoLongerValid(); }); }
             });
             return Promise.resolve(undefined);
         }
@@ -20110,7 +20985,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":152,"../restartApp":137,"./appEvts":139,"./remoteApiCaller":143,"chan-dongle-extended-client/dist/lib/types":169,"ts-events-extended":188}],142:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":163,"../restartApp":148,"./appEvts":150,"./remoteApiCaller":154,"chan-dongle-extended-client/dist/lib/types":179,"ts-events-extended":47}],153:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -20593,7 +21468,7 @@ exports.shouldAppendPromotionalMessage = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":151,"../../restartApp":137,"../appEvts":139,"../connection":140,"./sendRequest":144}],143:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":162,"../../restartApp":148,"../appEvts":150,"../connection":151,"./sendRequest":155}],154:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var core = require("./core");
@@ -20606,7 +21481,7 @@ var getWdApiCallerForSpecificSimFactory = function (encryptorDecryptor, userEmai
 };
 exports.getWdApiCallerForSpecificSimFactory = getWdApiCallerForSpecificSimFactory;
 
-},{"../appEvts":139,"./core":142,"./sendRequest":144,"./webphoneData":145}],144:[function(require,module,exports){
+},{"../appEvts":150,"./core":153,"./sendRequest":155,"./webphoneData":156}],155:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -20674,7 +21549,7 @@ function sendRequest(methodName, params) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../restartApp":137,"../connection":140,"ts-sip":49}],145:[function(require,module,exports){
+},{"../../restartApp":148,"../connection":151,"ts-sip":60}],156:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -21623,7 +22498,7 @@ evtRequestProcessedByBackend) {
     };
 }
 
-},{"../../../sip_api_declarations/backendToUa":151,"../../../tools/assert":154,"../../../tools/createObjectWithGivenRef":155,"../../../tools/id":156,"../../crypto/cryptoLibProxy":117,"../../types/webphoneData/logic":148,"md5":176,"ts-events-extended":188}],146:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":162,"../../../tools/assert":164,"../../../tools/createObjectWithGivenRef":165,"../../../tools/id":166,"../../crypto/cryptoLibProxy":128,"../../types/webphoneData/logic":159,"md5":186,"ts-events-extended":47}],157:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -21747,12 +22622,12 @@ function tryLoginFromStoredCredentials() {
 }
 exports.tryLoginFromStoredCredentials = tryLoginFromStoredCredentials;
 
-},{"./env":121,"./localStorage/Credentials":127,"./webApiCaller":149}],147:[function(require,module,exports){
+},{"./env":132,"./localStorage/Credentials":138,"./webApiCaller":160}],158:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectSidHttpHeaderName = "x-connect-sid";
 
-},{}],148:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -22040,7 +22915,7 @@ function getUnreadMessagesCount(wdChat) {
 }
 exports.getUnreadMessagesCount = getUnreadMessagesCount;
 
-},{"../../../tools/isAscendingAlphabeticalOrder":157,"crypto-lib/dist/async/serializer":17}],149:[function(require,module,exports){
+},{"../../../tools/isAscendingAlphabeticalOrder":167,"crypto-lib/dist/async/serializer":17}],160:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -22433,7 +23308,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":168,"../env":121,"../localStorage/AuthenticatedSessionDescriptorSharedData":126,"../localStorage/Credentials":127,"../localStorage/declaredPushNotificationToken":129,"../networkStateMonitoring":135,"../restartApp":137,"./sendRequest":150,"ts-events-extended":188}],150:[function(require,module,exports){
+},{"../../web_api_declaration":178,"../env":132,"../localStorage/AuthenticatedSessionDescriptorSharedData":137,"../localStorage/Credentials":138,"../localStorage/declaredPushNotificationToken":140,"../networkStateMonitoring":146,"../restartApp":148,"./sendRequest":161,"ts-events-extended":47}],161:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -22552,7 +23427,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":113,"../env":121,"../types/connectSidHttpHeaderName":147,"transfer-tools/dist/lib/JSON_CUSTOM":183}],151:[function(require,module,exports){
+},{"../../gateway/webApiPath":124,"../env":132,"../types/connectSidHttpHeaderName":158,"transfer-tools/dist/lib/JSON_CUSTOM":191}],162:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -22651,7 +23526,7 @@ var wd_notifyStatusReportReceived;
     wd_notifyStatusReportReceived.methodName = "wd_notifyStatusReportReceived";
 })(wd_notifyStatusReportReceived = exports.wd_notifyStatusReportReceived || (exports.wd_notifyStatusReportReceived = {}));
 
-},{}],152:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -22720,29 +23595,7 @@ var wd_notifyActionFromOtherUa;
     wd_notifyActionFromOtherUa.methodName = "wd_notifyActionFromOtherUa";
 })(wd_notifyActionFromOtherUa = exports.wd_notifyActionFromOtherUa || (exports.wd_notifyActionFromOtherUa = {}));
 
-},{}],153:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
-var ObservableImpl = /** @class */ (function () {
-    function ObservableImpl(value, areSame) {
-        if (areSame === void 0) { areSame = function (oldValue, newValue) { return oldValue === newValue; }; }
-        this.value = value;
-        this.areSame = areSame;
-        this.evtChange = new ts_events_extended_1.SyncEvent();
-    }
-    ObservableImpl.prototype.onPotentialChange = function (newValue) {
-        if (this.areSame(this.value, newValue)) {
-            return;
-        }
-        this.value = newValue;
-        this.evtChange.post(this.value);
-    };
-    return ObservableImpl;
-}());
-exports.ObservableImpl = ObservableImpl;
-
-},{"ts-events-extended":188}],154:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -22822,7 +23675,7 @@ exports.assert = assert;
 })();
 */
 
-},{}],155:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** changeRef(ref, o) === ref */
@@ -22833,13 +23686,13 @@ function createObjectWithGivenRef(ref, o) {
 }
 exports.createObjectWithGivenRef = createObjectWithGivenRef;
 
-},{}],156:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Return the value passed as argument, helper type for avoiding declaring variable */
 exports.id = function (o) { return o; };
 
-},{}],157:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -22863,7 +23716,7 @@ function isAscendingAlphabeticalOrder(a, b) {
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
 exports.isForWeb = true;
 
-},{}],158:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -22896,7 +23749,7 @@ function createGenericProxyForBootstrapModal($initializedModalDiv) {
 }
 exports.createGenericProxyForBootstrapModal = createGenericProxyForBootstrapModal;
 
-},{"ts-events-extended":188}],159:[function(require,module,exports){
+},{"ts-events-extended":47}],169:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
@@ -22930,7 +23783,7 @@ var loading;
 })(loading || (loading = {}));
 exports.getApi = function () { return customImplementationOfApi || bootboxBasedImplementationOfBaseApi; };
 
-},{"../createGenericProxyForBootstrapModal":158}],160:[function(require,module,exports){
+},{"../createGenericProxyForBootstrapModal":168}],170:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -23153,11 +24006,11 @@ exports.dialogApi = {
     }
 };
 
-},{"../stack":164,"./getApi":159,"./types":161,"run-exclusive":180}],161:[function(require,module,exports){
+},{"../stack":174,"./getApi":169,"./types":171,"run-exclusive":189}],171:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],162:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("./createGenericProxyForBootstrapModal");
@@ -23175,7 +24028,7 @@ var bootstrapBasedImplementationOfApi = {
 };
 exports.getApi = function () { return customImplementationOfApi || bootstrapBasedImplementationOfApi; };
 
-},{"./createGenericProxyForBootstrapModal":158}],163:[function(require,module,exports){
+},{"./createGenericProxyForBootstrapModal":168}],173:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -23199,7 +24052,7 @@ function createModal(structure, options) {
 }
 exports.createModal = createModal;
 
-},{"./getApi":162,"./stack":164}],164:[function(require,module,exports){
+},{"./getApi":172,"./stack":174}],174:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -23324,7 +24177,7 @@ function add(modal) {
 }
 exports.add = add;
 
-},{}],165:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -23637,7 +24490,7 @@ function observeWebRTC() {
 }
 exports.observeWebRTC = observeWebRTC;
 
-},{}],166:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -24096,7 +24949,7 @@ function testOverrideWebRTCImplementation() {
 }
 exports.testOverrideWebRTCImplementation = testOverrideWebRTCImplementation;
 
-},{"ts-events-extended":188}],167:[function(require,module,exports){
+},{"ts-events-extended":47}],177:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function buildUrl(urlPath, params) {
@@ -24122,7 +24975,7 @@ function parseUrl(url) {
 }
 exports.parseUrl = parseUrl;
 
-},{}],168:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
@@ -24190,7 +25043,7 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],169:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -24211,7 +25064,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],170:[function(require,module,exports){
+},{}],180:[function(require,module,exports){
 var charenc = {
   // UTF-8 encoding
   utf8: {
@@ -24246,7 +25099,7 @@ var charenc = {
 
 module.exports = charenc;
 
-},{}],171:[function(require,module,exports){
+},{}],181:[function(require,module,exports){
 (function() {
   var base64map
       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
@@ -24344,13 +25197,13 @@ module.exports = charenc;
   module.exports = crypt;
 })();
 
-},{}],172:[function(require,module,exports){
+},{}],182:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],173:[function(require,module,exports){
+},{"dup":23}],183:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./implementation":172,"dup":24}],174:[function(require,module,exports){
+},{"./implementation":182,"dup":24}],184:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25,"function-bind":173}],175:[function(require,module,exports){
+},{"dup":25,"function-bind":183}],185:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -24373,7 +25226,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],176:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 (function(){
   var crypt = require('crypt'),
       utf8 = require('charenc').utf8,
@@ -24535,31 +25388,17 @@ function isSlowBuffer (obj) {
 
 })();
 
-},{"charenc":170,"crypt":171,"is-buffer":175}],177:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],178:[function(require,module,exports){
+},{"charenc":180,"crypt":181,"is-buffer":185}],187:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],179:[function(require,module,exports){
+},{"dup":28}],188:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"./Map":178,"dup":30}],180:[function(require,module,exports){
+},{"./Map":187,"dup":30}],189:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"dup":31,"minimal-polyfills/dist/lib/WeakMap":179}],181:[function(require,module,exports){
-arguments[4][32][0].apply(exports,arguments)
-},{"dup":32}],182:[function(require,module,exports){
+},{"dup":31,"minimal-polyfills/dist/lib/WeakMap":188}],190:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"dup":33,"has":174}],183:[function(require,module,exports){
+},{"dup":33,"has":184}],191:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"dup":34,"super-json":182}],184:[function(require,module,exports){
-arguments[4][35][0].apply(exports,arguments)
-},{"./SyncEventBase":185,"dup":35}],185:[function(require,module,exports){
-arguments[4][36][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":186,"dup":36}],186:[function(require,module,exports){
-arguments[4][37][0].apply(exports,arguments)
-},{"./defs":187,"dup":37,"minimal-polyfills/dist/lib/Array.prototype.find":177,"minimal-polyfills/dist/lib/Map":178,"run-exclusive":180}],187:[function(require,module,exports){
-arguments[4][38][0].apply(exports,arguments)
-},{"dup":38,"setprototypeof":181}],188:[function(require,module,exports){
-arguments[4][39][0].apply(exports,arguments)
-},{"./SyncEvent":184,"./defs":187,"dup":39}],189:[function(require,module,exports){
+},{"dup":34,"super-json":190}],192:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -24613,7 +25452,7 @@ function extractBundledDataFromHeaders(headers, decryptor) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"./urlSafeBase64encoderDecoder":192,"crypto-lib/dist/async/serializer":206,"transfer-tools/dist/lib/stringTransform":227}],190:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":195,"crypto-lib/dist/async/serializer":209,"transfer-tools/dist/lib/stringTransform":230}],193:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var urlSafeBase64encoderDecoder_1 = require("./urlSafeBase64encoderDecoder");
@@ -24640,7 +25479,7 @@ function parseFromContactUriParams(contactUirParams) {
 }
 exports.parseFromContactUriParams = parseFromContactUriParams;
 
-},{"./urlSafeBase64encoderDecoder":192}],191:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":195}],194:[function(require,module,exports){
 "use strict";
 /* NOTE: Used in the browser. */
 var __read = (this && this.__read) || function (o, n) {
@@ -24723,7 +25562,7 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"./urlSafeBase64encoderDecoder":192,"ts-sip":242}],192:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":195,"ts-sip":245}],195:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Transpiled to ES3.
@@ -24733,7 +25572,7 @@ exports.urlSafeB64 = stringTransform.transcode("base64", {
     "/": "-"
 });
 
-},{"transfer-tools/dist/lib/stringTransform":227}],193:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":230}],196:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
@@ -24742,108 +25581,108 @@ var version;
     version.methodName = "version";
 })(version = exports.version || (exports.version = {}));
 
-},{}],194:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"./custom/trap":195,"./custom/zalgo":196,"./maps/america":199,"./maps/rainbow":200,"./maps/random":201,"./maps/zebra":202,"./styles":203,"./system/supports-colors":205,"dup":53,"util":10}],195:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54}],196:[function(require,module,exports){
-arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],197:[function(require,module,exports){
-arguments[4][56][0].apply(exports,arguments)
-},{"./colors":194,"dup":56}],198:[function(require,module,exports){
-arguments[4][57][0].apply(exports,arguments)
-},{"./colors":194,"./extendStringPrototype":197,"dup":57}],199:[function(require,module,exports){
-arguments[4][58][0].apply(exports,arguments)
-},{"dup":58}],200:[function(require,module,exports){
-arguments[4][59][0].apply(exports,arguments)
-},{"dup":59}],201:[function(require,module,exports){
-arguments[4][60][0].apply(exports,arguments)
-},{"dup":60}],202:[function(require,module,exports){
-arguments[4][61][0].apply(exports,arguments)
-},{"dup":61}],203:[function(require,module,exports){
-arguments[4][62][0].apply(exports,arguments)
-},{"dup":62}],204:[function(require,module,exports){
-arguments[4][63][0].apply(exports,arguments)
-},{"_process":8,"dup":63}],205:[function(require,module,exports){
+},{}],197:[function(require,module,exports){
 arguments[4][64][0].apply(exports,arguments)
-},{"./has-flag.js":204,"_process":8,"dup":64,"os":6}],206:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"../sync/utils/toBuffer":207,"buffer":3,"dup":17,"transfer-tools/dist/lib/JSON_CUSTOM":225}],207:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"buffer":3,"dup":22}],208:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],209:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"./implementation":208,"dup":24}],210:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25,"function-bind":209}],211:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],212:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],213:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"./Map":212,"dup":30}],214:[function(require,module,exports){
-arguments[4][31][0].apply(exports,arguments)
-},{"dup":31,"minimal-polyfills/dist/lib/WeakMap":213}],215:[function(require,module,exports){
+},{"./custom/trap":198,"./custom/zalgo":199,"./maps/america":202,"./maps/rainbow":203,"./maps/random":204,"./maps/zebra":205,"./styles":206,"./system/supports-colors":208,"dup":64,"util":10}],198:[function(require,module,exports){
+arguments[4][65][0].apply(exports,arguments)
+},{"dup":65}],199:[function(require,module,exports){
+arguments[4][66][0].apply(exports,arguments)
+},{"dup":66}],200:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"./colors":197,"dup":67}],201:[function(require,module,exports){
 arguments[4][68][0].apply(exports,arguments)
-},{"./lib/alea":216,"./lib/tychei":217,"./lib/xor128":218,"./lib/xor4096":219,"./lib/xorshift7":220,"./lib/xorwow":221,"./seedrandom":222,"dup":68}],216:[function(require,module,exports){
+},{"./colors":197,"./extendStringPrototype":200,"dup":68}],202:[function(require,module,exports){
 arguments[4][69][0].apply(exports,arguments)
-},{"dup":69}],217:[function(require,module,exports){
+},{"dup":69}],203:[function(require,module,exports){
 arguments[4][70][0].apply(exports,arguments)
-},{"dup":70}],218:[function(require,module,exports){
+},{"dup":70}],204:[function(require,module,exports){
 arguments[4][71][0].apply(exports,arguments)
-},{"dup":71}],219:[function(require,module,exports){
+},{"dup":71}],205:[function(require,module,exports){
 arguments[4][72][0].apply(exports,arguments)
-},{"dup":72}],220:[function(require,module,exports){
+},{"dup":72}],206:[function(require,module,exports){
 arguments[4][73][0].apply(exports,arguments)
-},{"dup":73}],221:[function(require,module,exports){
+},{"dup":73}],207:[function(require,module,exports){
 arguments[4][74][0].apply(exports,arguments)
-},{"dup":74}],222:[function(require,module,exports){
+},{"_process":8,"dup":74}],208:[function(require,module,exports){
 arguments[4][75][0].apply(exports,arguments)
-},{"crypto":2,"dup":75}],223:[function(require,module,exports){
-arguments[4][32][0].apply(exports,arguments)
-},{"dup":32}],224:[function(require,module,exports){
-arguments[4][33][0].apply(exports,arguments)
-},{"dup":33,"has":210}],225:[function(require,module,exports){
-arguments[4][34][0].apply(exports,arguments)
-},{"dup":34,"super-json":224}],226:[function(require,module,exports){
+},{"./has-flag.js":207,"_process":8,"dup":75,"os":6}],209:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"../sync/utils/toBuffer":210,"buffer":3,"dup":17,"transfer-tools/dist/lib/JSON_CUSTOM":228}],210:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"buffer":3,"dup":22}],211:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23}],212:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./implementation":211,"dup":24}],213:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25,"function-bind":212}],214:[function(require,module,exports){
+arguments[4][27][0].apply(exports,arguments)
+},{"dup":27}],215:[function(require,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"dup":28}],216:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"./Map":215,"dup":30}],217:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31,"minimal-polyfills/dist/lib/WeakMap":216}],218:[function(require,module,exports){
 arguments[4][79][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":225,"./stringTransform":227,"./stringTransformExt":228,"./testing":229,"dup":79}],227:[function(require,module,exports){
+},{"./lib/alea":219,"./lib/tychei":220,"./lib/xor128":221,"./lib/xor4096":222,"./lib/xorshift7":223,"./lib/xorwow":224,"./seedrandom":225,"dup":79}],219:[function(require,module,exports){
 arguments[4][80][0].apply(exports,arguments)
-},{"buffer":3,"dup":80}],228:[function(require,module,exports){
+},{"dup":80}],220:[function(require,module,exports){
 arguments[4][81][0].apply(exports,arguments)
-},{"./stringTransform":227,"dup":81}],229:[function(require,module,exports){
+},{"dup":81}],221:[function(require,module,exports){
 arguments[4][82][0].apply(exports,arguments)
-},{"./stringTransform":227,"dup":82,"seedrandom":215}],230:[function(require,module,exports){
+},{"dup":82}],222:[function(require,module,exports){
+arguments[4][83][0].apply(exports,arguments)
+},{"dup":83}],223:[function(require,module,exports){
+arguments[4][84][0].apply(exports,arguments)
+},{"dup":84}],224:[function(require,module,exports){
+arguments[4][85][0].apply(exports,arguments)
+},{"dup":85}],225:[function(require,module,exports){
+arguments[4][86][0].apply(exports,arguments)
+},{"crypto":2,"dup":86}],226:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"dup":32}],227:[function(require,module,exports){
+arguments[4][33][0].apply(exports,arguments)
+},{"dup":33,"has":213}],228:[function(require,module,exports){
+arguments[4][34][0].apply(exports,arguments)
+},{"dup":34,"super-json":227}],229:[function(require,module,exports){
+arguments[4][90][0].apply(exports,arguments)
+},{"./JSON_CUSTOM":228,"./stringTransform":230,"./stringTransformExt":231,"./testing":232,"dup":90}],230:[function(require,module,exports){
+arguments[4][91][0].apply(exports,arguments)
+},{"buffer":3,"dup":91}],231:[function(require,module,exports){
+arguments[4][92][0].apply(exports,arguments)
+},{"./stringTransform":230,"dup":92}],232:[function(require,module,exports){
+arguments[4][93][0].apply(exports,arguments)
+},{"./stringTransform":230,"dup":93,"seedrandom":218}],233:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./SyncEventBase":231,"dup":35}],231:[function(require,module,exports){
+},{"./SyncEventBase":234,"dup":35}],234:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":232,"dup":36}],232:[function(require,module,exports){
+},{"./SyncEventBaseProtected":235,"dup":36}],235:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"./defs":233,"dup":37,"minimal-polyfills/dist/lib/Array.prototype.find":211,"minimal-polyfills/dist/lib/Map":212,"run-exclusive":214}],233:[function(require,module,exports){
+},{"./defs":236,"dup":37,"minimal-polyfills/dist/lib/Array.prototype.find":214,"minimal-polyfills/dist/lib/Map":215,"run-exclusive":217}],236:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"dup":38,"setprototypeof":223}],234:[function(require,module,exports){
+},{"dup":38,"setprototypeof":226}],237:[function(require,module,exports){
 arguments[4][39][0].apply(exports,arguments)
-},{"./SyncEvent":230,"./defs":233,"dup":39}],235:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"buffer":3,"dup":42,"ts-events-extended":234}],236:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"./IConnection":235,"./api/ApiMessage":237,"./core":241,"./misc":245,"colors":198,"dup":43,"ts-events-extended":234}],237:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"../core":241,"../misc":245,"buffer":3,"dup":44,"transfer-tools":226}],238:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"../misc":245,"./ApiMessage":237,"colors":198,"dup":45,"util":10}],239:[function(require,module,exports){
-arguments[4][46][0].apply(exports,arguments)
-},{"../misc":245,"./ApiMessage":237,"dup":46,"setprototypeof":223}],240:[function(require,module,exports){
-arguments[4][47][0].apply(exports,arguments)
-},{"./Server":238,"./client":239,"dup":47}],241:[function(require,module,exports){
-arguments[4][48][0].apply(exports,arguments)
-},{"./legacy/sdp":243,"./legacy/sip":244,"buffer":3,"dup":48,"setprototypeof":223}],242:[function(require,module,exports){
-arguments[4][49][0].apply(exports,arguments)
-},{"./Socket":236,"./api":240,"./core":241,"./misc":245,"dup":49}],243:[function(require,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"dup":50}],244:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51}],245:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"./core":241,"buffer":3,"dup":52}]},{},[98]);
+},{"./SyncEvent":233,"./defs":236,"dup":39}],238:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"buffer":3,"dup":53,"ts-events-extended":237}],239:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"./IConnection":238,"./api/ApiMessage":240,"./core":244,"./misc":248,"colors":201,"dup":54,"ts-events-extended":237}],240:[function(require,module,exports){
+arguments[4][55][0].apply(exports,arguments)
+},{"../core":244,"../misc":248,"buffer":3,"dup":55,"transfer-tools":229}],241:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"../misc":248,"./ApiMessage":240,"colors":201,"dup":56,"util":10}],242:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"../misc":248,"./ApiMessage":240,"dup":57,"setprototypeof":226}],243:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"./Server":241,"./client":242,"dup":58}],244:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"./legacy/sdp":246,"./legacy/sip":247,"buffer":3,"dup":59,"setprototypeof":226}],245:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"./Socket":239,"./api":243,"./core":244,"./misc":248,"dup":60}],246:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],247:[function(require,module,exports){
+arguments[4][62][0].apply(exports,arguments)
+},{"dup":62}],248:[function(require,module,exports){
+arguments[4][63][0].apply(exports,arguments)
+},{"./core":244,"buffer":3,"dup":63}]},{},[109]);

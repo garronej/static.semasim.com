@@ -2043,6 +2043,1185 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 },{}],4:[function(require,module,exports){
 "use strict";
+exports.__esModule = true;
+var SyncEvent_1 = require("./SyncEvent");
+var ObservableImpl = /** @class */ (function () {
+    function ObservableImpl(value, areSame) {
+        if (areSame === void 0) { areSame = function (oldValue, newValue) { return oldValue === newValue; }; }
+        this.value = value;
+        this.areSame = areSame;
+        this.evtChange = new SyncEvent_1.SyncEvent();
+    }
+    ObservableImpl.prototype.onPotentialChange = function (newValue) {
+        if (this.areSame(this.value, newValue)) {
+            return;
+        }
+        this.value = newValue;
+        this.evtChange.post(this.value);
+    };
+    return ObservableImpl;
+}());
+exports.ObservableImpl = ObservableImpl;
+
+},{"./SyncEvent":5}],5:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+exports.__esModule = true;
+var SyncEventBase_1 = require("./SyncEventBase");
+var SyncEvent = /** @class */ (function (_super) {
+    __extends(SyncEvent, _super);
+    function SyncEvent() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.evtAttach = new SyncEventBase_1.SyncEventBase();
+        return _this;
+    }
+    SyncEvent.prototype.addHandler = function (attachParams, implicitAttachParams) {
+        var handler = _super.prototype.addHandler.call(this, attachParams, implicitAttachParams);
+        this.evtAttach.post(handler);
+        return handler;
+    };
+    /** Wait until an handler that match the event data have been attached
+     * return a promise that resolve with post count */
+    SyncEvent.prototype.postOnceMatched = function (eventData) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!!this.getHandlers().find(function (handler) { return handler.matcher(eventData); })) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.evtAttach.waitFor(function (handler) { return handler.matcher(eventData); })];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, this.post(eventData)];
+                }
+            });
+        });
+    };
+    return SyncEvent;
+}(SyncEventBase_1.SyncEventBase));
+exports.SyncEvent = SyncEvent;
+var VoidSyncEvent = /** @class */ (function (_super) {
+    __extends(VoidSyncEvent, _super);
+    function VoidSyncEvent() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    VoidSyncEvent.prototype.post = function () {
+        return _super.prototype.post.call(this, undefined);
+    };
+    VoidSyncEvent.prototype.postOnceMatched = function () {
+        return _super.prototype.postOnceMatched.call(this, undefined);
+    };
+    return VoidSyncEvent;
+}(SyncEvent));
+exports.VoidSyncEvent = VoidSyncEvent;
+
+},{"./SyncEventBase":6}],6:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+exports.__esModule = true;
+var SyncEventBaseProtected_1 = require("./SyncEventBaseProtected");
+function matchPostable(o) {
+    return o instanceof Object && typeof o.post === "function";
+}
+function isCallable(o) {
+    if (typeof o !== "function")
+        return false;
+    var prototype = o["prototype"];
+    if (!prototype)
+        return true;
+    var methods = Object.getOwnPropertyNames(prototype);
+    if (methods.length !== 1)
+        return false;
+    var name = o.name;
+    if (!name)
+        return true;
+    if (name[0].toUpperCase() === name[0])
+        return false;
+    return true;
+}
+/** SyncEvent without evtAttach property */
+var SyncEventBase = /** @class */ (function (_super) {
+    __extends(SyncEventBase, _super);
+    function SyncEventBase() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.defaultParams = {
+            "matcher": function matchAll() { return true; },
+            "boundTo": _this,
+            "timeout": undefined,
+            "callback": undefined
+        };
+        return _this;
+    }
+    SyncEventBase.prototype.getDefaultParams = function () {
+        return __assign({}, this.defaultParams);
+    };
+    SyncEventBase.prototype.readParams = function (inputs) {
+        var out = this.getDefaultParams();
+        var n = inputs.length;
+        if (!n)
+            return out;
+        //[ matcher, boundTo, timeout, callback ]
+        //[ matcher, boundTo, callback ]
+        //[ matcher, timeout, callback ]
+        //[ boundTo, timeout, callback ]
+        //[ matcher, callback ]
+        //[ boundTo, callback ]
+        //[ timeout, callback ]
+        //[ callback ]
+        //[ matcher, timeout, evt ]
+        //[ matcher, evt ]
+        //[ timeout, evt ]
+        //[ evt ]
+        if (matchPostable(inputs[n - 1])) {
+            out.boundTo = inputs[n - 1];
+            inputs[n - 1] = inputs[n - 1].post;
+        }
+        //[ matcher, boundTo, timeout, callback ]
+        //[ matcher, boundTo, callback ]
+        //[ matcher, timeout, callback ]
+        //[ boundTo, timeout, callback ]
+        //[ matcher, callback ]
+        //[ boundTo, callback ]
+        //[ timeout, callback ]
+        //[ callback ]
+        if (n === 4) {
+            //[ matcher, boundTo, timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2], p4 = inputs[3];
+            out.matcher = p1;
+            out.boundTo = p2;
+            out.timeout = p3;
+            out.callback = p4;
+        }
+        else if (n === 3) {
+            //[ matcher, boundTo, callback ]
+            //[ matcher, timeout, callback ]
+            //[ boundTo, timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2];
+            if (typeof p2 === "number") {
+                //[ matcher, timeout, callback ]
+                //[ boundTo, timeout, callback ]
+                out.timeout = p2;
+                out.callback = p3;
+                if (isCallable(p1)) {
+                    //[ matcher, timeout, callback ]
+                    out.matcher = p1;
+                }
+                else {
+                    //[ boundTo, timeout, callback ]
+                    out.boundTo = p1;
+                }
+            }
+            else {
+                //[ matcher, boundTo, callback ]
+                out.matcher = p1;
+                out.boundTo = p2;
+                out.callback = p3;
+            }
+        }
+        else if (n === 2) {
+            //[ matcher, callback ]
+            //[ boundTo, callback ]
+            //[ timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1];
+            if (typeof p1 === "number") {
+                //[ timeout, callback ]
+                out.timeout = p1;
+                out.callback = p2;
+            }
+            else {
+                //[ matcher, callback ]
+                //[ boundTo, callback ]
+                out.callback = p2;
+                if (isCallable(p1)) {
+                    out.matcher = p1;
+                }
+                else {
+                    out.boundTo = p1;
+                }
+            }
+        }
+        else if (n === 1) {
+            //[ callback ]
+            var p = inputs[0];
+            out.callback = p;
+        }
+        return out;
+    };
+    SyncEventBase.prototype.waitFor = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        var params = this.getDefaultParams();
+        var n = inputs.length;
+        if (n === 2) {
+            var p1 = inputs[0], p2 = inputs[1];
+            params.matcher = p1;
+            params.timeout = p2;
+        }
+        else {
+            var p = inputs[0];
+            if (isCallable(p)) {
+                params.matcher = p;
+            }
+            else {
+                params.timeout = p;
+            }
+        }
+        return _super.prototype.__waitFor.call(this, params);
+    };
+    SyncEventBase.prototype.attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attach(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnce(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachExtract(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachPrepend(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOncePrepend(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnceExtract(this.readParams(inputs));
+    };
+    return SyncEventBase;
+}(SyncEventBaseProtected_1.SyncEventBaseProtected));
+exports.SyncEventBase = SyncEventBase;
+
+},{"./SyncEventBaseProtected":7}],7:[function(require,module,exports){
+"use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
+exports.__esModule = true;
+var Map_1 = require("minimal-polyfills/dist/lib/Map");
+require("minimal-polyfills/dist/lib/Array.prototype.find");
+var runExclusive = require("run-exclusive");
+var defs_1 = require("./defs");
+/** SyncEvent without evtAttach property and without overload */
+var SyncEventBaseProtected = /** @class */ (function () {
+    function SyncEventBaseProtected() {
+        var _this = this;
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        this.postCount = 0;
+        this.traceId = null;
+        this.handlers = [];
+        this.handlerTriggers = new Map_1.Polyfill();
+        //NOTE: An async handler ( attached with waitFor ) is only eligible to handle a post if the post
+        //occurred after the handler was set. We don't want to waitFor event from the past.
+        //private readonly asyncHandlerChronologyMark = new WeakMap<ImplicitParams.Async, number>();
+        this.asyncHandlerChronologyMark = typeof WeakMap !== "undefined" ?
+            new WeakMap() :
+            new Map_1.Polyfill();
+        //NOTE: There is an exception to the above rule, we want to allow async waitFor loop 
+        //do so we have to handle the case where multiple event would be posted synchronously.
+        this.asyncHandlerChronologyExceptionRange = typeof WeakMap !== "undefined" ?
+            new WeakMap() :
+            new Map_1.Polyfill();
+        /*
+        NOTE: Used as Date.now() would be used to compare if an event is anterior
+        or posterior to an other. We don't use Date.now() because two call within
+        less than a ms will return the same value unlike this function.
+        */
+        this.getChronologyMark = (function () {
+            var currentChronologyMark = 0;
+            return function () { return currentChronologyMark++; };
+        })();
+        this.postAsync = runExclusive.buildCb(function (data, postChronologyMark, releaseLock) {
+            var promises = [];
+            var chronologyMarkStartResolveTick;
+            //NOTE: Must be before handlerTrigger call.
+            Promise.resolve().then(function () { return chronologyMarkStartResolveTick = _this.getChronologyMark(); });
+            var _loop_1 = function (handler) {
+                if (!handler.async) {
+                    return "continue";
+                }
+                if (!handler.matcher(data)) {
+                    return "continue";
+                }
+                var handlerTrigger = _this.handlerTriggers.get(handler);
+                if (!handlerTrigger) {
+                    return "continue";
+                }
+                var shouldCallHandlerTrigger = (function () {
+                    var handlerMark = _this.asyncHandlerChronologyMark.get(handler);
+                    if (postChronologyMark > handlerMark) {
+                        return true;
+                    }
+                    var exceptionRange = _this.asyncHandlerChronologyExceptionRange.get(handler);
+                    if (exceptionRange === undefined) {
+                        return false;
+                    }
+                    if (exceptionRange.lowerMark < postChronologyMark &&
+                        postChronologyMark < exceptionRange.upperMark) {
+                        return true;
+                    }
+                    return false;
+                })();
+                if (!shouldCallHandlerTrigger) {
+                    return "continue";
+                }
+                promises.push(handler.promise);
+                handlerTrigger(data);
+            };
+            for (var _i = 0, _a = __spreadArrays(_this.handlers); _i < _a.length; _i++) {
+                var handler = _a[_i];
+                _loop_1(handler);
+            }
+            if (promises.length !== 0) {
+                var handlersDump_1 = __spreadArrays(_this.handlers);
+                Promise.all(promises).then(function () {
+                    for (var _i = 0, _a = _this.handlers; _i < _a.length; _i++) {
+                        var handler = _a[_i];
+                        if (!handler.async) {
+                            continue;
+                        }
+                        if (handlersDump_1.indexOf(handler) >= 0) {
+                            continue;
+                        }
+                        _this.asyncHandlerChronologyExceptionRange.set(handler, {
+                            "lowerMark": postChronologyMark,
+                            "upperMark": chronologyMarkStartResolveTick
+                        });
+                    }
+                    releaseLock();
+                });
+            }
+            else {
+                releaseLock();
+            }
+        });
+        if (!inputs.length)
+            return;
+        var eventEmitter = inputs[0], eventName = inputs[1];
+        var formatter = inputs[2] || this.defaultFormatter;
+        eventEmitter.on(eventName, function () {
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            return _this.post(formatter.apply(null, inputs));
+        });
+    }
+    SyncEventBaseProtected.prototype.defaultFormatter = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return inputs[0];
+    };
+    SyncEventBaseProtected.prototype.enableTrace = function (id, formatter, log //NOTE: we don't want to expose types from node
+    ) {
+        this.traceId = id;
+        if (!!formatter) {
+            this.traceFormatter = formatter;
+        }
+        else {
+            this.traceFormatter = function (data) {
+                try {
+                    return JSON.stringify(data, null, 2);
+                }
+                catch (_a) {
+                    return "" + data;
+                }
+            };
+        }
+        if (!!log) {
+            this.log = log;
+        }
+        else {
+            this.log = function () {
+                var inputs = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    inputs[_i] = arguments[_i];
+                }
+                return console.log.apply(console, inputs);
+            };
+        }
+    };
+    SyncEventBaseProtected.prototype.disableTrace = function () {
+        this.traceId = null;
+    };
+    SyncEventBaseProtected.prototype.addHandler = function (attachParams, implicitAttachParams) {
+        var _this = this;
+        var handler = __assign(__assign(__assign({}, attachParams), implicitAttachParams), { "detach": null, "promise": null });
+        if (handler.async) {
+            this.asyncHandlerChronologyMark.set(handler, this.getChronologyMark());
+        }
+        handler.promise = new Promise(function (resolve, reject) {
+            var timer = undefined;
+            if (typeof handler.timeout === "number") {
+                timer = setTimeout(function () {
+                    timer = undefined;
+                    handler.detach();
+                    reject(new defs_1.EvtError.Timeout(handler.timeout));
+                }, handler.timeout);
+            }
+            handler.detach = function () {
+                var index = _this.handlers.indexOf(handler);
+                if (index < 0)
+                    return false;
+                _this.handlers.splice(index, 1);
+                _this.handlerTriggers["delete"](handler);
+                if (timer) {
+                    clearTimeout(timer);
+                    reject(new defs_1.EvtError.Detached());
+                }
+                return true;
+            };
+            _this.handlerTriggers.set(handler, function (data) {
+                var _a;
+                var callback = handler.callback, once = handler.once;
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = undefined;
+                }
+                if (once)
+                    handler.detach();
+                (_a = callback) === null || _a === void 0 ? void 0 : _a.call(handler.boundTo, data);
+                resolve(data);
+            });
+        });
+        if (handler.prepend) {
+            var i = void 0;
+            for (i = 0; i < this.handlers.length; i++) {
+                if (this.handlers[i].extract) {
+                    continue;
+                }
+                break;
+            }
+            this.handlers.splice(i, 0, handler);
+        }
+        else {
+            this.handlers.push(handler);
+        }
+        return handler;
+    };
+    SyncEventBaseProtected.prototype.trace = function (data) {
+        if (this.traceId === null) {
+            return;
+        }
+        var message = "(" + this.traceId + ") ";
+        var isExtracted = !!this.handlers.find(function (_a) {
+            var extract = _a.extract, matcher = _a.matcher;
+            return extract && matcher(data);
+        });
+        if (isExtracted) {
+            message += "extracted ";
+        }
+        else {
+            var handlerCount = this.handlers
+                .filter(function (_a) {
+                var extract = _a.extract, matcher = _a.matcher;
+                return !extract && matcher(data);
+            })
+                .length;
+            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
+        }
+        this.log(message + this.traceFormatter(data));
+    };
+    /** Returns post count */
+    SyncEventBaseProtected.prototype.post = function (data) {
+        this.trace(data);
+        this.postCount++;
+        //NOTE: Must be before postSync.
+        var postChronologyMark = this.getChronologyMark();
+        var isExtracted = this.postSync(data);
+        if (!isExtracted) {
+            this.postAsync(data, postChronologyMark);
+        }
+        return this.postCount;
+    };
+    /** Return isExtracted */
+    SyncEventBaseProtected.prototype.postSync = function (data) {
+        for (var _i = 0, _a = __spreadArrays(this.handlers); _i < _a.length; _i++) {
+            var handler = _a[_i];
+            var async = handler.async, matcher = handler.matcher, extract = handler.extract;
+            if (async) {
+                continue;
+            }
+            if (!matcher(data)) {
+                continue;
+            }
+            var handlerTrigger = this.handlerTriggers.get(handler);
+            //NOTE: Possible if detached while in the loop.
+            if (!handlerTrigger) {
+                continue;
+            }
+            handlerTrigger(data);
+            if (extract) {
+                return true;
+            }
+        }
+        return false;
+    };
+    SyncEventBaseProtected.prototype.__waitFor = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": true,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attach = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachPrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOnce = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOncePrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOnceExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.getHandlers = function () { return __spreadArrays(this.handlers); };
+    /** Detach every handler bound to a given object or all handlers, return the detached handlers */
+    SyncEventBaseProtected.prototype.detach = function (boundTo) {
+        var detachedHandlers = [];
+        for (var _i = 0, _a = __spreadArrays(this.handlers); _i < _a.length; _i++) {
+            var handler = _a[_i];
+            if (boundTo === undefined || handler.boundTo === boundTo) {
+                handler.detach();
+                detachedHandlers.push(handler);
+            }
+        }
+        return detachedHandlers;
+    };
+    return SyncEventBaseProtected;
+}());
+exports.SyncEventBaseProtected = SyncEventBaseProtected;
+
+},{"./defs":8,"minimal-polyfills/dist/lib/Array.prototype.find":10,"minimal-polyfills/dist/lib/Map":11,"run-exclusive":13}],8:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+exports.__esModule = true;
+var setPrototypeOf = require("setprototypeof");
+var EvtError;
+(function (EvtError) {
+    var Timeout = /** @class */ (function (_super) {
+        __extends(Timeout, _super);
+        function Timeout(timeout) {
+            var _newTarget = this.constructor;
+            var _this = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
+            _this.timeout = timeout;
+            setPrototypeOf(_this, _newTarget.prototype);
+            return _this;
+        }
+        return Timeout;
+    }(Error));
+    EvtError.Timeout = Timeout;
+    var Detached = /** @class */ (function (_super) {
+        __extends(Detached, _super);
+        function Detached() {
+            var _newTarget = this.constructor;
+            var _this = _super.call(this, "Evt handler detached") || this;
+            setPrototypeOf(_this, _newTarget.prototype);
+            return _this;
+        }
+        return Detached;
+    }(Error));
+    EvtError.Detached = Detached;
+})(EvtError = exports.EvtError || (exports.EvtError = {}));
+
+},{"setprototypeof":14}],9:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var SyncEvent_1 = require("./SyncEvent");
+exports.SyncEvent = SyncEvent_1.SyncEvent;
+exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
+var defs_1 = require("./defs");
+exports.EvtError = defs_1.EvtError;
+var Observable_1 = require("./Observable");
+exports.ObservableImpl = Observable_1.ObservableImpl;
+
+},{"./Observable":4,"./SyncEvent":5,"./defs":8}],10:[function(require,module,exports){
+// https://tc39.github.io/ecma262/#sec-array.prototype.find
+if (!Array.prototype.find) {
+    Object.defineProperty(Array.prototype, 'find', {
+        value: function (predicate) {
+            // 1. Let O be ? ToObject(this value).
+            if (this == null) {
+                throw new TypeError('"this" is null or not defined');
+            }
+            var o = Object(this);
+            // 2. Let len be ? ToLength(? Get(O, "length")).
+            var len = o.length >>> 0;
+            // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+            if (typeof predicate !== 'function') {
+                throw new TypeError('predicate must be a function');
+            }
+            // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+            var thisArg = arguments[1];
+            // 5. Let k be 0.
+            var k = 0;
+            // 6. Repeat, while k < len
+            while (k < len) {
+                // a. Let Pk be ! ToString(k).
+                // b. Let kValue be ? Get(O, Pk).
+                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+                // d. If testResult is true, return kValue.
+                var kValue = o[k];
+                if (predicate.call(thisArg, kValue, k, o)) {
+                    return kValue;
+                }
+                // e. Increase k by 1.
+                k++;
+            }
+            // 7. Return undefined.
+            return undefined;
+        },
+        configurable: true,
+        writable: true
+    });
+}
+
+},{}],11:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var LightMapImpl = /** @class */ (function () {
+    function LightMapImpl() {
+        this.record = [];
+    }
+    LightMapImpl.prototype.has = function (key) {
+        return this.record
+            .map(function (_a) {
+            var _key = _a[0];
+            return _key;
+        })
+            .indexOf(key) >= 0;
+    };
+    LightMapImpl.prototype.get = function (key) {
+        var entry = this.record
+            .filter(function (_a) {
+            var _key = _a[0];
+            return _key === key;
+        })[0];
+        if (entry === undefined) {
+            return undefined;
+        }
+        return entry[1];
+    };
+    LightMapImpl.prototype.set = function (key, value) {
+        var entry = this.record
+            .filter(function (_a) {
+            var _key = _a[0];
+            return _key === key;
+        })[0];
+        if (entry === undefined) {
+            this.record.push([key, value]);
+        }
+        else {
+            entry[1] = value;
+        }
+        return this;
+    };
+    LightMapImpl.prototype["delete"] = function (key) {
+        var index = this.record.map(function (_a) {
+            var key = _a[0];
+            return key;
+        }).indexOf(key);
+        if (index < 0) {
+            return false;
+        }
+        this.record.splice(index, 1);
+        return true;
+    };
+    LightMapImpl.prototype.keys = function () {
+        return this.record.map(function (_a) {
+            var key = _a[0];
+            return key;
+        });
+    };
+    return LightMapImpl;
+}());
+exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
+
+},{}],12:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Map_1 = require("./Map");
+exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
+
+},{"./Map":11}],13:[function(require,module,exports){
+"use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+exports.__esModule = true;
+var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
+var ExecQueue = /** @class */ (function () {
+    function ExecQueue() {
+        this.queuedCalls = [];
+        this.isRunning = false;
+        this.prComplete = Promise.resolve();
+    }
+    //TODO: move where it is used.
+    ExecQueue.prototype.cancelAllQueuedCalls = function () {
+        var n;
+        this.queuedCalls.splice(0, n = this.queuedCalls.length);
+        return n;
+    };
+    return ExecQueue;
+}());
+var globalContext = {};
+var clusters = new WeakMap_1.Polyfill();
+//console.log("Map version");
+//export const clusters = new Map<Object, Map<GroupRef,ExecQueue>>();
+function getOrCreateExecQueue(context, groupRef) {
+    var execQueueByGroup = clusters.get(context);
+    if (!execQueueByGroup) {
+        execQueueByGroup = new WeakMap_1.Polyfill();
+        clusters.set(context, execQueueByGroup);
+    }
+    var execQueue = execQueueByGroup.get(groupRef);
+    if (!execQueue) {
+        execQueue = new ExecQueue();
+        execQueueByGroup.set(groupRef, execQueue);
+    }
+    return execQueue;
+}
+function createGroupRef() {
+    return new Array(0);
+}
+exports.createGroupRef = createGroupRef;
+function build() {
+    var inputs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        inputs[_i] = arguments[_i];
+    }
+    switch (inputs.length) {
+        case 1: return buildFnPromise(true, createGroupRef(), inputs[0]);
+        case 2: return buildFnPromise(true, inputs[0], inputs[1]);
+    }
+}
+exports.build = build;
+function buildMethod() {
+    var inputs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        inputs[_i] = arguments[_i];
+    }
+    switch (inputs.length) {
+        case 1: return buildFnPromise(false, createGroupRef(), inputs[0]);
+        case 2: return buildFnPromise(false, inputs[0], inputs[1]);
+    }
+}
+exports.buildMethod = buildMethod;
+/**
+ *
+ * Get the number of queued call of a run-exclusive function.
+ * Note that if you call a runExclusive function and call this
+ * directly after it will return 0 as there is one function call
+ * running but 0 queued.
+ *
+ * The classInstanceObject parameter is to provide only for the run-exclusive
+ * function created with 'buildMethod[Cb].
+ *
+ * */
+function getQueuedCallCount(runExclusiveFunction, classInstanceObject) {
+    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
+    return execQueue ? execQueue.queuedCalls.length : 0;
+}
+exports.getQueuedCallCount = getQueuedCallCount;
+/**
+ *
+ * Cancel all queued calls of a run-exclusive function.
+ * Note that the current running call will not be cancelled.
+ *
+ * The classInstanceObject parameter is to provide only for the run-exclusive
+ * function created with 'buildMethod[Cb].
+ *
+ */
+function cancelAllQueuedCalls(runExclusiveFunction, classInstanceObject) {
+    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
+    return execQueue ? execQueue.cancelAllQueuedCalls() : 0;
+}
+exports.cancelAllQueuedCalls = cancelAllQueuedCalls;
+/**
+ * Tell if a run-exclusive function has an instance of it's call currently being
+ * performed.
+ *
+ * The classInstanceObject parameter is to provide only for the run-exclusive
+ * function created with 'buildMethod[Cb].
+ */
+function isRunning(runExclusiveFunction, classInstanceObject) {
+    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
+    return execQueue ? execQueue.isRunning : false;
+}
+exports.isRunning = isRunning;
+/**
+ * Return a promise that resolve when all the current queued call of a runExclusive functions
+ * have completed.
+ *
+ * The classInstanceObject parameter is to provide only for the run-exclusive
+ * function created with 'buildMethod[Cb].
+ */
+function getPrComplete(runExclusiveFunction, classInstanceObject) {
+    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
+    return execQueue ? execQueue.prComplete : Promise.resolve();
+}
+exports.getPrComplete = getPrComplete;
+var groupByRunExclusiveFunction = new WeakMap_1.Polyfill();
+function getExecQueueByFunctionAndContext(runExclusiveFunction, context) {
+    if (context === void 0) { context = globalContext; }
+    var groupRef = groupByRunExclusiveFunction.get(runExclusiveFunction);
+    if (!groupRef) {
+        throw Error("Not a run exclusiveFunction");
+    }
+    var execQueueByGroup = clusters.get(context);
+    if (!execQueueByGroup) {
+        return undefined;
+    }
+    return execQueueByGroup.get(groupRef);
+}
+function buildFnPromise(isGlobal, groupRef, fun) {
+    var execQueue;
+    var runExclusiveFunction = (function () {
+        var _this = this;
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        if (!isGlobal) {
+            if (!(this instanceof Object)) {
+                throw new Error("Run exclusive, <this> should be an object");
+            }
+            execQueue = getOrCreateExecQueue(this, groupRef);
+        }
+        return new Promise(function (resolve, reject) {
+            var onPrCompleteResolve;
+            execQueue.prComplete = new Promise(function (resolve) {
+                return onPrCompleteResolve = function () { return resolve(); };
+            });
+            var onComplete = function (result) {
+                onPrCompleteResolve();
+                execQueue.isRunning = false;
+                if (execQueue.queuedCalls.length) {
+                    execQueue.queuedCalls.shift()();
+                }
+                if ("data" in result) {
+                    resolve(result.data);
+                }
+                else {
+                    reject(result.reason);
+                }
+            };
+            (function callee() {
+                var _this = this;
+                var inputs = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    inputs[_i] = arguments[_i];
+                }
+                if (execQueue.isRunning) {
+                    execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
+                    return;
+                }
+                execQueue.isRunning = true;
+                try {
+                    fun.apply(this, inputs)
+                        .then(function (data) { return onComplete({ data: data }); })["catch"](function (reason) { return onComplete({ reason: reason }); });
+                }
+                catch (error) {
+                    onComplete({ "reason": error });
+                }
+            }).apply(_this, inputs);
+        });
+    });
+    if (isGlobal) {
+        execQueue = getOrCreateExecQueue(globalContext, groupRef);
+    }
+    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
+    return runExclusiveFunction;
+}
+function buildCb() {
+    var inputs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        inputs[_i] = arguments[_i];
+    }
+    switch (inputs.length) {
+        case 1: return buildFnCallback(true, createGroupRef(), inputs[0]);
+        case 2: return buildFnCallback(true, inputs[0], inputs[1]);
+    }
+}
+exports.buildCb = buildCb;
+function buildMethodCb() {
+    var inputs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        inputs[_i] = arguments[_i];
+    }
+    switch (inputs.length) {
+        case 1: return buildFnCallback(false, createGroupRef(), inputs[0]);
+        case 2: return buildFnCallback(false, inputs[0], inputs[1]);
+    }
+}
+exports.buildMethodCb = buildMethodCb;
+function buildFnCallback(isGlobal, groupRef, fun) {
+    var execQueue;
+    var runExclusiveFunction = (function () {
+        var _this = this;
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        if (!isGlobal) {
+            if (!(this instanceof Object)) {
+                throw new Error("Run exclusive, <this> should be an object");
+            }
+            execQueue = getOrCreateExecQueue(this, groupRef);
+        }
+        var callback = undefined;
+        if (inputs.length && typeof inputs[inputs.length - 1] === "function") {
+            callback = inputs.pop();
+        }
+        var onPrCompleteResolve;
+        execQueue.prComplete = new Promise(function (resolve) {
+            return onPrCompleteResolve = function () { return resolve(); };
+        });
+        var onComplete = function () {
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            onPrCompleteResolve();
+            execQueue.isRunning = false;
+            if (execQueue.queuedCalls.length) {
+                execQueue.queuedCalls.shift()();
+            }
+            if (callback) {
+                callback.apply(_this, inputs);
+            }
+        };
+        onComplete.hasCallback = !!callback;
+        (function callee() {
+            var _this = this;
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            if (execQueue.isRunning) {
+                execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
+                return;
+            }
+            execQueue.isRunning = true;
+            try {
+                fun.apply(this, __spread(inputs, [onComplete]));
+            }
+            catch (error) {
+                error.message += " ( This exception should not have been thrown, miss use of run-exclusive buildCb )";
+                throw error;
+            }
+        }).apply(this, inputs);
+    });
+    if (isGlobal) {
+        execQueue = getOrCreateExecQueue(globalContext, groupRef);
+    }
+    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
+    return runExclusiveFunction;
+}
+
+},{"minimal-polyfills/dist/lib/WeakMap":12}],14:[function(require,module,exports){
+'use strict'
+/* eslint no-proto: 0 */
+module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
+
+function setProtoOf (obj, proto) {
+  obj.__proto__ = proto
+  return obj
+}
+
+function mixinProperties (obj, proto) {
+  for (var prop in proto) {
+    if (!Object.prototype.hasOwnProperty.call(obj, prop)) {
+      obj[prop] = proto[prop]
+    }
+  }
+  return obj
+}
+
+},{}],15:[function(require,module,exports){
+"use strict";
 //NOTE: Assert StripeCheckout loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -2301,7 +3480,7 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../templates/UiController.html":15,"../templates/UiController.less":16,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"frontend-shared/dist/lib/env":27,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":29,"frontend-shared/dist/lib/webApiCaller":39,"frontend-shared/dist/tools/currency":41,"frontend-shared/dist/tools/modal/dialog":44,"frontend-shared/node_modules/ts-events-extended":63}],5:[function(require,module,exports){
+},{"../templates/UiController.html":26,"../templates/UiController.less":27,"./UiDownloadButtons":16,"./UiMySubscription":17,"./UiNegativeBalanceWarning":18,"./UiPaymentMethod":19,"./UiSubscribe":20,"frontend-shared/dist/lib/env":38,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":40,"frontend-shared/dist/lib/webApiCaller":50,"frontend-shared/dist/tools/currency":52,"frontend-shared/dist/tools/modal/dialog":55,"frontend-shared/node_modules/ts-events-extended":9}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -2314,7 +3493,7 @@ var UiDownloadButtons = /** @class */ (function () {
 }());
 exports.UiDownloadButtons = UiDownloadButtons;
 
-},{"../templates/UiDownloadButtons.html":17,"frontend-shared/dist/lib/loadUiClassHtml":28}],6:[function(require,module,exports){
+},{"../templates/UiDownloadButtons.html":28,"frontend-shared/dist/lib/loadUiClassHtml":39}],17:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -2354,7 +3533,7 @@ var UiMySubscription = /** @class */ (function () {
 }());
 exports.UiMySubscription = UiMySubscription;
 
-},{"../templates/UiMySubscription.html":18,"../templates/UiMySubscription.less":19,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/currency":41,"frontend-shared/node_modules/ts-events-extended":63,"moment":14}],7:[function(require,module,exports){
+},{"../templates/UiMySubscription.html":29,"../templates/UiMySubscription.less":30,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/dist/tools/currency":52,"frontend-shared/node_modules/ts-events-extended":9,"moment":25}],18:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -2370,7 +3549,7 @@ var UiNegativeBalanceWarning = /** @class */ (function () {
 }());
 exports.UiNegativeBalanceWarning = UiNegativeBalanceWarning;
 
-},{"../templates/UiNegativeBalanceWarning.html":20,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/currency":41}],8:[function(require,module,exports){
+},{"../templates/UiNegativeBalanceWarning.html":31,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/dist/tools/currency":52}],19:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -2392,7 +3571,7 @@ var UiPaymentMethod = /** @class */ (function () {
 }());
 exports.UiPaymentMethod = UiPaymentMethod;
 
-},{"../templates/UiPaymentMethod.html":21,"../templates/UiPaymentMethod.less":22,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/node_modules/ts-events-extended":63}],9:[function(require,module,exports){
+},{"../templates/UiPaymentMethod.html":32,"../templates/UiPaymentMethod.less":33,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/node_modules/ts-events-extended":9}],20:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -2412,7 +3591,7 @@ var UiSubscribe = /** @class */ (function () {
 }());
 exports.UiSubscribe = UiSubscribe;
 
-},{"../templates/UiSubscribe.html":23,"frontend-shared/dist/lib/loadUiClassHtml":28,"frontend-shared/dist/tools/currency":41,"frontend-shared/node_modules/ts-events-extended":63}],10:[function(require,module,exports){
+},{"../templates/UiSubscribe.html":34,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/dist/tools/currency":52,"frontend-shared/node_modules/ts-events-extended":9}],21:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -2542,7 +3721,7 @@ $(document).ready(function () {
     onLoggedIn();
 });
 
-},{"./UiController":4,"frontend-shared/dist/lib/availablePages":25,"frontend-shared/dist/lib/webApiCaller":39,"frontend-shared/dist/tools/modal/dialog":44,"frontend-shared/dist/tools/polyfills/Object.assign":47,"minimal-polyfills/dist/lib/ArrayBuffer.isView":13}],11:[function(require,module,exports){
+},{"./UiController":15,"frontend-shared/dist/lib/availablePages":36,"frontend-shared/dist/lib/webApiCaller":50,"frontend-shared/dist/tools/modal/dialog":55,"frontend-shared/dist/tools/polyfills/Object.assign":58,"minimal-polyfills/dist/lib/ArrayBuffer.isView":24}],22:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -2581,17 +3760,17 @@ module.exports.byUrl = function(url) {
   }
 };
 
-},{}],12:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports = require('cssify');
 
-},{"cssify":11}],13:[function(require,module,exports){
+},{"cssify":22}],24:[function(require,module,exports){
 if (!ArrayBuffer["isView"]) {
     ArrayBuffer.isView = function isView(a) {
         return a !== null && typeof (a) === "object" && a["buffer"] instanceof ArrayBuffer;
     };
 }
 
-},{}],14:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 //! moment.js
 
 ;(function (global, factory) {
@@ -7195,31 +8374,31 @@ if (!ArrayBuffer["isView"]) {
 
 })));
 
-},{}],15:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 module.exports = "<div class=\"id_UiController row\">\r\n\r\n    <div class=\"col-lg-9\">\r\n\r\n        <div class=\"id_placeholder_UiNegativeBalanceWarning\">\r\n        </div>\r\n\r\n        <div class=\"row\">\r\n\r\n            <div class=\"id_placeholder_UiSubscribe\">\r\n\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiMySubscription col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiPaymentMethod col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiDownloadButtons col-md-6\">\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],16:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var css = "div.id_UiController .heading-1 {\n  font-size: 20px;\n  font-weight: normal;\n  margin-bottom: 16px;\n}\ndiv.id_UiController .heading-2 {\n  color: #007FEB;\n  font-size: 26px;\n  margin-bottom: 7px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":12}],17:[function(require,module,exports){
+},{"lessify":23}],28:[function(require,module,exports){
 module.exports = "<div class=\"id_UiDownloadButtons panel plain mt10\">\r\n\r\n    <div class=\"panel-body text-center\">\r\n\r\n        <a href='https://play.google.com/store/apps/details?id=com.semasim.android&ah=2KIGba1mmZ33bXvBLhumK535eEY&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>\r\n            <img alt='Get it on Google Play' height=\"90px\" src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' />\r\n        </a>\r\n\r\n    </div>\r\n</div>";
-},{}],18:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports = "<div class=\"id_UiMySubscription panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"payment-subscription\">\r\n                <h1 class=\"heading-1\">My subscription</h1>\r\n                <h2 class=\"heading-2\">Active</h2>\r\n                <p class=\"payment-text\">Cancels in <strong class=\"id_days_left\">X</strong> days</p>\r\n            </div>\r\n            <div class=\"payment-next clearfix\">\r\n                <h2 class=\"heading-1\">Next payment due</h2>\r\n\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">DATE</dt>\r\n                    <dt class=\"id_nextBillDate payment-list-info\">13/12/18</dt>\r\n                </dl>\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">AMOUNT</dt>\r\n                    <dt class=\"payment-list-info\"><span class=\"id_amount\">3.07€</span></dt>\r\n                </dl>\r\n            </div>\r\n            <div class=\"payment-actions mt10\">\r\n                <button class=\"btn btn-primary\" type=\"button\">\r\n                    Cancel subscription\r\n                </button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],19:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var css = "div.id_UiMySubscription .payment-list {\n  float: left;\n  line-height: 20px;\n  width: 50%;\n}\ndiv.id_UiMySubscription .payment-text {\n  color: #72727D;\n  font-size: 14px;\n  line-height: 20px;\n  margin-bottom: 15px;\n  text-align: left;\n}\ndiv.id_UiMySubscription .payment-subscription {\n  border-bottom: solid 1px #EFEFF2;\n  padding-bottom: 16px;\n}\ndiv.id_UiMySubscription .payment-list-title {\n  color: #72727D;\n  font-size: 14px;\n}\ndiv.id_UiMySubscription .payment-list-info {\n  font-weight: normal;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":12}],20:[function(require,module,exports){
+},{"lessify":23}],31:[function(require,module,exports){
 module.exports = "<div class=\"id_UiNegativeBalanceWarning alert alert-warning fade in mt10 mb0\">\r\n    <i class=\"glyphicon glyphicon-warning-sign alert-icon \"></i>\r\n    <strong>Warning!</strong> Your current balance is <span class=\"id_val\">-22€</span>, Please update your payment method.\r\n</div>";
-},{}],21:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports = "<div class=\"id_UiPaymentMethod panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"page-subscription-payment-method clearfix\">\r\n                <h2 class=\"heading-1\">Payment method</h2>\r\n                <div class=\"alert alert-danger fade in\">\r\n                    <i class=\"glyphicon glyphicon-ban-circle alert-icon \"></i>\r\n                    <strong>No longer valid</strong> please register a new credit card\r\n                </div>\r\n                <dl class=\"page-subscription-payment-method-list card-number\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Card number</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\">XXX...<span class=\"id_last4\">1234</span></span></dt>\r\n                </dl>\r\n                <dl class=\"page-subscription-payment-method-list expiry\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Expiration date</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\"><span class=\"id_expire\">12/19</span></dt>\r\n                </dl>\r\n            </div>\r\n            <button class=\"btn btn-primary\">\r\n                Change credit card\r\n            </button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],22:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var css = "div.id_UiPaymentMethod .card-number {\n  width: 210px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list {\n  float: left;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-title {\n  color: #5F5E6A;\n  font-size: 14px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-info {\n  font-weight: normal;\n  font-size: 14px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":12}],23:[function(require,module,exports){
+},{"lessify":23}],34:[function(require,module,exports){
 module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>\r\n                For enabling semasim on your <b>Android</b> devices\r\n                <br>\r\n                and stop including <b>\"Sent with Semasim\"</b> in your SMSs.\r\n                <br>\r\n                <br>\r\n                Subscription cancelable anytime.\r\n            </p>\r\n            <button class=\"btn btn-primary\">Subscribe for <span class=\"id_amount\">XX€</span>/Month</button>\r\n        </div>\r\n\r\n        <div class=\"container\" style=\"text-align: center;\">\r\n            <div class=\"footer\">\r\n                <p>By subscribing you agree to our :</p>\r\n                <a href=\"http://www.semasim.com/terms-conditions\">terms</a>\r\n                <span> &amp; </span>\r\n                <a href=\"http://www.semasim.com/privacy-policy\">privacy policy</a>\r\n            </div>\r\n        </div>\r\n\r\n\r\n    </div>\r\n\r\n</div>";
-},{}],24:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"semasim-gateway/dist/web_api_declaration":65}],25:[function(require,module,exports){
+},{"semasim-gateway/dist/web_api_declaration":69}],36:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -7252,7 +8431,7 @@ var PageName;
     _a = __read(PageName.pagesNames, 6), PageName.login = _a[0], PageName.register = _a[1], PageName.manager = _a[2], PageName.webphone = _a[3], PageName.subscription = _a[4], PageName.shop = _a[5];
 })(PageName = exports.PageName || (exports.PageName = {}));
 
-},{}],26:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Defined at ejs building in templates/head_common.ejs
@@ -7272,7 +8451,7 @@ var default_ = typeof window !== "undefined" ? ({
 });
 exports.default = default_;
 
-},{}],27:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 "use strict";
 /*
 import { jsRuntimeEnv } from "./jsRuntimeEnv";
@@ -7292,7 +8471,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.env = impl_1.default;
 
-},{"./impl":26}],28:[function(require,module,exports){
+},{"./impl":37}],39:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -7306,7 +8485,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],29:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -7422,7 +8601,7 @@ var AuthenticatedSessionDescriptorSharedData;
 })(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./localStorageApi":33,"buffer":2,"ts-events-extended":63}],30:[function(require,module,exports){
+},{"./localStorageApi":44,"buffer":2,"ts-events-extended":9}],41:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -7530,7 +8709,7 @@ var Credentials;
     Credentials.set = set;
 })(Credentials = exports.Credentials || (exports.Credentials = {}));
 
-},{"./localStorageApi":33}],31:[function(require,module,exports){
+},{"./localStorageApi":44}],42:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -7623,12 +8802,12 @@ function remove() {
 }
 exports.remove = remove;
 
-},{"./localStorageApi":33}],32:[function(require,module,exports){
+},{"./localStorageApi":44}],43:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = localStorage;
 
-},{}],33:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -7693,7 +8872,7 @@ function removeItem(key) {
 }
 exports.removeItem = removeItem;
 
-},{"./asyncOrSyncLocalStorage":32}],34:[function(require,module,exports){
+},{"./asyncOrSyncLocalStorage":43}],45:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -7708,13 +8887,13 @@ var api = {
 };
 exports.getApi = function () { return Promise.resolve(api); };
 
-},{"ts-events-extended":63}],35:[function(require,module,exports){
+},{"ts-events-extended":9}],46:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.getApi = impl_1.getApi;
 
-},{"./impl":34}],36:[function(require,module,exports){
+},{"./impl":45}],47:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("../env");
@@ -7727,8 +8906,55 @@ var default_ = function (reason) {
 };
 exports.default = default_;
 
-},{"../env":27}],37:[function(require,module,exports){
+},{"../env":38}],48:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -7750,24 +8976,62 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
 var impl = require("./impl");
-exports.evtAppAboutToRestart = new ts_events_extended_1.VoidSyncEvent();
+var beforeRestartActions = [];
+function registerActionToPerformBeforeAppRestart(action) {
+    beforeRestartActions.push(action);
+}
+exports.registerActionToPerformBeforeAppRestart = registerActionToPerformBeforeAppRestart;
+function matchPromise(obj) {
+    return (obj instanceof Object &&
+        typeof obj.then === "function");
+}
 exports.restartApp = function () {
     var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         args[_i] = arguments[_i];
     }
-    exports.evtAppAboutToRestart.post();
-    return impl.default.apply(impl, __spread(args));
+    return __awaiter(void 0, void 0, void 0, function () {
+        var tasks, beforeRestartActions_1, beforeRestartActions_1_1, action, prOrVoid;
+        var e_1, _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    tasks = [];
+                    try {
+                        for (beforeRestartActions_1 = __values(beforeRestartActions), beforeRestartActions_1_1 = beforeRestartActions_1.next(); !beforeRestartActions_1_1.done; beforeRestartActions_1_1 = beforeRestartActions_1.next()) {
+                            action = beforeRestartActions_1_1.value;
+                            prOrVoid = action();
+                            if (!matchPromise(prOrVoid)) {
+                                continue;
+                            }
+                            tasks.push(prOrVoid);
+                        }
+                    }
+                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    finally {
+                        try {
+                            if (beforeRestartActions_1_1 && !beforeRestartActions_1_1.done && (_a = beforeRestartActions_1.return)) _a.call(beforeRestartActions_1);
+                        }
+                        finally { if (e_1) throw e_1.error; }
+                    }
+                    if (!(tasks.length !== 0)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, Promise.all(tasks)];
+                case 1:
+                    _b.sent();
+                    _b.label = 2;
+                case 2: return [2 /*return*/, impl.default.apply(impl, __spread(args))];
+            }
+        });
+    });
 };
 
-},{"./impl":36,"ts-events-extended":63}],38:[function(require,module,exports){
+},{"./impl":47}],49:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectSidHttpHeaderName = "x-connect-sid";
 
-},{}],39:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -8160,7 +9424,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":48,"../env":27,"../localStorage/AuthenticatedSessionDescriptorSharedData":29,"../localStorage/Credentials":30,"../localStorage/declaredPushNotificationToken":31,"../networkStateMonitoring":35,"../restartApp":37,"./sendRequest":40,"ts-events-extended":63}],40:[function(require,module,exports){
+},{"../../web_api_declaration":59,"../env":38,"../localStorage/AuthenticatedSessionDescriptorSharedData":40,"../localStorage/Credentials":41,"../localStorage/declaredPushNotificationToken":42,"../networkStateMonitoring":46,"../restartApp":48,"./sendRequest":51,"ts-events-extended":9}],51:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -8279,7 +9543,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":24,"../env":27,"../types/connectSidHttpHeaderName":38,"transfer-tools/dist/lib/JSON_CUSTOM":58}],41:[function(require,module,exports){
+},{"../../gateway/webApiPath":35,"../env":38,"../types/connectSidHttpHeaderName":49,"transfer-tools/dist/lib/JSON_CUSTOM":67}],52:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -8479,7 +9743,7 @@ function prettyPrint(amount, currency) {
 }
 exports.prettyPrint = prettyPrint;
 
-},{"../../res/currency.json":64}],42:[function(require,module,exports){
+},{"../../res/currency.json":68}],53:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -8512,7 +9776,7 @@ function createGenericProxyForBootstrapModal($initializedModalDiv) {
 }
 exports.createGenericProxyForBootstrapModal = createGenericProxyForBootstrapModal;
 
-},{"ts-events-extended":63}],43:[function(require,module,exports){
+},{"ts-events-extended":9}],54:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
@@ -8546,7 +9810,7 @@ var loading;
 })(loading || (loading = {}));
 exports.getApi = function () { return customImplementationOfApi || bootboxBasedImplementationOfBaseApi; };
 
-},{"../createGenericProxyForBootstrapModal":42}],44:[function(require,module,exports){
+},{"../createGenericProxyForBootstrapModal":53}],55:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -8769,11 +10033,11 @@ exports.dialogApi = {
     }
 };
 
-},{"../stack":46,"./getApi":43,"./types":45,"run-exclusive":55}],45:[function(require,module,exports){
+},{"../stack":57,"./getApi":54,"./types":56,"run-exclusive":65}],56:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],46:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -8898,7 +10162,7 @@ function add(modal) {
 }
 exports.add = add;
 
-},{}],47:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 if (typeof Object.assign !== 'function') {
     // Must be writable: true, enumerable: false, configurable: true
     Object.defineProperty(Object, "assign", {
@@ -8926,7 +10190,7 @@ if (typeof Object.assign !== 'function') {
     });
 }
 
-},{}],48:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
@@ -8994,7 +10258,7 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],49:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -9048,441 +10312,27 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],50:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":49}],51:[function(require,module,exports){
+},{"./implementation":60}],62:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":50}],52:[function(require,module,exports){
-// https://tc39.github.io/ecma262/#sec-array.prototype.find
-if (!Array.prototype.find) {
-    Object.defineProperty(Array.prototype, 'find', {
-        value: function (predicate) {
-            // 1. Let O be ? ToObject(this value).
-            if (this == null) {
-                throw new TypeError('"this" is null or not defined');
-            }
-            var o = Object(this);
-            // 2. Let len be ? ToLength(? Get(O, "length")).
-            var len = o.length >>> 0;
-            // 3. If IsCallable(predicate) is false, throw a TypeError exception.
-            if (typeof predicate !== 'function') {
-                throw new TypeError('predicate must be a function');
-            }
-            // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
-            var thisArg = arguments[1];
-            // 5. Let k be 0.
-            var k = 0;
-            // 6. Repeat, while k < len
-            while (k < len) {
-                // a. Let Pk be ! ToString(k).
-                // b. Let kValue be ? Get(O, Pk).
-                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
-                // d. If testResult is true, return kValue.
-                var kValue = o[k];
-                if (predicate.call(thisArg, kValue, k, o)) {
-                    return kValue;
-                }
-                // e. Increase k by 1.
-                k++;
-            }
-            // 7. Return undefined.
-            return undefined;
-        },
-        configurable: true,
-        writable: true
-    });
-}
-
-},{}],53:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var LightMapImpl = /** @class */ (function () {
-    function LightMapImpl() {
-        this.record = [];
-    }
-    LightMapImpl.prototype.has = function (key) {
-        return this.record
-            .map(function (_a) {
-            var _key = _a[0];
-            return _key;
-        })
-            .indexOf(key) >= 0;
-    };
-    LightMapImpl.prototype.get = function (key) {
-        var entry = this.record
-            .filter(function (_a) {
-            var _key = _a[0];
-            return _key === key;
-        })[0];
-        if (entry === undefined) {
-            return undefined;
-        }
-        return entry[1];
-    };
-    LightMapImpl.prototype.set = function (key, value) {
-        var entry = this.record
-            .filter(function (_a) {
-            var _key = _a[0];
-            return _key === key;
-        })[0];
-        if (entry === undefined) {
-            this.record.push([key, value]);
-        }
-        else {
-            entry[1] = value;
-        }
-        return this;
-    };
-    LightMapImpl.prototype["delete"] = function (key) {
-        var index = this.record.map(function (_a) {
-            var key = _a[0];
-            return key;
-        }).indexOf(key);
-        if (index < 0) {
-            return false;
-        }
-        this.record.splice(index, 1);
-        return true;
-    };
-    LightMapImpl.prototype.keys = function () {
-        return this.record.map(function (_a) {
-            var key = _a[0];
-            return key;
-        });
-    };
-    return LightMapImpl;
-}());
-exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
-
-},{}],54:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var Map_1 = require("./Map");
-exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
-
-},{"./Map":53}],55:[function(require,module,exports){
-"use strict";
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
-};
-exports.__esModule = true;
-var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
-var ExecQueue = /** @class */ (function () {
-    function ExecQueue() {
-        this.queuedCalls = [];
-        this.isRunning = false;
-        this.prComplete = Promise.resolve();
-    }
-    //TODO: move where it is used.
-    ExecQueue.prototype.cancelAllQueuedCalls = function () {
-        var n;
-        this.queuedCalls.splice(0, n = this.queuedCalls.length);
-        return n;
-    };
-    return ExecQueue;
-}());
-var globalContext = {};
-var clusters = new WeakMap_1.Polyfill();
-//console.log("Map version");
-//export const clusters = new Map<Object, Map<GroupRef,ExecQueue>>();
-function getOrCreateExecQueue(context, groupRef) {
-    var execQueueByGroup = clusters.get(context);
-    if (!execQueueByGroup) {
-        execQueueByGroup = new WeakMap_1.Polyfill();
-        clusters.set(context, execQueueByGroup);
-    }
-    var execQueue = execQueueByGroup.get(groupRef);
-    if (!execQueue) {
-        execQueue = new ExecQueue();
-        execQueueByGroup.set(groupRef, execQueue);
-    }
-    return execQueue;
-}
-function createGroupRef() {
-    return new Array(0);
-}
-exports.createGroupRef = createGroupRef;
-function build() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnPromise(true, createGroupRef(), inputs[0]);
-        case 2: return buildFnPromise(true, inputs[0], inputs[1]);
-    }
-}
-exports.build = build;
-function buildMethod() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnPromise(false, createGroupRef(), inputs[0]);
-        case 2: return buildFnPromise(false, inputs[0], inputs[1]);
-    }
-}
-exports.buildMethod = buildMethod;
-/**
- *
- * Get the number of queued call of a run-exclusive function.
- * Note that if you call a runExclusive function and call this
- * directly after it will return 0 as there is one function call
- * running but 0 queued.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- *
- * */
-function getQueuedCallCount(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.queuedCalls.length : 0;
-}
-exports.getQueuedCallCount = getQueuedCallCount;
-/**
- *
- * Cancel all queued calls of a run-exclusive function.
- * Note that the current running call will not be cancelled.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- *
- */
-function cancelAllQueuedCalls(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.cancelAllQueuedCalls() : 0;
-}
-exports.cancelAllQueuedCalls = cancelAllQueuedCalls;
-/**
- * Tell if a run-exclusive function has an instance of it's call currently being
- * performed.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- */
-function isRunning(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.isRunning : false;
-}
-exports.isRunning = isRunning;
-/**
- * Return a promise that resolve when all the current queued call of a runExclusive functions
- * have completed.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- */
-function getPrComplete(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.prComplete : Promise.resolve();
-}
-exports.getPrComplete = getPrComplete;
-var groupByRunExclusiveFunction = new WeakMap_1.Polyfill();
-function getExecQueueByFunctionAndContext(runExclusiveFunction, context) {
-    if (context === void 0) { context = globalContext; }
-    var groupRef = groupByRunExclusiveFunction.get(runExclusiveFunction);
-    if (!groupRef) {
-        throw Error("Not a run exclusiveFunction");
-    }
-    var execQueueByGroup = clusters.get(context);
-    if (!execQueueByGroup) {
-        return undefined;
-    }
-    return execQueueByGroup.get(groupRef);
-}
-function buildFnPromise(isGlobal, groupRef, fun) {
-    var execQueue;
-    var runExclusiveFunction = (function () {
-        var _this = this;
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        if (!isGlobal) {
-            if (!(this instanceof Object)) {
-                throw new Error("Run exclusive, <this> should be an object");
-            }
-            execQueue = getOrCreateExecQueue(this, groupRef);
-        }
-        return new Promise(function (resolve, reject) {
-            var onPrCompleteResolve;
-            execQueue.prComplete = new Promise(function (resolve) {
-                return onPrCompleteResolve = function () { return resolve(); };
-            });
-            var onComplete = function (result) {
-                onPrCompleteResolve();
-                execQueue.isRunning = false;
-                if (execQueue.queuedCalls.length) {
-                    execQueue.queuedCalls.shift()();
-                }
-                if ("data" in result) {
-                    resolve(result.data);
-                }
-                else {
-                    reject(result.reason);
-                }
-            };
-            (function callee() {
-                var _this = this;
-                var inputs = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    inputs[_i] = arguments[_i];
-                }
-                if (execQueue.isRunning) {
-                    execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
-                    return;
-                }
-                execQueue.isRunning = true;
-                try {
-                    fun.apply(this, inputs)
-                        .then(function (data) { return onComplete({ data: data }); })["catch"](function (reason) { return onComplete({ reason: reason }); });
-                }
-                catch (error) {
-                    onComplete({ "reason": error });
-                }
-            }).apply(_this, inputs);
-        });
-    });
-    if (isGlobal) {
-        execQueue = getOrCreateExecQueue(globalContext, groupRef);
-    }
-    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
-    return runExclusiveFunction;
-}
-function buildCb() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnCallback(true, createGroupRef(), inputs[0]);
-        case 2: return buildFnCallback(true, inputs[0], inputs[1]);
-    }
-}
-exports.buildCb = buildCb;
-function buildMethodCb() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnCallback(false, createGroupRef(), inputs[0]);
-        case 2: return buildFnCallback(false, inputs[0], inputs[1]);
-    }
-}
-exports.buildMethodCb = buildMethodCb;
-function buildFnCallback(isGlobal, groupRef, fun) {
-    var execQueue;
-    var runExclusiveFunction = (function () {
-        var _this = this;
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        if (!isGlobal) {
-            if (!(this instanceof Object)) {
-                throw new Error("Run exclusive, <this> should be an object");
-            }
-            execQueue = getOrCreateExecQueue(this, groupRef);
-        }
-        var callback = undefined;
-        if (inputs.length && typeof inputs[inputs.length - 1] === "function") {
-            callback = inputs.pop();
-        }
-        var onPrCompleteResolve;
-        execQueue.prComplete = new Promise(function (resolve) {
-            return onPrCompleteResolve = function () { return resolve(); };
-        });
-        var onComplete = function () {
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            onPrCompleteResolve();
-            execQueue.isRunning = false;
-            if (execQueue.queuedCalls.length) {
-                execQueue.queuedCalls.shift()();
-            }
-            if (callback) {
-                callback.apply(_this, inputs);
-            }
-        };
-        onComplete.hasCallback = !!callback;
-        (function callee() {
-            var _this = this;
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            if (execQueue.isRunning) {
-                execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
-                return;
-            }
-            execQueue.isRunning = true;
-            try {
-                fun.apply(this, __spread(inputs, [onComplete]));
-            }
-            catch (error) {
-                error.message += " ( This exception should not have been thrown, miss use of run-exclusive buildCb )";
-                throw error;
-            }
-        }).apply(this, inputs);
-    });
-    if (isGlobal) {
-        execQueue = getOrCreateExecQueue(globalContext, groupRef);
-    }
-    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
-    return runExclusiveFunction;
-}
-
-},{"minimal-polyfills/dist/lib/WeakMap":54}],56:[function(require,module,exports){
-'use strict'
-/* eslint no-proto: 0 */
-module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
-
-function setProtoOf (obj, proto) {
-  obj.__proto__ = proto
-  return obj
-}
-
-function mixinProperties (obj, proto) {
-  for (var prop in proto) {
-    if (!Object.prototype.hasOwnProperty.call(obj, prop)) {
-      obj[prop] = proto[prop]
-    }
-  }
-  return obj
-}
-
-},{}],57:[function(require,module,exports){
+},{"function-bind":61}],63:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],64:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"./Map":63,"dup":12}],65:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"dup":13,"minimal-polyfills/dist/lib/WeakMap":64}],66:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -9817,7 +10667,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":51}],58:[function(require,module,exports){
+},{"has":62}],67:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -9867,603 +10717,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":57}],59:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-exports.__esModule = true;
-var SyncEventBase_1 = require("./SyncEventBase");
-var SyncEvent = /** @class */ (function (_super) {
-    __extends(SyncEvent, _super);
-    function SyncEvent() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.evtAttach = new SyncEventBase_1.SyncEventBase();
-        return _this;
-    }
-    SyncEvent.prototype.addHandler = function (attachParams, implicitAttachParams) {
-        var handler = _super.prototype.addHandler.call(this, attachParams, implicitAttachParams);
-        this.evtAttach.post(handler);
-        return handler;
-    };
-    return SyncEvent;
-}(SyncEventBase_1.SyncEventBase));
-exports.SyncEvent = SyncEvent;
-var VoidSyncEvent = /** @class */ (function (_super) {
-    __extends(VoidSyncEvent, _super);
-    function VoidSyncEvent() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    VoidSyncEvent.prototype.post = function () {
-        return _super.prototype.post.call(this, undefined);
-    };
-    return VoidSyncEvent;
-}(SyncEvent));
-exports.VoidSyncEvent = VoidSyncEvent;
-
-},{"./SyncEventBase":60}],60:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
-exports.__esModule = true;
-var SyncEventBaseProtected_1 = require("./SyncEventBaseProtected");
-function matchPostable(o) {
-    return o instanceof Object && typeof o.post === "function";
-}
-function isCallable(o) {
-    if (typeof o !== "function")
-        return false;
-    var prototype = o["prototype"];
-    if (!prototype)
-        return true;
-    var methods = Object.getOwnPropertyNames(prototype);
-    if (methods.length !== 1)
-        return false;
-    var name = o.name;
-    if (!name)
-        return true;
-    if (name[0].toUpperCase() === name[0])
-        return false;
-    return true;
-}
-/** SyncEvent without evtAttach property */
-var SyncEventBase = /** @class */ (function (_super) {
-    __extends(SyncEventBase, _super);
-    function SyncEventBase() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.defaultParams = {
-            "matcher": function matchAll() { return true; },
-            "boundTo": _this,
-            "timeout": undefined,
-            "callback": undefined
-        };
-        return _this;
-    }
-    SyncEventBase.prototype.getDefaultParams = function () {
-        return __assign({}, this.defaultParams);
-    };
-    SyncEventBase.prototype.readParams = function (inputs) {
-        var out = this.getDefaultParams();
-        var n = inputs.length;
-        if (!n)
-            return out;
-        //[ matcher, boundTo, timeout, callback ]
-        //[ matcher, boundTo, callback ]
-        //[ matcher, timeout, callback ]
-        //[ boundTo, timeout, callback ]
-        //[ matcher, callback ]
-        //[ boundTo, callback ]
-        //[ timeout, callback ]
-        //[ callback ]
-        //[ matcher, timeout, evt ]
-        //[ matcher, evt ]
-        //[ timeout, evt ]
-        //[ evt ]
-        if (matchPostable(inputs[n - 1])) {
-            out.boundTo = inputs[n - 1];
-            inputs[n - 1] = inputs[n - 1].post;
-        }
-        //[ matcher, boundTo, timeout, callback ]
-        //[ matcher, boundTo, callback ]
-        //[ matcher, timeout, callback ]
-        //[ boundTo, timeout, callback ]
-        //[ matcher, callback ]
-        //[ boundTo, callback ]
-        //[ timeout, callback ]
-        //[ callback ]
-        if (n === 4) {
-            //[ matcher, boundTo, timeout, callback ]
-            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2], p4 = inputs[3];
-            out.matcher = p1;
-            out.boundTo = p2;
-            out.timeout = p3;
-            out.callback = p4;
-        }
-        else if (n === 3) {
-            //[ matcher, boundTo, callback ]
-            //[ matcher, timeout, callback ]
-            //[ boundTo, timeout, callback ]
-            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2];
-            if (typeof p2 === "number") {
-                //[ matcher, timeout, callback ]
-                //[ boundTo, timeout, callback ]
-                out.timeout = p2;
-                out.callback = p3;
-                if (isCallable(p1)) {
-                    //[ matcher, timeout, callback ]
-                    out.matcher = p1;
-                }
-                else {
-                    //[ boundTo, timeout, callback ]
-                    out.boundTo = p1;
-                }
-            }
-            else {
-                //[ matcher, boundTo, callback ]
-                out.matcher = p1;
-                out.boundTo = p2;
-                out.callback = p3;
-            }
-        }
-        else if (n === 2) {
-            //[ matcher, callback ]
-            //[ boundTo, callback ]
-            //[ timeout, callback ]
-            var p1 = inputs[0], p2 = inputs[1];
-            if (typeof p1 === "number") {
-                //[ timeout, callback ]
-                out.timeout = p1;
-                out.callback = p2;
-            }
-            else {
-                //[ matcher, callback ]
-                //[ boundTo, callback ]
-                out.callback = p2;
-                if (isCallable(p1)) {
-                    out.matcher = p1;
-                }
-                else {
-                    out.boundTo = p1;
-                }
-            }
-        }
-        else if (n === 1) {
-            //[ callback ]
-            var p = inputs[0];
-            out.callback = p;
-        }
-        return out;
-    };
-    SyncEventBase.prototype.waitFor = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        var params = this.getDefaultParams();
-        var n = inputs.length;
-        if (n === 2) {
-            var p1 = inputs[0], p2 = inputs[1];
-            params.matcher = p1;
-            params.timeout = p2;
-        }
-        else {
-            var p = inputs[0];
-            if (isCallable(p)) {
-                params.matcher = p;
-            }
-            else {
-                params.timeout = p;
-            }
-        }
-        return _super.prototype.__waitFor.call(this, params);
-    };
-    SyncEventBase.prototype.attach = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attach(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachOnce = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachOnce(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachExtract = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachExtract(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachPrepend = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachPrepend(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachOncePrepend = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachOncePrepend(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachOnceExtract = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachOnceExtract(this.readParams(inputs));
-    };
-    return SyncEventBase;
-}(SyncEventBaseProtected_1.SyncEventBaseProtected));
-exports.SyncEventBase = SyncEventBase;
-
-},{"./SyncEventBaseProtected":61}],61:[function(require,module,exports){
-"use strict";
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
-exports.__esModule = true;
-var Map_1 = require("minimal-polyfills/dist/lib/Map");
-require("minimal-polyfills/dist/lib/Array.prototype.find");
-var runExclusive = require("run-exclusive");
-var defs_1 = require("./defs");
-/** SyncEvent without evtAttach property and without overload */
-var SyncEventBaseProtected = /** @class */ (function () {
-    function SyncEventBaseProtected() {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        var _this = this;
-        this.tick = 0;
-        this.postCount = 0;
-        this.traceId = null;
-        this.handlers = [];
-        this.handlerTriggers = new Map_1.Polyfill();
-        this.postAsync = runExclusive.buildCb(function (data, postTick, releaseLock) {
-            var isHandled = false;
-            for (var _i = 0, _a = _this.handlers.slice(); _i < _a.length; _i++) {
-                var handler = _a[_i];
-                var async = handler.async, matcher = handler.matcher;
-                if (!async || !matcher(data))
-                    continue;
-                var handlerTrigger = _this.handlerTriggers.get(handler);
-                if (!handlerTrigger)
-                    continue;
-                if (handlerTrigger.handlerTick > postTick)
-                    continue;
-                isHandled = true;
-                handlerTrigger.trigger(data);
-            }
-            if (!isHandled) {
-                releaseLock();
-            }
-            else {
-                var handlersDump_1 = _this.handlers.slice();
-                setTimeout(function () {
-                    for (var _i = 0, _a = _this.handlers; _i < _a.length; _i++) {
-                        var handler = _a[_i];
-                        var async = handler.async;
-                        if (!async)
-                            continue;
-                        if (handlersDump_1.indexOf(handler) >= 0)
-                            continue;
-                        _this.handlerTriggers.get(handler).handlerTick = postTick;
-                    }
-                    releaseLock();
-                }, 0);
-            }
-        });
-        if (!inputs.length)
-            return;
-        var eventEmitter = inputs[0], eventName = inputs[1];
-        var formatter = inputs[2] || this.defaultFormatter;
-        eventEmitter.on(eventName, function () {
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            return _this.post(formatter.apply(null, inputs));
-        });
-    }
-    SyncEventBaseProtected.prototype.defaultFormatter = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return inputs[0];
-    };
-    SyncEventBaseProtected.prototype.enableTrace = function (id, formatter, log) {
-        this.traceId = id;
-        if (!!formatter) {
-            this.traceFormatter = formatter;
-        }
-        else {
-            this.traceFormatter = function (data) {
-                try {
-                    return JSON.stringify(data, null, 2);
-                }
-                catch (_a) {
-                    return "" + data;
-                }
-            };
-        }
-        if (!!log) {
-            this.log = log;
-        }
-        else {
-            this.log = function () {
-                var inputs = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    inputs[_i] = arguments[_i];
-                }
-                return console.log.apply(console, inputs);
-            };
-        }
-    };
-    SyncEventBaseProtected.prototype.disableTrace = function () {
-        this.traceId = null;
-    };
-    SyncEventBaseProtected.prototype.addHandler = function (attachParams, implicitAttachParams) {
-        var _this = this;
-        var handler = __assign({}, attachParams, implicitAttachParams, { "detach": null, "promise": null });
-        handler.promise = new Promise(function (resolve, reject) {
-            var timer = undefined;
-            if (typeof handler.timeout === "number") {
-                timer = setTimeout(function () {
-                    timer = undefined;
-                    handler.detach();
-                    reject(new defs_1.EvtError.Timeout(handler.timeout));
-                }, handler.timeout);
-            }
-            handler.detach = function () {
-                var index = _this.handlers.indexOf(handler);
-                if (index < 0)
-                    return false;
-                _this.handlers.splice(index, 1);
-                _this.handlerTriggers["delete"](handler);
-                if (timer) {
-                    clearTimeout(timer);
-                    reject(new defs_1.EvtError.Detached());
-                }
-                return true;
-            };
-            var handlerTick = _this.tick++;
-            var trigger = function (data) {
-                var callback = handler.callback, once = handler.once;
-                if (timer) {
-                    clearTimeout(timer);
-                    timer = undefined;
-                }
-                if (once)
-                    handler.detach();
-                if (callback)
-                    callback.call(handler.boundTo, data);
-                resolve(data);
-            };
-            _this.handlerTriggers.set(handler, { handlerTick: handlerTick, trigger: trigger });
-        });
-        if (handler.prepend) {
-            var i = void 0;
-            for (i = 0; i < this.handlers.length; i++) {
-                if (this.handlers[i].extract)
-                    continue;
-                else
-                    break;
-            }
-            this.handlers.splice(i, 0, handler);
-        }
-        else {
-            this.handlers.push(handler);
-        }
-        return handler;
-    };
-    SyncEventBaseProtected.prototype.trace = function (data) {
-        if (this.traceId === null) {
-            return;
-        }
-        var message = "(" + this.traceId + ") ";
-        var isExtracted = !!this.handlers.find(function (_a) {
-            var extract = _a.extract, matcher = _a.matcher;
-            return extract && matcher(data);
-        });
-        if (isExtracted) {
-            message += "extracted ";
-        }
-        else {
-            var handlerCount = this.handlers
-                .filter(function (_a) {
-                var extract = _a.extract, matcher = _a.matcher;
-                return !extract && matcher(data);
-            })
-                .length;
-            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
-        }
-        this.log(message + this.traceFormatter(data));
-    };
-    SyncEventBaseProtected.prototype.post = function (data) {
-        this.trace(data);
-        this.postCount++;
-        var postTick = this.tick++;
-        var isExtracted = this.postSync(data);
-        if (!isExtracted) {
-            this.postAsync(data, postTick);
-        }
-        return this.postCount;
-    };
-    SyncEventBaseProtected.prototype.postSync = function (data) {
-        for (var _i = 0, _a = this.handlers.slice(); _i < _a.length; _i++) {
-            var handler = _a[_i];
-            var async = handler.async, matcher = handler.matcher, extract = handler.extract;
-            if (async || !matcher(data))
-                continue;
-            var handlerTrigger = this.handlerTriggers.get(handler);
-            if (!handlerTrigger)
-                continue;
-            handlerTrigger.trigger(data);
-            if (extract)
-                return true;
-        }
-        return false;
-    };
-    SyncEventBaseProtected.prototype.__waitFor = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": true,
-            "extract": false,
-            "once": true,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attach = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": false,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachExtract = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": true,
-            "once": false,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachPrepend = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": false,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOnce = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": true,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOncePrepend = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": true,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOnceExtract = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": true,
-            "once": true,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.getHandlers = function () { return this.handlers.slice(); };
-    /** Detach every handler bound to a given object or all handlers, return the detached handlers */
-    SyncEventBaseProtected.prototype.detach = function (boundTo) {
-        var detachedHandlers = [];
-        for (var _i = 0, _a = this.handlers.slice(); _i < _a.length; _i++) {
-            var handler = _a[_i];
-            if (boundTo === undefined || handler.boundTo === boundTo) {
-                handler.detach();
-                detachedHandlers.push(handler);
-            }
-        }
-        return detachedHandlers;
-    };
-    return SyncEventBaseProtected;
-}());
-exports.SyncEventBaseProtected = SyncEventBaseProtected;
-
-},{"./defs":62,"minimal-polyfills/dist/lib/Array.prototype.find":52,"minimal-polyfills/dist/lib/Map":53,"run-exclusive":55}],62:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-exports.__esModule = true;
-var setPrototypeOf = require("setprototypeof");
-var EvtError;
-(function (EvtError) {
-    var Timeout = /** @class */ (function (_super) {
-        __extends(Timeout, _super);
-        function Timeout(timeout) {
-            var _newTarget = this.constructor;
-            var _this = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
-            _this.timeout = timeout;
-            setPrototypeOf(_this, _newTarget.prototype);
-            return _this;
-        }
-        return Timeout;
-    }(Error));
-    EvtError.Timeout = Timeout;
-    var Detached = /** @class */ (function (_super) {
-        __extends(Detached, _super);
-        function Detached() {
-            var _newTarget = this.constructor;
-            var _this = _super.call(this, "Evt handler detached") || this;
-            setPrototypeOf(_this, _newTarget.prototype);
-            return _this;
-        }
-        return Detached;
-    }(Error));
-    EvtError.Detached = Detached;
-})(EvtError = exports.EvtError || (exports.EvtError = {}));
-
-},{"setprototypeof":56}],63:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var SyncEvent_1 = require("./SyncEvent");
-exports.SyncEvent = SyncEvent_1.SyncEvent;
-exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
-var defs_1 = require("./defs");
-exports.EvtError = defs_1.EvtError;
-
-},{"./SyncEvent":59,"./defs":62}],64:[function(require,module,exports){
+},{"super-json":66}],68:[function(require,module,exports){
 module.exports={
   "usd": {
     "symbol": "$",
@@ -11372,7 +11626,7 @@ module.exports={
   }
 }
 
-},{}],65:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
@@ -11381,4 +11635,4 @@ var version;
     version.methodName = "version";
 })(version = exports.version || (exports.version = {}));
 
-},{}]},{},[10]);
+},{}]},{},[21]);

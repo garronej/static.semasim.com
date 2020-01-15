@@ -5698,6 +5698,775 @@ var phoneNumber;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./importUtilScript":39}],41:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var SyncEvent_1 = require("./SyncEvent");
+var ObservableImpl = /** @class */ (function () {
+    function ObservableImpl(value, areSame) {
+        if (areSame === void 0) { areSame = function (oldValue, newValue) { return oldValue === newValue; }; }
+        this.value = value;
+        this.areSame = areSame;
+        this.evtChange = new SyncEvent_1.SyncEvent();
+    }
+    ObservableImpl.prototype.onPotentialChange = function (newValue) {
+        if (this.areSame(this.value, newValue)) {
+            return;
+        }
+        this.value = newValue;
+        this.evtChange.post(this.value);
+    };
+    return ObservableImpl;
+}());
+exports.ObservableImpl = ObservableImpl;
+
+},{"./SyncEvent":42}],42:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+exports.__esModule = true;
+var SyncEventBase_1 = require("./SyncEventBase");
+var SyncEvent = /** @class */ (function (_super) {
+    __extends(SyncEvent, _super);
+    function SyncEvent() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.evtAttach = new SyncEventBase_1.SyncEventBase();
+        return _this;
+    }
+    SyncEvent.prototype.addHandler = function (attachParams, implicitAttachParams) {
+        var handler = _super.prototype.addHandler.call(this, attachParams, implicitAttachParams);
+        this.evtAttach.post(handler);
+        return handler;
+    };
+    /** Wait until an handler that match the event data have been attached
+     * return a promise that resolve with post count */
+    SyncEvent.prototype.postOnceMatched = function (eventData) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!!this.getHandlers().find(function (handler) { return handler.matcher(eventData); })) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.evtAttach.waitFor(function (handler) { return handler.matcher(eventData); })];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, this.post(eventData)];
+                }
+            });
+        });
+    };
+    return SyncEvent;
+}(SyncEventBase_1.SyncEventBase));
+exports.SyncEvent = SyncEvent;
+var VoidSyncEvent = /** @class */ (function (_super) {
+    __extends(VoidSyncEvent, _super);
+    function VoidSyncEvent() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    VoidSyncEvent.prototype.post = function () {
+        return _super.prototype.post.call(this, undefined);
+    };
+    VoidSyncEvent.prototype.postOnceMatched = function () {
+        return _super.prototype.postOnceMatched.call(this, undefined);
+    };
+    return VoidSyncEvent;
+}(SyncEvent));
+exports.VoidSyncEvent = VoidSyncEvent;
+
+},{"./SyncEventBase":43}],43:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+exports.__esModule = true;
+var SyncEventBaseProtected_1 = require("./SyncEventBaseProtected");
+function matchPostable(o) {
+    return o instanceof Object && typeof o.post === "function";
+}
+function isCallable(o) {
+    if (typeof o !== "function")
+        return false;
+    var prototype = o["prototype"];
+    if (!prototype)
+        return true;
+    var methods = Object.getOwnPropertyNames(prototype);
+    if (methods.length !== 1)
+        return false;
+    var name = o.name;
+    if (!name)
+        return true;
+    if (name[0].toUpperCase() === name[0])
+        return false;
+    return true;
+}
+/** SyncEvent without evtAttach property */
+var SyncEventBase = /** @class */ (function (_super) {
+    __extends(SyncEventBase, _super);
+    function SyncEventBase() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.defaultParams = {
+            "matcher": function matchAll() { return true; },
+            "boundTo": _this,
+            "timeout": undefined,
+            "callback": undefined
+        };
+        return _this;
+    }
+    SyncEventBase.prototype.getDefaultParams = function () {
+        return __assign({}, this.defaultParams);
+    };
+    SyncEventBase.prototype.readParams = function (inputs) {
+        var out = this.getDefaultParams();
+        var n = inputs.length;
+        if (!n)
+            return out;
+        //[ matcher, boundTo, timeout, callback ]
+        //[ matcher, boundTo, callback ]
+        //[ matcher, timeout, callback ]
+        //[ boundTo, timeout, callback ]
+        //[ matcher, callback ]
+        //[ boundTo, callback ]
+        //[ timeout, callback ]
+        //[ callback ]
+        //[ matcher, timeout, evt ]
+        //[ matcher, evt ]
+        //[ timeout, evt ]
+        //[ evt ]
+        if (matchPostable(inputs[n - 1])) {
+            out.boundTo = inputs[n - 1];
+            inputs[n - 1] = inputs[n - 1].post;
+        }
+        //[ matcher, boundTo, timeout, callback ]
+        //[ matcher, boundTo, callback ]
+        //[ matcher, timeout, callback ]
+        //[ boundTo, timeout, callback ]
+        //[ matcher, callback ]
+        //[ boundTo, callback ]
+        //[ timeout, callback ]
+        //[ callback ]
+        if (n === 4) {
+            //[ matcher, boundTo, timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2], p4 = inputs[3];
+            out.matcher = p1;
+            out.boundTo = p2;
+            out.timeout = p3;
+            out.callback = p4;
+        }
+        else if (n === 3) {
+            //[ matcher, boundTo, callback ]
+            //[ matcher, timeout, callback ]
+            //[ boundTo, timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2];
+            if (typeof p2 === "number") {
+                //[ matcher, timeout, callback ]
+                //[ boundTo, timeout, callback ]
+                out.timeout = p2;
+                out.callback = p3;
+                if (isCallable(p1)) {
+                    //[ matcher, timeout, callback ]
+                    out.matcher = p1;
+                }
+                else {
+                    //[ boundTo, timeout, callback ]
+                    out.boundTo = p1;
+                }
+            }
+            else {
+                //[ matcher, boundTo, callback ]
+                out.matcher = p1;
+                out.boundTo = p2;
+                out.callback = p3;
+            }
+        }
+        else if (n === 2) {
+            //[ matcher, callback ]
+            //[ boundTo, callback ]
+            //[ timeout, callback ]
+            var p1 = inputs[0], p2 = inputs[1];
+            if (typeof p1 === "number") {
+                //[ timeout, callback ]
+                out.timeout = p1;
+                out.callback = p2;
+            }
+            else {
+                //[ matcher, callback ]
+                //[ boundTo, callback ]
+                out.callback = p2;
+                if (isCallable(p1)) {
+                    out.matcher = p1;
+                }
+                else {
+                    out.boundTo = p1;
+                }
+            }
+        }
+        else if (n === 1) {
+            //[ callback ]
+            var p = inputs[0];
+            out.callback = p;
+        }
+        return out;
+    };
+    SyncEventBase.prototype.waitFor = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        var params = this.getDefaultParams();
+        var n = inputs.length;
+        if (n === 2) {
+            var p1 = inputs[0], p2 = inputs[1];
+            params.matcher = p1;
+            params.timeout = p2;
+        }
+        else {
+            var p = inputs[0];
+            if (isCallable(p)) {
+                params.matcher = p;
+            }
+            else {
+                params.timeout = p;
+            }
+        }
+        return _super.prototype.__waitFor.call(this, params);
+    };
+    SyncEventBase.prototype.attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attach(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnce(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachExtract(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachPrepend(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOncePrepend(this.readParams(inputs));
+    };
+    SyncEventBase.prototype.attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnceExtract(this.readParams(inputs));
+    };
+    return SyncEventBase;
+}(SyncEventBaseProtected_1.SyncEventBaseProtected));
+exports.SyncEventBase = SyncEventBase;
+
+},{"./SyncEventBaseProtected":44}],44:[function(require,module,exports){
+"use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
+exports.__esModule = true;
+var Map_1 = require("minimal-polyfills/dist/lib/Map");
+require("minimal-polyfills/dist/lib/Array.prototype.find");
+var runExclusive = require("run-exclusive");
+var defs_1 = require("./defs");
+/** SyncEvent without evtAttach property and without overload */
+var SyncEventBaseProtected = /** @class */ (function () {
+    function SyncEventBaseProtected() {
+        var _this = this;
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        this.postCount = 0;
+        this.traceId = null;
+        this.handlers = [];
+        this.handlerTriggers = new Map_1.Polyfill();
+        //NOTE: An async handler ( attached with waitFor ) is only eligible to handle a post if the post
+        //occurred after the handler was set. We don't want to waitFor event from the past.
+        //private readonly asyncHandlerChronologyMark = new WeakMap<ImplicitParams.Async, number>();
+        this.asyncHandlerChronologyMark = typeof WeakMap !== "undefined" ?
+            new WeakMap() :
+            new Map_1.Polyfill();
+        //NOTE: There is an exception to the above rule, we want to allow async waitFor loop 
+        //do so we have to handle the case where multiple event would be posted synchronously.
+        this.asyncHandlerChronologyExceptionRange = typeof WeakMap !== "undefined" ?
+            new WeakMap() :
+            new Map_1.Polyfill();
+        /*
+        NOTE: Used as Date.now() would be used to compare if an event is anterior
+        or posterior to an other. We don't use Date.now() because two call within
+        less than a ms will return the same value unlike this function.
+        */
+        this.getChronologyMark = (function () {
+            var currentChronologyMark = 0;
+            return function () { return currentChronologyMark++; };
+        })();
+        this.postAsync = runExclusive.buildCb(function (data, postChronologyMark, releaseLock) {
+            var promises = [];
+            var chronologyMarkStartResolveTick;
+            //NOTE: Must be before handlerTrigger call.
+            Promise.resolve().then(function () { return chronologyMarkStartResolveTick = _this.getChronologyMark(); });
+            var _loop_1 = function (handler) {
+                if (!handler.async) {
+                    return "continue";
+                }
+                if (!handler.matcher(data)) {
+                    return "continue";
+                }
+                var handlerTrigger = _this.handlerTriggers.get(handler);
+                if (!handlerTrigger) {
+                    return "continue";
+                }
+                var shouldCallHandlerTrigger = (function () {
+                    var handlerMark = _this.asyncHandlerChronologyMark.get(handler);
+                    if (postChronologyMark > handlerMark) {
+                        return true;
+                    }
+                    var exceptionRange = _this.asyncHandlerChronologyExceptionRange.get(handler);
+                    if (exceptionRange === undefined) {
+                        return false;
+                    }
+                    if (exceptionRange.lowerMark < postChronologyMark &&
+                        postChronologyMark < exceptionRange.upperMark) {
+                        return true;
+                    }
+                    return false;
+                })();
+                if (!shouldCallHandlerTrigger) {
+                    return "continue";
+                }
+                promises.push(handler.promise);
+                handlerTrigger(data);
+            };
+            for (var _i = 0, _a = __spreadArrays(_this.handlers); _i < _a.length; _i++) {
+                var handler = _a[_i];
+                _loop_1(handler);
+            }
+            if (promises.length !== 0) {
+                var handlersDump_1 = __spreadArrays(_this.handlers);
+                Promise.all(promises).then(function () {
+                    for (var _i = 0, _a = _this.handlers; _i < _a.length; _i++) {
+                        var handler = _a[_i];
+                        if (!handler.async) {
+                            continue;
+                        }
+                        if (handlersDump_1.indexOf(handler) >= 0) {
+                            continue;
+                        }
+                        _this.asyncHandlerChronologyExceptionRange.set(handler, {
+                            "lowerMark": postChronologyMark,
+                            "upperMark": chronologyMarkStartResolveTick
+                        });
+                    }
+                    releaseLock();
+                });
+            }
+            else {
+                releaseLock();
+            }
+        });
+        if (!inputs.length)
+            return;
+        var eventEmitter = inputs[0], eventName = inputs[1];
+        var formatter = inputs[2] || this.defaultFormatter;
+        eventEmitter.on(eventName, function () {
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            return _this.post(formatter.apply(null, inputs));
+        });
+    }
+    SyncEventBaseProtected.prototype.defaultFormatter = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return inputs[0];
+    };
+    SyncEventBaseProtected.prototype.enableTrace = function (id, formatter, log //NOTE: we don't want to expose types from node
+    ) {
+        this.traceId = id;
+        if (!!formatter) {
+            this.traceFormatter = formatter;
+        }
+        else {
+            this.traceFormatter = function (data) {
+                try {
+                    return JSON.stringify(data, null, 2);
+                }
+                catch (_a) {
+                    return "" + data;
+                }
+            };
+        }
+        if (!!log) {
+            this.log = log;
+        }
+        else {
+            this.log = function () {
+                var inputs = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    inputs[_i] = arguments[_i];
+                }
+                return console.log.apply(console, inputs);
+            };
+        }
+    };
+    SyncEventBaseProtected.prototype.disableTrace = function () {
+        this.traceId = null;
+    };
+    SyncEventBaseProtected.prototype.addHandler = function (attachParams, implicitAttachParams) {
+        var _this = this;
+        var handler = __assign(__assign(__assign({}, attachParams), implicitAttachParams), { "detach": null, "promise": null });
+        if (handler.async) {
+            this.asyncHandlerChronologyMark.set(handler, this.getChronologyMark());
+        }
+        handler.promise = new Promise(function (resolve, reject) {
+            var timer = undefined;
+            if (typeof handler.timeout === "number") {
+                timer = setTimeout(function () {
+                    timer = undefined;
+                    handler.detach();
+                    reject(new defs_1.EvtError.Timeout(handler.timeout));
+                }, handler.timeout);
+            }
+            handler.detach = function () {
+                var index = _this.handlers.indexOf(handler);
+                if (index < 0)
+                    return false;
+                _this.handlers.splice(index, 1);
+                _this.handlerTriggers["delete"](handler);
+                if (timer) {
+                    clearTimeout(timer);
+                    reject(new defs_1.EvtError.Detached());
+                }
+                return true;
+            };
+            _this.handlerTriggers.set(handler, function (data) {
+                var _a;
+                var callback = handler.callback, once = handler.once;
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = undefined;
+                }
+                if (once)
+                    handler.detach();
+                (_a = callback) === null || _a === void 0 ? void 0 : _a.call(handler.boundTo, data);
+                resolve(data);
+            });
+        });
+        if (handler.prepend) {
+            var i = void 0;
+            for (i = 0; i < this.handlers.length; i++) {
+                if (this.handlers[i].extract) {
+                    continue;
+                }
+                break;
+            }
+            this.handlers.splice(i, 0, handler);
+        }
+        else {
+            this.handlers.push(handler);
+        }
+        return handler;
+    };
+    SyncEventBaseProtected.prototype.trace = function (data) {
+        if (this.traceId === null) {
+            return;
+        }
+        var message = "(" + this.traceId + ") ";
+        var isExtracted = !!this.handlers.find(function (_a) {
+            var extract = _a.extract, matcher = _a.matcher;
+            return extract && matcher(data);
+        });
+        if (isExtracted) {
+            message += "extracted ";
+        }
+        else {
+            var handlerCount = this.handlers
+                .filter(function (_a) {
+                var extract = _a.extract, matcher = _a.matcher;
+                return !extract && matcher(data);
+            })
+                .length;
+            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
+        }
+        this.log(message + this.traceFormatter(data));
+    };
+    /** Returns post count */
+    SyncEventBaseProtected.prototype.post = function (data) {
+        this.trace(data);
+        this.postCount++;
+        //NOTE: Must be before postSync.
+        var postChronologyMark = this.getChronologyMark();
+        var isExtracted = this.postSync(data);
+        if (!isExtracted) {
+            this.postAsync(data, postChronologyMark);
+        }
+        return this.postCount;
+    };
+    /** Return isExtracted */
+    SyncEventBaseProtected.prototype.postSync = function (data) {
+        for (var _i = 0, _a = __spreadArrays(this.handlers); _i < _a.length; _i++) {
+            var handler = _a[_i];
+            var async = handler.async, matcher = handler.matcher, extract = handler.extract;
+            if (async) {
+                continue;
+            }
+            if (!matcher(data)) {
+                continue;
+            }
+            var handlerTrigger = this.handlerTriggers.get(handler);
+            //NOTE: Possible if detached while in the loop.
+            if (!handlerTrigger) {
+                continue;
+            }
+            handlerTrigger(data);
+            if (extract) {
+                return true;
+            }
+        }
+        return false;
+    };
+    SyncEventBaseProtected.prototype.__waitFor = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": true,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attach = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachPrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOnce = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOncePrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.__attachOnceExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    SyncEventBaseProtected.prototype.getHandlers = function () { return __spreadArrays(this.handlers); };
+    /** Detach every handler bound to a given object or all handlers, return the detached handlers */
+    SyncEventBaseProtected.prototype.detach = function (boundTo) {
+        var detachedHandlers = [];
+        for (var _i = 0, _a = __spreadArrays(this.handlers); _i < _a.length; _i++) {
+            var handler = _a[_i];
+            if (boundTo === undefined || handler.boundTo === boundTo) {
+                handler.detach();
+                detachedHandlers.push(handler);
+            }
+        }
+        return detachedHandlers;
+    };
+    return SyncEventBaseProtected;
+}());
+exports.SyncEventBaseProtected = SyncEventBaseProtected;
+
+},{"./defs":45,"minimal-polyfills/dist/lib/Array.prototype.find":47,"minimal-polyfills/dist/lib/Map":48,"run-exclusive":50}],45:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+exports.__esModule = true;
+var setPrototypeOf = require("setprototypeof");
+var EvtError;
+(function (EvtError) {
+    var Timeout = /** @class */ (function (_super) {
+        __extends(Timeout, _super);
+        function Timeout(timeout) {
+            var _newTarget = this.constructor;
+            var _this = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
+            _this.timeout = timeout;
+            setPrototypeOf(_this, _newTarget.prototype);
+            return _this;
+        }
+        return Timeout;
+    }(Error));
+    EvtError.Timeout = Timeout;
+    var Detached = /** @class */ (function (_super) {
+        __extends(Detached, _super);
+        function Detached() {
+            var _newTarget = this.constructor;
+            var _this = _super.call(this, "Evt handler detached") || this;
+            setPrototypeOf(_this, _newTarget.prototype);
+            return _this;
+        }
+        return Detached;
+    }(Error));
+    EvtError.Detached = Detached;
+})(EvtError = exports.EvtError || (exports.EvtError = {}));
+
+},{"setprototypeof":51}],46:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var SyncEvent_1 = require("./SyncEvent");
+exports.SyncEvent = SyncEvent_1.SyncEvent;
+exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
+var defs_1 = require("./defs");
+exports.EvtError = defs_1.EvtError;
+var Observable_1 = require("./Observable");
+exports.ObservableImpl = Observable_1.ObservableImpl;
+
+},{"./Observable":41,"./SyncEvent":42,"./defs":45}],47:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],48:[function(require,module,exports){
+arguments[4][27][0].apply(exports,arguments)
+},{"dup":27}],49:[function(require,module,exports){
+arguments[4][29][0].apply(exports,arguments)
+},{"./Map":48,"dup":29}],50:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"dup":30,"minimal-polyfills/dist/lib/WeakMap":49}],51:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],52:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -5869,7 +6638,7 @@ var WebSocketConnection = /** @class */ (function () {
 exports.WebSocketConnection = WebSocketConnection;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3,"ts-events-extended":86}],42:[function(require,module,exports){
+},{"buffer":3,"ts-events-extended":97}],53:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -6181,7 +6950,7 @@ var Socket = /** @class */ (function () {
 }());
 exports.Socket = Socket;
 
-},{"./IConnection":41,"./api/ApiMessage":43,"./core":47,"./misc":51,"colors":56,"ts-events-extended":86}],43:[function(require,module,exports){
+},{"./IConnection":52,"./api/ApiMessage":54,"./core":58,"./misc":62,"colors":67,"ts-events-extended":97}],54:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -6269,7 +7038,7 @@ var keepAlive;
 })(keepAlive = exports.keepAlive || (exports.keepAlive = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../core":47,"../misc":51,"buffer":3,"transfer-tools":78}],44:[function(require,module,exports){
+},{"../core":58,"../misc":62,"buffer":3,"transfer-tools":89}],55:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -6452,7 +7221,7 @@ exports.Server = Server;
 })(Server = exports.Server || (exports.Server = {}));
 exports.Server = Server;
 
-},{"../misc":51,"./ApiMessage":43,"colors":56,"util":10}],45:[function(require,module,exports){
+},{"../misc":62,"./ApiMessage":54,"colors":67,"util":10}],56:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -6694,7 +7463,7 @@ function getDefaultErrorLogger(options) {
 }
 exports.getDefaultErrorLogger = getDefaultErrorLogger;
 
-},{"../misc":51,"./ApiMessage":43,"setprototypeof":75}],46:[function(require,module,exports){
+},{"../misc":62,"./ApiMessage":54,"setprototypeof":86}],57:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Server_1 = require("./Server");
@@ -6702,7 +7471,7 @@ exports.Server = Server_1.Server;
 var client = require("./client");
 exports.client = client;
 
-},{"./Server":44,"./client":45}],47:[function(require,module,exports){
+},{"./Server":55,"./client":56}],58:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -6786,7 +7555,7 @@ exports.parseSdp = _sdp_.parse;
 exports.stringifySdp = _sdp_.stringify;
 
 }).call(this,require("buffer").Buffer)
-},{"./legacy/sdp":49,"./legacy/sip":50,"buffer":3,"setprototypeof":75}],48:[function(require,module,exports){
+},{"./legacy/sdp":60,"./legacy/sip":61,"buffer":3,"setprototypeof":86}],59:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -6798,7 +7567,7 @@ __export(require("./misc"));
 var api = require("./api");
 exports.api = api;
 
-},{"./Socket":42,"./api":46,"./core":47,"./misc":51}],49:[function(require,module,exports){
+},{"./Socket":53,"./api":57,"./core":58,"./misc":62}],60:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var parsers = {
@@ -6914,7 +7683,7 @@ function stringify(sdp) {
 }
 exports.stringify = stringify;
 
-},{}],50:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 "use strict";
 /** Trim from sip.js project */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -7305,7 +8074,7 @@ function generateBranch() {
 }
 exports.generateBranch = generateBranch;
 
-},{}],51:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __assign = (this && this.__assign) || function () {
@@ -7604,7 +8373,7 @@ exports.buildNextHopPacket = buildNextHopPacket;
 })(buildNextHopPacket = exports.buildNextHopPacket || (exports.buildNextHopPacket = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./core":47,"buffer":3}],52:[function(require,module,exports){
+},{"./core":58,"buffer":3}],63:[function(require,module,exports){
 /*
 
 The MIT License (MIT)
@@ -7817,7 +8586,7 @@ for (var map in colors.maps) {
 
 defineProps(colors, init());
 
-},{"./custom/trap":53,"./custom/zalgo":54,"./maps/america":57,"./maps/rainbow":58,"./maps/random":59,"./maps/zebra":60,"./styles":61,"./system/supports-colors":63,"util":10}],53:[function(require,module,exports){
+},{"./custom/trap":64,"./custom/zalgo":65,"./maps/america":68,"./maps/rainbow":69,"./maps/random":70,"./maps/zebra":71,"./styles":72,"./system/supports-colors":74,"util":10}],64:[function(require,module,exports){
 module['exports'] = function runTheTrap(text, options) {
   var result = '';
   text = text || 'Run the trap, drop the bass';
@@ -7865,7 +8634,7 @@ module['exports'] = function runTheTrap(text, options) {
   return result;
 };
 
-},{}],54:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 // please no
 module['exports'] = function zalgo(text, options) {
   text = text || '   he is here   ';
@@ -7977,7 +8746,7 @@ module['exports'] = function zalgo(text, options) {
 };
 
 
-},{}],55:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 var colors = require('./colors');
 
 module['exports'] = function() {
@@ -8089,7 +8858,7 @@ module['exports'] = function() {
   };
 };
 
-},{"./colors":52}],56:[function(require,module,exports){
+},{"./colors":63}],67:[function(require,module,exports){
 var colors = require('./colors');
 module['exports'] = colors;
 
@@ -8104,7 +8873,7 @@ module['exports'] = colors;
 //
 require('./extendStringPrototype')();
 
-},{"./colors":52,"./extendStringPrototype":55}],57:[function(require,module,exports){
+},{"./colors":63,"./extendStringPrototype":66}],68:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     if (letter === ' ') return letter;
@@ -8116,7 +8885,7 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],58:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 module['exports'] = function(colors) {
   // RoY G BiV
   var rainbowColors = ['red', 'yellow', 'green', 'blue', 'magenta'];
@@ -8130,7 +8899,7 @@ module['exports'] = function(colors) {
 };
 
 
-},{}],59:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 module['exports'] = function(colors) {
   var available = ['underline', 'inverse', 'grey', 'yellow', 'red', 'green',
     'blue', 'white', 'cyan', 'magenta', 'brightYellow', 'brightRed',
@@ -8143,14 +8912,14 @@ module['exports'] = function(colors) {
   };
 };
 
-},{}],60:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 module['exports'] = function(colors) {
   return function(letter, i, exploded) {
     return i % 2 === 0 ? letter : colors.inverse(letter);
   };
 };
 
-},{}],61:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -8247,7 +9016,7 @@ Object.keys(codes).forEach(function(key) {
   style.close = '\u001b[' + val[1] + 'm';
 });
 
-},{}],62:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 (function (process){
 /*
 MIT License
@@ -8286,7 +9055,7 @@ module.exports = function(flag, argv) {
 };
 
 }).call(this,require('_process'))
-},{"_process":8}],63:[function(require,module,exports){
+},{"_process":8}],74:[function(require,module,exports){
 (function (process){
 /*
 The MIT License (MIT)
@@ -8441,13 +9210,13 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./has-flag.js":62,"_process":8,"os":6}],64:[function(require,module,exports){
+},{"./has-flag.js":73,"_process":8,"os":6}],75:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],65:[function(require,module,exports){
+},{"dup":22}],76:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"./implementation":64,"dup":23}],66:[function(require,module,exports){
+},{"./implementation":75,"dup":23}],77:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"function-bind":65}],67:[function(require,module,exports){
+},{"dup":24,"function-bind":76}],78:[function(require,module,exports){
 // A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
@@ -8509,7 +9278,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":68,"./lib/tychei":69,"./lib/xor128":70,"./lib/xor4096":71,"./lib/xorshift7":72,"./lib/xorwow":73,"./seedrandom":74}],68:[function(require,module,exports){
+},{"./lib/alea":79,"./lib/tychei":80,"./lib/xor128":81,"./lib/xor4096":82,"./lib/xorshift7":83,"./lib/xorwow":84,"./seedrandom":85}],79:[function(require,module,exports){
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -8625,7 +9394,7 @@ if (module && module.exports) {
 
 
 
-},{}],69:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 // A Javascript implementaion of the "Tyche-i" prng algorithm by
 // Samuel Neves and Filipe Araujo.
 // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
@@ -8730,7 +9499,7 @@ if (module && module.exports) {
 
 
 
-},{}],70:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 // A Javascript implementaion of the "xor128" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -8813,7 +9582,7 @@ if (module && module.exports) {
 
 
 
-},{}],71:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 // A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
 //
 // This fast non-cryptographic random number generator is designed for
@@ -8961,7 +9730,7 @@ if (module && module.exports) {
   (typeof define) == 'function' && define   // present with an AMD loader
 );
 
-},{}],72:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 // A Javascript implementaion of the "xorshift7" algorithm by
 // François Panneton and Pierre L'ecuyer:
 // "On the Xorgshift Random Number Generators"
@@ -9060,7 +9829,7 @@ if (module && module.exports) {
 );
 
 
-},{}],73:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 // A Javascript implementaion of the "xorwow" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -9148,7 +9917,7 @@ if (module && module.exports) {
 
 
 
-},{}],74:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 /*
 Copyright 2019 David Bau.
 
@@ -9403,13 +10172,13 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":2}],75:[function(require,module,exports){
+},{"crypto":2}],86:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"dup":31}],76:[function(require,module,exports){
+},{"dup":31}],87:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32,"has":66}],77:[function(require,module,exports){
+},{"dup":32,"has":77}],88:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"dup":33,"super-json":76}],78:[function(require,module,exports){
+},{"dup":33,"super-json":87}],89:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var JSON_CUSTOM = require("./JSON_CUSTOM");
@@ -9421,7 +10190,7 @@ exports.stringTransformExt = stringTransformExt;
 var testing = require("./testing");
 exports.testing = testing;
 
-},{"./JSON_CUSTOM":77,"./stringTransform":79,"./stringTransformExt":80,"./testing":81}],79:[function(require,module,exports){
+},{"./JSON_CUSTOM":88,"./stringTransform":90,"./stringTransformExt":91,"./testing":92}],90:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 exports.__esModule = true;
@@ -9483,7 +10252,7 @@ function textSplit(partMaxLength, text) {
 exports.textSplit = textSplit;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3}],80:[function(require,module,exports){
+},{"buffer":3}],91:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var stringTransform_1 = require("./stringTransform");
@@ -9551,7 +10320,7 @@ function b64crop(partMaxLength, text) {
 }
 exports.b64crop = b64crop;
 
-},{"./stringTransform":79}],81:[function(require,module,exports){
+},{"./stringTransform":90}],92:[function(require,module,exports){
 "use strict";
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
@@ -9851,27 +10620,27 @@ exports.genUtf8Str = genUtf8Str;
     ;
 })(genUtf8Str = exports.genUtf8Str || (exports.genUtf8Str = {}));
 
-},{"./stringTransform":79,"seedrandom":67}],82:[function(require,module,exports){
+},{"./stringTransform":90,"seedrandom":78}],93:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"./SyncEventBase":83,"dup":34}],83:[function(require,module,exports){
+},{"./SyncEventBase":94,"dup":34}],94:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":84,"dup":35}],84:[function(require,module,exports){
+},{"./SyncEventBaseProtected":95,"dup":35}],95:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"./defs":85,"dup":36,"minimal-polyfills/dist/lib/Array.prototype.find":87,"minimal-polyfills/dist/lib/Map":88,"run-exclusive":89}],85:[function(require,module,exports){
+},{"./defs":96,"dup":36,"minimal-polyfills/dist/lib/Array.prototype.find":98,"minimal-polyfills/dist/lib/Map":99,"run-exclusive":100}],96:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"dup":37,"setprototypeof":75}],86:[function(require,module,exports){
+},{"dup":37,"setprototypeof":86}],97:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"./SyncEvent":82,"./defs":85,"dup":38}],87:[function(require,module,exports){
+},{"./SyncEvent":93,"./defs":96,"dup":38}],98:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],88:[function(require,module,exports){
+},{"dup":26}],99:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],89:[function(require,module,exports){
+},{"dup":27}],100:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30,"minimal-polyfills/dist/lib/WeakMap":91}],90:[function(require,module,exports){
+},{"dup":30,"minimal-polyfills/dist/lib/WeakMap":102}],101:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],91:[function(require,module,exports){
+},{"dup":27}],102:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"./Map":90,"dup":29}],92:[function(require,module,exports){
+},{"./Map":101,"dup":29}],103:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
@@ -9952,7 +10721,7 @@ var UiButtonBar = /** @class */ (function () {
 }());
 exports.UiButtonBar = UiButtonBar;
 
-},{"../templates/UiButtonBar.html":104,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/node_modules/ts-events-extended":175}],93:[function(require,module,exports){
+},{"../templates/UiButtonBar.html":115,"frontend-shared/dist/lib/loadUiClassHtml":127,"frontend-shared/node_modules/ts-events-extended":46}],104:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -10493,7 +11262,7 @@ function interact_getUserSimContainingNumber(userSims, number) {
     });
 }
 
-},{"../templates/UiController.html":105,"./UiButtonBar":92,"./UiPhonebook":94,"./UiShareSim":95,"./UiSimRow":96,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/dist/lib/toBackend/appEvts":127,"frontend-shared/dist/lib/toBackend/remoteApiCaller/core":130,"frontend-shared/dist/lib/types/userSim":136,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/node_modules/phone-number":40,"frontend-shared/node_modules/ts-events-extended":175}],94:[function(require,module,exports){
+},{"../templates/UiController.html":116,"./UiButtonBar":103,"./UiPhonebook":105,"./UiShareSim":106,"./UiSimRow":107,"frontend-shared/dist/lib/loadUiClassHtml":127,"frontend-shared/dist/lib/toBackend/appEvts":138,"frontend-shared/dist/lib/toBackend/remoteApiCaller/core":141,"frontend-shared/dist/lib/types/userSim":147,"frontend-shared/dist/tools/modal/dialog":159,"frontend-shared/node_modules/phone-number":40,"frontend-shared/node_modules/ts-events-extended":46}],105:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -11129,7 +11898,7 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../templates/UiPhonebook.html":106,"frontend-shared/dist/lib/env":114,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/dist/tools/isAscendingAlphabeticalOrder":145,"frontend-shared/dist/tools/modal":151,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/node_modules/phone-number":40,"frontend-shared/node_modules/ts-events-extended":175,"minimal-polyfills/dist/lib/Map":102}],95:[function(require,module,exports){
+},{"../templates/UiPhonebook.html":117,"frontend-shared/dist/lib/env":125,"frontend-shared/dist/lib/loadUiClassHtml":127,"frontend-shared/dist/tools/isAscendingAlphabeticalOrder":156,"frontend-shared/dist/tools/modal":162,"frontend-shared/dist/tools/modal/dialog":159,"frontend-shared/node_modules/phone-number":40,"frontend-shared/node_modules/ts-events-extended":46,"minimal-polyfills/dist/lib/Map":113}],106:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11367,7 +12136,7 @@ var UiShareSim = /** @class */ (function () {
 }());
 exports.UiShareSim = UiShareSim;
 
-},{"../templates/UiShareSim.html":107,"../templates/UiShareSim.less":108,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/dist/tools/modal":151,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/node_modules/ts-events-extended":175}],96:[function(require,module,exports){
+},{"../templates/UiShareSim.html":118,"../templates/UiShareSim.less":119,"frontend-shared/dist/lib/loadUiClassHtml":127,"frontend-shared/dist/tools/modal":162,"frontend-shared/dist/tools/modal/dialog":159,"frontend-shared/node_modules/ts-events-extended":46}],107:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
@@ -11544,7 +12313,7 @@ var UiSimRow = /** @class */ (function () {
 }());
 exports.UiSimRow = UiSimRow;
 
-},{"../templates/UiSimRow.html":109,"../templates/UiSimRow.less":110,"frontend-shared/dist/lib/loadUiClassHtml":116,"frontend-shared/node_modules/ts-events-extended":175}],97:[function(require,module,exports){
+},{"../templates/UiSimRow.html":120,"../templates/UiSimRow.less":121,"frontend-shared/dist/lib/loadUiClassHtml":127,"frontend-shared/node_modules/ts-events-extended":46}],108:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11619,7 +12388,7 @@ function onLoggedIn() {
                         };
                         return out;
                     })());
-                    interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(appEvts_1.appEvts, remoteCoreApiCaller, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
+                    interactiveAppEvtHandlers_1.registerInteractiveAppEvtHandlers(Promise.resolve(), appEvts_1.appEvts, remoteCoreApiCaller, dialog_1.dialogApi, dialog_1.startMultiDialogProcess, restartApp_1.restartApp);
                     _a = UiController_1.UiController.bind;
                     return [4 /*yield*/, remoteCoreApiCaller.getUsableUserSims()];
                 case 1:
@@ -11714,7 +12483,7 @@ $(document).ready(function () {
     onLoggedIn();
 });
 
-},{"./UiController":93,"frontend-shared/dist/lib/interactiveAppEvtHandlers":115,"frontend-shared/dist/lib/restartApp":126,"frontend-shared/dist/lib/toBackend/appEvts":127,"frontend-shared/dist/lib/toBackend/connection":128,"frontend-shared/dist/lib/toBackend/remoteApiCaller/core":130,"frontend-shared/dist/lib/webApiCaller":138,"frontend-shared/dist/tools/modal/dialog":148,"frontend-shared/dist/tools/polyfills/Object.assign":153,"minimal-polyfills/dist/lib/Array.from":100,"minimal-polyfills/dist/lib/ArrayBuffer.isView":101,"minimal-polyfills/dist/lib/String.prototype.startsWith":103}],98:[function(require,module,exports){
+},{"./UiController":104,"frontend-shared/dist/lib/interactiveAppEvtHandlers":126,"frontend-shared/dist/lib/restartApp":137,"frontend-shared/dist/lib/toBackend/appEvts":138,"frontend-shared/dist/lib/toBackend/connection":139,"frontend-shared/dist/lib/toBackend/remoteApiCaller/core":141,"frontend-shared/dist/lib/webApiCaller":149,"frontend-shared/dist/tools/modal/dialog":159,"frontend-shared/dist/tools/polyfills/Object.assign":164,"minimal-polyfills/dist/lib/Array.from":111,"minimal-polyfills/dist/lib/ArrayBuffer.isView":112,"minimal-polyfills/dist/lib/String.prototype.startsWith":114}],109:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -11753,48 +12522,48 @@ module.exports.byUrl = function(url) {
   }
 };
 
-},{}],99:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 module.exports = require('cssify');
 
-},{"cssify":98}],100:[function(require,module,exports){
+},{"cssify":109}],111:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],101:[function(require,module,exports){
+},{"dup":25}],112:[function(require,module,exports){
 if (!ArrayBuffer["isView"]) {
     ArrayBuffer.isView = function isView(a) {
         return a !== null && typeof (a) === "object" && a["buffer"] instanceof ArrayBuffer;
     };
 }
 
-},{}],102:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],103:[function(require,module,exports){
+},{"dup":27}],114:[function(require,module,exports){
 if (typeof String.prototype.startsWith !== "function") {
     String.prototype.startsWith = function startsWith(str) {
         return this.indexOf(str) === 0;
     };
 }
 
-},{}],104:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 module.exports = "<style>\r\n    .id_UiButtonBar .st_flex {\r\n        display:flex;\r\n        justify-content:space-around;\r\n    }\r\n\r\n    .id_UiButtonBar .st_flex button {\r\n        width: 100%;\r\n        margin: 5px;\r\n    }\r\n\r\n    @media (min-width: 768px) {\r\n        .id_UiButtonBar .id_g1 {\r\n            padding-right: 0px !important;\r\n        }\r\n        .id_UiButtonBar .id_g2 {\r\n            padding-left: 0px !important;\r\n        }\r\n    }\r\n</style>\r\n\r\n<div class=\"id_UiButtonBar col-xs-12 mb10\">\r\n\r\n    <div class=\"row\">\r\n\r\n        <div class=\"id_g1 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-default\">Details</button>\r\n                <button type=\"button\" class=\"btn btn-default\"> <i class=\"fa fa-arrow-left\"></i> </button>\r\n                <button type=\"button\" class=\"btn btn-danger\">Delete</button>\r\n                <button type=\"button\" class=\"btn btn-primary\">Contacts</button>\r\n            </div>\r\n        </div>\r\n        <div class=\"id_g2 col-sm-6 col-xs-12\">\r\n            <div class=\"st_flex\">\r\n                <button type=\"button\" class=\"btn btn-success\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Make SIM usable by other Semasim users\">Share</button>\r\n                <button type=\"button\" class=\"btn btn-default\">Rename</button>\r\n                <button type=\"button\" class=\"btn btn-default\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"Restart the GSM dongle that hold the SIM\">Reboot</button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n    \r\n</div>\r\n";
-},{}],105:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 module.exports = "\r\n<div class=\"id_UiController container-fluid panel-body row\">\r\n\r\n\r\n</div>";
-},{}],106:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 module.exports = "<style>\r\n\r\n    .id_UiPhonebook ul li > div {\r\n        padding: 6px 10px;\r\n        color: #030303;\r\n        border-top: 1px solid #EAEAEA;\r\n        cursor: pointer;\r\n    }\r\n\r\n    .id_UiPhonebook ul li > div .id_number {\r\n        cursor: text;\r\n    }\r\n\r\n    .id_UiPhonebook ul li.selected > div {\r\n        color: #000000;\r\n        background-color: #e9ebeb !important;\r\n    }\r\n\r\n</style>\r\n\r\n<div class=\"templates\">\r\n\r\n    <li>\r\n        <div>\r\n            <span class=\"id_name \"></span>\r\n            <div class=\"pull-right \">\r\n                <span class=\"id_number \"></span>\r\n            </div>\r\n        </div>\r\n    </li>\r\n\r\n</div>\r\n\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiPhonebook modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Sim Phonebook</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body p0\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row\">\r\n\r\n                                <div class=\"col-xd-12 pt15 pr15 pl15 pb5\">\r\n\r\n                                    <div style=\"float: right\">\r\n\r\n                                        <button class=\"id_edit btn btn-primary\" style=\"padding-top: 3px; padding-bottom: 3px; padding-left: 10px; padding-right: 10px;\" type=\"button\">\r\n                                        <!--<button class=\"id_edit btn btn-primary\"  type=\"button\">-->\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-edit_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                            <!--<i class=\"semasim-icon-test-contact\" style=\"font-size: 17px;\"></i>-->\r\n                                        </button>\r\n                                        <button class=\"id_delete btn btn-danger\" type=\"button\">\r\n                                            <i class=\"glyphicon glyphicon-trash\"></i>\r\n                                            <span></span>\r\n                                            <!--<i class=\"semasim-icon-rubbish-bin\" style=\"font-size: 17px;\"></i>-->\r\n\r\n                                        </button>\r\n                                        <button class=\"id_createContact btn btn-success btn-sm\" type=\"button\" >\r\n                                            <i>\r\n                                                <svg class=\"custom-icon\">\r\n                                                    <use xlink:href=\"#icon-add_contact\"></use>\r\n                                                </svg>\r\n                                            </i>\r\n                                            <!--<i class=\"semasim-icon-contact\" style=\"font-size: 17px;\"></i>-->\r\n                                        </button>\r\n\r\n                                    </div>\r\n                                    <div style=\"overflow: hidden; padding-right: .5em;\">\r\n                                        <input class=\"form-control\" type=\"text\" name=\"search\" placeholder=\"Search\"  style=\"width: 100%;\"/>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                                <div class=\"col-xs-12 pb15 bl15 pr15\">\r\n\r\n                                    <ul class=\"nav \">\r\n                                    </ul>\r\n\r\n                                </div>\r\n\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n";
-},{}],107:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 module.exports = "<style>\r\n</style>\r\n<!-- Panel Modal -->\r\n<div class=\"id_UiShareSim modal\" tabindex=\"-1\" role=\"dialog\">\r\n    <div class=\"modal-dialog\">\r\n        <div class=\"modal-content\">\r\n            <div class=\"modal-body p0\">\r\n                <div class=\"panel panel-default mb0\">\r\n                    <!-- Start .panel -->\r\n                    <div class=\"panel-heading\">\r\n                        <h4 class=\"panel-title\">Share SIM card</h4>\r\n                        <div class=\"panel-controls panel-controls-right\">\r\n                            <a href=\"#\" class=\"panel-close id_close\">\r\n                                <i class=\"fa fa-times\"></i>\r\n                            </a>\r\n                        </div>\r\n\r\n                    </div>\r\n                    <div class=\"panel-body\">\r\n                        <div class=\"container-fluid\">\r\n\r\n                            <div class=\"row _toHideIfNotShared\">\r\n\r\n                                <div class=\"col-md-12\">\r\n\r\n                                    <label class=\"pt5\">Allowed users:</label>\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"id_stopSharing btn btn-danger btn-sm\" type=\"button\">\r\n                                            <span>Stop sharing</span>\r\n                                        </button>\r\n                                    </div>\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n                            <div class=\"id_list row b mt10 _toHideIfNotShared\">\r\n\r\n                            </div>\r\n\r\n                            <div class=\"row mt10\">\r\n\r\n                                <label class=\"col-md-12 pt5\">Invite users:</label>\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10\">\r\n                                    <input type=\"text\" class=\"id_emails\" name=\"email\">\r\n                                </div>\r\n\r\n\r\n                                <div class=\"col-md-12 pl0 pr0 mt10 id_message\">\r\n                                    <textarea class=\"form-control\" rows=\"2\">I would like to share SIM Free (06 34 39 39 99 ) with you.</textarea>\r\n                                    <i class=\"fa fa-comments textarea-icon s16\"></i>\r\n                                </div>\r\n\r\n                                <div class=\"col-md-12 mt10\">\r\n\r\n                                    <div class=\"pull-right\">\r\n                                        <button class=\"btn btn-success id_submit\" type=\"button\">\r\n                                            <span>Submit share request</span>\r\n                                        </button>\r\n                                    </div>\r\n\r\n                                </div>\r\n\r\n                            </div>\r\n\r\n\r\n                        </div>\r\n\r\n\r\n                    </div>\r\n                </div>\r\n                <!-- End .panel -->\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n<div class=\"templates\">\r\n\r\n    <div class=\"id_row col-md-12 pt10 pb10\">\r\n        <i class=\"glyphicon glyphicon-user mr10\"></i>\r\n        <span class=\"mr10 strong id_email\"></span>\r\n        <span class=\"mr10 text-nowrap id_isConfirmed\"></span>\r\n    </div>\r\n\r\n</div>";
-},{}],108:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 var css = ".id_UiShareSim .id_row {\n  cursor: pointer;\n}\n.id_UiShareSim .selected {\n  background-color: #e2e0db;\n}\n.id_UiShareSim .id_message textarea {\n  padding-left: 32px;\n}\n.id_UiShareSim .id_message i {\n  position: absolute;\n  top: 7px;\n  left: 8px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":99}],109:[function(require,module,exports){
+},{"lessify":110}],120:[function(require,module,exports){
 module.exports = "<div class=\"id_UiSimRow col-xs-12\">\r\n    <div class=\"id_row  bb p10\">\r\n        <i class=\"semasim-icon-sim\" style=\"font-size: 25px;\"></i>\r\n        <span class=\"id_simId strong mr10\">---My sim1 (0654996385)---</span>\r\n        <span class=\"id_connectivity mr10\">---Online---</span>\r\n        <span class=\"mr10\">\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"NULL\">NULL</i>\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"VERY WEAK\">VERY WEAK</i>\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"WEAK\">WEAK</i>\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"GOOD\">GOOD</i>\r\n            <i class=\"signal_ico glyphicon glyphicon-signal\" data-strength=\"EXCELLENT\">EXCELLENT</i>\r\n        </span>\r\n        <span class=\"id_ownership hidden-xs\">---Owned by: ...---</span>\r\n    </div>\r\n    <div class=\"id_details pr0 pl0 pt15\">\r\n        <p>\r\n            <span class=\"strong p10\">Physical location:</span>\r\n            <span class=\"id_gw_location\">---Montpellier, Languedoc Rousillong, FR ( 82.302.102.2 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Owner:</span>\r\n            <span class=\"id_owner\">---foo@gmail.com---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Phone number:</span>\r\n            <span class=\"id_number\">---0636786385 ( +33636786385 )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Service provider:</span>\r\n            <span class=\"id_serviceProvider\">---Free Mobile ( France )---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle model:</span>\r\n            <span class=\"id_dongle_model\">---Huawei E160X</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle firmware:</span>\r\n            <span class=\"id_dongle_firm\">---10.12222---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle imei:</span>\r\n            <span class=\"id_dongle_imei\">---111111111111111---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">Dongle voice support:</span>\r\n            <span class=\"id_voice_support\">---yes---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM IMSI:</span>\r\n            <span class=\"id_imsi\">---332344242344---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM ICCID:</span>\r\n            <span class=\"id_iccid\">---2343334340342343---</span>\r\n        </p>\r\n        <p>\r\n            <span class=\"strong p10\">SIM Phonebook memory usage:</span>\r\n            <span class=\"id_phonebook\">--12/123---</span>\r\n        </p>\r\n    </div>\r\n</div>";
-},{}],110:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 var css = ".id_UiSimRow .id_row {\n  cursor: pointer;\n}\n.id_UiSimRow .selected {\n  background-color: #e2e0db;\n}\n.id_UiSimRow .offline {\n  opacity: 0.6;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":99}],111:[function(require,module,exports){
+},{"lessify":110}],122:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"semasim-gateway/dist/web_api_declaration":176}],112:[function(require,module,exports){
+},{"semasim-gateway/dist/web_api_declaration":180}],123:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
@@ -11908,7 +12677,7 @@ var rsa;
 })(rsa = exports.rsa || (exports.rsa = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../env":114,"../nativeModules/hostCryptoLib":122,"buffer":3,"crypto-lib":16}],113:[function(require,module,exports){
+},{"../env":125,"../nativeModules/hostCryptoLib":133,"buffer":3,"crypto-lib":16}],124:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Defined at ejs building in templates/head_common.ejs
@@ -11928,7 +12697,7 @@ var default_ = typeof window !== "undefined" ? ({
 });
 exports.default = default_;
 
-},{}],114:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 "use strict";
 /*
 import { jsRuntimeEnv } from "./jsRuntimeEnv";
@@ -11948,7 +12717,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.env = impl_1.default;
 
-},{"./impl":113}],115:[function(require,module,exports){
+},{"./impl":124}],126:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -11988,10 +12757,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("./env");
-function registerInteractiveAppEvtHandlers(appEvts, remoteCoreApiCaller, dialogApi, startMultiDialogProcess, restartApp) {
+function registerInteractiveAppEvtHandlers(prReadyToInteract, appEvts, remoteCoreApiCaller, dialogApi, startMultiDialogProcess, restartApp) {
     var _this = this;
     var interactiveProcedures = getInteractiveProcedures(remoteCoreApiCaller);
-    appEvts.evtDongleOnLan.attach(function (data) { return __awaiter(_this, void 0, void 0, function () {
+    appEvts.evtDongleOnLan.attach(function (data) { return prReadyToInteract.then(function () { return __awaiter(_this, void 0, void 0, function () {
         var _a, dialogApi, endMultiDialogProcess;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -12005,8 +12774,8 @@ function registerInteractiveAppEvtHandlers(appEvts, remoteCoreApiCaller, dialogA
                     return [2 /*return*/];
             }
         });
-    }); });
-    appEvts.evtSimSharingRequest.attach(function (userSim) { return __awaiter(_this, void 0, void 0, function () {
+    }); }); });
+    appEvts.evtSimSharingRequest.attach(function (userSim) { return prReadyToInteract.then(function () { return __awaiter(_this, void 0, void 0, function () {
         var _a, endMultiDialogProcess, dialogApi;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -12019,18 +12788,20 @@ function registerInteractiveAppEvtHandlers(appEvts, remoteCoreApiCaller, dialogA
                     return [2 /*return*/];
             }
         });
-    }); });
+    }); }); });
     appEvts.evtSharingRequestResponse.attach(function (_a) {
         var userSim = _a.userSim, email = _a.email, isAccepted = _a.isAccepted;
-        return dialogApi.create("alert", { "message": email + " " + (isAccepted ? "accepted" : "rejected") + " sharing request for " + userSim.friendlyName });
+        return prReadyToInteract.then(function () { return dialogApi.create("alert", { "message": email + " " + (isAccepted ? "accepted" : "rejected") + " sharing request for " + userSim.friendlyName }); });
     });
     appEvts.evtOtherSimUserUnregisteredSim.attach(function (_a) {
         var userSim = _a.userSim, email = _a.email;
-        return dialogApi.create("alert", { "message": email + " no longer share " + userSim.friendlyName });
+        return prReadyToInteract.then(function () { return dialogApi.create("alert", { "message": email + " no longer share " + userSim.friendlyName }); });
     });
-    appEvts.evtOpenElsewhere.attach(function () { return dialogApi.create("alert", {
-        "message": "You are connected somewhere else",
-        "callback": function () { return restartApp("Connected somewhere else with uaInstanceId"); }
+    appEvts.evtOpenElsewhere.attach(function () { return prReadyToInteract.then(function () {
+        return dialogApi.create("alert", {
+            "message": "You are connected somewhere else",
+            "callback": function () { return restartApp("Connected somewhere else with uaInstanceId"); }
+        });
     }); });
 }
 exports.registerInteractiveAppEvtHandlers = registerInteractiveAppEvtHandlers;
@@ -12266,7 +13037,7 @@ function getInteractiveProcedures(remoteCoreApiCaller) {
     };
 }
 
-},{"./env":114}],116:[function(require,module,exports){
+},{"./env":125}],127:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -12280,7 +13051,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],117:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -12396,7 +13167,7 @@ var AuthenticatedSessionDescriptorSharedData;
 })(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./localStorageApi":121,"buffer":3,"ts-events-extended":175}],118:[function(require,module,exports){
+},{"./localStorageApi":132,"buffer":3,"ts-events-extended":46}],129:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12504,7 +13275,7 @@ var Credentials;
     Credentials.set = set;
 })(Credentials = exports.Credentials || (exports.Credentials = {}));
 
-},{"./localStorageApi":121}],119:[function(require,module,exports){
+},{"./localStorageApi":132}],130:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12597,12 +13368,12 @@ function remove() {
 }
 exports.remove = remove;
 
-},{"./localStorageApi":121}],120:[function(require,module,exports){
+},{"./localStorageApi":132}],131:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = localStorage;
 
-},{}],121:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12667,7 +13438,7 @@ function removeItem(key) {
 }
 exports.removeItem = removeItem;
 
-},{"./asyncOrSyncLocalStorage":120}],122:[function(require,module,exports){
+},{"./asyncOrSyncLocalStorage":131}],133:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12786,7 +13557,7 @@ function rsaGenerateKeys(seedB64, keysLengthBytes) {
 }
 exports.rsaGenerateKeys = rsaGenerateKeys;
 
-},{"ts-events-extended":175}],123:[function(require,module,exports){
+},{"ts-events-extended":46}],134:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -12801,13 +13572,13 @@ var api = {
 };
 exports.getApi = function () { return Promise.resolve(api); };
 
-},{"ts-events-extended":175}],124:[function(require,module,exports){
+},{"ts-events-extended":46}],135:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.getApi = impl_1.getApi;
 
-},{"./impl":123}],125:[function(require,module,exports){
+},{"./impl":134}],136:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("../env");
@@ -12820,8 +13591,55 @@ var default_ = function (reason) {
 };
 exports.default = default_;
 
-},{"../env":114}],126:[function(require,module,exports){
+},{"../env":125}],137:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -12843,19 +13661,57 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
 var impl = require("./impl");
-exports.evtAppAboutToRestart = new ts_events_extended_1.VoidSyncEvent();
+var beforeRestartActions = [];
+function registerActionToPerformBeforeAppRestart(action) {
+    beforeRestartActions.push(action);
+}
+exports.registerActionToPerformBeforeAppRestart = registerActionToPerformBeforeAppRestart;
+function matchPromise(obj) {
+    return (obj instanceof Object &&
+        typeof obj.then === "function");
+}
 exports.restartApp = function () {
     var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         args[_i] = arguments[_i];
     }
-    exports.evtAppAboutToRestart.post();
-    return impl.default.apply(impl, __spread(args));
+    return __awaiter(void 0, void 0, void 0, function () {
+        var tasks, beforeRestartActions_1, beforeRestartActions_1_1, action, prOrVoid;
+        var e_1, _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    tasks = [];
+                    try {
+                        for (beforeRestartActions_1 = __values(beforeRestartActions), beforeRestartActions_1_1 = beforeRestartActions_1.next(); !beforeRestartActions_1_1.done; beforeRestartActions_1_1 = beforeRestartActions_1.next()) {
+                            action = beforeRestartActions_1_1.value;
+                            prOrVoid = action();
+                            if (!matchPromise(prOrVoid)) {
+                                continue;
+                            }
+                            tasks.push(prOrVoid);
+                        }
+                    }
+                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    finally {
+                        try {
+                            if (beforeRestartActions_1_1 && !beforeRestartActions_1_1.done && (_a = beforeRestartActions_1.return)) _a.call(beforeRestartActions_1);
+                        }
+                        finally { if (e_1) throw e_1.error; }
+                    }
+                    if (!(tasks.length !== 0)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, Promise.all(tasks)];
+                case 1:
+                    _b.sent();
+                    _b.label = 2;
+                case 2: return [2 /*return*/, impl.default.apply(impl, __spread(args))];
+            }
+        });
+    });
 };
 
-},{"./impl":125,"ts-events-extended":175}],127:[function(require,module,exports){
+},{"./impl":136}],138:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12916,15 +13772,16 @@ var appEvts;
     appEvts.evtSharingRequestResponse = new ts_events_extended_1.SyncEvent();
     appEvts.evtOtherSimUserUnregisteredSim = new ts_events_extended_1.SyncEvent();
     appEvts.evtOpenElsewhere = new ts_events_extended_1.VoidSyncEvent();
-    var rtcIceEServer;
-    (function (rtcIceEServer) {
-        rtcIceEServer.evt = new ts_events_extended_1.SyncEvent();
-        rtcIceEServer.getCurrent = (function () {
+    appEvts.evt = new ts_events_extended_1.SyncEvent();
+    var rtcIceServer;
+    (function (rtcIceServer_1) {
+        rtcIceServer_1.evt = new ts_events_extended_1.SyncEvent();
+        rtcIceServer_1.getCurrent = (function () {
             var current = undefined;
             var evtUpdated = new ts_events_extended_1.VoidSyncEvent();
-            rtcIceEServer.evt.attach(function (_a) {
-                var rtcIceServer = _a.rtcIceServer, socket = _a.socket;
-                socket.evtClose.attachOnce(function () { return current = undefined; });
+            rtcIceServer_1.evt.attach(function (_a) {
+                var rtcIceServer = _a.rtcIceServer, attachOnNoLongerValid = _a.attachOnNoLongerValid;
+                attachOnNoLongerValid(function () { return current = undefined; });
                 current = rtcIceServer;
                 evtUpdated.post();
             });
@@ -12945,7 +13802,7 @@ var appEvts;
                 });
             };
         })();
-    })(rtcIceEServer = appEvts.rtcIceEServer || (appEvts.rtcIceEServer = {}));
+    })(rtcIceServer = appEvts.rtcIceServer || (appEvts.rtcIceServer = {}));
     appEvts.evtWdActionFromOtherUa = new ts_events_extended_1.SyncEvent();
 })(appEvts = exports.appEvts || (exports.appEvts = {}));
 /*
@@ -13002,7 +13859,7 @@ export type HelperType<K extends keyof TypeofImport> = HelperType2<Pick<TypeofIm
 }
 */
 
-},{"ts-events-extended":175}],128:[function(require,module,exports){
+},{"ts-events-extended":46}],139:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13240,7 +14097,7 @@ function get() {
 }
 exports.get = get;
 
-},{"../../tools/modal/dialog":148,"../../tools/urlGetParameters":154,"../env":114,"../localStorage/AuthenticatedSessionDescriptorSharedData":117,"../networkStateMonitoring":124,"../restartApp":126,"../tryLoginFromStoredCredentials":134,"./appEvts":127,"./localApiHandlers":129,"ts-events-extended":175,"ts-sip":48}],129:[function(require,module,exports){
+},{"../../tools/modal/dialog":159,"../../tools/urlGetParameters":165,"../env":125,"../localStorage/AuthenticatedSessionDescriptorSharedData":128,"../networkStateMonitoring":135,"../restartApp":137,"../tryLoginFromStoredCredentials":145,"./appEvts":138,"./localApiHandlers":140,"ts-events-extended":46,"ts-sip":59}],140:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13741,7 +14598,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     var methodName = apiDeclaration.notifyIceServer.methodName;
     var handler = {
         "handler": function (params, fromSocket) {
-            appEvts_1.appEvts.rtcIceEServer.evt.post({
+            appEvts_1.appEvts.rtcIceServer.evt.post({
                 "rtcIceServer": params !== undefined ? params :
                     ({
                         "urls": [
@@ -13751,7 +14608,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
                             "stun:stun4.l.google.com:19302"
                         ]
                     }),
-                "socket": fromSocket
+                "attachOnNoLongerValid": function (onNoLongerValid) { return fromSocket.evtClose.attachOnce(function () { return onNoLongerValid(); }); }
             });
             return Promise.resolve(undefined);
         }
@@ -13769,7 +14626,7 @@ var evtUsableDongle = new ts_events_extended_1.SyncEvent();
     exports.handlers[methodName] = handler;
 }
 
-},{"../../sip_api_declarations/uaToBackend":141,"../restartApp":126,"./appEvts":127,"./remoteApiCaller":131,"chan-dongle-extended-client/dist/lib/types":156,"ts-events-extended":175}],130:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":152,"../restartApp":137,"./appEvts":138,"./remoteApiCaller":142,"chan-dongle-extended-client/dist/lib/types":167,"ts-events-extended":46}],141:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -14252,7 +15109,7 @@ exports.shouldAppendPromotionalMessage = (function () {
     };
 })();
 
-},{"../../../sip_api_declarations/backendToUa":140,"../../restartApp":126,"../appEvts":127,"../connection":128,"./sendRequest":132}],131:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":151,"../../restartApp":137,"../appEvts":138,"../connection":139,"./sendRequest":143}],142:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var core = require("./core");
@@ -14265,7 +15122,7 @@ var getWdApiCallerForSpecificSimFactory = function (encryptorDecryptor, userEmai
 };
 exports.getWdApiCallerForSpecificSimFactory = getWdApiCallerForSpecificSimFactory;
 
-},{"../appEvts":127,"./core":130,"./sendRequest":132,"./webphoneData":133}],132:[function(require,module,exports){
+},{"../appEvts":138,"./core":141,"./sendRequest":143,"./webphoneData":144}],143:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -14333,7 +15190,7 @@ function sendRequest(methodName, params) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../restartApp":126,"../connection":128,"ts-sip":48}],133:[function(require,module,exports){
+},{"../../restartApp":137,"../connection":139,"ts-sip":59}],144:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -15282,7 +16139,7 @@ evtRequestProcessedByBackend) {
     };
 }
 
-},{"../../../sip_api_declarations/backendToUa":140,"../../../tools/assert":142,"../../../tools/createObjectWithGivenRef":143,"../../../tools/id":144,"../../crypto/cryptoLibProxy":112,"../../types/webphoneData/logic":137,"md5":163,"ts-events-extended":175}],134:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":151,"../../../tools/assert":153,"../../../tools/createObjectWithGivenRef":154,"../../../tools/id":155,"../../crypto/cryptoLibProxy":123,"../../types/webphoneData/logic":148,"md5":174,"ts-events-extended":46}],145:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -15406,12 +16263,12 @@ function tryLoginFromStoredCredentials() {
 }
 exports.tryLoginFromStoredCredentials = tryLoginFromStoredCredentials;
 
-},{"./env":114,"./localStorage/Credentials":118,"./webApiCaller":138}],135:[function(require,module,exports){
+},{"./env":125,"./localStorage/Credentials":129,"./webApiCaller":149}],146:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectSidHttpHeaderName = "x-connect-sid";
 
-},{}],136:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var UserSim;
@@ -15453,7 +16310,7 @@ var UserSim;
     })(Usable = UserSim.Usable || (UserSim.Usable = {}));
 })(UserSim = exports.UserSim || (exports.UserSim = {}));
 
-},{}],137:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -15741,7 +16598,7 @@ function getUnreadMessagesCount(wdChat) {
 }
 exports.getUnreadMessagesCount = getUnreadMessagesCount;
 
-},{"../../../tools/isAscendingAlphabeticalOrder":145,"crypto-lib/dist/async/serializer":17}],138:[function(require,module,exports){
+},{"../../../tools/isAscendingAlphabeticalOrder":156,"crypto-lib/dist/async/serializer":17}],149:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -16134,7 +16991,7 @@ exports.getOrders = (function () {
     };
 })();
 
-},{"../../web_api_declaration":155,"../env":114,"../localStorage/AuthenticatedSessionDescriptorSharedData":117,"../localStorage/Credentials":118,"../localStorage/declaredPushNotificationToken":119,"../networkStateMonitoring":124,"../restartApp":126,"./sendRequest":139,"ts-events-extended":175}],139:[function(require,module,exports){
+},{"../../web_api_declaration":166,"../env":125,"../localStorage/AuthenticatedSessionDescriptorSharedData":128,"../localStorage/Credentials":129,"../localStorage/declaredPushNotificationToken":130,"../networkStateMonitoring":135,"../restartApp":137,"./sendRequest":150,"ts-events-extended":46}],150:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -16253,7 +17110,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":111,"../env":114,"../types/connectSidHttpHeaderName":135,"transfer-tools/dist/lib/JSON_CUSTOM":170}],140:[function(require,module,exports){
+},{"../../gateway/webApiPath":122,"../env":125,"../types/connectSidHttpHeaderName":146,"transfer-tools/dist/lib/JSON_CUSTOM":179}],151:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var getUsableUserSims;
@@ -16352,7 +17209,7 @@ var wd_notifyStatusReportReceived;
     wd_notifyStatusReportReceived.methodName = "wd_notifyStatusReportReceived";
 })(wd_notifyStatusReportReceived = exports.wd_notifyStatusReportReceived || (exports.wd_notifyStatusReportReceived = {}));
 
-},{}],141:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var notifySimOffline;
@@ -16421,7 +17278,7 @@ var wd_notifyActionFromOtherUa;
     wd_notifyActionFromOtherUa.methodName = "wd_notifyActionFromOtherUa";
 })(wd_notifyActionFromOtherUa = exports.wd_notifyActionFromOtherUa || (exports.wd_notifyActionFromOtherUa = {}));
 
-},{}],142:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -16501,7 +17358,7 @@ exports.assert = assert;
 })();
 */
 
-},{}],143:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** changeRef(ref, o) === ref */
@@ -16512,13 +17369,13 @@ function createObjectWithGivenRef(ref, o) {
 }
 exports.createObjectWithGivenRef = createObjectWithGivenRef;
 
-},{}],144:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Return the value passed as argument, helper type for avoiding declaring variable */
 exports.id = function (o) { return o; };
 
-},{}],145:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function isAscendingAlphabeticalOrder(a, b) {
@@ -16542,7 +17399,7 @@ function isAscendingAlphabeticalOrder(a, b) {
 exports.isAscendingAlphabeticalOrder = isAscendingAlphabeticalOrder;
 exports.isForWeb = true;
 
-},{}],146:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ts_events_extended_1 = require("ts-events-extended");
@@ -16575,7 +17432,7 @@ function createGenericProxyForBootstrapModal($initializedModalDiv) {
 }
 exports.createGenericProxyForBootstrapModal = createGenericProxyForBootstrapModal;
 
-},{"ts-events-extended":175}],147:[function(require,module,exports){
+},{"ts-events-extended":46}],158:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
@@ -16609,7 +17466,7 @@ var loading;
 })(loading || (loading = {}));
 exports.getApi = function () { return customImplementationOfApi || bootboxBasedImplementationOfBaseApi; };
 
-},{"../createGenericProxyForBootstrapModal":146}],148:[function(require,module,exports){
+},{"../createGenericProxyForBootstrapModal":157}],159:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -16832,11 +17689,11 @@ exports.dialogApi = {
     }
 };
 
-},{"../stack":152,"./getApi":147,"./types":149,"run-exclusive":167}],149:[function(require,module,exports){
+},{"../stack":163,"./getApi":158,"./types":160,"run-exclusive":177}],160:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],150:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("./createGenericProxyForBootstrapModal");
@@ -16854,7 +17711,7 @@ var bootstrapBasedImplementationOfApi = {
 };
 exports.getApi = function () { return customImplementationOfApi || bootstrapBasedImplementationOfApi; };
 
-},{"./createGenericProxyForBootstrapModal":146}],151:[function(require,module,exports){
+},{"./createGenericProxyForBootstrapModal":157}],162:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -16878,7 +17735,7 @@ function createModal(structure, options) {
 }
 exports.createModal = createModal;
 
-},{"./getApi":150,"./stack":152}],152:[function(require,module,exports){
+},{"./getApi":161,"./stack":163}],163:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -17003,7 +17860,7 @@ function add(modal) {
 }
 exports.add = add;
 
-},{}],153:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 if (typeof Object.assign !== 'function') {
     // Must be writable: true, enumerable: false, configurable: true
     Object.defineProperty(Object, "assign", {
@@ -17031,7 +17888,7 @@ if (typeof Object.assign !== 'function') {
     });
 }
 
-},{}],154:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function buildUrl(urlPath, params) {
@@ -17057,7 +17914,7 @@ function parseUrl(url) {
 }
 exports.parseUrl = parseUrl;
 
-},{}],155:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
@@ -17125,7 +17982,7 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],156:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -17146,7 +18003,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],157:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 var charenc = {
   // UTF-8 encoding
   utf8: {
@@ -17181,7 +18038,7 @@ var charenc = {
 
 module.exports = charenc;
 
-},{}],158:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 (function() {
   var base64map
       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
@@ -17279,13 +18136,13 @@ module.exports = charenc;
   module.exports = crypt;
 })();
 
-},{}],159:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],160:[function(require,module,exports){
+},{"dup":22}],171:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"./implementation":159,"dup":23}],161:[function(require,module,exports){
+},{"./implementation":170,"dup":23}],172:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"dup":24,"function-bind":160}],162:[function(require,module,exports){
+},{"dup":24,"function-bind":171}],173:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -17308,7 +18165,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],163:[function(require,module,exports){
+},{}],174:[function(require,module,exports){
 (function(){
   var crypt = require('crypt'),
       utf8 = require('charenc').utf8,
@@ -17470,31 +18327,17 @@ function isSlowBuffer (obj) {
 
 })();
 
-},{"charenc":157,"crypt":158,"is-buffer":162}],164:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],165:[function(require,module,exports){
+},{"charenc":168,"crypt":169,"is-buffer":173}],175:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],166:[function(require,module,exports){
+},{"dup":27}],176:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"./Map":165,"dup":29}],167:[function(require,module,exports){
+},{"./Map":175,"dup":29}],177:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30,"minimal-polyfills/dist/lib/WeakMap":166}],168:[function(require,module,exports){
-arguments[4][31][0].apply(exports,arguments)
-},{"dup":31}],169:[function(require,module,exports){
+},{"dup":30,"minimal-polyfills/dist/lib/WeakMap":176}],178:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32,"has":161}],170:[function(require,module,exports){
+},{"dup":32,"has":172}],179:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"dup":33,"super-json":169}],171:[function(require,module,exports){
-arguments[4][34][0].apply(exports,arguments)
-},{"./SyncEventBase":172,"dup":34}],172:[function(require,module,exports){
-arguments[4][35][0].apply(exports,arguments)
-},{"./SyncEventBaseProtected":173,"dup":35}],173:[function(require,module,exports){
-arguments[4][36][0].apply(exports,arguments)
-},{"./defs":174,"dup":36,"minimal-polyfills/dist/lib/Array.prototype.find":164,"minimal-polyfills/dist/lib/Map":165,"run-exclusive":167}],174:[function(require,module,exports){
-arguments[4][37][0].apply(exports,arguments)
-},{"dup":37,"setprototypeof":168}],175:[function(require,module,exports){
-arguments[4][38][0].apply(exports,arguments)
-},{"./SyncEvent":171,"./defs":174,"dup":38}],176:[function(require,module,exports){
+},{"dup":33,"super-json":178}],180:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
@@ -17503,4 +18346,4 @@ var version;
     version.methodName = "version";
 })(version = exports.version || (exports.version = {}));
 
-},{}]},{},[97]);
+},{}]},{},[108]);
