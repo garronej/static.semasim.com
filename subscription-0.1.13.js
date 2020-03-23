@@ -298,6 +298,12 @@ function from (value, encodingOrOffset, length) {
     return fromArrayBuffer(value, encodingOrOffset, length)
   }
 
+  if (typeof SharedArrayBuffer !== 'undefined' &&
+      (isInstance(value, SharedArrayBuffer) ||
+      (value && isInstance(value.buffer, SharedArrayBuffer)))) {
+    return fromArrayBuffer(value, encodingOrOffset, length)
+  }
+
   if (typeof value === 'number') {
     throw new TypeError(
       'The "value" argument must not be of type number. Received type number'
@@ -2043,1185 +2049,6 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 },{}],4:[function(require,module,exports){
 "use strict";
-exports.__esModule = true;
-var SyncEvent_1 = require("./SyncEvent");
-var ObservableImpl = /** @class */ (function () {
-    function ObservableImpl(value, areSame) {
-        if (areSame === void 0) { areSame = function (oldValue, newValue) { return oldValue === newValue; }; }
-        this.value = value;
-        this.areSame = areSame;
-        this.evtChange = new SyncEvent_1.SyncEvent();
-    }
-    ObservableImpl.prototype.onPotentialChange = function (newValue) {
-        if (this.areSame(this.value, newValue)) {
-            return;
-        }
-        this.value = newValue;
-        this.evtChange.post(this.value);
-    };
-    return ObservableImpl;
-}());
-exports.ObservableImpl = ObservableImpl;
-
-},{"./SyncEvent":5}],5:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-exports.__esModule = true;
-var SyncEventBase_1 = require("./SyncEventBase");
-var SyncEvent = /** @class */ (function (_super) {
-    __extends(SyncEvent, _super);
-    function SyncEvent() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.evtAttach = new SyncEventBase_1.SyncEventBase();
-        return _this;
-    }
-    SyncEvent.prototype.addHandler = function (attachParams, implicitAttachParams) {
-        var handler = _super.prototype.addHandler.call(this, attachParams, implicitAttachParams);
-        this.evtAttach.post(handler);
-        return handler;
-    };
-    /** Wait until an handler that match the event data have been attached
-     * return a promise that resolve with post count */
-    SyncEvent.prototype.postOnceMatched = function (eventData) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!!this.getHandlers().find(function (handler) { return handler.matcher(eventData); })) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.evtAttach.waitFor(function (handler) { return handler.matcher(eventData); })];
-                    case 1:
-                        _a.sent();
-                        _a.label = 2;
-                    case 2: return [2 /*return*/, this.post(eventData)];
-                }
-            });
-        });
-    };
-    return SyncEvent;
-}(SyncEventBase_1.SyncEventBase));
-exports.SyncEvent = SyncEvent;
-var VoidSyncEvent = /** @class */ (function (_super) {
-    __extends(VoidSyncEvent, _super);
-    function VoidSyncEvent() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    VoidSyncEvent.prototype.post = function () {
-        return _super.prototype.post.call(this, undefined);
-    };
-    VoidSyncEvent.prototype.postOnceMatched = function () {
-        return _super.prototype.postOnceMatched.call(this, undefined);
-    };
-    return VoidSyncEvent;
-}(SyncEvent));
-exports.VoidSyncEvent = VoidSyncEvent;
-
-},{"./SyncEventBase":6}],6:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-exports.__esModule = true;
-var SyncEventBaseProtected_1 = require("./SyncEventBaseProtected");
-function matchPostable(o) {
-    return o instanceof Object && typeof o.post === "function";
-}
-function isCallable(o) {
-    if (typeof o !== "function")
-        return false;
-    var prototype = o["prototype"];
-    if (!prototype)
-        return true;
-    var methods = Object.getOwnPropertyNames(prototype);
-    if (methods.length !== 1)
-        return false;
-    var name = o.name;
-    if (!name)
-        return true;
-    if (name[0].toUpperCase() === name[0])
-        return false;
-    return true;
-}
-/** SyncEvent without evtAttach property */
-var SyncEventBase = /** @class */ (function (_super) {
-    __extends(SyncEventBase, _super);
-    function SyncEventBase() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.defaultParams = {
-            "matcher": function matchAll() { return true; },
-            "boundTo": _this,
-            "timeout": undefined,
-            "callback": undefined
-        };
-        return _this;
-    }
-    SyncEventBase.prototype.getDefaultParams = function () {
-        return __assign({}, this.defaultParams);
-    };
-    SyncEventBase.prototype.readParams = function (inputs) {
-        var out = this.getDefaultParams();
-        var n = inputs.length;
-        if (!n)
-            return out;
-        //[ matcher, boundTo, timeout, callback ]
-        //[ matcher, boundTo, callback ]
-        //[ matcher, timeout, callback ]
-        //[ boundTo, timeout, callback ]
-        //[ matcher, callback ]
-        //[ boundTo, callback ]
-        //[ timeout, callback ]
-        //[ callback ]
-        //[ matcher, timeout, evt ]
-        //[ matcher, evt ]
-        //[ timeout, evt ]
-        //[ evt ]
-        if (matchPostable(inputs[n - 1])) {
-            out.boundTo = inputs[n - 1];
-            inputs[n - 1] = inputs[n - 1].post;
-        }
-        //[ matcher, boundTo, timeout, callback ]
-        //[ matcher, boundTo, callback ]
-        //[ matcher, timeout, callback ]
-        //[ boundTo, timeout, callback ]
-        //[ matcher, callback ]
-        //[ boundTo, callback ]
-        //[ timeout, callback ]
-        //[ callback ]
-        if (n === 4) {
-            //[ matcher, boundTo, timeout, callback ]
-            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2], p4 = inputs[3];
-            out.matcher = p1;
-            out.boundTo = p2;
-            out.timeout = p3;
-            out.callback = p4;
-        }
-        else if (n === 3) {
-            //[ matcher, boundTo, callback ]
-            //[ matcher, timeout, callback ]
-            //[ boundTo, timeout, callback ]
-            var p1 = inputs[0], p2 = inputs[1], p3 = inputs[2];
-            if (typeof p2 === "number") {
-                //[ matcher, timeout, callback ]
-                //[ boundTo, timeout, callback ]
-                out.timeout = p2;
-                out.callback = p3;
-                if (isCallable(p1)) {
-                    //[ matcher, timeout, callback ]
-                    out.matcher = p1;
-                }
-                else {
-                    //[ boundTo, timeout, callback ]
-                    out.boundTo = p1;
-                }
-            }
-            else {
-                //[ matcher, boundTo, callback ]
-                out.matcher = p1;
-                out.boundTo = p2;
-                out.callback = p3;
-            }
-        }
-        else if (n === 2) {
-            //[ matcher, callback ]
-            //[ boundTo, callback ]
-            //[ timeout, callback ]
-            var p1 = inputs[0], p2 = inputs[1];
-            if (typeof p1 === "number") {
-                //[ timeout, callback ]
-                out.timeout = p1;
-                out.callback = p2;
-            }
-            else {
-                //[ matcher, callback ]
-                //[ boundTo, callback ]
-                out.callback = p2;
-                if (isCallable(p1)) {
-                    out.matcher = p1;
-                }
-                else {
-                    out.boundTo = p1;
-                }
-            }
-        }
-        else if (n === 1) {
-            //[ callback ]
-            var p = inputs[0];
-            out.callback = p;
-        }
-        return out;
-    };
-    SyncEventBase.prototype.waitFor = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        var params = this.getDefaultParams();
-        var n = inputs.length;
-        if (n === 2) {
-            var p1 = inputs[0], p2 = inputs[1];
-            params.matcher = p1;
-            params.timeout = p2;
-        }
-        else {
-            var p = inputs[0];
-            if (isCallable(p)) {
-                params.matcher = p;
-            }
-            else {
-                params.timeout = p;
-            }
-        }
-        return _super.prototype.__waitFor.call(this, params);
-    };
-    SyncEventBase.prototype.attach = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attach(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachOnce = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachOnce(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachExtract = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachExtract(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachPrepend = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachPrepend(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachOncePrepend = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachOncePrepend(this.readParams(inputs));
-    };
-    SyncEventBase.prototype.attachOnceExtract = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return this.__attachOnceExtract(this.readParams(inputs));
-    };
-    return SyncEventBase;
-}(SyncEventBaseProtected_1.SyncEventBaseProtected));
-exports.SyncEventBase = SyncEventBase;
-
-},{"./SyncEventBaseProtected":7}],7:[function(require,module,exports){
-"use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-};
-exports.__esModule = true;
-var Map_1 = require("minimal-polyfills/dist/lib/Map");
-require("minimal-polyfills/dist/lib/Array.prototype.find");
-var runExclusive = require("run-exclusive");
-var defs_1 = require("./defs");
-/** SyncEvent without evtAttach property and without overload */
-var SyncEventBaseProtected = /** @class */ (function () {
-    function SyncEventBaseProtected() {
-        var _this = this;
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        this.postCount = 0;
-        this.traceId = null;
-        this.handlers = [];
-        this.handlerTriggers = new Map_1.Polyfill();
-        //NOTE: An async handler ( attached with waitFor ) is only eligible to handle a post if the post
-        //occurred after the handler was set. We don't want to waitFor event from the past.
-        //private readonly asyncHandlerChronologyMark = new WeakMap<ImplicitParams.Async, number>();
-        this.asyncHandlerChronologyMark = typeof WeakMap !== "undefined" ?
-            new WeakMap() :
-            new Map_1.Polyfill();
-        //NOTE: There is an exception to the above rule, we want to allow async waitFor loop 
-        //do so we have to handle the case where multiple event would be posted synchronously.
-        this.asyncHandlerChronologyExceptionRange = typeof WeakMap !== "undefined" ?
-            new WeakMap() :
-            new Map_1.Polyfill();
-        /*
-        NOTE: Used as Date.now() would be used to compare if an event is anterior
-        or posterior to an other. We don't use Date.now() because two call within
-        less than a ms will return the same value unlike this function.
-        */
-        this.getChronologyMark = (function () {
-            var currentChronologyMark = 0;
-            return function () { return currentChronologyMark++; };
-        })();
-        this.postAsync = runExclusive.buildCb(function (data, postChronologyMark, releaseLock) {
-            var promises = [];
-            var chronologyMarkStartResolveTick;
-            //NOTE: Must be before handlerTrigger call.
-            Promise.resolve().then(function () { return chronologyMarkStartResolveTick = _this.getChronologyMark(); });
-            var _loop_1 = function (handler) {
-                if (!handler.async) {
-                    return "continue";
-                }
-                if (!handler.matcher(data)) {
-                    return "continue";
-                }
-                var handlerTrigger = _this.handlerTriggers.get(handler);
-                if (!handlerTrigger) {
-                    return "continue";
-                }
-                var shouldCallHandlerTrigger = (function () {
-                    var handlerMark = _this.asyncHandlerChronologyMark.get(handler);
-                    if (postChronologyMark > handlerMark) {
-                        return true;
-                    }
-                    var exceptionRange = _this.asyncHandlerChronologyExceptionRange.get(handler);
-                    if (exceptionRange === undefined) {
-                        return false;
-                    }
-                    if (exceptionRange.lowerMark < postChronologyMark &&
-                        postChronologyMark < exceptionRange.upperMark) {
-                        return true;
-                    }
-                    return false;
-                })();
-                if (!shouldCallHandlerTrigger) {
-                    return "continue";
-                }
-                promises.push(handler.promise);
-                handlerTrigger(data);
-            };
-            for (var _i = 0, _a = __spreadArrays(_this.handlers); _i < _a.length; _i++) {
-                var handler = _a[_i];
-                _loop_1(handler);
-            }
-            if (promises.length !== 0) {
-                var handlersDump_1 = __spreadArrays(_this.handlers);
-                Promise.all(promises).then(function () {
-                    for (var _i = 0, _a = _this.handlers; _i < _a.length; _i++) {
-                        var handler = _a[_i];
-                        if (!handler.async) {
-                            continue;
-                        }
-                        if (handlersDump_1.indexOf(handler) >= 0) {
-                            continue;
-                        }
-                        _this.asyncHandlerChronologyExceptionRange.set(handler, {
-                            "lowerMark": postChronologyMark,
-                            "upperMark": chronologyMarkStartResolveTick
-                        });
-                    }
-                    releaseLock();
-                });
-            }
-            else {
-                releaseLock();
-            }
-        });
-        if (!inputs.length)
-            return;
-        var eventEmitter = inputs[0], eventName = inputs[1];
-        var formatter = inputs[2] || this.defaultFormatter;
-        eventEmitter.on(eventName, function () {
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            return _this.post(formatter.apply(null, inputs));
-        });
-    }
-    SyncEventBaseProtected.prototype.defaultFormatter = function () {
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        return inputs[0];
-    };
-    SyncEventBaseProtected.prototype.enableTrace = function (id, formatter, log //NOTE: we don't want to expose types from node
-    ) {
-        this.traceId = id;
-        if (!!formatter) {
-            this.traceFormatter = formatter;
-        }
-        else {
-            this.traceFormatter = function (data) {
-                try {
-                    return JSON.stringify(data, null, 2);
-                }
-                catch (_a) {
-                    return "" + data;
-                }
-            };
-        }
-        if (!!log) {
-            this.log = log;
-        }
-        else {
-            this.log = function () {
-                var inputs = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    inputs[_i] = arguments[_i];
-                }
-                return console.log.apply(console, inputs);
-            };
-        }
-    };
-    SyncEventBaseProtected.prototype.disableTrace = function () {
-        this.traceId = null;
-    };
-    SyncEventBaseProtected.prototype.addHandler = function (attachParams, implicitAttachParams) {
-        var _this = this;
-        var handler = __assign(__assign(__assign({}, attachParams), implicitAttachParams), { "detach": null, "promise": null });
-        if (handler.async) {
-            this.asyncHandlerChronologyMark.set(handler, this.getChronologyMark());
-        }
-        handler.promise = new Promise(function (resolve, reject) {
-            var timer = undefined;
-            if (typeof handler.timeout === "number") {
-                timer = setTimeout(function () {
-                    timer = undefined;
-                    handler.detach();
-                    reject(new defs_1.EvtError.Timeout(handler.timeout));
-                }, handler.timeout);
-            }
-            handler.detach = function () {
-                var index = _this.handlers.indexOf(handler);
-                if (index < 0)
-                    return false;
-                _this.handlers.splice(index, 1);
-                _this.handlerTriggers["delete"](handler);
-                if (timer) {
-                    clearTimeout(timer);
-                    reject(new defs_1.EvtError.Detached());
-                }
-                return true;
-            };
-            _this.handlerTriggers.set(handler, function (data) {
-                var _a;
-                var callback = handler.callback, once = handler.once;
-                if (timer) {
-                    clearTimeout(timer);
-                    timer = undefined;
-                }
-                if (once)
-                    handler.detach();
-                (_a = callback) === null || _a === void 0 ? void 0 : _a.call(handler.boundTo, data);
-                resolve(data);
-            });
-        });
-        if (handler.prepend) {
-            var i = void 0;
-            for (i = 0; i < this.handlers.length; i++) {
-                if (this.handlers[i].extract) {
-                    continue;
-                }
-                break;
-            }
-            this.handlers.splice(i, 0, handler);
-        }
-        else {
-            this.handlers.push(handler);
-        }
-        return handler;
-    };
-    SyncEventBaseProtected.prototype.trace = function (data) {
-        if (this.traceId === null) {
-            return;
-        }
-        var message = "(" + this.traceId + ") ";
-        var isExtracted = !!this.handlers.find(function (_a) {
-            var extract = _a.extract, matcher = _a.matcher;
-            return extract && matcher(data);
-        });
-        if (isExtracted) {
-            message += "extracted ";
-        }
-        else {
-            var handlerCount = this.handlers
-                .filter(function (_a) {
-                var extract = _a.extract, matcher = _a.matcher;
-                return !extract && matcher(data);
-            })
-                .length;
-            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
-        }
-        this.log(message + this.traceFormatter(data));
-    };
-    /** Returns post count */
-    SyncEventBaseProtected.prototype.post = function (data) {
-        this.trace(data);
-        this.postCount++;
-        //NOTE: Must be before postSync.
-        var postChronologyMark = this.getChronologyMark();
-        var isExtracted = this.postSync(data);
-        if (!isExtracted) {
-            this.postAsync(data, postChronologyMark);
-        }
-        return this.postCount;
-    };
-    /** Return isExtracted */
-    SyncEventBaseProtected.prototype.postSync = function (data) {
-        for (var _i = 0, _a = __spreadArrays(this.handlers); _i < _a.length; _i++) {
-            var handler = _a[_i];
-            var async = handler.async, matcher = handler.matcher, extract = handler.extract;
-            if (async) {
-                continue;
-            }
-            if (!matcher(data)) {
-                continue;
-            }
-            var handlerTrigger = this.handlerTriggers.get(handler);
-            //NOTE: Possible if detached while in the loop.
-            if (!handlerTrigger) {
-                continue;
-            }
-            handlerTrigger(data);
-            if (extract) {
-                return true;
-            }
-        }
-        return false;
-    };
-    SyncEventBaseProtected.prototype.__waitFor = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": true,
-            "extract": false,
-            "once": true,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attach = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": false,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachExtract = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": true,
-            "once": false,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachPrepend = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": false,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOnce = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": true,
-            "prepend": false
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOncePrepend = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": false,
-            "once": true,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.__attachOnceExtract = function (attachParams) {
-        return this.addHandler(attachParams, {
-            "async": false,
-            "extract": true,
-            "once": true,
-            "prepend": true
-        }).promise;
-    };
-    SyncEventBaseProtected.prototype.getHandlers = function () { return __spreadArrays(this.handlers); };
-    /** Detach every handler bound to a given object or all handlers, return the detached handlers */
-    SyncEventBaseProtected.prototype.detach = function (boundTo) {
-        var detachedHandlers = [];
-        for (var _i = 0, _a = __spreadArrays(this.handlers); _i < _a.length; _i++) {
-            var handler = _a[_i];
-            if (boundTo === undefined || handler.boundTo === boundTo) {
-                handler.detach();
-                detachedHandlers.push(handler);
-            }
-        }
-        return detachedHandlers;
-    };
-    return SyncEventBaseProtected;
-}());
-exports.SyncEventBaseProtected = SyncEventBaseProtected;
-
-},{"./defs":8,"minimal-polyfills/dist/lib/Array.prototype.find":10,"minimal-polyfills/dist/lib/Map":11,"run-exclusive":13}],8:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-exports.__esModule = true;
-var setPrototypeOf = require("setprototypeof");
-var EvtError;
-(function (EvtError) {
-    var Timeout = /** @class */ (function (_super) {
-        __extends(Timeout, _super);
-        function Timeout(timeout) {
-            var _newTarget = this.constructor;
-            var _this = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
-            _this.timeout = timeout;
-            setPrototypeOf(_this, _newTarget.prototype);
-            return _this;
-        }
-        return Timeout;
-    }(Error));
-    EvtError.Timeout = Timeout;
-    var Detached = /** @class */ (function (_super) {
-        __extends(Detached, _super);
-        function Detached() {
-            var _newTarget = this.constructor;
-            var _this = _super.call(this, "Evt handler detached") || this;
-            setPrototypeOf(_this, _newTarget.prototype);
-            return _this;
-        }
-        return Detached;
-    }(Error));
-    EvtError.Detached = Detached;
-})(EvtError = exports.EvtError || (exports.EvtError = {}));
-
-},{"setprototypeof":14}],9:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var SyncEvent_1 = require("./SyncEvent");
-exports.SyncEvent = SyncEvent_1.SyncEvent;
-exports.VoidSyncEvent = SyncEvent_1.VoidSyncEvent;
-var defs_1 = require("./defs");
-exports.EvtError = defs_1.EvtError;
-var Observable_1 = require("./Observable");
-exports.ObservableImpl = Observable_1.ObservableImpl;
-
-},{"./Observable":4,"./SyncEvent":5,"./defs":8}],10:[function(require,module,exports){
-// https://tc39.github.io/ecma262/#sec-array.prototype.find
-if (!Array.prototype.find) {
-    Object.defineProperty(Array.prototype, 'find', {
-        value: function (predicate) {
-            // 1. Let O be ? ToObject(this value).
-            if (this == null) {
-                throw new TypeError('"this" is null or not defined');
-            }
-            var o = Object(this);
-            // 2. Let len be ? ToLength(? Get(O, "length")).
-            var len = o.length >>> 0;
-            // 3. If IsCallable(predicate) is false, throw a TypeError exception.
-            if (typeof predicate !== 'function') {
-                throw new TypeError('predicate must be a function');
-            }
-            // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
-            var thisArg = arguments[1];
-            // 5. Let k be 0.
-            var k = 0;
-            // 6. Repeat, while k < len
-            while (k < len) {
-                // a. Let Pk be ! ToString(k).
-                // b. Let kValue be ? Get(O, Pk).
-                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
-                // d. If testResult is true, return kValue.
-                var kValue = o[k];
-                if (predicate.call(thisArg, kValue, k, o)) {
-                    return kValue;
-                }
-                // e. Increase k by 1.
-                k++;
-            }
-            // 7. Return undefined.
-            return undefined;
-        },
-        configurable: true,
-        writable: true
-    });
-}
-
-},{}],11:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var LightMapImpl = /** @class */ (function () {
-    function LightMapImpl() {
-        this.record = [];
-    }
-    LightMapImpl.prototype.has = function (key) {
-        return this.record
-            .map(function (_a) {
-            var _key = _a[0];
-            return _key;
-        })
-            .indexOf(key) >= 0;
-    };
-    LightMapImpl.prototype.get = function (key) {
-        var entry = this.record
-            .filter(function (_a) {
-            var _key = _a[0];
-            return _key === key;
-        })[0];
-        if (entry === undefined) {
-            return undefined;
-        }
-        return entry[1];
-    };
-    LightMapImpl.prototype.set = function (key, value) {
-        var entry = this.record
-            .filter(function (_a) {
-            var _key = _a[0];
-            return _key === key;
-        })[0];
-        if (entry === undefined) {
-            this.record.push([key, value]);
-        }
-        else {
-            entry[1] = value;
-        }
-        return this;
-    };
-    LightMapImpl.prototype["delete"] = function (key) {
-        var index = this.record.map(function (_a) {
-            var key = _a[0];
-            return key;
-        }).indexOf(key);
-        if (index < 0) {
-            return false;
-        }
-        this.record.splice(index, 1);
-        return true;
-    };
-    LightMapImpl.prototype.keys = function () {
-        return this.record.map(function (_a) {
-            var key = _a[0];
-            return key;
-        });
-    };
-    return LightMapImpl;
-}());
-exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
-
-},{}],12:[function(require,module,exports){
-"use strict";
-exports.__esModule = true;
-var Map_1 = require("./Map");
-exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
-
-},{"./Map":11}],13:[function(require,module,exports){
-"use strict";
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
-};
-exports.__esModule = true;
-var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
-var ExecQueue = /** @class */ (function () {
-    function ExecQueue() {
-        this.queuedCalls = [];
-        this.isRunning = false;
-        this.prComplete = Promise.resolve();
-    }
-    //TODO: move where it is used.
-    ExecQueue.prototype.cancelAllQueuedCalls = function () {
-        var n;
-        this.queuedCalls.splice(0, n = this.queuedCalls.length);
-        return n;
-    };
-    return ExecQueue;
-}());
-var globalContext = {};
-var clusters = new WeakMap_1.Polyfill();
-//console.log("Map version");
-//export const clusters = new Map<Object, Map<GroupRef,ExecQueue>>();
-function getOrCreateExecQueue(context, groupRef) {
-    var execQueueByGroup = clusters.get(context);
-    if (!execQueueByGroup) {
-        execQueueByGroup = new WeakMap_1.Polyfill();
-        clusters.set(context, execQueueByGroup);
-    }
-    var execQueue = execQueueByGroup.get(groupRef);
-    if (!execQueue) {
-        execQueue = new ExecQueue();
-        execQueueByGroup.set(groupRef, execQueue);
-    }
-    return execQueue;
-}
-function createGroupRef() {
-    return new Array(0);
-}
-exports.createGroupRef = createGroupRef;
-function build() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnPromise(true, createGroupRef(), inputs[0]);
-        case 2: return buildFnPromise(true, inputs[0], inputs[1]);
-    }
-}
-exports.build = build;
-function buildMethod() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnPromise(false, createGroupRef(), inputs[0]);
-        case 2: return buildFnPromise(false, inputs[0], inputs[1]);
-    }
-}
-exports.buildMethod = buildMethod;
-/**
- *
- * Get the number of queued call of a run-exclusive function.
- * Note that if you call a runExclusive function and call this
- * directly after it will return 0 as there is one function call
- * running but 0 queued.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- *
- * */
-function getQueuedCallCount(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.queuedCalls.length : 0;
-}
-exports.getQueuedCallCount = getQueuedCallCount;
-/**
- *
- * Cancel all queued calls of a run-exclusive function.
- * Note that the current running call will not be cancelled.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- *
- */
-function cancelAllQueuedCalls(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.cancelAllQueuedCalls() : 0;
-}
-exports.cancelAllQueuedCalls = cancelAllQueuedCalls;
-/**
- * Tell if a run-exclusive function has an instance of it's call currently being
- * performed.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- */
-function isRunning(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.isRunning : false;
-}
-exports.isRunning = isRunning;
-/**
- * Return a promise that resolve when all the current queued call of a runExclusive functions
- * have completed.
- *
- * The classInstanceObject parameter is to provide only for the run-exclusive
- * function created with 'buildMethod[Cb].
- */
-function getPrComplete(runExclusiveFunction, classInstanceObject) {
-    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
-    return execQueue ? execQueue.prComplete : Promise.resolve();
-}
-exports.getPrComplete = getPrComplete;
-var groupByRunExclusiveFunction = new WeakMap_1.Polyfill();
-function getExecQueueByFunctionAndContext(runExclusiveFunction, context) {
-    if (context === void 0) { context = globalContext; }
-    var groupRef = groupByRunExclusiveFunction.get(runExclusiveFunction);
-    if (!groupRef) {
-        throw Error("Not a run exclusiveFunction");
-    }
-    var execQueueByGroup = clusters.get(context);
-    if (!execQueueByGroup) {
-        return undefined;
-    }
-    return execQueueByGroup.get(groupRef);
-}
-function buildFnPromise(isGlobal, groupRef, fun) {
-    var execQueue;
-    var runExclusiveFunction = (function () {
-        var _this = this;
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        if (!isGlobal) {
-            if (!(this instanceof Object)) {
-                throw new Error("Run exclusive, <this> should be an object");
-            }
-            execQueue = getOrCreateExecQueue(this, groupRef);
-        }
-        return new Promise(function (resolve, reject) {
-            var onPrCompleteResolve;
-            execQueue.prComplete = new Promise(function (resolve) {
-                return onPrCompleteResolve = function () { return resolve(); };
-            });
-            var onComplete = function (result) {
-                onPrCompleteResolve();
-                execQueue.isRunning = false;
-                if (execQueue.queuedCalls.length) {
-                    execQueue.queuedCalls.shift()();
-                }
-                if ("data" in result) {
-                    resolve(result.data);
-                }
-                else {
-                    reject(result.reason);
-                }
-            };
-            (function callee() {
-                var _this = this;
-                var inputs = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    inputs[_i] = arguments[_i];
-                }
-                if (execQueue.isRunning) {
-                    execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
-                    return;
-                }
-                execQueue.isRunning = true;
-                try {
-                    fun.apply(this, inputs)
-                        .then(function (data) { return onComplete({ data: data }); })["catch"](function (reason) { return onComplete({ reason: reason }); });
-                }
-                catch (error) {
-                    onComplete({ "reason": error });
-                }
-            }).apply(_this, inputs);
-        });
-    });
-    if (isGlobal) {
-        execQueue = getOrCreateExecQueue(globalContext, groupRef);
-    }
-    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
-    return runExclusiveFunction;
-}
-function buildCb() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnCallback(true, createGroupRef(), inputs[0]);
-        case 2: return buildFnCallback(true, inputs[0], inputs[1]);
-    }
-}
-exports.buildCb = buildCb;
-function buildMethodCb() {
-    var inputs = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        inputs[_i] = arguments[_i];
-    }
-    switch (inputs.length) {
-        case 1: return buildFnCallback(false, createGroupRef(), inputs[0]);
-        case 2: return buildFnCallback(false, inputs[0], inputs[1]);
-    }
-}
-exports.buildMethodCb = buildMethodCb;
-function buildFnCallback(isGlobal, groupRef, fun) {
-    var execQueue;
-    var runExclusiveFunction = (function () {
-        var _this = this;
-        var inputs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            inputs[_i] = arguments[_i];
-        }
-        if (!isGlobal) {
-            if (!(this instanceof Object)) {
-                throw new Error("Run exclusive, <this> should be an object");
-            }
-            execQueue = getOrCreateExecQueue(this, groupRef);
-        }
-        var callback = undefined;
-        if (inputs.length && typeof inputs[inputs.length - 1] === "function") {
-            callback = inputs.pop();
-        }
-        var onPrCompleteResolve;
-        execQueue.prComplete = new Promise(function (resolve) {
-            return onPrCompleteResolve = function () { return resolve(); };
-        });
-        var onComplete = function () {
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            onPrCompleteResolve();
-            execQueue.isRunning = false;
-            if (execQueue.queuedCalls.length) {
-                execQueue.queuedCalls.shift()();
-            }
-            if (callback) {
-                callback.apply(_this, inputs);
-            }
-        };
-        onComplete.hasCallback = !!callback;
-        (function callee() {
-            var _this = this;
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            if (execQueue.isRunning) {
-                execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
-                return;
-            }
-            execQueue.isRunning = true;
-            try {
-                fun.apply(this, __spread(inputs, [onComplete]));
-            }
-            catch (error) {
-                error.message += " ( This exception should not have been thrown, miss use of run-exclusive buildCb )";
-                throw error;
-            }
-        }).apply(this, inputs);
-    });
-    if (isGlobal) {
-        execQueue = getOrCreateExecQueue(globalContext, groupRef);
-    }
-    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
-    return runExclusiveFunction;
-}
-
-},{"minimal-polyfills/dist/lib/WeakMap":12}],14:[function(require,module,exports){
-'use strict'
-/* eslint no-proto: 0 */
-module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
-
-function setProtoOf (obj, proto) {
-  obj.__proto__ = proto
-  return obj
-}
-
-function mixinProperties (obj, proto) {
-  for (var prop in proto) {
-    if (!Object.prototype.hasOwnProperty.call(obj, prop)) {
-      obj[prop] = proto[prop]
-    }
-  }
-  return obj
-}
-
-},{}],15:[function(require,module,exports){
-"use strict";
 //NOTE: Assert StripeCheckout loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -3260,10 +2087,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var webApiCaller = require("frontend-shared/dist/lib/webApiCaller");
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
 var dialog_1 = require("frontend-shared/dist/tools/modal/dialog");
-var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
+var evt_1 = require("frontend-shared/node_modules/evt");
 var currencyLib = require("frontend-shared/dist/tools/currency");
 var env_1 = require("frontend-shared/dist/lib/env");
 var AuthenticatedSessionDescriptorSharedData_1 = require("frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData");
@@ -3275,10 +2101,12 @@ var UiNegativeBalanceWarning_1 = require("./UiNegativeBalanceWarning");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiController.html"), "UiController");
 require("../templates/UiController.less");
 var UiController = /** @class */ (function () {
-    function UiController(subscriptionInfos, guessedCountryIso) {
+    function UiController(params) {
         var _this = this;
+        this.params = params;
         this.structure = html.structure.clone();
-        this.evtDone = new ts_events_extended_1.VoidSyncEvent();
+        this.evtDone = new evt_1.VoidEvt();
+        var subscriptionInfos = params.subscriptionInfos, guessedCountryIso = params.guessedCountryIso, webApi = params.webApi;
         console.log(JSON.stringify(subscriptionInfos));
         var uiDownloadButton = new UiDownloadButtons_1.UiDownloadButtons();
         this.structure.find(".id_placeholder_UiDownloadButtons")
@@ -3289,7 +2117,7 @@ var UiController = /** @class */ (function () {
         }
         var pricingByCurrency = subscriptionInfos.pricingByCurrency, source = subscriptionInfos.source, subscription = subscriptionInfos.subscription, due = subscriptionInfos.due;
         var retreaveUserSourceViaStripeCheckout = (function () {
-            var evtSourceId = new ts_events_extended_1.SyncEvent();
+            var evtSourceId = new evt_1.Evt();
             var handler;
             AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get().then(function (email) { return handler = StripeCheckout.configure({
                 "key": subscriptionInfos.stripePublicApiKey,
@@ -3326,7 +2154,7 @@ var UiController = /** @class */ (function () {
                     switch (_a.label) {
                         case 0:
                             dialog_1.dialogApi.loading("Canceling your subscription");
-                            return [4 /*yield*/, webApiCaller.unsubscribe()];
+                            return [4 /*yield*/, webApi.unsubscribe()];
                         case 1:
                             _a.sent();
                             dialog_1.dialogApi.dismissLoading();
@@ -3344,7 +2172,7 @@ var UiController = /** @class */ (function () {
                                 return [2 /*return*/];
                             }
                             dialog_1.dialogApi.loading("Re enabling your subscription");
-                            return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource()];
+                            return [4 /*yield*/, webApi.subscribeOrUpdateSource({})];
                         case 1:
                             _a.sent();
                             dialog_1.dialogApi.dismissLoading();
@@ -3415,7 +2243,7 @@ var UiController = /** @class */ (function () {
                                 return [2 /*return*/];
                             }
                             dialog_1.dialogApi.loading("Enabling your subscription");
-                            return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource(newSourceId)];
+                            return [4 /*yield*/, webApi.subscribeOrUpdateSource({ "sourceId": newSourceId })];
                         case 5:
                             _a.sent();
                             dialog_1.dialogApi.dismissLoading();
@@ -3440,7 +2268,7 @@ var UiController = /** @class */ (function () {
                                 return [2 /*return*/];
                             }
                             dialog_1.dialogApi.loading("Updating your payment method");
-                            return [4 /*yield*/, webApiCaller.subscribeOrUpdateSource(source.id)];
+                            return [4 /*yield*/, webApi.subscribeOrUpdateSource({ "sourceId": source.id })];
                         case 2:
                             _a.sent();
                             dialog_1.dialogApi.dismissLoading();
@@ -3461,7 +2289,11 @@ var UiController = /** @class */ (function () {
                     case 0:
                         dialog_1.dialogApi.loading("Redirecting to payment page");
                         url = window.location.href.split("?")[0];
-                        return [4 /*yield*/, webApiCaller.createStripeCheckoutSessionForSubscription(currency, url + "?success=true", url + "?success=false")];
+                        return [4 /*yield*/, this.params.webApi.createStripeCheckoutSessionForSubscription({
+                                currency: currency,
+                                "success_url": url + "?success=true",
+                                "cancel_url": url + "?success=false"
+                            })];
                     case 1:
                         _a = _b.sent(), stripePublicApiKey = _a.stripePublicApiKey, sessionId = _a.checkoutSessionId;
                         stripe = Stripe(stripePublicApiKey);
@@ -3480,7 +2312,7 @@ var UiController = /** @class */ (function () {
 }());
 exports.UiController = UiController;
 
-},{"../templates/UiController.html":26,"../templates/UiController.less":27,"./UiDownloadButtons":16,"./UiMySubscription":17,"./UiNegativeBalanceWarning":18,"./UiPaymentMethod":19,"./UiSubscribe":20,"frontend-shared/dist/lib/env":38,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":40,"frontend-shared/dist/lib/webApiCaller":50,"frontend-shared/dist/tools/currency":52,"frontend-shared/dist/tools/modal/dialog":55,"frontend-shared/node_modules/ts-events-extended":9}],16:[function(require,module,exports){
+},{"../templates/UiController.html":15,"../templates/UiController.less":16,"./UiDownloadButtons":5,"./UiMySubscription":6,"./UiNegativeBalanceWarning":7,"./UiPaymentMethod":8,"./UiSubscribe":9,"frontend-shared/dist/lib/env":26,"frontend-shared/dist/lib/loadUiClassHtml":27,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":28,"frontend-shared/dist/tools/currency":38,"frontend-shared/dist/tools/modal/dialog":41,"frontend-shared/node_modules/evt":50}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -3493,11 +2325,11 @@ var UiDownloadButtons = /** @class */ (function () {
 }());
 exports.UiDownloadButtons = UiDownloadButtons;
 
-},{"../templates/UiDownloadButtons.html":28,"frontend-shared/dist/lib/loadUiClassHtml":39}],17:[function(require,module,exports){
+},{"../templates/UiDownloadButtons.html":17,"frontend-shared/dist/lib/loadUiClassHtml":27}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
-var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
+var evt_1 = require("frontend-shared/node_modules/evt");
 var moment = require("moment");
 var currencyLib = require("frontend-shared/dist/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiMySubscription.html"), "UiMySubscription");
@@ -3506,8 +2338,8 @@ var UiMySubscription = /** @class */ (function () {
     function UiMySubscription(s, amount) {
         var _this = this;
         this.structure = html.structure.clone();
-        this.evtScheduleCancel = new ts_events_extended_1.VoidSyncEvent();
-        this.evtReactivate = new ts_events_extended_1.VoidSyncEvent();
+        this.evtScheduleCancel = new evt_1.VoidEvt();
+        this.evtReactivate = new evt_1.VoidEvt();
         var formatDate = function (date) {
             return moment.unix(~~(date.getTime() / 1000))
                 .format("YYYY-MM-DD");
@@ -3533,7 +2365,7 @@ var UiMySubscription = /** @class */ (function () {
 }());
 exports.UiMySubscription = UiMySubscription;
 
-},{"../templates/UiMySubscription.html":29,"../templates/UiMySubscription.less":30,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/dist/tools/currency":52,"frontend-shared/node_modules/ts-events-extended":9,"moment":25}],18:[function(require,module,exports){
+},{"../templates/UiMySubscription.html":18,"../templates/UiMySubscription.less":19,"frontend-shared/dist/lib/loadUiClassHtml":27,"frontend-shared/dist/tools/currency":38,"frontend-shared/node_modules/evt":50,"moment":14}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
@@ -3549,18 +2381,18 @@ var UiNegativeBalanceWarning = /** @class */ (function () {
 }());
 exports.UiNegativeBalanceWarning = UiNegativeBalanceWarning;
 
-},{"../templates/UiNegativeBalanceWarning.html":31,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/dist/tools/currency":52}],19:[function(require,module,exports){
+},{"../templates/UiNegativeBalanceWarning.html":20,"frontend-shared/dist/lib/loadUiClassHtml":27,"frontend-shared/dist/tools/currency":38}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
-var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
+var evt_1 = require("frontend-shared/node_modules/evt");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiPaymentMethod.html"), "UiPaymentMethod");
 require("../templates/UiPaymentMethod.less");
 var UiPaymentMethod = /** @class */ (function () {
     function UiPaymentMethod(s) {
         var _this = this;
         this.structure = html.structure.clone();
-        this.evtRequestUpdate = new ts_events_extended_1.VoidSyncEvent();
+        this.evtRequestUpdate = new evt_1.VoidEvt();
         this.structure.find(".alert")[s.isChargeable ? "hide" : "show"]();
         this.structure.find(".id_last4").text(s.lastDigits);
         this.structure.find(".id_expire").text(s.expiration);
@@ -3571,18 +2403,18 @@ var UiPaymentMethod = /** @class */ (function () {
 }());
 exports.UiPaymentMethod = UiPaymentMethod;
 
-},{"../templates/UiPaymentMethod.html":32,"../templates/UiPaymentMethod.less":33,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/node_modules/ts-events-extended":9}],20:[function(require,module,exports){
+},{"../templates/UiPaymentMethod.html":21,"../templates/UiPaymentMethod.less":22,"frontend-shared/dist/lib/loadUiClassHtml":27,"frontend-shared/node_modules/evt":50}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
-var ts_events_extended_1 = require("frontend-shared/node_modules/ts-events-extended");
+var evt_1 = require("frontend-shared/node_modules/evt");
 var currencyLib = require("frontend-shared/dist/tools/currency");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiSubscribe.html"), "UiSubscribe");
 var UiSubscribe = /** @class */ (function () {
     function UiSubscribe(currency, amount) {
         var _this = this;
         this.structure = html.structure.clone();
-        this.evtRequestSubscribe = new ts_events_extended_1.VoidSyncEvent();
+        this.evtRequestSubscribe = new evt_1.VoidEvt();
         this.structure.find(".id_amount").text(currencyLib.prettyPrint(amount, currency));
         this.structure.find("button")
             .on("click", function () { return _this.evtRequestSubscribe.post(); });
@@ -3591,8 +2423,19 @@ var UiSubscribe = /** @class */ (function () {
 }());
 exports.UiSubscribe = UiSubscribe;
 
-},{"../templates/UiSubscribe.html":34,"frontend-shared/dist/lib/loadUiClassHtml":39,"frontend-shared/dist/tools/currency":52,"frontend-shared/node_modules/ts-events-extended":9}],21:[function(require,module,exports){
+},{"../templates/UiSubscribe.html":23,"frontend-shared/dist/lib/loadUiClassHtml":27,"frontend-shared/dist/tools/currency":38,"frontend-shared/node_modules/evt":50}],10:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -3629,13 +2472,45 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var webApiCaller = require("frontend-shared/dist/lib/webApiCaller");
+//TODO: Write a launcher
+var webApiCaller_1 = require("frontend-shared/dist/lib/webApiCaller");
+var AuthenticatedSessionDescriptorSharedData_1 = require("frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData");
+var networkStateMonitoring = require("frontend-shared/dist/lib/networkStateMonitoring");
+var restartApp_1 = require("frontend-shared/dist/lib/restartApp");
 var dialog_1 = require("frontend-shared/dist/tools/modal/dialog");
 var UiController_1 = require("./UiController");
-var availablePages = require("frontend-shared/dist/lib/availablePages");
 require("frontend-shared/dist/tools/polyfills/Object.assign");
 require("minimal-polyfills/dist/lib/ArrayBuffer.isView");
+var prWebApi = (function () { return __awaiter(void 0, void 0, void 0, function () {
+    var networkStateMonitoringApi;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, networkStateMonitoring.getApi()];
+            case 1:
+                networkStateMonitoringApi = _a.sent();
+                return [2 /*return*/, (function () {
+                        var _a = webApiCaller_1.getWebApi({
+                            AuthenticatedSessionDescriptorSharedData: AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData,
+                            networkStateMonitoringApi: networkStateMonitoringApi,
+                            restartApp: restartApp_1.restartApp
+                        }), getLoginLogoutApi = _a.getLoginLogoutApi, rest = __rest(_a, ["getLoginLogoutApi"]);
+                        return __assign(__assign({}, rest), getLoginLogoutApi({ "assertJsRuntimeEnv": "browser" }));
+                    })()];
+        }
+    });
+}); })();
 if (typeof apiExposedByHost !== "undefined") {
     window.onerror = function (msg, url, lineNumber) {
         apiExposedByHost.onDone(msg + "\n'" + url + ":" + lineNumber);
@@ -3649,16 +2524,19 @@ if (typeof apiExposedByHost !== "undefined") {
 }
 function onLoggedIn() {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, subscriptionInfos, _b, countryIsoFromLocation, countryIsoForLanguage, uiController;
+        var webApi, _a, subscriptionInfos, _b, countryIsoFromLocation, countryIsoForLanguage, uiController;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
                     dialog_1.dialogApi.loading("Loading subscription infos");
-                    return [4 /*yield*/, Promise.all([
-                            webApiCaller.getSubscriptionInfos(),
-                            webApiCaller.getCountryIso()
-                        ])];
+                    return [4 /*yield*/, prWebApi];
                 case 1:
+                    webApi = _c.sent();
+                    return [4 /*yield*/, Promise.all([
+                            webApi.getSubscriptionInfos(),
+                            webApi.getCountryIso()
+                        ])];
+                case 2:
                     _a = _c.sent(), subscriptionInfos = _a[0], _b = _a[1], countryIsoFromLocation = _b.location, countryIsoForLanguage = _b.language;
                     if (typeof apiExposedByHost !== "undefined" &&
                         (subscriptionInfos.customerStatus === "EXEMPTED" ||
@@ -3667,7 +2545,11 @@ function onLoggedIn() {
                         return [2 /*return*/];
                     }
                     dialog_1.dialogApi.dismissLoading();
-                    uiController = new UiController_1.UiController(subscriptionInfos, countryIsoFromLocation || countryIsoForLanguage);
+                    uiController = new UiController_1.UiController({
+                        webApi: webApi,
+                        subscriptionInfos: subscriptionInfos,
+                        "guessedCountryIso": countryIsoFromLocation || countryIsoForLanguage
+                    });
                     uiController.evtDone.attachOnce(function () {
                         if (typeof apiExposedByHost !== "undefined") {
                             apiExposedByHost.onDone(null);
@@ -3685,11 +2567,18 @@ function onLoggedIn() {
 var apiExposedToHost = {
     "login": function (email, secret) {
         (function () { return __awaiter(void 0, void 0, void 0, function () {
-            var status;
+            var webApi, status;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, webApiCaller.loginUser(email, secret, undefined)];
+                    case 0: return [4 /*yield*/, prWebApi];
                     case 1:
+                        webApi = _a.sent();
+                        return [4 /*yield*/, webApi.loginUser({
+                                "assertJsRuntimeEnv": "browser",
+                                email: email,
+                                secret: secret,
+                            })];
+                    case 2:
                         status = (_a.sent()).status;
                         if (status !== "SUCCESS") {
                             apiExposedByHost.onDone("Login failed");
@@ -3708,12 +2597,16 @@ $(document).ready(function () {
         return;
     }
     $("#logout").click(function () { return __awaiter(void 0, void 0, void 0, function () {
+        var webApi;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, webApiCaller.logoutUser()];
+                case 0: return [4 /*yield*/, prWebApi];
                 case 1:
+                    webApi = _a.sent();
+                    return [4 /*yield*/, webApi.logoutUser()];
+                case 2:
                     _a.sent();
-                    location.href = "/" + availablePages.PageName.login;
+                    restartApp_1.restartApp("User logged out");
                     return [2 /*return*/];
             }
         });
@@ -3721,7 +2614,7 @@ $(document).ready(function () {
     onLoggedIn();
 });
 
-},{"./UiController":15,"frontend-shared/dist/lib/availablePages":36,"frontend-shared/dist/lib/webApiCaller":50,"frontend-shared/dist/tools/modal/dialog":55,"frontend-shared/dist/tools/polyfills/Object.assign":58,"minimal-polyfills/dist/lib/ArrayBuffer.isView":24}],22:[function(require,module,exports){
+},{"./UiController":4,"frontend-shared/dist/lib/localStorage/AuthenticatedSessionDescriptorSharedData":28,"frontend-shared/dist/lib/networkStateMonitoring":32,"frontend-shared/dist/lib/restartApp":34,"frontend-shared/dist/lib/webApiCaller":36,"frontend-shared/dist/tools/modal/dialog":41,"frontend-shared/dist/tools/polyfills/Object.assign":44,"minimal-polyfills/dist/lib/ArrayBuffer.isView":13}],11:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -3760,17 +2653,17 @@ module.exports.byUrl = function(url) {
   }
 };
 
-},{}],23:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = require('cssify');
 
-},{"cssify":22}],24:[function(require,module,exports){
+},{"cssify":11}],13:[function(require,module,exports){
 if (!ArrayBuffer["isView"]) {
     ArrayBuffer.isView = function isView(a) {
         return a !== null && typeof (a) === "object" && a["buffer"] instanceof ArrayBuffer;
     };
 }
 
-},{}],25:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 //! moment.js
 
 ;(function (global, factory) {
@@ -8374,64 +7267,31 @@ if (!ArrayBuffer["isView"]) {
 
 })));
 
-},{}],26:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = "<div class=\"id_UiController row\">\r\n\r\n    <div class=\"col-lg-9\">\r\n\r\n        <div class=\"id_placeholder_UiNegativeBalanceWarning\">\r\n        </div>\r\n\r\n        <div class=\"row\">\r\n\r\n            <div class=\"id_placeholder_UiSubscribe\">\r\n\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiMySubscription col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiPaymentMethod col-md-6\">\r\n            </div>\r\n\r\n            <div class=\"id_placeholder_UiDownloadButtons col-md-6\">\r\n            </div>\r\n\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],27:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var css = "div.id_UiController .heading-1 {\n  font-size: 20px;\n  font-weight: normal;\n  margin-bottom: 16px;\n}\ndiv.id_UiController .heading-2 {\n  color: #007FEB;\n  font-size: 26px;\n  margin-bottom: 7px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":23}],28:[function(require,module,exports){
+},{"lessify":12}],17:[function(require,module,exports){
 module.exports = "<div class=\"id_UiDownloadButtons panel plain mt10\">\r\n\r\n    <div class=\"panel-body text-center\">\r\n\r\n        <a href='https://play.google.com/store/apps/details?id=com.semasim.android&ah=2KIGba1mmZ33bXvBLhumK535eEY&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>\r\n            <img alt='Get it on Google Play' height=\"90px\" src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' />\r\n        </a>\r\n\r\n    </div>\r\n</div>";
-},{}],29:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports = "<div class=\"id_UiMySubscription panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"payment-subscription\">\r\n                <h1 class=\"heading-1\">My subscription</h1>\r\n                <h2 class=\"heading-2\">Active</h2>\r\n                <p class=\"payment-text\">Cancels in <strong class=\"id_days_left\">X</strong> days</p>\r\n            </div>\r\n            <div class=\"payment-next clearfix\">\r\n                <h2 class=\"heading-1\">Next payment due</h2>\r\n\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">DATE</dt>\r\n                    <dt class=\"id_nextBillDate payment-list-info\">13/12/18</dt>\r\n                </dl>\r\n                <dl class=\"payment-list\">\r\n                    <dt class=\"payment-list-title\">AMOUNT</dt>\r\n                    <dt class=\"payment-list-info\"><span class=\"id_amount\">3.07€</span></dt>\r\n                </dl>\r\n            </div>\r\n            <div class=\"payment-actions mt10\">\r\n                <button class=\"btn btn-primary\" type=\"button\">\r\n                    Cancel subscription\r\n                </button>\r\n            </div>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],30:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var css = "div.id_UiMySubscription .payment-list {\n  float: left;\n  line-height: 20px;\n  width: 50%;\n}\ndiv.id_UiMySubscription .payment-text {\n  color: #72727D;\n  font-size: 14px;\n  line-height: 20px;\n  margin-bottom: 15px;\n  text-align: left;\n}\ndiv.id_UiMySubscription .payment-subscription {\n  border-bottom: solid 1px #EFEFF2;\n  padding-bottom: 16px;\n}\ndiv.id_UiMySubscription .payment-list-title {\n  color: #72727D;\n  font-size: 14px;\n}\ndiv.id_UiMySubscription .payment-list-info {\n  font-weight: normal;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":23}],31:[function(require,module,exports){
+},{"lessify":12}],20:[function(require,module,exports){
 module.exports = "<div class=\"id_UiNegativeBalanceWarning alert alert-warning fade in mt10 mb0\">\r\n    <i class=\"glyphicon glyphicon-warning-sign alert-icon \"></i>\r\n    <strong>Warning!</strong> Your current balance is <span class=\"id_val\">-22€</span>, Please update your payment method.\r\n</div>";
-},{}],32:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports = "<div class=\"id_UiPaymentMethod panel plain mt10\">\r\n\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"content-menu\">\r\n            <div class=\"page-subscription-payment-method clearfix\">\r\n                <h2 class=\"heading-1\">Payment method</h2>\r\n                <div class=\"alert alert-danger fade in\">\r\n                    <i class=\"glyphicon glyphicon-ban-circle alert-icon \"></i>\r\n                    <strong>No longer valid</strong> please register a new credit card\r\n                </div>\r\n                <dl class=\"page-subscription-payment-method-list card-number\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Card number</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\">XXX...<span class=\"id_last4\">1234</span></span></dt>\r\n                </dl>\r\n                <dl class=\"page-subscription-payment-method-list expiry\">\r\n                    <dt class=\"page-subscription-payment-method-list-title\">Expiration date</dt>\r\n                    <dt class=\"page-subscription-payment-method-list-info item-alert\"><span class=\"id_expire\">12/19</span></dt>\r\n                </dl>\r\n            </div>\r\n            <button class=\"btn btn-primary\">\r\n                Change credit card\r\n            </button>\r\n        </div>\r\n\r\n    </div>\r\n</div>";
-},{}],33:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var css = "div.id_UiPaymentMethod .card-number {\n  width: 210px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list {\n  float: left;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-title {\n  color: #5F5E6A;\n  font-size: 14px;\n}\ndiv.id_UiPaymentMethod .page-subscription-payment-method-list-info {\n  font-weight: normal;\n  font-size: 14px;\n}\n";(require('lessify'))(css); module.exports = css;
-},{"lessify":23}],34:[function(require,module,exports){
+},{"lessify":12}],23:[function(require,module,exports){
 module.exports = "<div class=\"id_UiSubscribe panel plain mt10\">\r\n    <div class=\"panel-body\">\r\n\r\n        <div class=\"jumbotron\">\r\n            <h1>Subscribe now</h1>\r\n            <p>\r\n                For enabling semasim on your <b>Android</b> devices\r\n                <br>\r\n                and stop including <b>\"Sent with Semasim\"</b> in your SMSs.\r\n                <br>\r\n                <br>\r\n                Subscription cancelable anytime.\r\n            </p>\r\n            <button class=\"btn btn-primary\">Subscribe for <span class=\"id_amount\">XX€</span>/Month</button>\r\n        </div>\r\n\r\n        <div class=\"container\" style=\"text-align: center;\">\r\n            <div class=\"footer\">\r\n                <p>By subscribing you agree to our :</p>\r\n                <a href=\"http://www.semasim.com/terms-conditions\">terms</a>\r\n                <span> &amp; </span>\r\n                <a href=\"http://www.semasim.com/privacy-policy\">privacy policy</a>\r\n            </div>\r\n        </div>\r\n\r\n\r\n    </div>\r\n\r\n</div>";
-},{}],35:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"semasim-gateway/dist/web_api_declaration":69}],36:[function(require,module,exports){
-"use strict";
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var PageName;
-(function (PageName) {
-    var _a;
-    PageName.pagesNames = [
-        "login",
-        "register",
-        "manager",
-        "webphone",
-        "subscription",
-        "shop"
-    ];
-    _a = __read(PageName.pagesNames, 6), PageName.login = _a[0], PageName.register = _a[1], PageName.manager = _a[2], PageName.webphone = _a[3], PageName.subscription = _a[4], PageName.shop = _a[5];
-})(PageName = exports.PageName || (exports.PageName = {}));
-
-},{}],37:[function(require,module,exports){
+},{"semasim-gateway/dist/web_api_declaration":86}],25:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Defined at ejs building in templates/head_common.ejs
@@ -8451,7 +7311,7 @@ var default_ = typeof window !== "undefined" ? ({
 });
 exports.default = default_;
 
-},{}],38:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 /*
 import { jsRuntimeEnv } from "./jsRuntimeEnv";
@@ -8471,7 +7331,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.env = impl_1.default;
 
-},{"./impl":37}],39:[function(require,module,exports){
+},{"./impl":25}],27:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /** Assert jQuery is loaded on the page. */
@@ -8485,7 +7345,7 @@ function loadUiClassHtml(html, widgetClassName) {
 }
 exports.loadUiClassHtml = loadUiClassHtml;
 
-},{}],40:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -8525,13 +7385,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
+var evt_1 = require("evt");
 var localStorageApi = require("./localStorageApi");
 var key = "authenticated-session-descriptor-shared-data";
 var AuthenticatedSessionDescriptorSharedData;
 (function (AuthenticatedSessionDescriptorSharedData) {
     /** Can be used to track when the user is logged in */
-    AuthenticatedSessionDescriptorSharedData.evtChange = new ts_events_extended_1.SyncEvent();
+    AuthenticatedSessionDescriptorSharedData.evtChange = new evt_1.Evt();
     function isPresent() {
         return __awaiter(this, void 0, void 0, function () {
             var value;
@@ -8601,213 +7461,12 @@ var AuthenticatedSessionDescriptorSharedData;
 })(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./localStorageApi":44,"buffer":2,"ts-events-extended":9}],41:[function(require,module,exports){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var localStorageApi = require("./localStorageApi");
-var key = "credentials";
-var Credentials;
-(function (Credentials) {
-    function isPresent() {
-        return __awaiter(this, void 0, void 0, function () {
-            var value;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
-                    case 1:
-                        value = _a.sent();
-                        return [2 /*return*/, value !== null];
-                }
-            });
-        });
-    }
-    Credentials.isPresent = isPresent;
-    function remove() {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, isPresent()];
-                    case 1:
-                        if (!(_a.sent())) {
-                            return [2 /*return*/];
-                        }
-                        return [4 /*yield*/, localStorageApi.removeItem(key)];
-                    case 2:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    }
-    Credentials.remove = remove;
-    /** assert isPresent */
-    function get() {
-        return __awaiter(this, void 0, void 0, function () {
-            var value;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
-                    case 1:
-                        value = _a.sent();
-                        if (value === null) {
-                            throw new Error("Auth not present in localStorage");
-                        }
-                        return [2 /*return*/, JSON.parse(value)];
-                }
-            });
-        });
-    }
-    Credentials.get = get;
-    function set(authenticatedSessionDescriptorSharedData) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, localStorageApi.setItem(key, JSON.stringify(authenticatedSessionDescriptorSharedData))];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    }
-    Credentials.set = set;
-})(Credentials = exports.Credentials || (exports.Credentials = {}));
-
-},{"./localStorageApi":44}],42:[function(require,module,exports){
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var localStorageApi = require("./localStorageApi");
-var key = "declaredPushNotificationToken";
-function get() {
-    return __awaiter(this, void 0, void 0, function () {
-        var value;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, localStorageApi.getItem(key)];
-                case 1:
-                    value = _a.sent();
-                    if (value === null) {
-                        return [2 /*return*/, undefined];
-                    }
-                    return [2 /*return*/, value];
-            }
-        });
-    });
-}
-exports.get = get;
-function set(value) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, localStorageApi.setItem(key, value)];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.set = set;
-function remove() {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _a = null;
-                    return [4 /*yield*/, get()];
-                case 1:
-                    if (_a === (_b.sent())) {
-                        return [2 /*return*/];
-                    }
-                    return [4 /*yield*/, localStorageApi.removeItem(key)];
-                case 2:
-                    _b.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.remove = remove;
-
-},{"./localStorageApi":44}],43:[function(require,module,exports){
+},{"./localStorageApi":30,"buffer":2,"evt":50}],29:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = localStorage;
 
-},{}],44:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -8872,14 +7531,14 @@ function removeItem(key) {
 }
 exports.removeItem = removeItem;
 
-},{"./asyncOrSyncLocalStorage":43}],45:[function(require,module,exports){
+},{"./asyncOrSyncLocalStorage":29}],31:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
+var evt_1 = require("evt");
 var api = {
     "getIsOnline": function () { return navigator.onLine; },
     "evtStateChange": (function () {
-        var out = new ts_events_extended_1.VoidSyncEvent();
+        var out = new evt_1.VoidEvt();
         window.addEventListener("online", function () { return out.post(); });
         window.addEventListener("offline", function () { return out.post(); });
         return out;
@@ -8887,13 +7546,13 @@ var api = {
 };
 exports.getApi = function () { return Promise.resolve(api); };
 
-},{"ts-events-extended":9}],46:[function(require,module,exports){
+},{"evt":50}],32:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
 exports.getApi = impl_1.getApi;
 
-},{"./impl":45}],47:[function(require,module,exports){
+},{"./impl":31}],33:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("../env");
@@ -8906,7 +7565,7 @@ var default_ = function (reason) {
 };
 exports.default = default_;
 
-},{"../env":38}],48:[function(require,module,exports){
+},{"../env":26}],34:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -9026,12 +7685,12 @@ exports.restartApp = function () {
     });
 };
 
-},{"./impl":47}],49:[function(require,module,exports){
+},{"./impl":33}],35:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectSidHttpHeaderName = "x-connect-sid";
 
-},{}],50:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -9069,362 +7728,459 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var apiDeclaration = require("../../web_api_declaration");
 var sendRequest_1 = require("./sendRequest");
-exports.WebApiError = sendRequest_1.WebApiError;
-var AuthenticatedSessionDescriptorSharedData_1 = require("../localStorage/AuthenticatedSessionDescriptorSharedData");
-var Credentials_1 = require("../localStorage/Credentials");
 var env_1 = require("../env");
-var ts_events_extended_1 = require("ts-events-extended");
-var restartApp_1 = require("../restartApp");
-var declaredPushNotificationToken = require("../localStorage/declaredPushNotificationToken");
-var networkStateMonitoring = require("../networkStateMonitoring");
-var evtError = new ts_events_extended_1.SyncEvent();
-evtError.attach(function (_a) {
-    var methodName = _a.methodName, httpErrorStatus = _a.httpErrorStatus;
-    switch (env_1.env.jsRuntimeEnv) {
-        case "browser":
-            {
-                switch (httpErrorStatus) {
-                    case 401:
-                        restartApp_1.restartApp("Wep api 401");
-                        break;
-                        ;
-                    case 500:
-                        alert("Internal server error");
-                        break;
-                    case 400:
-                        alert("Request malformed");
-                        break;
-                    case undefined:
-                        alert("Can't reach the server");
-                        break;
-                    default: alert(methodName + " httpErrorStatus: " + httpErrorStatus);
+var evt_1 = require("evt");
+var assert_1 = require("../../tools/typeSafety/assert");
+function getWebApi(params) {
+    var _this = this;
+    assert_1.assert(!getWebApi.hasBeenCalled);
+    getWebApi.hasBeenCalled = true;
+    //const { Credentials, AuthenticatedSessionDescriptorSharedData } = params;
+    var AuthenticatedSessionDescriptorSharedData = params.AuthenticatedSessionDescriptorSharedData, restartApp = params.restartApp, networkStateMonitoringApi = params.networkStateMonitoringApi;
+    var evtError = new evt_1.Evt();
+    evtError.attach(function (_a) {
+        var methodName = _a.methodName, httpErrorStatus = _a.httpErrorStatus;
+        switch (env_1.env.jsRuntimeEnv) {
+            case "browser":
+                {
+                    switch (httpErrorStatus) {
+                        case 401:
+                            restartApp("Wep api 401");
+                            break;
+                            ;
+                        case 500:
+                            alert("Internal server error");
+                            break;
+                        case 400:
+                            alert("Request malformed");
+                            break;
+                        case undefined:
+                            alert("Can't reach the server");
+                            break;
+                        default: alert(methodName + " httpErrorStatus: " + httpErrorStatus);
+                    }
                 }
-            }
-            break;
-        case "react-native":
-            {
-                restartApp_1.restartApp("WebApi Error: " + methodName + " " + httpErrorStatus);
-            }
-            break;
-    }
-});
-var canRequestThrow = false;
-function setCanRequestThrowToTrueForNextMethodCall() {
-    canRequestThrow = true;
-}
-exports.setCanRequestThrowToTrueForNextMethodCall = setCanRequestThrowToTrueForNextMethodCall;
-var sendRequest = function (methodName, params) { return __awaiter(void 0, void 0, void 0, function () {
-    var networkStateMonitoringApi, _a, _b, _c, _d, error_1;
-    return __generator(this, function (_e) {
-        switch (_e.label) {
-            case 0: return [4 /*yield*/, networkStateMonitoring.getApi()];
-            case 1:
-                networkStateMonitoringApi = _e.sent();
-                if (!!networkStateMonitoringApi.getIsOnline()) return [3 /*break*/, 3];
-                return [4 /*yield*/, networkStateMonitoringApi.evtStateChange.waitFor()];
-            case 2:
-                _e.sent();
-                _e.label = 3;
-            case 3:
-                _e.trys.push([3, 9, , 10]);
-                _a = sendRequest_1.sendRequest;
-                _b = [methodName,
-                    params];
-                _d = env_1.env.jsRuntimeEnv === "react-native";
-                if (!_d) return [3 /*break*/, 5];
-                return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
-            case 4:
-                _d = (_e.sent());
-                _e.label = 5;
-            case 5:
-                if (!_d) return [3 /*break*/, 7];
-                return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.get()];
-            case 6:
-                _c = (_e.sent()).connect_sid;
-                return [3 /*break*/, 8];
-            case 7:
-                _c = undefined;
-                _e.label = 8;
-            case 8: return [2 /*return*/, _a.apply(void 0, _b.concat([_c]))];
-            case 9:
-                error_1 = _e.sent();
-                if (!(error_1 instanceof sendRequest_1.WebApiError)) {
-                    throw error_1;
+                break;
+            case "react-native":
+                {
+                    restartApp("WebApi Error: " + methodName + " " + httpErrorStatus);
                 }
-                if (canRequestThrow) {
-                    canRequestThrow = false;
-                    throw error_1;
-                }
-                evtError.post(error_1);
-                return [2 /*return*/, new Promise(function () { })];
-            case 10: return [2 /*return*/];
+                break;
         }
     });
-}); };
-exports.registerUser = (function () {
-    var methodName = apiDeclaration.registerUser.methodName;
-    return function (email, secret, towardUserEncryptKeyStr, encryptedSymmetricKey) {
-        return sendRequest(methodName, {
-            email: email,
-            secret: secret,
-            towardUserEncryptKeyStr: towardUserEncryptKeyStr,
-            encryptedSymmetricKey: encryptedSymmetricKey
+    var sendRequest = function (params_) { return __awaiter(_this, void 0, void 0, function () {
+        var methodName, params, shouldThrowOnError, _a, _b, _c, _d, error_1;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
+                case 0:
+                    methodName = params_.methodName, params = params_.params, shouldThrowOnError = params_.shouldThrowOnError;
+                    if (!!networkStateMonitoringApi.getIsOnline()) return [3 /*break*/, 2];
+                    return [4 /*yield*/, networkStateMonitoringApi.evtStateChange.waitFor()];
+                case 1:
+                    _e.sent();
+                    _e.label = 2;
+                case 2:
+                    _e.trys.push([2, 8, , 9]);
+                    _a = sendRequest_1.sendRequest;
+                    _b = [methodName,
+                        params];
+                    _d = env_1.env.jsRuntimeEnv === "react-native";
+                    if (!_d) return [3 /*break*/, 4];
+                    return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.isPresent()];
+                case 3:
+                    _d = (_e.sent());
+                    _e.label = 4;
+                case 4:
+                    if (!_d) return [3 /*break*/, 6];
+                    return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.get()];
+                case 5:
+                    _c = (_e.sent()).connect_sid;
+                    return [3 /*break*/, 7];
+                case 6:
+                    _c = undefined;
+                    _e.label = 7;
+                case 7: return [2 /*return*/, _a.apply(void 0, _b.concat([_c]))];
+                case 8:
+                    error_1 = _e.sent();
+                    if (!(error_1 instanceof sendRequest_1.WebApiError)) {
+                        throw error_1;
+                    }
+                    if (shouldThrowOnError) {
+                        throw error_1;
+                    }
+                    evtError.post(error_1);
+                    return [2 /*return*/, new Promise(function () { })];
+                case 9: return [2 /*return*/];
+            }
         });
-    };
-})();
-exports.validateEmail = (function () {
-    var methodName = apiDeclaration.validateEmail.methodName;
-    return function (email, activationCode) {
-        return sendRequest(methodName, { email: email, activationCode: activationCode });
-    };
-})();
-/** uaInstanceId should be provided on android/ios and undefined on the web */
-exports.loginUser = (function () {
-    var methodName = apiDeclaration.loginUser.methodName;
-    return function (email, secret, uaInstanceId) {
-        return __awaiter(this, void 0, void 0, function () {
-            var response;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        email = email.toLowerCase();
-                        return [4 /*yield*/, sendRequest(methodName, { email: email, secret: secret, uaInstanceId: uaInstanceId })];
-                    case 1:
-                        response = _a.sent();
-                        if (!(response.status !== "SUCCESS")) return [3 /*break*/, 4];
-                        if (!(response.status !== "RETRY STILL FORBIDDEN")) return [3 /*break*/, 3];
-                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
-                    case 2:
-                        _a.sent();
-                        _a.label = 3;
-                    case 3: return [2 /*return*/, response];
-                    case 4:
-                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 6];
-                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
-                                var previousCred, _a;
-                                return __generator(this, function (_b) {
-                                    switch (_b.label) {
-                                        case 0: return [4 /*yield*/, Credentials_1.Credentials.isPresent()];
-                                        case 1:
-                                            if (!(_b.sent())) return [3 /*break*/, 3];
-                                            return [4 /*yield*/, Credentials_1.Credentials.get()];
-                                        case 2:
-                                            _a = _b.sent();
-                                            return [3 /*break*/, 4];
-                                        case 3:
-                                            _a = undefined;
-                                            _b.label = 4;
-                                        case 4:
-                                            previousCred = _a;
-                                            if (!!previousCred &&
-                                                previousCred.email === email &&
-                                                previousCred.secret === secret &&
-                                                previousCred.uaInstanceId === uaInstanceId) {
-                                                return [2 /*return*/];
-                                            }
-                                            return [4 /*yield*/, Promise.all([
-                                                    Credentials_1.Credentials.set({
-                                                        email: email,
-                                                        secret: secret,
-                                                        "uaInstanceId": uaInstanceId
-                                                    }),
-                                                    declaredPushNotificationToken.remove()
-                                                ])];
-                                        case 5:
-                                            _b.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            }); })()];
-                    case 5:
-                        _a.sent();
-                        _a.label = 6;
-                    case 6: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.set({
-                            "connect_sid": response.connect_sid,
-                            email: email,
-                            "encryptedSymmetricKey": response.encryptedSymmetricKey,
-                            "uaInstanceId": uaInstanceId === undefined ?
-                                response.webUaInstanceId : uaInstanceId
-                        })];
-                    case 7:
-                        _a.sent();
-                        return [2 /*return*/, { "status": response.status }];
-                }
-            });
-        });
-    };
-})();
-exports.isUserLoggedIn = (function () {
-    var methodName = apiDeclaration.isUserLoggedIn.methodName;
-    return function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var isLoggedIn;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.isPresent()];
-                    case 1:
-                        if (!(_a.sent())) {
-                            return [2 /*return*/, false];
-                        }
-                        return [4 /*yield*/, sendRequest(methodName, undefined)];
-                    case 2:
-                        isLoggedIn = _a.sent();
-                        if (!!isLoggedIn) return [3 /*break*/, 4];
-                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
-                    case 3:
-                        _a.sent();
-                        _a.label = 4;
-                    case 4: return [2 /*return*/, isLoggedIn];
-                }
-            });
-        });
-    };
-})();
-exports.declareUa = (function () {
-    var methodName = apiDeclaration.declareUa.methodName;
-    return function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest(methodName, params)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.logoutUser = (function () {
-    var methodName = apiDeclaration.logoutUser.methodName;
-    return function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData_1.AuthenticatedSessionDescriptorSharedData.remove()];
-                    case 2:
-                        _a.sent();
-                        if (!(env_1.env.jsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
-                        return [4 /*yield*/, Credentials_1.Credentials.remove()];
-                    case 3:
-                        _a.sent();
-                        _a.label = 4;
-                    case 4: return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-/** Return true if email has account */
-exports.sendRenewPasswordEmail = (function () {
-    var methodName = apiDeclaration.sendRenewPasswordEmail.methodName;
-    return function (email) {
-        return sendRequest(methodName, { email: email });
-    };
-})();
-exports.renewPassword = (function () {
-    var methodName = apiDeclaration.renewPassword.methodName;
-    return function (email, newSecret, newTowardUserEncryptKeyStr, newEncryptedSymmetricKey, token) {
-        return sendRequest(methodName, {
-            email: email,
-            newSecret: newSecret,
-            newTowardUserEncryptKeyStr: newTowardUserEncryptKeyStr,
-            newEncryptedSymmetricKey: newEncryptedSymmetricKey,
-            token: token
-        });
-    };
-})();
-exports.getCountryIso = (function () {
-    var methodName = apiDeclaration.getCountryIso.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
-exports.getChangesRates = (function () {
-    var methodName = apiDeclaration.getChangesRates.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
-exports.getSubscriptionInfos = (function () {
-    var methodName = apiDeclaration.getSubscriptionInfos.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
-exports.subscribeOrUpdateSource = (function () {
-    var methodName = apiDeclaration.subscribeOrUpdateSource.methodName;
-    return function (sourceId) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest(methodName, { sourceId: sourceId })];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.unsubscribe = (function () {
-    var methodName = apiDeclaration.unsubscribe.methodName;
-    return function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, sendRequest(methodName, undefined)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-})();
-exports.createStripeCheckoutSessionForShop = (function () {
-    var methodName = apiDeclaration.createStripeCheckoutSessionForShop.methodName;
-    return function (cart, shippingFormData, currency, success_url, cancel_url) {
-        return sendRequest(methodName, {
-            "cartDescription": cart.map(function (_a) {
-                var product = _a.product, quantity = _a.quantity;
-                return ({
-                    "productName": product.name,
-                    quantity: quantity
+    }); };
+    return {
+        WebApiError: sendRequest_1.WebApiError,
+        "registerUser": (function () {
+            var methodName = apiDeclaration.registerUser.methodName;
+            return function (params_) {
+                var shouldThrowOnError = params_.shouldThrowOnError, params = __rest(params_, ["shouldThrowOnError"]);
+                return sendRequest({
+                    methodName: methodName,
+                    params: params,
+                    shouldThrowOnError: shouldThrowOnError
                 });
-            }),
-            shippingFormData: shippingFormData,
-            currency: currency,
-            success_url: success_url,
-            cancel_url: cancel_url
-        });
+            };
+        })(),
+        "validateEmail": (function () {
+            var methodName = apiDeclaration.validateEmail.methodName;
+            return function (params_) {
+                var shouldThrowOnError = params_.shouldThrowOnError, params = __rest(params_, ["shouldThrowOnError"]);
+                return sendRequest({
+                    methodName: methodName,
+                    params: params,
+                    shouldThrowOnError: shouldThrowOnError
+                });
+            };
+        })(),
+        "getLoginLogoutApi": function (dependencyInjectionParams) {
+            assert_1.assert(dependencyInjectionParams.assertJsRuntimeEnv === env_1.env.jsRuntimeEnv, "Wrong params for js runtime environnement");
+            return ({
+                /** uaInstanceId should be provided on android/ios and undefined on the web */
+                "loginUser": (function () {
+                    var methodName = apiDeclaration.loginUser.methodName;
+                    return function (params_) {
+                        return __awaiter(this, void 0, void 0, function () {
+                            var response, Credentials_1, declaredPushNotificationToken_1;
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        assert_1.assert(params_.assertJsRuntimeEnv === env_1.env.jsRuntimeEnv);
+                                        params_.email = params_.email.toLowerCase();
+                                        return [4 /*yield*/, sendRequest({
+                                                methodName: methodName,
+                                                "params": {
+                                                    "email": params_.email,
+                                                    "secret": params_.secret,
+                                                    "uaInstanceId": (function () {
+                                                        switch (params_.assertJsRuntimeEnv) {
+                                                            case "browser": return undefined;
+                                                            case "react-native": return params_.uaInstanceId;
+                                                        }
+                                                    })()
+                                                },
+                                                "shouldThrowOnError": params_.shouldThrowOnError
+                                            })];
+                                    case 1:
+                                        response = _a.sent();
+                                        if (!(response.status !== "SUCCESS")) return [3 /*break*/, 4];
+                                        if (!(response.status !== "RETRY STILL FORBIDDEN" &&
+                                            dependencyInjectionParams.assertJsRuntimeEnv === "react-native")) return [3 /*break*/, 3];
+                                        return [4 /*yield*/, dependencyInjectionParams.Credentials.remove()];
+                                    case 2:
+                                        _a.sent();
+                                        _a.label = 3;
+                                    case 3: return [2 /*return*/, response];
+                                    case 4:
+                                        if (!(params_.assertJsRuntimeEnv === "react-native")) return [3 /*break*/, 6];
+                                        assert_1.assert(params_.assertJsRuntimeEnv === dependencyInjectionParams.assertJsRuntimeEnv);
+                                        Credentials_1 = dependencyInjectionParams.Credentials, declaredPushNotificationToken_1 = dependencyInjectionParams.declaredPushNotificationToken;
+                                        return [4 /*yield*/, (function () { return __awaiter(_this, void 0, void 0, function () {
+                                                var previousCred, _a;
+                                                return __generator(this, function (_b) {
+                                                    switch (_b.label) {
+                                                        case 0: return [4 /*yield*/, Credentials_1.isPresent()];
+                                                        case 1:
+                                                            if (!(_b.sent())) return [3 /*break*/, 3];
+                                                            return [4 /*yield*/, Credentials_1.get()];
+                                                        case 2:
+                                                            _a = _b.sent();
+                                                            return [3 /*break*/, 4];
+                                                        case 3:
+                                                            _a = undefined;
+                                                            _b.label = 4;
+                                                        case 4:
+                                                            previousCred = _a;
+                                                            if (!!previousCred &&
+                                                                previousCred.email === params_.email &&
+                                                                previousCred.secret === params_.secret &&
+                                                                previousCred.uaInstanceId === params_.uaInstanceId) {
+                                                                return [2 /*return*/];
+                                                            }
+                                                            return [4 /*yield*/, Promise.all([
+                                                                    Credentials_1.set({
+                                                                        "email": params_.email,
+                                                                        "secret": params_.secret,
+                                                                        "uaInstanceId": params_.uaInstanceId
+                                                                    }),
+                                                                    declaredPushNotificationToken_1.remove()
+                                                                ])];
+                                                        case 5:
+                                                            _b.sent();
+                                                            return [2 /*return*/];
+                                                    }
+                                                });
+                                            }); })()];
+                                    case 5:
+                                        _a.sent();
+                                        _a.label = 6;
+                                    case 6: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.set({
+                                            "connect_sid": response.connect_sid,
+                                            "email": params_.email,
+                                            "encryptedSymmetricKey": response.encryptedSymmetricKey,
+                                            "uaInstanceId": (function () {
+                                                switch (params_.assertJsRuntimeEnv) {
+                                                    case "browser": return response.webUaInstanceId;
+                                                    case "react-native": return params_.uaInstanceId;
+                                                }
+                                            })()
+                                        })];
+                                    case 7:
+                                        _a.sent();
+                                        return [2 /*return*/, { "status": response.status }];
+                                }
+                            });
+                        });
+                    };
+                })(),
+                "logoutUser": (function () {
+                    var methodName = apiDeclaration.logoutUser.methodName;
+                    return function (params_) {
+                        return __awaiter(this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, sendRequest({
+                                            methodName: methodName,
+                                            "params": undefined,
+                                            "shouldThrowOnError": params_ === null || params_ === void 0 ? void 0 : params_.shouldThrowOnError
+                                        })];
+                                    case 1:
+                                        _a.sent();
+                                        return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.remove()];
+                                    case 2:
+                                        _a.sent();
+                                        if (!(dependencyInjectionParams.assertJsRuntimeEnv === "react-native")) return [3 /*break*/, 4];
+                                        return [4 /*yield*/, dependencyInjectionParams.Credentials.remove()];
+                                    case 3:
+                                        _a.sent();
+                                        _a.label = 4;
+                                    case 4: return [2 /*return*/];
+                                }
+                            });
+                        });
+                    };
+                })()
+            });
+        },
+        "isUserLoggedIn": (function () {
+            var methodName = apiDeclaration.isUserLoggedIn.methodName;
+            return function (params_) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var isLoggedIn;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.isPresent()];
+                            case 1:
+                                if (!(_a.sent())) {
+                                    return [2 /*return*/, false];
+                                }
+                                return [4 /*yield*/, sendRequest({
+                                        methodName: methodName,
+                                        "params": undefined,
+                                        "shouldThrowOnError": params_ === null || params_ === void 0 ? void 0 : params_.shouldThrowOnError
+                                    })];
+                            case 2:
+                                isLoggedIn = _a.sent();
+                                if (!!isLoggedIn) return [3 /*break*/, 4];
+                                return [4 /*yield*/, AuthenticatedSessionDescriptorSharedData.remove()];
+                            case 3:
+                                _a.sent();
+                                _a.label = 4;
+                            case 4: return [2 /*return*/, isLoggedIn];
+                        }
+                    });
+                });
+            };
+        })(),
+        "declareUa": (function () {
+            var methodName = apiDeclaration.declareUa.methodName;
+            return function (params_) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var assertJsRuntimeEnv, shouldThrowOnError, params;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                assert_1.assert(params_.assertJsRuntimeEnv === env_1.env.jsRuntimeEnv);
+                                assertJsRuntimeEnv = params_.assertJsRuntimeEnv, shouldThrowOnError = params_.shouldThrowOnError, params = __rest(params_, ["assertJsRuntimeEnv", "shouldThrowOnError"]);
+                                return [4 /*yield*/, sendRequest({
+                                        methodName: methodName,
+                                        params: params,
+                                        shouldThrowOnError: shouldThrowOnError
+                                    })];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+        })(),
+        /** Return true if email has account */
+        "sendRenewPasswordEmail": (function () {
+            var methodName = apiDeclaration.sendRenewPasswordEmail.methodName;
+            return function (params_) {
+                var shouldThrowOnError = params_.shouldThrowOnError, params = __rest(params_, ["shouldThrowOnError"]);
+                return sendRequest({
+                    methodName: methodName,
+                    params: params,
+                    shouldThrowOnError: shouldThrowOnError
+                });
+            };
+        })(),
+        "renewPassword": (function () {
+            var methodName = apiDeclaration.renewPassword.methodName;
+            return function (params_) {
+                var shouldThrowOnError = params_.shouldThrowOnError, params = __rest(params_, ["shouldThrowOnError"]);
+                return sendRequest({
+                    methodName: methodName,
+                    params: params,
+                    shouldThrowOnError: shouldThrowOnError
+                });
+            };
+        })(),
+        "getCountryIso": (function () {
+            var methodName = apiDeclaration.getCountryIso.methodName;
+            return function (params_) {
+                return sendRequest({
+                    methodName: methodName,
+                    "params": undefined,
+                    "shouldThrowOnError": params_ === null || params_ === void 0 ? void 0 : params_.shouldThrowOnError
+                });
+            };
+        })(),
+        "getChangesRates": (function () {
+            var methodName = apiDeclaration.getChangesRates.methodName;
+            return function (params_) {
+                return sendRequest({
+                    methodName: methodName,
+                    "params": undefined,
+                    "shouldThrowOnError": params_ === null || params_ === void 0 ? void 0 : params_.shouldThrowOnError
+                });
+            };
+        })(),
+        "getSubscriptionInfos": (function () {
+            var methodName = apiDeclaration.getSubscriptionInfos.methodName;
+            return function (params_) {
+                return sendRequest({
+                    methodName: methodName,
+                    "params": undefined,
+                    "shouldThrowOnError": params_ === null || params_ === void 0 ? void 0 : params_.shouldThrowOnError
+                });
+            };
+        })(),
+        "subscribeOrUpdateSource": (function () {
+            var methodName = apiDeclaration.subscribeOrUpdateSource.methodName;
+            return function (params_) {
+                return __awaiter(this, void 0, void 0, function () {
+                    var sourceId, shouldThrowOnError;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                sourceId = params_.sourceId, shouldThrowOnError = params_.shouldThrowOnError;
+                                return [4 /*yield*/, sendRequest({
+                                        methodName: methodName,
+                                        "params": { sourceId: sourceId },
+                                        shouldThrowOnError: shouldThrowOnError
+                                    })];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+        })(),
+        "unsubscribe": (function () {
+            var methodName = apiDeclaration.unsubscribe.methodName;
+            return function (params_) {
+                return __awaiter(this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, sendRequest({
+                                    methodName: methodName,
+                                    "params": undefined,
+                                    "shouldThrowOnError": params_ === null || params_ === void 0 ? void 0 : params_.shouldThrowOnError
+                                })];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+        })(),
+        "createStripeCheckoutSessionForShop": (function () {
+            var methodName = apiDeclaration.createStripeCheckoutSessionForShop.methodName;
+            return function (params_) {
+                var cart = params_.cart, shippingFormData = params_.shippingFormData, currency = params_.currency, success_url = params_.success_url, cancel_url = params_.cancel_url, shouldThrowOnError = params_.shouldThrowOnError;
+                return sendRequest({
+                    methodName: methodName,
+                    "params": {
+                        "cartDescription": cart.map(function (_a) {
+                            var product = _a.product, quantity = _a.quantity;
+                            return ({
+                                "productName": product.name,
+                                quantity: quantity
+                            });
+                        }),
+                        shippingFormData: shippingFormData,
+                        currency: currency,
+                        success_url: success_url,
+                        cancel_url: cancel_url
+                    },
+                    shouldThrowOnError: shouldThrowOnError
+                });
+            };
+        })(),
+        "createStripeCheckoutSessionForSubscription": (function () {
+            var methodName = apiDeclaration.createStripeCheckoutSessionForSubscription.methodName;
+            return function (params_) {
+                var shouldThrowOnError = params_.shouldThrowOnError, params = __rest(params_, ["shouldThrowOnError"]);
+                return sendRequest({
+                    methodName: methodName,
+                    params: params,
+                    shouldThrowOnError: shouldThrowOnError
+                });
+            };
+        })(),
+        "getOrders": (function () {
+            var methodName = apiDeclaration.getOrders.methodName;
+            return function (params_) {
+                return sendRequest({
+                    methodName: methodName,
+                    "params": undefined,
+                    "shouldThrowOnError": params_ === null || params_ === void 0 ? void 0 : params_.shouldThrowOnError
+                });
+            };
+        })()
     };
-})();
-exports.createStripeCheckoutSessionForSubscription = (function () {
-    var methodName = apiDeclaration.createStripeCheckoutSessionForSubscription.methodName;
-    return function (currency, success_url, cancel_url) {
-        return sendRequest(methodName, {
-            currency: currency,
-            success_url: success_url,
-            cancel_url: cancel_url
-        });
-    };
-})();
-exports.getOrders = (function () {
-    var methodName = apiDeclaration.getOrders.methodName;
-    return function () {
-        return sendRequest(methodName, undefined);
-    };
-})();
+}
+exports.getWebApi = getWebApi;
+(function (getWebApi) {
+    getWebApi.hasBeenCalled = false;
+})(getWebApi = exports.getWebApi || (exports.getWebApi = {}));
 
-},{"../../web_api_declaration":59,"../env":38,"../localStorage/AuthenticatedSessionDescriptorSharedData":40,"../localStorage/Credentials":41,"../localStorage/declaredPushNotificationToken":42,"../networkStateMonitoring":46,"../restartApp":48,"./sendRequest":51,"ts-events-extended":9}],51:[function(require,module,exports){
+},{"../../tools/typeSafety/assert":45,"../../web_api_declaration":46,"../env":26,"./sendRequest":37,"evt":50}],37:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -9543,7 +8299,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":35,"../env":38,"../types/connectSidHttpHeaderName":49,"transfer-tools/dist/lib/JSON_CUSTOM":67}],52:[function(require,module,exports){
+},{"../../gateway/webApiPath":24,"../env":26,"../types/connectSidHttpHeaderName":35,"transfer-tools/dist/lib/JSON_CUSTOM":84}],38:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -9743,10 +8499,10 @@ function prettyPrint(amount, currency) {
 }
 exports.prettyPrint = prettyPrint;
 
-},{"../../res/currency.json":68}],53:[function(require,module,exports){
+},{"../../res/currency.json":85}],39:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts_events_extended_1 = require("ts-events-extended");
+var evt_1 = require("evt");
 /**
  * Assert bootstrap modal initialized on jQuery element.
  * bootbox already call .modal().
@@ -9756,9 +8512,9 @@ var ts_events_extended_1 = require("ts-events-extended");
  * NOTE: For dialog remember to invoke removeFromDom once hidden.
  */
 function createGenericProxyForBootstrapModal($initializedModalDiv) {
-    var evtHide = new ts_events_extended_1.VoidSyncEvent();
-    var evtShown = new ts_events_extended_1.VoidSyncEvent();
-    var evtHidden = new ts_events_extended_1.VoidSyncEvent();
+    var evtHide = new evt_1.VoidEvt();
+    var evtShown = new evt_1.VoidEvt();
+    var evtHidden = new evt_1.VoidEvt();
     $initializedModalDiv.on("hide.bs.modal", function () { return evtHide.post(); });
     $initializedModalDiv.on("shown.bs.modal", function () { return evtShown.post(); });
     $initializedModalDiv.on("hidden.bs.modal", function () { return evtHidden.post(); });
@@ -9776,7 +8532,7 @@ function createGenericProxyForBootstrapModal($initializedModalDiv) {
 }
 exports.createGenericProxyForBootstrapModal = createGenericProxyForBootstrapModal;
 
-},{"ts-events-extended":9}],54:[function(require,module,exports){
+},{"evt":50}],40:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
@@ -9810,7 +8566,7 @@ var loading;
 })(loading || (loading = {}));
 exports.getApi = function () { return customImplementationOfApi || bootboxBasedImplementationOfBaseApi; };
 
-},{"../createGenericProxyForBootstrapModal":53}],55:[function(require,module,exports){
+},{"../createGenericProxyForBootstrapModal":39}],41:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -10033,11 +8789,11 @@ exports.dialogApi = {
     }
 };
 
-},{"../stack":57,"./getApi":54,"./types":56,"run-exclusive":65}],56:[function(require,module,exports){
+},{"../stack":43,"./getApi":40,"./types":42,"run-exclusive":82}],42:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],57:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -10162,7 +8918,7 @@ function add(modal) {
 }
 exports.add = add;
 
-},{}],58:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 if (typeof Object.assign !== 'function') {
     // Must be writable: true, enumerable: false, configurable: true
     Object.defineProperty(Object, "assign", {
@@ -10190,7 +8946,17 @@ if (typeof Object.assign !== 'function') {
     });
 }
 
-},{}],59:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function assert(condition, msg) {
+    if (!condition) {
+        throw new Error(msg);
+    }
+}
+exports.assert = assert;
+
+},{}],46:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
@@ -10258,7 +9024,1869 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],60:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+exports.__esModule = true;
+var Set_1 = require("minimal-polyfills/dist/lib/Set");
+var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
+var getLazyEvtFactory_1 = require("./util/getLazyEvtFactory");
+var assert_1 = require("../tools/typeSafety/assert");
+var typeGuard_1 = require("../tools/typeSafety/typeGuard");
+/** https://docs.evt.land/api/ctx */
+var Ctx = /** @class */ (function () {
+    function Ctx() {
+        this.handlers = new Set_1.Polyfill();
+        this.evtByHandler = new WeakMap_1.Polyfill();
+        {
+            var _a = getLazyEvtFactory_1.getLazyEvtFactory(), getEvt = _a.getEvt, post = _a.post;
+            this.onDone = post;
+            this.getEvtDone = getEvt;
+        }
+        {
+            var _b = getLazyEvtFactory_1.getLazyEvtFactory(), getEvt = _b.getEvt, post = _b.post;
+            this.getEvtAttach = getEvt;
+            this.onAttach = post;
+        }
+        {
+            var _c = getLazyEvtFactory_1.getLazyEvtFactory(), getEvt = _c.getEvt, post = _c.post;
+            this.getEvtDetach = getEvt;
+            this.onDetach = post;
+        }
+    }
+    /**
+     *
+     * https://docs.evt.land/api/ctx#ctx-getprdone-timeout
+     *
+     * Return a promise that resolve next time ctx.done(result) is invoked
+     * Reject if ctx.abort(error) is invoked.
+     * Optionally a timeout can be passed, if so the returned promise will reject
+     * with EvtError.Timeout if done(result) is not called * within [timeout]ms.
+     * If the timeout is reached ctx.abort(timeoutError) will be invoked.
+     */
+    Ctx.prototype.getPrDone = function (timeout) {
+        var _this_1 = this;
+        return this.getEvtDone()
+            .waitFor(timeout)
+            .then(function (_a) {
+            var _b = __read(_a, 2), error = _b[0], result = _b[1];
+            if (!!error) {
+                throw error;
+            }
+            return result;
+        }, function (timeoutError) {
+            _this_1.abort(timeoutError);
+            throw timeoutError;
+        });
+    };
+    /**
+     * https://docs.evt.land/api/ctx#ctx-abort-error
+     *
+     * All the handler will be detached.
+     * evtDone will post [ error, undefined, handlers (detached) ]
+     * if getPrDone() was invoked the promise will reject with the error
+     */
+    Ctx.prototype.abort = function (error) {
+        return this.__done(error);
+    };
+    /**
+     * https://docs.evt.land/api/ctx#ctx-done-result
+     *
+     * Detach all handlers.
+     * evtDone will post [ null, result, handlers (detached) ]
+     * If getPrDone() was invoked the promise will result with result
+     */
+    Ctx.prototype.done = function (result) {
+        return this.__done(undefined, result);
+    };
+    /** Detach all handler bound to this context from theirs respective Evt and post getEvtDone() */
+    Ctx.prototype.__done = function (error, result) {
+        var e_1, _a;
+        var handlers = [];
+        try {
+            for (var _b = __values(this.handlers.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var handler = _c.value;
+                var evt = this.evtByHandler.get(handler);
+                var wasStillAttached = handler.detach();
+                //NOTE: It should not be possible
+                if (!wasStillAttached) {
+                    continue;
+                }
+                handlers.push({ handler: handler, evt: evt });
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        this.onDone([
+            error !== null && error !== void 0 ? error : null,
+            result,
+            handlers
+        ]);
+        return handlers;
+    };
+    /** https://docs.evt.land/api/ctx#ctx-gethandlers */
+    Ctx.prototype.getHandlers = function () {
+        var _this_1 = this;
+        return Array.from(this.handlers.values())
+            .map(function (handler) { return ({ handler: handler, "evt": _this_1.evtByHandler.get(handler) }); });
+    };
+    /** Exposed only to enable safe interoperability between mismatching EVT versions, do not use */
+    Ctx.prototype.zz__addHandler = function (handler, evt) {
+        assert_1.assert(handler.ctx === this);
+        assert_1.assert(typeGuard_1.typeGuard(handler));
+        this.handlers.add(handler);
+        this.evtByHandler.set(handler, evt);
+        this.onAttach({ handler: handler, evt: evt });
+    };
+    /** Exposed only to enable safe interoperability between EVT versions, do not use */
+    Ctx.prototype.zz__removeHandler = function (handler) {
+        assert_1.assert(handler.ctx === this);
+        assert_1.assert(typeGuard_1.typeGuard(handler));
+        this.onDetach({ handler: handler, "evt": this.evtByHandler.get(handler) });
+        this.handlers["delete"](handler);
+    };
+    return Ctx;
+}());
+exports.Ctx = Ctx;
+/** https://docs.evt.land/api/ctx */
+var VoidCtx = /** @class */ (function (_super) {
+    __extends(VoidCtx, _super);
+    function VoidCtx() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Detach all handlers.
+     * evtDone will post [ null, undefined, handlers (detached) ]
+     * If getPrDone() was invoked the promise will resolve
+     */
+    VoidCtx.prototype.done = function () {
+        return _super.prototype.done.call(this, undefined);
+    };
+    return VoidCtx;
+}(Ctx));
+exports.VoidCtx = VoidCtx;
+
+},{"../tools/typeSafety/assert":70,"../tools/typeSafety/typeGuard":74,"./util/getLazyEvtFactory":64,"minimal-polyfills/dist/lib/Set":80,"minimal-polyfills/dist/lib/WeakMap":81}],48:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+exports.__esModule = true;
+require("minimal-polyfills/dist/lib/Array.prototype.find");
+var Map_1 = require("minimal-polyfills/dist/lib/Map");
+var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
+var runExclusive = require("run-exclusive");
+var EvtError_1 = require("./types/EvtError");
+var overwriteReadonlyProp_1 = require("../tools/overwriteReadonlyProp");
+var encapsulateOpState_1 = require("./util/encapsulateOpState");
+var typeGuard_1 = require("../tools/typeSafety/typeGuard");
+var Operator_1 = require("./types/Operator");
+var Ctx_1 = require("./Ctx");
+var invokeOperator_1 = require("./util/invokeOperator");
+var merge_1 = require("./util/merge");
+var from_1 = require("./util/from");
+var parseOverloadParams_1 = require("./util/parseOverloadParams");
+var getLazyEvtFactory_1 = require("./util/getLazyEvtFactory");
+var getCtxFactory_1 = require("./util/getCtxFactory");
+exports.setPostCount = function (evt, value) {
+    return overwriteReadonlyProp_1.overwriteReadonlyProp(evt, "postCount", value);
+};
+/** https://docs.evt.land/api/evt */
+var Evt = /** @class */ (function () {
+    function Evt() {
+        var _this_1 = this;
+        this.__maxHandlers = 25;
+        //NOTE: Not really readonly but we want to prevent user from setting the value
+        //manually and we cant user accessor because we target es3.
+        /**
+         * https://docs.evt.land/api/evt/post
+         *
+         * Number of times .post(data) have been called.
+         */
+        this.postCount = 0;
+        this.traceId = null;
+        this.handlers = [];
+        this.handlerTriggers = new Map_1.Polyfill();
+        //NOTE: An async handler ( attached with waitFor ) is only eligible to handle a post if the post
+        //occurred after the handler was set. We don't want to waitFor event from the past.
+        //private readonly asyncHandlerChronologyMark = new WeakMap<ImplicitParams.Async, number>();
+        this.asyncHandlerChronologyMark = new WeakMap_1.Polyfill();
+        //NOTE: There is an exception to the above rule, we want to allow async waitFor loop 
+        //do so we have to handle the case where multiple event would be posted synchronously.
+        this.asyncHandlerChronologyExceptionRange = new WeakMap_1.Polyfill();
+        /*
+        NOTE: Used as Date.now() would be used to compare if an event is anterior
+        or posterior to an other. We don't use Date.now() because two call within
+        less than a ms will return the same value unlike this function.
+        */
+        this.getChronologyMark = (function () {
+            var currentChronologyMark = 0;
+            return function () { return currentChronologyMark++; };
+        })();
+        this.statelessByStatefulOp = new WeakMap_1.Polyfill();
+        this.postAsync = runExclusive.buildMethodCb(function (data, postChronologyMark, releaseLock) {
+            var e_1, _a;
+            var promises = [];
+            var chronologyMarkStartResolveTick;
+            //NOTE: Must be before handlerTrigger call.
+            Promise.resolve().then(function () { return chronologyMarkStartResolveTick = _this_1.getChronologyMark(); });
+            var _loop_1 = function (handler) {
+                if (!handler.async) {
+                    return "continue";
+                }
+                var opResult = invokeOperator_1.invokeOperator(_this_1.getStatelessOp(handler.op), data, true);
+                if (Operator_1.Operator.fλ.Result.NotMatched.match(opResult)) {
+                    Evt.doDetachIfNeeded(handler, opResult);
+                    return "continue";
+                }
+                var handlerTrigger = _this_1.handlerTriggers.get(handler);
+                if (!handlerTrigger) {
+                    return "continue";
+                }
+                var shouldCallHandlerTrigger = (function () {
+                    var handlerMark = _this_1.asyncHandlerChronologyMark.get(handler);
+                    if (postChronologyMark > handlerMark) {
+                        return true;
+                    }
+                    var exceptionRange = _this_1.asyncHandlerChronologyExceptionRange.get(handler);
+                    return (exceptionRange !== undefined &&
+                        exceptionRange.lowerMark < postChronologyMark &&
+                        postChronologyMark < exceptionRange.upperMark &&
+                        handlerMark > exceptionRange.upperMark);
+                })();
+                if (!shouldCallHandlerTrigger) {
+                    return "continue";
+                }
+                promises.push(new Promise(function (resolve) { return handler.promise
+                    .then(function () { return resolve(); })["catch"](function () { return resolve(); }); }));
+                handlerTrigger(opResult);
+            };
+            try {
+                for (var _b = __values(__spread(_this_1.handlers)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var handler = _c.value;
+                    _loop_1(handler);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            if (promises.length === 0) {
+                releaseLock();
+                return;
+            }
+            var handlersDump = __spread(_this_1.handlers);
+            Promise.all(promises).then(function () {
+                var e_2, _a;
+                try {
+                    for (var _b = __values(_this_1.handlers), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        var handler = _c.value;
+                        if (!handler.async) {
+                            continue;
+                        }
+                        if (handlersDump.indexOf(handler) >= 0) {
+                            continue;
+                        }
+                        _this_1.asyncHandlerChronologyExceptionRange.set(handler, {
+                            "lowerMark": postChronologyMark,
+                            "upperMark": chronologyMarkStartResolveTick
+                        });
+                    }
+                }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                finally {
+                    try {
+                        if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+                    }
+                    finally { if (e_2) throw e_2.error; }
+                }
+                releaseLock();
+            });
+        });
+        this.__parseOverloadParams = parseOverloadParams_1.parseOverloadParamsFactory();
+        var _a = getLazyEvtFactory_1.getLazyEvtFactory(), getEvtAttach = _a.getEvt, postEvtAttach = _a.post;
+        var _b = getLazyEvtFactory_1.getLazyEvtFactory(), getEvtDetach = _b.getEvt, postEvtDetach = _b.post;
+        this.onHandler = function (isAttach, handler) {
+            return (isAttach ? postEvtAttach : postEvtDetach)(handler);
+        };
+        this.getEvtAttach = getEvtAttach;
+        this.getEvtDetach = getEvtDetach;
+    }
+    Evt.newCtx = function () {
+        return new Ctx_1.Ctx();
+    };
+    /** https://docs.evt.land/api/evt/post */
+    Evt.prototype.postAsyncOnceHandled = function (data) {
+        var _this_1 = this;
+        if (this.isHandled(data)) {
+            return this.post(data);
+        }
+        var resolvePr;
+        var pr = new Promise(function (resolve) { return resolvePr = resolve; });
+        this.getEvtAttach().attachOnce(function (_a) {
+            var op = _a.op;
+            return !!invokeOperator_1.invokeOperator(_this_1.getStatelessOp(op), data);
+        }, function () { return Promise.resolve().then(function () { return resolvePr(_this_1.post(data)); }); });
+        return pr;
+    };
+    /**
+     *
+     * By default EventEmitters will print a warning if more than 25 handlers are added for
+     * a particular event. This is a useful default that helps finding memory leaks.
+     * Not all events should be limited to 25 handlers. The evt.setMaxHandlers() method allows the limit to be
+     * modified for this specific EventEmitter instance.
+     * The value can be set to Infinity (or 0) to indicate an unlimited number of listeners.
+     * Returns a reference to the EventEmitter, so that calls can be chained.
+     *
+     */
+    Evt.prototype.setMaxHandlers = function (n) {
+        this.__maxHandlers = isFinite(n) ? n : 0;
+        return this;
+    };
+    /** https://docs.evt.land/api/evt/enabletrace */
+    Evt.prototype.enableTrace = function (id, formatter, log
+    //NOTE: Not typeof console.log as we don't want to expose types from node
+    ) {
+        this.traceId = id;
+        this.traceFormatter = formatter !== null && formatter !== void 0 ? formatter : (function (data) {
+            try {
+                return JSON.stringify(data, null, 2);
+            }
+            catch (_a) {
+                return "" + data;
+            }
+        });
+        this.log = log !== null && log !== void 0 ? log : (function () {
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            return console.log.apply(console, __spread(inputs));
+        });
+    };
+    /** https://docs.evt.land/api/evt/enabletrace */
+    Evt.prototype.disableTrace = function () {
+        this.traceId = null;
+    };
+    Evt.prototype.detachHandler = function (handler, wTimer, rejectPr) {
+        var _a;
+        var index = this.handlers.indexOf(handler);
+        if (index < 0) {
+            return false;
+        }
+        if (typeGuard_1.typeGuard(handler, !!handler.ctx)) {
+            handler.ctx.zz__removeHandler(handler);
+        }
+        this.handlers.splice(index, 1);
+        this.handlerTriggers["delete"](handler);
+        if (wTimer[0] !== undefined) {
+            clearTimeout(wTimer[0]);
+            rejectPr(new EvtError_1.EvtError.Detached());
+        }
+        (_a = this.onHandler) === null || _a === void 0 ? void 0 : _a.call(this, false, handler);
+        return true;
+    };
+    Evt.doDetachIfNeeded = function (handler, opResult, once) {
+        var detach = Operator_1.Operator.fλ.Result.getDetachArg(opResult);
+        if (typeof detach !== "boolean") {
+            var _a = __read(detach, 3), ctx = _a[0], error = _a[1], res = _a[2];
+            if (!!error) {
+                ctx.abort(error);
+            }
+            else {
+                ctx.done(res);
+            }
+        }
+        else if (detach || !!once) {
+            handler.detach();
+        }
+    };
+    Evt.prototype.triggerHandler = function (handler, wTimer, resolvePr, opResult) {
+        var callback = handler.callback, once = handler.once;
+        if (wTimer[0] !== undefined) {
+            clearTimeout(wTimer[0]);
+            wTimer[0] = undefined;
+        }
+        Evt.doDetachIfNeeded(handler, opResult, once);
+        var _a = __read(opResult, 1), transformedData = _a[0];
+        callback === null || callback === void 0 ? void 0 : callback.call(this, transformedData);
+        resolvePr(transformedData);
+    };
+    Evt.prototype.addHandler = function (propsFromArgs, propsFromMethodName) {
+        var _this_1 = this;
+        var _a;
+        if (Operator_1.Operator.fλ.Stateful.match(propsFromArgs.op)) {
+            this.statelessByStatefulOp.set(propsFromArgs.op, encapsulateOpState_1.encapsulateOpState(propsFromArgs.op));
+        }
+        var handler = __assign(__assign(__assign({}, propsFromArgs), propsFromMethodName), { "detach": null, "promise": null });
+        if (handler.async) {
+            this.asyncHandlerChronologyMark.set(handler, this.getChronologyMark());
+        }
+        handler.promise = new Promise(function (resolve, reject) {
+            var wTimer = [undefined];
+            if (typeof handler.timeout === "number") {
+                wTimer[0] = setTimeout(function () {
+                    wTimer[0] = undefined;
+                    handler.detach();
+                    reject(new EvtError_1.EvtError.Timeout(handler.timeout));
+                }, handler.timeout);
+            }
+            handler.detach =
+                function () { return _this_1.detachHandler(handler, wTimer, reject); };
+            _this_1.handlerTriggers.set(handler, function (opResult) { return _this_1.triggerHandler(handler, wTimer, resolve, opResult); });
+        });
+        if (handler.prepend) {
+            var i = void 0;
+            for (i = 0; i < this.handlers.length; i++) {
+                if (this.handlers[i].extract) {
+                    continue;
+                }
+                break;
+            }
+            this.handlers.splice(i, 0, handler);
+        }
+        else {
+            this.handlers.push(handler);
+        }
+        if (this.__maxHandlers !== 0 &&
+            this.handlers.length % (this.__maxHandlers + 1) === 0) {
+            var message = [
+                "MaxHandlersExceededWarning: Possible Evt memory leak detected.",
+                this.handlers.length + " handlers attached" + (this.traceId ? " to " + this.traceId : "") + ".",
+                "Use evt.setMaxHandlers() to increase limit."
+            ].join(" ");
+            try {
+                console.warn(message);
+            }
+            catch (_b) {
+            }
+        }
+        if (typeGuard_1.typeGuard(handler, !!handler.ctx)) {
+            handler.ctx.zz__addHandler(handler, this);
+        }
+        (_a = this.onHandler) === null || _a === void 0 ? void 0 : _a.call(this, true, handler);
+        return handler;
+    };
+    /** https://docs.evt.land/api/evt/getstatelessop */
+    Evt.prototype.getStatelessOp = function (op) {
+        return Operator_1.Operator.fλ.Stateful.match(op) ?
+            this.statelessByStatefulOp.get(op) :
+            op;
+    };
+    Evt.prototype.trace = function (data) {
+        var _this_1 = this;
+        if (this.traceId === null) {
+            return;
+        }
+        var message = "(" + this.traceId + ") ";
+        var isExtracted = !!this.handlers.find(function (_a) {
+            var extract = _a.extract, op = _a.op;
+            return (extract &&
+                !!_this_1.getStatelessOp(op)(data));
+        });
+        if (isExtracted) {
+            message += "extracted ";
+        }
+        else {
+            var handlerCount = this.handlers
+                .filter(function (_a) {
+                var extract = _a.extract, op = _a.op;
+                return !extract &&
+                    !!_this_1.getStatelessOp(op)(data);
+            })
+                .length;
+            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
+        }
+        this.log(message + this.traceFormatter(data));
+    };
+    /**
+     * https://garronej.github.io/ts-evt/#evtattach-evtattachonce-and-evtpost
+     *
+     * Returns post count
+     * */
+    Evt.prototype.post = function (data) {
+        this.trace(data);
+        exports.setPostCount(this, this.postCount + 1);
+        //NOTE: Must be before postSync.
+        var postChronologyMark = this.getChronologyMark();
+        var isExtracted = this.postSync(data);
+        if (!isExtracted) {
+            this.postAsync(data, postChronologyMark);
+        }
+        return this.postCount;
+    };
+    /** Return isExtracted */
+    Evt.prototype.postSync = function (data) {
+        var e_3, _a;
+        try {
+            for (var _b = __values(__spread(this.handlers)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var handler = _c.value;
+                var async = handler.async, op = handler.op, extract = handler.extract;
+                if (async) {
+                    continue;
+                }
+                var opResult = invokeOperator_1.invokeOperator(this.getStatelessOp(op), data, true);
+                if (Operator_1.Operator.fλ.Result.NotMatched.match(opResult)) {
+                    Evt.doDetachIfNeeded(handler, opResult);
+                    continue;
+                }
+                var handlerTrigger = this.handlerTriggers.get(handler);
+                //NOTE: Possible if detached while in the loop.
+                if (!handlerTrigger) {
+                    continue;
+                }
+                handlerTrigger(opResult);
+                if (extract) {
+                    return true;
+                }
+            }
+        }
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_3) throw e_3.error; }
+        }
+        return false;
+    };
+    Evt.prototype.__waitFor = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": true,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    Evt.prototype.__attach = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": false
+        }).promise;
+    };
+    Evt.prototype.__attachExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    Evt.prototype.__attachPrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    Evt.prototype.__attachOnce = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    Evt.prototype.__attachOncePrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    Evt.prototype.__attachOnceExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    /**
+     * https://docs.evt.land/api/evt/ishandled
+     *
+     * Test if posting a given event data will have an effect.
+     *
+     * Return true if:
+     * -There is at least one handler matching
+     * this event data ( at least one handler's callback function
+     * will be invoked if the data is posted. )
+     * -Handlers could be will be detached
+     * if the event data is posted.
+     *
+     */
+    Evt.prototype.isHandled = function (data) {
+        var _this_1 = this;
+        return !!this.getHandlers()
+            .find(function (_a) {
+            var op = _a.op;
+            return !!_this_1.getStatelessOp(op)(data);
+        });
+    };
+    /** https://docs.evt.land/api/evt/gethandler */
+    Evt.prototype.getHandlers = function () {
+        return __spread(this.handlers);
+    };
+    Evt.prototype.detach = function (ctx) {
+        var e_4, _a;
+        var detachedHandlers = [];
+        try {
+            for (var _b = __values(this.getHandlers()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var handler = _c.value;
+                if (ctx !== undefined && handler.ctx !== ctx) {
+                    continue;
+                }
+                var wasStillAttached = handler.detach();
+                //NOTE: It should not be possible.
+                if (!wasStillAttached) {
+                    continue;
+                }
+                detachedHandlers.push(handler);
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_4) throw e_4.error; }
+        }
+        return detachedHandlers;
+    };
+    Evt.prototype.pipe = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        var evtDelegate = new Evt();
+        this.__attach(__assign(__assign({}, this.__parseOverloadParams(inputs, "pipe")), { "callback": function (transformedData) { return evtDelegate.post(transformedData); } }));
+        return evtDelegate;
+    };
+    Evt.prototype.waitFor = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__waitFor(this.__parseOverloadParams(inputs, "waitFor"));
+    };
+    Evt.prototype.$attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attach.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attach(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOnce.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnce(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOnceExtract.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachExtract(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachPrepend.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachPrepend(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOncePrepend.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOncePrepend(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOnceExtract.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnceExtract(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    /**
+     * https://docs.evt.land/api/evt/getctx
+     *
+     * Evt.weakCtx(obj) always return the same instance of VoidCtx for a given object.
+     * No strong reference to the object is created
+     * when the object is no longer referenced it's associated Ctx will be freed from memory.
+     */
+    Evt.getCtx = getCtxFactory_1.getCtxFactory();
+    /** https://docs.evt.land/api/evt/merge */
+    Evt.merge = merge_1.merge;
+    /** https://docs.evt.land/api/evt/from */
+    Evt.from = from_1.from;
+    return Evt;
+}());
+exports.Evt = Evt;
+/** https://docs.evt.land/api/voidevt */
+var VoidEvt = /** @class */ (function (_super) {
+    __extends(VoidEvt, _super);
+    function VoidEvt() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    VoidEvt.prototype.post = function () {
+        return _super.prototype.post.call(this, undefined);
+    };
+    VoidEvt.prototype.postAsyncOnceHandled = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, _super.prototype.postAsyncOnceHandled.call(this, undefined)];
+            });
+        });
+    };
+    return VoidEvt;
+}(Evt));
+exports.VoidEvt = VoidEvt;
+
+},{"../tools/overwriteReadonlyProp":69,"../tools/typeSafety/typeGuard":74,"./Ctx":47,"./types/EvtError":52,"./types/Operator":53,"./util/encapsulateOpState":57,"./util/from":58,"./util/getCtxFactory":63,"./util/getLazyEvtFactory":64,"./util/invokeOperator":66,"./util/merge":67,"./util/parseOverloadParams":68,"minimal-polyfills/dist/lib/Array.prototype.find":78,"minimal-polyfills/dist/lib/Map":79,"minimal-polyfills/dist/lib/WeakMap":81,"run-exclusive":82}],49:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Evt_2 = require("./Evt");
+var overwriteReadonlyProp_1 = require("../tools/overwriteReadonlyProp");
+;
+/** https://docs.evt.land/api/observable */
+var Observable = /** @class */ (function () {
+    function Observable(initialValue, areSame) {
+        if (areSame === void 0) { areSame = function (currentValue, newValue) { return currentValue === newValue; }; }
+        this.areSame = areSame;
+        {
+            var evtChangeDiff_1 = new Evt_2.Evt();
+            this.evtChangeDiff_post = function (changeDiff) { return evtChangeDiff_1.post(changeDiff); };
+            this.evtChange = evtChangeDiff_1.pipe(function (_a) {
+                var newValue = _a.newValue;
+                return [newValue];
+            });
+            this.evtChangeDiff = evtChangeDiff_1;
+        }
+        this.overwriteReadonlyValue(initialValue);
+    }
+    Observable.prototype.overwriteReadonlyValue = function (newValue) {
+        overwriteReadonlyProp_1.overwriteReadonlyProp(this, "value", newValue);
+    };
+    /** Return true if the value have been changed */
+    Observable.prototype.onPotentialChange = function (newValue) {
+        if (this.areSame(this.value, newValue)) {
+            return false;
+        }
+        var previousValue = this.value;
+        this.overwriteReadonlyValue(newValue);
+        this.evtChangeDiff_post({ previousValue: previousValue, newValue: newValue });
+        return true;
+    };
+    return Observable;
+}());
+exports.Observable = Observable;
+
+},{"../tools/overwriteReadonlyProp":69,"./Evt":48}],50:[function(require,module,exports){
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+exports.__esModule = true;
+__export(require("./Evt"));
+__export(require("./Ctx"));
+__export(require("./types"));
+__export(require("./Observable"));
+__export(require("./util"));
+
+},{"./Ctx":47,"./Evt":48,"./Observable":49,"./types":54,"./util":65}],51:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var typeSafety_1 = require("../../tools/typeSafety");
+var EventTargetLike;
+(function (EventTargetLike) {
+    var RxJSSubject;
+    (function (RxJSSubject) {
+        function match(eventTarget) {
+            return (typeSafety_1.typeGuard(eventTarget) &&
+                eventTarget instanceof Object &&
+                typeof eventTarget.subscribe === "function");
+        }
+        RxJSSubject.match = match;
+    })(RxJSSubject = EventTargetLike.RxJSSubject || (EventTargetLike.RxJSSubject = {}));
+    var NodeStyleEventEmitter;
+    (function (NodeStyleEventEmitter) {
+        ;
+        function match(eventTarget) {
+            return (typeSafety_1.typeGuard(eventTarget) &&
+                eventTarget instanceof Object &&
+                typeof eventTarget.addListener === "function" &&
+                typeof eventTarget.removeListener === "function");
+        }
+        NodeStyleEventEmitter.match = match;
+    })(NodeStyleEventEmitter = EventTargetLike.NodeStyleEventEmitter || (EventTargetLike.NodeStyleEventEmitter = {}));
+    var JQueryStyleEventEmitter;
+    (function (JQueryStyleEventEmitter) {
+        function match(eventTarget) {
+            return (typeSafety_1.typeGuard(eventTarget) &&
+                eventTarget instanceof Object &&
+                typeof eventTarget.on === "function" &&
+                typeof eventTarget.off === "function");
+        }
+        JQueryStyleEventEmitter.match = match;
+    })(JQueryStyleEventEmitter = EventTargetLike.JQueryStyleEventEmitter || (EventTargetLike.JQueryStyleEventEmitter = {}));
+    var HasEventTargetAddRemove;
+    (function (HasEventTargetAddRemove) {
+        function match(eventTarget) {
+            return (typeSafety_1.typeGuard(eventTarget) &&
+                eventTarget instanceof Object &&
+                typeof eventTarget.addEventListener === "function" &&
+                typeof eventTarget.removeEventListener === "function");
+        }
+        HasEventTargetAddRemove.match = match;
+    })(HasEventTargetAddRemove = EventTargetLike.HasEventTargetAddRemove || (EventTargetLike.HasEventTargetAddRemove = {}));
+})(EventTargetLike = exports.EventTargetLike || (exports.EventTargetLike = {}));
+
+},{"../../tools/typeSafety":72}],52:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+exports.__esModule = true;
+var EvtError;
+(function (EvtError) {
+    var Timeout = /** @class */ (function (_super) {
+        __extends(Timeout, _super);
+        function Timeout(timeout) {
+            var _newTarget = this.constructor;
+            var _this_1 = _super.call(this, "Evt timeout after " + timeout + "ms") || this;
+            _this_1.timeout = timeout;
+            Object.setPrototypeOf(_this_1, _newTarget.prototype);
+            return _this_1;
+        }
+        return Timeout;
+    }(Error));
+    EvtError.Timeout = Timeout;
+    var Detached = /** @class */ (function (_super) {
+        __extends(Detached, _super);
+        function Detached() {
+            var _newTarget = this.constructor;
+            var _this_1 = _super.call(this, "Evt handler detached") || this;
+            Object.setPrototypeOf(_this_1, _newTarget.prototype);
+            return _this_1;
+        }
+        return Detached;
+    }(Error));
+    EvtError.Detached = Detached;
+})(EvtError = exports.EvtError || (exports.EvtError = {}));
+
+},{}],53:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var typeSafety_1 = require("../../tools/typeSafety");
+var Operator;
+(function (Operator) {
+    var fλ;
+    (function (fλ) {
+        var Stateful;
+        (function (Stateful) {
+            function match(op) {
+                return typeof op !== "function";
+            }
+            Stateful.match = match;
+        })(Stateful = fλ.Stateful || (fλ.Stateful = {}));
+        var Result;
+        (function (Result) {
+            function match(result) {
+                return Matched.match(result) || NotMatched.match(result);
+            }
+            Result.match = match;
+            function getDetachArg(result) {
+                var detach = Matched.match(result) ? result[1] : result;
+                if (Detach.FromEvt.match(detach)) {
+                    return true;
+                }
+                if (Detach.WithCtxArg.match(detach)) {
+                    return [
+                        detach.DETACH,
+                        detach.err,
+                        detach.res
+                    ];
+                }
+                return false;
+            }
+            Result.getDetachArg = getDetachArg;
+            var NotMatched;
+            (function (NotMatched) {
+                function match(result) {
+                    return (result === null ||
+                        Detach.match(result));
+                }
+                NotMatched.match = match;
+            })(NotMatched = Result.NotMatched || (Result.NotMatched = {}));
+            var Matched;
+            (function (Matched) {
+                function match(result) {
+                    return (typeSafety_1.typeGuard(result) &&
+                        result instanceof Object &&
+                        (result.length === 1 ||
+                            (result.length === 2 &&
+                                (result[1] === null ||
+                                    Detach.match(result[1])))));
+                }
+                Matched.match = match;
+            })(Matched = Result.Matched || (Result.Matched = {}));
+            var Detach;
+            (function (Detach) {
+                var FromEvt;
+                (function (FromEvt) {
+                    function match(detach) {
+                        return detach === "DETACH";
+                    }
+                    FromEvt.match = match;
+                })(FromEvt = Detach.FromEvt || (Detach.FromEvt = {}));
+                var WithCtxArg;
+                (function (WithCtxArg) {
+                    function match(detach) {
+                        return (typeSafety_1.typeGuard(detach) &&
+                            detach instanceof Object &&
+                            detach.DETACH instanceof Object);
+                    }
+                    WithCtxArg.match = match;
+                })(WithCtxArg = Detach.WithCtxArg || (Detach.WithCtxArg = {}));
+                function match(detach) {
+                    return FromEvt.match(detach) || WithCtxArg.match(detach);
+                }
+                Detach.match = match;
+            })(Detach = Result.Detach || (Result.Detach = {}));
+        })(Result = fλ.Result || (fλ.Result = {}));
+    })(fλ = Operator.fλ || (Operator.fλ = {}));
+})(Operator = exports.Operator || (exports.Operator = {}));
+
+},{"../../tools/typeSafety":72}],54:[function(require,module,exports){
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+exports.__esModule = true;
+__export(require("./EvtError"));
+__export(require("./Operator"));
+var dom = require("./lib.dom");
+exports.dom = dom;
+
+},{"./EvtError":52,"./Operator":53,"./lib.dom":55}],55:[function(require,module,exports){
+"use strict";
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+ 
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+ 
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+exports.__esModule = true;
+
+},{}],56:[function(require,module,exports){
+"use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+exports.__esModule = true;
+var encapsulateOpState_1 = require("./encapsulateOpState");
+var invokeOperator_1 = require("./invokeOperator");
+var Operator_1 = require("../types/Operator");
+var id_1 = require("../../tools/typeSafety/id");
+var assert_1 = require("../../tools/typeSafety/assert");
+var typeGuard_1 = require("../../tools/typeSafety/typeGuard");
+function f_o_g(op1, op2) {
+    var opAtoB = Operator_1.Operator.fλ.Stateful.match(op1) ?
+        encapsulateOpState_1.encapsulateOpState(op1) :
+        id_1.id(op1);
+    var opBtoC = Operator_1.Operator.fλ.Stateful.match(op2) ?
+        encapsulateOpState_1.encapsulateOpState(op2) :
+        id_1.id(op2);
+    return id_1.id(function () {
+        var _a = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            _a[_i] = arguments[_i];
+        }
+        var _b = __read(_a, 3), dataA = _b[0], isPost = _b[2];
+        var _c, _d;
+        var resultB = invokeOperator_1.invokeOperator(opAtoB, dataA, isPost);
+        if (Operator_1.Operator.fλ.Result.NotMatched.match(resultB)) {
+            //CtxResultOp1 assignable to CtxResultOp1 | CtxResultOp2...
+            assert_1.assert(typeGuard_1.typeGuard(resultB));
+            return resultB;
+        }
+        var detachOp1 = (_c = resultB[1]) !== null && _c !== void 0 ? _c : null;
+        //...same...
+        assert_1.assert(typeGuard_1.typeGuard(detachOp1));
+        var _e = __read(resultB, 1), dataB = _e[0];
+        var resultC = invokeOperator_1.invokeOperator(opBtoC, dataB, isPost);
+        if (Operator_1.Operator.fλ.Result.NotMatched.match(resultC)) {
+            //...same
+            assert_1.assert(typeGuard_1.typeGuard(resultC));
+            return detachOp1 !== null && detachOp1 !== void 0 ? detachOp1 : resultC;
+        }
+        return id_1.id([
+            resultC[0],
+            (_d = detachOp1 !== null && detachOp1 !== void 0 ? detachOp1 : resultC[1]) !== null && _d !== void 0 ? _d : null
+        ]);
+    });
+}
+function compose() {
+    var ops = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        ops[_i] = arguments[_i];
+    }
+    if (ops.length === 1) {
+        var _a = __read(ops, 1), op = _a[0];
+        return Operator_1.Operator.fλ.Stateful.match(op) ?
+            encapsulateOpState_1.encapsulateOpState(op) :
+            op;
+    }
+    var _b = __read(ops), op1 = _b[0], op2 = _b[1], rest = _b.slice(2);
+    var op1_o_op2 = f_o_g(op1, op2);
+    if (rest.length === 0) {
+        return op1_o_op2;
+    }
+    return compose.apply(void 0, __spread([op1_o_op2], rest));
+}
+exports.compose = compose;
+
+},{"../../tools/typeSafety/assert":70,"../../tools/typeSafety/id":71,"../../tools/typeSafety/typeGuard":74,"../types/Operator":53,"./encapsulateOpState":57,"./invokeOperator":66}],57:[function(require,module,exports){
+"use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+exports.__esModule = true;
+var id_1 = require("../../tools/typeSafety/id");
+var Operator_1 = require("../types/Operator");
+function encapsulateOpState(statefulFλOp) {
+    var state = statefulFλOp[1];
+    return id_1.id(function () {
+        var _a = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            _a[_i] = arguments[_i];
+        }
+        var _b = __read(_a, 3), data = _b[0], cbInvokedIfMatched = _b[2];
+        var opResult = statefulFλOp[0](data, state, cbInvokedIfMatched);
+        if (!!cbInvokedIfMatched &&
+            Operator_1.Operator.fλ.Result.Matched.match(opResult)) {
+            state = opResult[0];
+        }
+        return opResult;
+    });
+}
+exports.encapsulateOpState = encapsulateOpState;
+
+},{"../../tools/typeSafety/id":71,"../types/Operator":53}],58:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Evt_2 = require("../Evt");
+var typeSafety_1 = require("../../tools/typeSafety");
+var EventTargetLike_1 = require("../types/EventTargetLike");
+var merge_1 = require("./merge");
+function fromImpl(ctx, target, eventName, options) {
+    if ("length" in target) {
+        return merge_1.mergeImpl(ctx, Array.from(target).map(function (target) { return fromImpl(ctx, target, eventName, options); }));
+    }
+    var proxy;
+    if (EventTargetLike_1.EventTargetLike.NodeStyleEventEmitter.match(target)) {
+        proxy = {
+            "on": function (listener, eventName) { return target.addListener(eventName, listener); },
+            "off": function (listener, eventName) { return target.removeListener(eventName, listener); }
+        };
+    }
+    else if (EventTargetLike_1.EventTargetLike.JQueryStyleEventEmitter.match(target)) {
+        proxy = {
+            "on": function (listener, eventName) { return target.on(eventName, listener); },
+            "off": function (listener, eventName) { return target.off(eventName, listener); }
+        };
+    }
+    else if (EventTargetLike_1.EventTargetLike.HasEventTargetAddRemove.match(target)) {
+        proxy = {
+            "on": function (listener, eventName, options) { return target.addEventListener(eventName, listener, options); },
+            "off": function (listener, eventName, options) { return target.removeEventListener(eventName, listener, options); }
+        };
+    }
+    else if (EventTargetLike_1.EventTargetLike.RxJSSubject.match(target)) {
+        var subscription_1;
+        proxy = {
+            "on": function (listener) { return subscription_1 = target.subscribe(function (data) { return listener(data); }); },
+            "off": function () { return subscription_1.unsubscribe(); }
+        };
+    }
+    else {
+        typeSafety_1.id(target);
+        typeSafety_1.assert(false);
+    }
+    var evt = new Evt_2.Evt();
+    var listener = function (data) { return evt.post(data); };
+    ctx === null || ctx === void 0 ? void 0 : ctx.getEvtDone().attachOnce(function () { return proxy.off(listener, eventName, options); });
+    proxy.on(listener, eventName, options);
+    return evt;
+}
+function from(ctxOrTarget, targetOrEventName, eventNameOrOptions, options) {
+    if ("getEvtDone" in ctxOrTarget) {
+        typeSafety_1.assert(typeSafety_1.typeGuard(targetOrEventName) &&
+            typeSafety_1.typeGuard(eventNameOrOptions) &&
+            typeSafety_1.typeGuard(options));
+        return fromImpl(ctxOrTarget, targetOrEventName, eventNameOrOptions, options);
+    }
+    else {
+        typeSafety_1.assert(typeSafety_1.typeGuard(targetOrEventName) &&
+            typeSafety_1.typeGuard(eventNameOrOptions));
+        return fromImpl(undefined, ctxOrTarget, targetOrEventName, eventNameOrOptions);
+    }
+}
+exports.from = from;
+
+},{"../../tools/typeSafety":72,"../Evt":48,"../types/EventTargetLike":51,"./merge":67}],59:[function(require,module,exports){
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+exports.__esModule = true;
+__export(require("./scan"));
+__export(require("./throttleTime"));
+__export(require("./to"));
+
+},{"./scan":60,"./throttleTime":61,"./to":62}],60:[function(require,module,exports){
+"use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+exports.__esModule = true;
+var compose_1 = require("../compose");
+exports.scan = function (accumulator, seed) { return compose_1.compose([
+    function (data, _a) {
+        var _b = __read(_a, 3), acc = _b[1], index = _b[2];
+        return [[data, accumulator(acc, data, index), index + 1]];
+    },
+    [null, seed, 0]
+], function (_a) {
+    var _b = __read(_a, 2), acc = _b[1];
+    return [acc];
+}); };
+
+},{"../compose":56}],61:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var compose_1 = require("../compose");
+exports.throttleTime = function (duration) {
+    return compose_1.compose([
+        function (data, _a) {
+            var lastClick = _a.lastClick;
+            var now = Date.now();
+            return now - lastClick < duration ?
+                null :
+                [{ data: data, "lastClick": now }];
+        },
+        { "lastClick": 0, "data": null }
+    ], function (_a) {
+        var data = _a.data;
+        return [data];
+    });
+};
+
+},{"../compose":56}],62:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+exports.to = function (eventName) {
+    return function (data) { return data[0] !== eventName ?
+        null : [data[1]]; };
+};
+
+},{}],63:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Ctx_1 = require("../Ctx");
+var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
+function getCtxFactory() {
+    var ctxByObj = new WeakMap_1.Polyfill();
+    function getCtx(obj) {
+        var ctx = ctxByObj.get(obj);
+        if (ctx === undefined) {
+            ctx = new Ctx_1.VoidCtx();
+            ctxByObj.set(obj, ctx);
+        }
+        return ctx;
+    }
+    return getCtx;
+}
+exports.getCtxFactory = getCtxFactory;
+
+},{"../Ctx":47,"minimal-polyfills/dist/lib/WeakMap":81}],64:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Evt_2 = require("../Evt");
+var Evt_3 = require("../Evt");
+function getLazyEvtFactory() {
+    var initialPostCount = 0;
+    var evt = undefined;
+    function getEvt() {
+        if (evt === undefined) {
+            evt = new Evt_2.Evt();
+            Evt_3.setPostCount(evt, initialPostCount);
+        }
+        return evt;
+    }
+    function post(data) {
+        if (evt === undefined) {
+            initialPostCount++;
+            return;
+        }
+        evt.post(data);
+    }
+    return { getEvt: getEvt, post: post };
+}
+exports.getLazyEvtFactory = getLazyEvtFactory;
+
+},{"../Evt":48}],65:[function(require,module,exports){
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+exports.__esModule = true;
+__export(require("./genericOperators"));
+__export(require("./compose"));
+__export(require("./encapsulateOpState"));
+__export(require("./compose"));
+__export(require("./invokeOperator"));
+
+},{"./compose":56,"./encapsulateOpState":57,"./genericOperators":59,"./invokeOperator":66}],66:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Operator_1 = require("../types/Operator");
+function invokeOperator(op, data, isPost) {
+    var result = op(data, undefined, isPost);
+    return Operator_1.Operator.fλ.Result.match(result) ?
+        result :
+        !!result ? [data] : null;
+}
+exports.invokeOperator = invokeOperator;
+
+},{"../types/Operator":53}],67:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Evt_2 = require("../Evt");
+//TODO: Fix interoperability between versions.
+function mergeImpl(ctx, evts) {
+    var evtUnion = new Evt_2.Evt();
+    var callback = function (data) { return evtUnion.post(data); };
+    evts.forEach(function (evt) {
+        if (ctx === undefined) {
+            evt.attach(callback);
+        }
+        else {
+            evt.attach(ctx, callback);
+        }
+    });
+    return evtUnion;
+}
+exports.mergeImpl = mergeImpl;
+function merge(p1, p2) {
+    return "length" in p1 ?
+        mergeImpl(undefined, p1) :
+        mergeImpl(p1, p2);
+}
+exports.merge = merge;
+
+},{"../Evt":48}],68:[function(require,module,exports){
+"use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+exports.__esModule = true;
+var id_1 = require("../../tools/typeSafety/id");
+var compose_1 = require("./compose");
+var typeGuard_1 = require("../../tools/typeSafety/typeGuard");
+function matchAll() { return true; }
+var canBeOperator = function (p) {
+    return (p !== undefined &&
+        typeGuard_1.typeGuard(p) &&
+        (typeof p === "function" ||
+            typeof p[0] === "function"));
+};
+function parseOverloadParamsFactory() {
+    var defaultParams = id_1.id({
+        "op": matchAll,
+        "ctx": undefined,
+        "timeout": undefined,
+        "callback": undefined
+    });
+    return function parseOverloadParams(inputs, methodName) {
+        switch (methodName) {
+            case "pipe":
+                {
+                    //[]
+                    //[undefined] ( not valid but user would expect it to work )
+                    //[ ctx, ...op[] ]
+                    //[ ...op[] ]
+                    var getOpWrap = function (ops) {
+                        return ops.length === 0 ?
+                            {}
+                            :
+                                { "op": ops.length === 1 ? ops[0] : compose_1.compose.apply(void 0, __spread(ops)) };
+                    };
+                    if (canBeOperator(inputs[0])) {
+                        //[ ...op[] ]
+                        return id_1.id(__assign(__assign({}, defaultParams), getOpWrap(inputs)));
+                    }
+                    else {
+                        //[]
+                        //[ ctx, ...Operator.fλ[] ]
+                        var _a = __read(inputs), ctx = _a[0], rest = _a.slice(1);
+                        return id_1.id(__assign(__assign(__assign({}, defaultParams), (ctx !== undefined ? { ctx: ctx } : {})), getOpWrap(rest)));
+                    }
+                }
+                break;
+            case "waitFor":
+                {
+                    //[ op, ctx, timeout ]
+                    //[ op, ctx, undefined ]
+                    //[ op, ctx ]
+                    //[ op, timeout ]
+                    //[ op, undefined ]
+                    //[ ctx, timeout ]
+                    //[ ctx, undefined ]
+                    //[ op ]
+                    //[ ctx ]
+                    //[ timeout ]
+                    //[ undefined ]
+                    //[ callback ]
+                    return parseOverloadParams(__spread(inputs.filter(function (value, index) { return !(index === inputs.length - 1 &&
+                        value === undefined); }), [
+                        defaultParams.callback
+                    ]), "attach*");
+                }
+                break;
+            case "attach*":
+                {
+                    //NOTE: when callback is undefined call has been forward from waitFor.
+                    //[ op, ctx, timeout, callback ]
+                    //[ op, ctx, timeout, undefined ]
+                    //[ op, ctx, callback ]
+                    //[ op, ctx, undefined ]
+                    //[ op, timeout, callback ]
+                    //[ op, timeout, undefined ]
+                    //[ ctx, timeout, callback ]
+                    //[ ctx, timeout, undefined ]
+                    //[ op, callback ]
+                    //[ op, undefined ]
+                    //[ ctx, callback ]
+                    //[ ctx, undefined ]
+                    //[ timeout, callback ]
+                    //[ timeout, undefined ]
+                    //[ callback ]
+                    //[ undefined ]
+                    var n = inputs.length;
+                    switch (n) {
+                        case 4: {
+                            //[ op, ctx, timeout, callback ]
+                            var _b = __read(inputs, 4), p1 = _b[0], p2 = _b[1], p3 = _b[2], p4 = _b[3];
+                            return id_1.id(__assign(__assign({}, defaultParams), { "op": p1, "ctx": p2, "timeout": p3, "callback": p4 }));
+                        }
+                        case 3: {
+                            //[ op, ctx, callback ]
+                            //[ op, timeout, callback ]
+                            //[ ctx, timeout, callback ]
+                            var _c = __read(inputs, 3), p1 = _c[0], p2 = _c[1], p3 = _c[2];
+                            if (typeof p2 === "number") {
+                                //[ op, timeout, callback ]
+                                //[ ctx, timeout, callback ]
+                                var timeout = p2;
+                                var callback = p3;
+                                if (canBeOperator(p1)) {
+                                    //[ op, timeout, callback ]
+                                    return id_1.id(__assign(__assign({}, defaultParams), { timeout: timeout,
+                                        callback: callback, "op": p1 }));
+                                }
+                                else {
+                                    //[ ctx, timeout, callback ]
+                                    return id_1.id(__assign(__assign({}, defaultParams), { timeout: timeout,
+                                        callback: callback, "ctx": p1 }));
+                                }
+                            }
+                            else {
+                                //[ op, ctx, callback ]
+                                return id_1.id(__assign(__assign({}, defaultParams), { "op": p1, "ctx": p2, "callback": p3 }));
+                            }
+                        }
+                        case 2: {
+                            //[ op, callback ]
+                            //[ ctx, callback ]
+                            //[ timeout, callback ]
+                            var _d = __read(inputs, 2), p1 = _d[0], p2 = _d[1];
+                            if (typeof p1 === "number") {
+                                //[ timeout, callback ]
+                                return id_1.id(__assign(__assign({}, defaultParams), { "timeout": p1, "callback": p2 }));
+                            }
+                            else {
+                                //[ op, callback ]
+                                //[ ctx, callback ]
+                                var callback = p2;
+                                if (canBeOperator(p1)) {
+                                    return id_1.id(__assign(__assign({}, defaultParams), { callback: callback, "op": p1 }));
+                                }
+                                else {
+                                    return id_1.id(__assign(__assign({}, defaultParams), { callback: callback, "ctx": p1 }));
+                                }
+                            }
+                        }
+                        case 1: {
+                            //[ callback ]
+                            var _e = __read(inputs, 1), p = _e[0];
+                            return id_1.id(__assign(__assign({}, defaultParams), { "callback": p }));
+                        }
+                        case 0: {
+                            return id_1.id(__assign({}, defaultParams));
+                        }
+                    }
+                }
+                break;
+        }
+    };
+}
+exports.parseOverloadParamsFactory = parseOverloadParamsFactory;
+
+},{"../../tools/typeSafety/id":71,"../../tools/typeSafety/typeGuard":74,"./compose":56}],69:[function(require,module,exports){
+"use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+exports.__esModule = true;
+exports.overwriteReadonlyProp = function (obj, propertyName, value) {
+    try {
+        obj[propertyName] = value;
+        if (obj[propertyName] === value) {
+            return;
+        }
+    }
+    catch (_a) {
+    }
+    Object.defineProperty(obj, propertyName, __assign(__assign({}, Object.getOwnPropertyDescriptor(obj, propertyName)), { value: value }));
+};
+
+},{}],70:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+function assert(condition, msg) {
+    if (!condition) {
+        throw new Error(msg);
+    }
+}
+exports.assert = assert;
+
+},{}],71:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+/**
+ * The identity function.
+ *
+ * Help to build an object of type T.
+ * Better than using 'as T' as there is no type safety loss.
+ *
+ * - Used as continence for enabling type inference.
+ * Example:
+ *
+ * type Circle = {
+ *     type: "CIRCLE";
+ *     radius: number;
+ * };
+ *
+ * type Square = {
+ *     type: "SQUARE";
+ *     side: number;
+ * };
+ * type Shape= Circle | Square;
+ *
+ * declare function f(shape: Shape): void;
+ *
+ * f(id<Circle>({ "type": "CIRCLE", "radius": 33 }); <== We have auto completion to instantiate circle.
+ *
+ * - Used to loosen the type restriction without saying "trust me" to the compiler.
+ * declare const x: Set<readonly ["FOO"]>;
+ * declare function f(s: Set<string[]>): void;
+ * f(id<Set<any>>(x));
+ *
+ * Example:
+ * declare const x: Set<readonly [ "FOO" ]>;
+ * declare f(x: Set<string[]>): void;
+ * id(x as Set<["FOO"]>); <== trust me it's readonly!
+ * f(id<Set<any>>(x)); <== we acknowledge that we are out of the safe zone.
+ */
+exports.id = function (x) { return x; };
+
+},{}],72:[function(require,module,exports){
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+exports.__esModule = true;
+__export(require("./id"));
+__export(require("./typeGuard"));
+__export(require("./assert"));
+__export(require("./matchVoid"));
+
+},{"./assert":70,"./id":71,"./matchVoid":73,"./typeGuard":74}],73:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var typeGuard_1 = require("./typeGuard");
+/**
+ *
+ * To test if an object is void,
+ * unlike undefined or null, testing o !== void
+ * will not restrict the type.
+ *
+ * Example:
+ *
+ * declare o: { p: string; } | void;
+ *
+ * matchVoid(o)?null:o.p <== Type inference ok
+ *
+ * Match void
+ * @param o type of o should be a union of type containing void
+ * @returns true if o is void'ish ( null or undefined )
+ */
+function matchVoid(o) {
+    return typeGuard_1.typeGuard(o, o === undefined || o === null);
+}
+exports.matchVoid = matchVoid;
+
+},{"./typeGuard":74}],74:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+/**
+ * Use cases:
+ *
+ * 1) When we know the subtype of a variable but the compiler is unaware.
+ *
+ * declare const x: "FOO" | "BAR";
+ *
+ * 1.1) If we want to tel the compile that we know x is of type "BAR"
+ *
+ * assert(typeGuard<"BAR">(x));
+ * x; <== x is of type "BAR"
+ *
+ * 1.2) If we want to tell the compiler that x is NOT of type "BAR"
+ *
+ * assert(!typeGuard<"BAR">(x,false));
+ * x; <== x is of type "FOO"
+ *
+ * 2) Tell the compiler what assertion can be made on a given variable
+ * if a given test return true.
+ *
+ * type Circle = { type: "CIRCLE"; radius: number; };
+ * type Square = { type: "SQUARE"; sideLength: number; };
+ * type Shape = Circle | Square;
+ *
+ * declare const shape: Shape;
+ *
+ * if( typeGuard<Circle>(shape, shape.type === "CIRCLE") ){
+ *     [ shape is Circle ]
+ * }else{
+ *     [ shape is not Circle ]
+ * }
+ *
+ *
+ * export function matchVoid(o: any): o is void {
+ *     return typeGuard<void>(o, o === undefined || o === null );
+ * }
+ *
+ * 3) Helper for safely build other type guards
+ *
+ * export function match<T>(set: Object): set is SetLike<T> {
+ *     return (
+ *         typeGuard<SetLike<T>>(set) &&
+ *         typeof set.values === "function" &&
+ *         /Set/.test(Object.getPrototypeOf(set).constructor.name)
+ *     );
+ * }
+ *
+ */
+function typeGuard(o, isMatched) {
+    if (isMatched === void 0) { isMatched = true; }
+    return isMatched;
+}
+exports.typeGuard = typeGuard;
+
+},{}],75:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -10312,27 +10940,456 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],61:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":60}],62:[function(require,module,exports){
+},{"./implementation":75}],77:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":61}],63:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"dup":11}],64:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"./Map":63,"dup":12}],65:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13,"minimal-polyfills/dist/lib/WeakMap":64}],66:[function(require,module,exports){
+},{"function-bind":76}],78:[function(require,module,exports){
+// https://tc39.github.io/ecma262/#sec-array.prototype.find
+if (!Array.prototype.find) {
+    Object.defineProperty(Array.prototype, 'find', {
+        value: function (predicate) {
+            // 1. Let O be ? ToObject(this value).
+            if (this == null) {
+                throw new TypeError('"this" is null or not defined');
+            }
+            var o = Object(this);
+            // 2. Let len be ? ToLength(? Get(O, "length")).
+            var len = o.length >>> 0;
+            // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+            if (typeof predicate !== 'function') {
+                throw new TypeError('predicate must be a function');
+            }
+            // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+            var thisArg = arguments[1];
+            // 5. Let k be 0.
+            var k = 0;
+            // 6. Repeat, while k < len
+            while (k < len) {
+                // a. Let Pk be ! ToString(k).
+                // b. Let kValue be ? Get(O, Pk).
+                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+                // d. If testResult is true, return kValue.
+                var kValue = o[k];
+                if (predicate.call(thisArg, kValue, k, o)) {
+                    return kValue;
+                }
+                // e. Increase k by 1.
+                k++;
+            }
+            // 7. Return undefined.
+            return undefined;
+        },
+        configurable: true,
+        writable: true
+    });
+}
+
+},{}],79:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var LightMapImpl = /** @class */ (function () {
+    function LightMapImpl() {
+        this.record = [];
+    }
+    LightMapImpl.prototype.has = function (key) {
+        return this.record
+            .map(function (_a) {
+            var _key = _a[0];
+            return _key;
+        })
+            .indexOf(key) >= 0;
+    };
+    LightMapImpl.prototype.get = function (key) {
+        var entry = this.record
+            .filter(function (_a) {
+            var _key = _a[0];
+            return _key === key;
+        })[0];
+        if (entry === undefined) {
+            return undefined;
+        }
+        return entry[1];
+    };
+    LightMapImpl.prototype.set = function (key, value) {
+        var entry = this.record
+            .filter(function (_a) {
+            var _key = _a[0];
+            return _key === key;
+        })[0];
+        if (entry === undefined) {
+            this.record.push([key, value]);
+        }
+        else {
+            entry[1] = value;
+        }
+        return this;
+    };
+    LightMapImpl.prototype["delete"] = function (key) {
+        var index = this.record.map(function (_a) {
+            var key = _a[0];
+            return key;
+        }).indexOf(key);
+        if (index < 0) {
+            return false;
+        }
+        this.record.splice(index, 1);
+        return true;
+    };
+    LightMapImpl.prototype.keys = function () {
+        return this.record.map(function (_a) {
+            var key = _a[0];
+            return key;
+        });
+    };
+    return LightMapImpl;
+}());
+exports.LightMapImpl = LightMapImpl;
+exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
+
+},{}],80:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Map_1 = require("./Map");
+var LightSetImpl = /** @class */ (function () {
+    function LightSetImpl(values) {
+        this.map = new Map_1.Polyfill();
+        if (values === undefined) {
+            return;
+        }
+        for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
+            var value = values_1[_i];
+            this.add(value);
+        }
+    }
+    LightSetImpl.prototype.has = function (value) {
+        return this.map.has(value);
+    };
+    LightSetImpl.prototype.add = function (value) {
+        this.map.set(value, true);
+        return this;
+    };
+    LightSetImpl.prototype.values = function () {
+        return this.map.keys();
+    };
+    LightSetImpl.prototype["delete"] = function (value) {
+        return this.map["delete"](value);
+    };
+    return LightSetImpl;
+}());
+exports.LightSetImpl = LightSetImpl;
+exports.Polyfill = typeof Set !== "undefined" ? Set : LightSetImpl;
+
+},{"./Map":79}],81:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var Map_1 = require("./Map");
+exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
+
+},{"./Map":79}],82:[function(require,module,exports){
+"use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+exports.__esModule = true;
+var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
+var ExecQueue = /** @class */ (function () {
+    function ExecQueue() {
+        this.queuedCalls = [];
+        this.isRunning = false;
+        this.prComplete = Promise.resolve();
+    }
+    //TODO: move where it is used.
+    ExecQueue.prototype.cancelAllQueuedCalls = function () {
+        var n;
+        this.queuedCalls.splice(0, n = this.queuedCalls.length);
+        return n;
+    };
+    return ExecQueue;
+}());
+var globalContext = {};
+var clusters = new WeakMap_1.Polyfill();
+//console.log("Map version");
+//export const clusters = new Map<Object, Map<GroupRef,ExecQueue>>();
+function getOrCreateExecQueue(context, groupRef) {
+    var execQueueByGroup = clusters.get(context);
+    if (!execQueueByGroup) {
+        execQueueByGroup = new WeakMap_1.Polyfill();
+        clusters.set(context, execQueueByGroup);
+    }
+    var execQueue = execQueueByGroup.get(groupRef);
+    if (!execQueue) {
+        execQueue = new ExecQueue();
+        execQueueByGroup.set(groupRef, execQueue);
+    }
+    return execQueue;
+}
+function createGroupRef() {
+    return new Array(0);
+}
+exports.createGroupRef = createGroupRef;
+function build() {
+    var inputs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        inputs[_i] = arguments[_i];
+    }
+    switch (inputs.length) {
+        case 1: return buildFnPromise(true, createGroupRef(), inputs[0]);
+        case 2: return buildFnPromise(true, inputs[0], inputs[1]);
+    }
+}
+exports.build = build;
+function buildMethod() {
+    var inputs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        inputs[_i] = arguments[_i];
+    }
+    switch (inputs.length) {
+        case 1: return buildFnPromise(false, createGroupRef(), inputs[0]);
+        case 2: return buildFnPromise(false, inputs[0], inputs[1]);
+    }
+}
+exports.buildMethod = buildMethod;
+/**
+ *
+ * Get the number of queued call of a run-exclusive function.
+ * Note that if you call a runExclusive function and call this
+ * directly after it will return 0 as there is one function call
+ * execution ongoing but 0 queued.
+ *
+ * The classInstanceObject parameter is to provide only for the run-exclusive
+ * function created with 'buildMethod[Cb].
+ *
+ * */
+function getQueuedCallCount(runExclusiveFunction, classInstanceObject) {
+    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
+    return execQueue ? execQueue.queuedCalls.length : 0;
+}
+exports.getQueuedCallCount = getQueuedCallCount;
+/**
+ *
+ * Cancel all queued calls of a run-exclusive function.
+ * Note that the current running call will not be cancelled.
+ *
+ * The classInstanceObject parameter is to provide only for the run-exclusive
+ * function created with 'buildMethod[Cb].
+ *
+ */
+function cancelAllQueuedCalls(runExclusiveFunction, classInstanceObject) {
+    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
+    return execQueue ? execQueue.cancelAllQueuedCalls() : 0;
+}
+exports.cancelAllQueuedCalls = cancelAllQueuedCalls;
+/**
+ * Tell if a run-exclusive function has an instance of it's call currently being
+ * performed.
+ *
+ * The classInstanceObject parameter is to provide only for the run-exclusive
+ * function created with 'buildMethod[Cb].
+ */
+function isRunning(runExclusiveFunction, classInstanceObject) {
+    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
+    return execQueue ? execQueue.isRunning : false;
+}
+exports.isRunning = isRunning;
+/**
+ * Return a promise that resolve when all the current queued call of a runExclusive functions
+ * have completed.
+ *
+ * The classInstanceObject parameter is to provide only for the run-exclusive
+ * function created with 'buildMethod[Cb].
+ */
+function getPrComplete(runExclusiveFunction, classInstanceObject) {
+    var execQueue = getExecQueueByFunctionAndContext(runExclusiveFunction, classInstanceObject);
+    return execQueue ? execQueue.prComplete : Promise.resolve();
+}
+exports.getPrComplete = getPrComplete;
+var groupByRunExclusiveFunction = new WeakMap_1.Polyfill();
+function getExecQueueByFunctionAndContext(runExclusiveFunction, context) {
+    if (context === void 0) { context = globalContext; }
+    var groupRef = groupByRunExclusiveFunction.get(runExclusiveFunction);
+    if (!groupRef) {
+        throw Error("Not a run exclusiveFunction");
+    }
+    var execQueueByGroup = clusters.get(context);
+    if (!execQueueByGroup) {
+        return undefined;
+    }
+    return execQueueByGroup.get(groupRef);
+}
+function buildFnPromise(isGlobal, groupRef, fun) {
+    var execQueue;
+    var runExclusiveFunction = (function () {
+        var _this = this;
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        if (!isGlobal) {
+            if (!(this instanceof Object)) {
+                throw new Error("Run exclusive, <this> should be an object");
+            }
+            execQueue = getOrCreateExecQueue(this, groupRef);
+        }
+        return new Promise(function (resolve, reject) {
+            var onPrCompleteResolve;
+            execQueue.prComplete = new Promise(function (resolve) {
+                return onPrCompleteResolve = function () { return resolve(); };
+            });
+            var onComplete = function (result) {
+                onPrCompleteResolve();
+                execQueue.isRunning = false;
+                if (execQueue.queuedCalls.length) {
+                    execQueue.queuedCalls.shift()();
+                }
+                if ("data" in result) {
+                    resolve(result.data);
+                }
+                else {
+                    reject(result.reason);
+                }
+            };
+            (function callee() {
+                var _this = this;
+                var inputs = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    inputs[_i] = arguments[_i];
+                }
+                if (execQueue.isRunning) {
+                    execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
+                    return;
+                }
+                execQueue.isRunning = true;
+                try {
+                    fun.apply(this, inputs)
+                        .then(function (data) { return onComplete({ data: data }); })["catch"](function (reason) { return onComplete({ reason: reason }); });
+                }
+                catch (error) {
+                    onComplete({ "reason": error });
+                }
+            }).apply(_this, inputs);
+        });
+    });
+    if (isGlobal) {
+        execQueue = getOrCreateExecQueue(globalContext, groupRef);
+    }
+    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
+    return runExclusiveFunction;
+}
+function buildCb() {
+    var inputs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        inputs[_i] = arguments[_i];
+    }
+    switch (inputs.length) {
+        case 1: return buildFnCallback(true, createGroupRef(), inputs[0]);
+        case 2: return buildFnCallback(true, inputs[0], inputs[1]);
+    }
+}
+exports.buildCb = buildCb;
+function buildMethodCb() {
+    var inputs = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        inputs[_i] = arguments[_i];
+    }
+    switch (inputs.length) {
+        case 1: return buildFnCallback(false, createGroupRef(), inputs[0]);
+        case 2: return buildFnCallback(false, inputs[0], inputs[1]);
+    }
+}
+exports.buildMethodCb = buildMethodCb;
+function buildFnCallback(isGlobal, groupRef, fun) {
+    var execQueue;
+    var runExclusiveFunction = (function () {
+        var _this = this;
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        if (!isGlobal) {
+            if (!(this instanceof Object)) {
+                throw new Error("Run exclusive, <this> should be an object");
+            }
+            execQueue = getOrCreateExecQueue(this, groupRef);
+        }
+        var callback = undefined;
+        if (inputs.length && typeof inputs[inputs.length - 1] === "function") {
+            callback = inputs.pop();
+        }
+        var onPrCompleteResolve;
+        execQueue.prComplete = new Promise(function (resolve) {
+            return onPrCompleteResolve = function () { return resolve(); };
+        });
+        var onComplete = function () {
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            onPrCompleteResolve();
+            execQueue.isRunning = false;
+            if (execQueue.queuedCalls.length) {
+                execQueue.queuedCalls.shift()();
+            }
+            if (callback) {
+                callback.apply(_this, inputs);
+            }
+        };
+        onComplete.hasCallback = !!callback;
+        (function callee() {
+            var _this = this;
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            if (execQueue.isRunning) {
+                execQueue.queuedCalls.push(function () { return callee.apply(_this, inputs); });
+                return;
+            }
+            execQueue.isRunning = true;
+            try {
+                fun.apply(this, __spread(inputs, [onComplete]));
+            }
+            catch (error) {
+                error.message += " ( This exception should not have been thrown, miss use of run-exclusive buildCb )";
+                throw error;
+            }
+        }).apply(this, inputs);
+    });
+    if (isGlobal) {
+        execQueue = getOrCreateExecQueue(globalContext, groupRef);
+    }
+    groupByRunExclusiveFunction.set(runExclusiveFunction, groupRef);
+    return runExclusiveFunction;
+}
+
+},{"minimal-polyfills/dist/lib/WeakMap":81}],83:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -10667,7 +11724,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":62}],67:[function(require,module,exports){
+},{"has":77}],84:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -10717,7 +11774,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":66}],68:[function(require,module,exports){
+},{"super-json":83}],85:[function(require,module,exports){
 module.exports={
   "usd": {
     "symbol": "$",
@@ -11626,7 +12683,7 @@ module.exports={
   }
 }
 
-},{}],69:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
@@ -11635,4 +12692,4 @@ var version;
     version.methodName = "version";
 })(version = exports.version || (exports.version = {}));
 
-},{}]},{},[21]);
+},{}]},{},[10]);
