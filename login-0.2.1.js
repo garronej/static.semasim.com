@@ -6265,11 +6265,11 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
             })(),
             "uiApi": {
                 "emailInput": {
-                    "getValue": $("#email").val(),
+                    "getValue": function () { return $("#email").val(); },
                     "setValue": function (email) { return $("#email").val(email); }
                 },
                 "passwordInput": {
-                    "getValue": $("#password").val(),
+                    "getValue": function () { return $("#password").val(); },
                     "setValue": function (password) { return $("#password").val(password); }
                 },
                 "triggerClickButtonLogin": function () { return $("#login-btn").trigger("click"); },
