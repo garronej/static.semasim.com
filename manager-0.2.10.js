@@ -14500,40 +14500,35 @@ var evt_1 = require("evt");
 var dcTypes = require("chan-dongle-extended-client/dist/lib/types");
 function getHandlers() {
     var _this = this;
+    var evtRtcIceServer = new evt_1.Evt();
     var remoteNotifyEvts = {
         "evtUserSimChange": new evt_1.Evt(),
         "evtDongleOnLan": new evt_1.Evt(),
         "evtOpenElsewhere": new evt_1.VoidEvt(),
-        "rtcIceServer": (function () {
-            var evt = new evt_1.Evt();
-            return {
-                evt: evt,
-                "getCurrent": (function () {
-                    var current = undefined;
-                    var evtUpdated = new evt_1.VoidEvt();
-                    evt.attach(function (_a) {
-                        var rtcIceServer = _a.rtcIceServer, attachOnNoLongerValid = _a.attachOnNoLongerValid;
-                        attachOnNoLongerValid(function () { return current = undefined; });
-                        current = rtcIceServer;
-                        evtUpdated.post();
-                    });
-                    return function callee() {
-                        return __awaiter(this, void 0, void 0, function () {
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0:
-                                        if (current !== undefined) {
-                                            return [2 /*return*/, current];
-                                        }
-                                        return [4 /*yield*/, evtUpdated.waitFor()];
-                                    case 1:
-                                        _a.sent();
-                                        return [2 /*return*/, callee()];
+        "getRtcIceServer": (function () {
+            var current = undefined;
+            var evtUpdated = new evt_1.VoidEvt();
+            evtRtcIceServer.attach(function (_a) {
+                var rtcIceServer = _a.rtcIceServer, attachOnNoLongerValid = _a.attachOnNoLongerValid;
+                attachOnNoLongerValid(function () { return current = undefined; });
+                current = rtcIceServer;
+                evtUpdated.post();
+            });
+            return function callee() {
+                return __awaiter(this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (current !== undefined) {
+                                    return [2 /*return*/, current];
                                 }
-                            });
-                        });
-                    };
-                })()
+                                return [4 /*yield*/, evtUpdated.waitFor()];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/, callee()];
+                        }
+                    });
+                });
             };
         })(),
         "evtWdActionFromOtherUa": new evt_1.Evt()
@@ -14581,7 +14576,7 @@ function getHandlers() {
                     if (data.type === "USABLE") {
                         evtUsableDongle.post({ "imei": dongle.imei });
                     }
-                    remoteNotifyEvts.evtDongleOnLan.post(data);
+                    remoteNotifyEvts.evtDongleOnLan.postAsyncOnceHandled(data);
                     return [2 /*return*/, undefined];
                 });
             }); }
@@ -14592,7 +14587,7 @@ function getHandlers() {
         var methodName = apiDeclaration.notifyLoggedFromOtherTab.methodName;
         var handler = {
             "handler": function () {
-                remoteNotifyEvts.evtOpenElsewhere.post();
+                remoteNotifyEvts.evtOpenElsewhere.postAsyncOnceHandled();
                 return Promise.resolve(undefined);
             }
         };
@@ -14602,7 +14597,7 @@ function getHandlers() {
         var methodName = apiDeclaration.notifyIceServer.methodName;
         var handler = {
             "handler": function (params, fromSocket) {
-                remoteNotifyEvts.rtcIceServer.evt.post({
+                evtRtcIceServer.post({
                     "rtcIceServer": params !== undefined ? params :
                         ({
                             "urls": [
@@ -16964,8 +16959,7 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-var wd = require("./webphoneData");
-exports.wd = wd;
+exports.wd = require("./webphoneData");
 __export(require("./UserSim"));
 __export(require("./Webphone"));
 
