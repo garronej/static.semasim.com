@@ -7494,7 +7494,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var crypto = require("../crypto/keysGeneration");
+var keyGeneration = require("../crypto/keysGeneration");
 var cryptoLib = require("../crypto/cryptoLibProxy");
 function factory(params) {
     var webApi = params.webApi, dialogApi = params.dialogApi, JustRegistered = params.JustRegistered;
@@ -7504,7 +7504,7 @@ function factory(params) {
             var _this = this;
             return __generator(this, function (_a) {
                 email = params.email, uiApi = params.uiApi;
-                crypto.preSpawnIfNotAlreadyDone();
+                keyGeneration.preSpawnIfNotAlreadyDone();
                 if (email !== undefined) {
                     uiApi.emailInput.setValue({
                         "value": email,
@@ -7519,7 +7519,7 @@ function factory(params) {
                                     case 0:
                                         email = uiApi.emailInput.getValue();
                                         password = uiApi.passwordInput.getValue();
-                                        return [4 /*yield*/, crypto.computeLoginSecretAndTowardUserKeys({
+                                        return [4 /*yield*/, keyGeneration.computeLoginSecretAndTowardUserKeys({
                                                 password: password,
                                                 "uniqUserIdentification": email
                                             })];
@@ -7533,7 +7533,7 @@ function factory(params) {
                                             "towardUserEncryptKeyStr": cryptoLib.RsaKey.stringify(towardUserKeys.encryptKey)
                                         };
                                         _e = "encryptedSymmetricKey";
-                                        return [4 /*yield*/, crypto.symmetricKey.createThenEncryptKey(towardUserKeys.encryptKey)];
+                                        return [4 /*yield*/, keyGeneration.symmetricKey.createThenEncryptKey(towardUserKeys.encryptKey)];
                                     case 2: return [4 /*yield*/, _c.apply(_b, [(_d[_e] = _f.sent(),
                                                 _d["shouldThrowOnError"] = true,
                                                 _d)]).catch(function () { return new Error(); })];
