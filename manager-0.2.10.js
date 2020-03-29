@@ -5040,6 +5040,7 @@ var Operator;
                 function match(result) {
                     return (typeSafety_1.typeGuard(result) &&
                         result instanceof Object &&
+                        !("input" in result) && //exclude String.prototype.match
                         (result.length === 1 ||
                             (result.length === 2 &&
                                 (result[1] === null ||
@@ -8682,9 +8683,10 @@ function readSrflxAddrInSdp(sdp) {
 exports.readSrflxAddrInSdp = readSrflxAddrInSdp;
 function isPlainMessageRequest(sipRequest, withAuth) {
     if (withAuth === void 0) { withAuth = undefined; }
+    var _a;
     return (sipRequest.method === "MESSAGE" &&
         (!withAuth || "authorization" in sipRequest.headers) &&
-        sipRequest.headers["content-type"].toLowerCase().match(/^text\/plain/));
+        !!((_a = sipRequest.headers["content-type"]) === null || _a === void 0 ? void 0 : _a.toLowerCase().match(/^text\/plain/)));
 }
 exports.isPlainMessageRequest = isPlainMessageRequest;
 function parsePath(path) {

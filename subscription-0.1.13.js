@@ -10128,6 +10128,7 @@ var Operator;
                 function match(result) {
                     return (typeSafety_1.typeGuard(result) &&
                         result instanceof Object &&
+                        !("input" in result) && //exclude String.prototype.match
                         (result.length === 1 ||
                             (result.length === 2 &&
                                 (result[1] === null ||

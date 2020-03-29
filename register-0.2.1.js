@@ -4443,6 +4443,7 @@ var Operator;
                 function match(result) {
                     return (typeSafety_1.typeGuard(result) &&
                         result instanceof Object &&
+                        !("input" in result) && //exclude String.prototype.match
                         (result.length === 1 ||
                             (result.length === 2 &&
                                 (result[1] === null ||
@@ -6665,7 +6666,9 @@ function computeLoginSecretAndTowardUserKeys(params) {
                                 switch (_a.label) {
                                     case 0: return [4 /*yield*/, cryptoLib.scrypt.hash((function () {
                                             var realm = Buffer.from("semasim.com", "utf8");
-                                            return cryptoLib.toBuffer(binaryDataManipulations_1.concatUint8Array(realm, binaryDataManipulations_1.addPadding("LEFT", Buffer.from(uniqUserIdentification, "utf8"), 100 - realm.length))).toString("utf8");
+                                            return cryptoLib.toBuffer(binaryDataManipulations_1.concatUint8Array(realm, binaryDataManipulations_1.addPadding("LEFT", Buffer.from(uniqUserIdentification
+                                                .replace(/\s/g, "")
+                                                .toLowerCase(), "utf8"), 100 - realm.length))).toString("utf8");
                                         })(), "", {
                                             "n": 3,
                                             "digestLengthBytes": 16
