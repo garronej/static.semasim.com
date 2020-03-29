@@ -20825,7 +20825,6 @@ function factory(params) {
                                             resp = _d.sent();
                                             if (!(resp instanceof Error)) return [3 /*break*/, 6];
                                             console.log(resp);
-                                            alert(resp.message);
                                             return [4 /*yield*/, dialogApi.create("alert", { "message": "Please try again later" })];
                                         case 5:
                                             _d.sent();
