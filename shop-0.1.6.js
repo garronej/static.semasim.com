@@ -2997,7 +2997,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var web_api_declaration_1 = require("semasim-gateway/dist/web_api_declaration");
 exports.webApiPath = web_api_declaration_1.apiPath;
 
-},{"semasim-gateway/dist/web_api_declaration":93}],25:[function(require,module,exports){
+},{"semasim-gateway/dist/web_api_declaration":94}],25:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Defined at ejs building in templates/head_common.ejs
@@ -4463,7 +4463,7 @@ function sendRequest(methodName, params, connectSid) {
 }
 exports.sendRequest = sendRequest;
 
-},{"../../gateway/webApiPath":24,"../env":26,"../types/connectSidHttpHeaderName":37,"transfer-tools/dist/lib/JSON_CUSTOM":91}],41:[function(require,module,exports){
+},{"../../gateway/webApiPath":24,"../env":26,"../types/connectSidHttpHeaderName":37,"transfer-tools/dist/lib/JSON_CUSTOM":92}],41:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -4715,7 +4715,7 @@ function prettyPrint(amount, currency) {
 }
 exports.prettyPrint = prettyPrint;
 
-},{"../../res/currency.json":92}],43:[function(require,module,exports){
+},{"../../res/currency.json":93}],43:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var evt_1 = require("evt");
@@ -5005,7 +5005,7 @@ exports.dialogApi = {
     }
 };
 
-},{"../stack":49,"./getApi":44,"./types":46,"run-exclusive":89}],46:[function(require,module,exports){
+},{"../stack":49,"./getApi":44,"./types":46,"run-exclusive":90}],46:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
@@ -5432,7 +5432,10 @@ var Ctx = /** @class */ (function () {
         return Array.from(this.handlers.values())
             .map(function (handler) { return ({ handler: handler, "evt": _this_1.evtByHandler.get(handler) }); });
     };
-    /** Exposed only to enable safe interoperability between mismatching EVT versions, do not use */
+    /**
+     * Exposed to enable safe interoperability between mismatching EVT versions.
+     * Should be considered private
+     * */
     Ctx.prototype.zz__addHandler = function (handler, evt) {
         assert_1.assert(handler.ctx === this);
         assert_1.assert(typeGuard_1.typeGuard(handler));
@@ -5440,7 +5443,10 @@ var Ctx = /** @class */ (function () {
         this.evtByHandler.set(handler, evt);
         this.onHandler(true, { handler: handler, evt: evt });
     };
-    /** Exposed only to enable safe interoperability between EVT versions, do not use */
+    /**
+     * Exposed to enable safe interoperability between EVT versions.
+     * Should be considered private
+     * */
     Ctx.prototype.zz__removeHandler = function (handler) {
         assert_1.assert(handler.ctx === this);
         assert_1.assert(typeGuard_1.typeGuard(handler));
@@ -5470,7 +5476,7 @@ var VoidCtx = /** @class */ (function (_super) {
 exports.VoidCtx = VoidCtx;
 importProxy_1.importProxy.VoidCtx = VoidCtx;
 
-},{"../tools/typeSafety/assert":77,"../tools/typeSafety/typeGuard":81,"./importProxy":56,"./util/LazyEvtFactory":63,"minimal-polyfills/dist/lib/Set":87,"minimal-polyfills/dist/lib/WeakMap":88}],54:[function(require,module,exports){
+},{"../tools/typeSafety/assert":78,"../tools/typeSafety/typeGuard":82,"./importProxy":56,"./util/LazyEvtFactory":63,"minimal-polyfills/dist/lib/Set":88,"minimal-polyfills/dist/lib/WeakMap":89}],54:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -5580,11 +5586,12 @@ var parseOverloadParams_1 = require("./util/parseOverloadParams");
 var getCtxFactory_1 = require("./util/getCtxFactory");
 var LazyEvtFactory_1 = require("./util/LazyEvtFactory");
 var importProxy_1 = require("./importProxy");
+var useEffect_1 = require("./util/useEffect");
 /** https://docs.evt.land/api/evt */
 var Evt = /** @class */ (function () {
     function Evt() {
         var _this_1 = this;
-        this.__maxHandlers = 25;
+        this.__maxHandlers = undefined;
         //NOTE: Not really readonly but we want to prevent user from setting the value
         //manually and we cant user accessor because we target es3.
         /**
@@ -5721,24 +5728,20 @@ var Evt = /** @class */ (function () {
         }, function () { return Promise.resolve().then(function () { return resolvePr(_this_1.post(data)); }); });
         return pr;
     };
-    /**
-     *
-     * By default EventEmitters will print a warning if more than 25 handlers are added for
-     * a particular event. This is a useful default that helps finding memory leaks.
-     * Not all events should be limited to 25 handlers. The evt.setMaxHandlers() method allows the limit to be
-     * modified for this specific EventEmitter instance.
-     * The value can be set to Infinity (or 0) to indicate an unlimited number of listeners.
-     * Returns a reference to the EventEmitter, so that calls can be chained.
-     *
-     */
+    /** https://docs.evt.land/api/evt/setdefaultmaxhandlers */
+    Evt.setDefaultMaxHandlers = function (n) {
+        this.__defaultMaxHandlers = isFinite(n) ? n : 0;
+    };
+    /** https://docs.evt.land/api/evt/setmaxhandlers */
     Evt.prototype.setMaxHandlers = function (n) {
         this.__maxHandlers = isFinite(n) ? n : 0;
         return this;
     };
     /** https://docs.evt.land/api/evt/enabletrace */
-    Evt.prototype.enableTrace = function (id, formatter, log
+    Evt.prototype.enableTrace = function (params
     //NOTE: Not typeof console.log as we don't want to expose types from node
     ) {
+        var id = params.id, formatter = params.formatter, log = params.log;
         this.traceId = id;
         this.traceFormatter = formatter !== null && formatter !== void 0 ? formatter : (function (data) {
             try {
@@ -5748,13 +5751,16 @@ var Evt = /** @class */ (function () {
                 return "" + data;
             }
         });
-        this.log = log !== null && log !== void 0 ? log : (function () {
-            var inputs = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                inputs[_i] = arguments[_i];
-            }
-            return console.log.apply(console, __spread(inputs));
-        });
+        this.log =
+            log === undefined ?
+                (function () {
+                    var inputs = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        inputs[_i] = arguments[_i];
+                    }
+                    return console.log.apply(console, __spread(inputs));
+                }) :
+                log === false ? undefined : log;
     };
     /** https://docs.evt.land/api/evt/enabletrace */
     Evt.prototype.disableTrace = function () {
@@ -5806,7 +5812,6 @@ var Evt = /** @class */ (function () {
     };
     Evt.prototype.addHandler = function (propsFromArgs, propsFromMethodName) {
         var _this_1 = this;
-        var _a;
         if (Operator_1.Operator.fλ.Stateful.match(propsFromArgs.op)) {
             this.statelessByStatefulOp.set(propsFromArgs.op, encapsulateOpState_1.encapsulateOpState(propsFromArgs.op));
         }
@@ -5840,24 +5845,54 @@ var Evt = /** @class */ (function () {
         else {
             this.handlers.push(handler);
         }
-        if (this.__maxHandlers !== 0 &&
-            this.handlers.length % (this.__maxHandlers + 1) === 0) {
-            var message = [
-                "MaxHandlersExceededWarning: Possible Evt memory leak detected.",
-                this.handlers.length + " handlers attached" + (this.traceId ? " to " + this.traceId : "") + ".",
-                "Use evt.setMaxHandlers() to increase limit."
-            ].join(" ");
-            try {
-                console.warn(message);
-            }
-            catch (_b) {
-            }
-        }
+        this.checkForPotentialMemoryLeak();
         if (typeGuard_1.typeGuard(handler, !!handler.ctx)) {
             handler.ctx.zz__addHandler(handler, this);
         }
-        (_a = this.onHandler) === null || _a === void 0 ? void 0 : _a.call(this, true, handler);
+        this.onHandler(true, handler);
         return handler;
+    };
+    Evt.prototype.checkForPotentialMemoryLeak = function () {
+        var _a;
+        var maxHandlers = (_a = this.__maxHandlers) !== null && _a !== void 0 ? _a : Evt.__defaultMaxHandlers;
+        if (maxHandlers === 0 ||
+            this.handlers.length % (maxHandlers + 1) !== 0) {
+            return;
+        }
+        var message = [
+            "MaxHandlersExceededWarning: Possible Evt memory leak detected.",
+            this.handlers.length + " handlers attached" + (this.traceId ? " to \"" + this.traceId + "\"" : "") + ".\n",
+            "Use Evt.prototype.setMaxHandlers(n) to increase limit on a specific Evt.\n",
+            "Use Evt.setDefaultMaxHandlers(n) to change the default limit currently set to " + Evt.__defaultMaxHandlers + ".\n",
+        ].join("");
+        var map = new Map_1.Polyfill();
+        this.getHandlers()
+            .map(function (_a) {
+            var ctx = _a.ctx, async = _a.async, once = _a.once, prepend = _a.prepend, extract = _a.extract, op = _a.op, callback = _a.callback;
+            return (__assign(__assign({ "hasCtx": !!ctx, once: once,
+                prepend: prepend,
+                extract: extract, "isWaitFor": async }, (op === parseOverloadParams_1.matchAll ? {} : { "op": op.toString() })), (!callback ? {} : { "callback": callback.toString() })));
+        })
+            .map(function (obj) {
+            return "{\n" + Object.keys(obj)
+                .map(function (key) { return "  " + key + ": " + obj[key]; })
+                .join(",\n") + "\n}";
+        })
+            .forEach(function (str) { var _a; return map.set(str, ((_a = map.get(str)) !== null && _a !== void 0 ? _a : 0) + 1); });
+        message += "\n" + Array.from(map.keys())
+            .map(function (str) { return map.get(str) + " handler" + (map.get(str) === 1 ? "" : "s") + " like:\n" + str; })
+            .join("\n") + "\n";
+        if (this.traceId === null) {
+            message += "\n" + [
+                "To validate the identify of the Evt instance that is triggering this warning you can call",
+                "Evt.prototype.enableTrace({ \"id\": \"My evt id\", \"log\": false }) on the Evt that you suspect.\n"
+            ].join(" ");
+        }
+        try {
+            console.warn(message);
+        }
+        catch (_b) {
+        }
     };
     /** https://docs.evt.land/api/evt/getstatelessop */
     Evt.prototype.getStatelessOp = function (op) {
@@ -5867,6 +5902,7 @@ var Evt = /** @class */ (function () {
     };
     Evt.prototype.trace = function (data) {
         var _this_1 = this;
+        var _a;
         if (this.traceId === null) {
             return;
         }
@@ -5887,9 +5923,9 @@ var Evt = /** @class */ (function () {
                     !!_this_1.getStatelessOp(op)(data);
             })
                 .length;
-            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
+            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + ", ";
         }
-        this.log(message + this.traceFormatter(data));
+        (_a = this.log) === null || _a === void 0 ? void 0 : _a.call(this, message + this.traceFormatter(data));
     };
     /**
      * https://garronej.github.io/ts-evt/#evtattach-evtattachonce-and-evtpost
@@ -6161,6 +6197,9 @@ var Evt = /** @class */ (function () {
     Evt.merge = merge_1.merge;
     /** https://docs.evt.land/api/evt/from */
     Evt.from = from_1.from;
+    /** https://docs.evt.land/api/evt/use-effect */
+    Evt.useEffect = useEffect_1.useEffect;
+    Evt.__defaultMaxHandlers = 25;
     return Evt;
 }());
 exports.Evt = Evt;
@@ -6185,7 +6224,7 @@ var VoidEvt = /** @class */ (function (_super) {
 }(Evt));
 exports.VoidEvt = VoidEvt;
 
-},{"../tools/overwriteReadonlyProp":76,"../tools/typeSafety/typeGuard":81,"./importProxy":56,"./types/EvtError":59,"./types/Operator":60,"./util/LazyEvtFactory":63,"./util/encapsulateOpState":65,"./util/from":66,"./util/getCtxFactory":71,"./util/invokeOperator":73,"./util/merge":74,"./util/parseOverloadParams":75,"minimal-polyfills/dist/lib/Array.prototype.find":85,"minimal-polyfills/dist/lib/Map":86,"minimal-polyfills/dist/lib/WeakMap":88,"run-exclusive":89}],55:[function(require,module,exports){
+},{"../tools/overwriteReadonlyProp":77,"../tools/typeSafety/typeGuard":82,"./importProxy":56,"./types/EvtError":59,"./types/Operator":60,"./util/LazyEvtFactory":63,"./util/encapsulateOpState":65,"./util/from":66,"./util/getCtxFactory":71,"./util/invokeOperator":73,"./util/merge":74,"./util/parseOverloadParams":75,"./util/useEffect":76,"minimal-polyfills/dist/lib/Array.prototype.find":86,"minimal-polyfills/dist/lib/Map":87,"minimal-polyfills/dist/lib/WeakMap":89,"run-exclusive":90}],55:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var Evt_2 = require("./Evt");
@@ -6221,7 +6260,7 @@ var Observable = /** @class */ (function () {
 }());
 exports.Observable = Observable;
 
-},{"../tools/overwriteReadonlyProp":76,"./Evt":54}],56:[function(require,module,exports){
+},{"../tools/overwriteReadonlyProp":77,"./Evt":54}],56:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 /** Manually handling circular import so React Native does not gives warning. */
@@ -6292,7 +6331,7 @@ var EventTargetLike;
     })(HasEventTargetAddRemove = EventTargetLike.HasEventTargetAddRemove || (EventTargetLike.HasEventTargetAddRemove = {}));
 })(EventTargetLike = exports.EventTargetLike || (exports.EventTargetLike = {}));
 
-},{"../../tools/typeSafety":79}],59:[function(require,module,exports){
+},{"../../tools/typeSafety":80}],59:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -6419,7 +6458,7 @@ var Operator;
     })(fλ = Operator.fλ || (Operator.fλ = {}));
 })(Operator = exports.Operator || (exports.Operator = {}));
 
-},{"../../tools/typeSafety":79}],61:[function(require,module,exports){
+},{"../../tools/typeSafety":80}],61:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var EvtError_1 = require("./EvtError");
@@ -6472,7 +6511,7 @@ var LazyEvtFactory = /** @class */ (function () {
 }());
 exports.LazyEvtFactory = LazyEvtFactory;
 
-},{"../../tools/overwriteReadonlyProp":76,"../importProxy":56}],64:[function(require,module,exports){
+},{"../../tools/overwriteReadonlyProp":77,"../importProxy":56}],64:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -6557,7 +6596,7 @@ function compose() {
 }
 exports.compose = compose;
 
-},{"../../tools/typeSafety/assert":77,"../../tools/typeSafety/id":78,"../../tools/typeSafety/typeGuard":81,"../types/Operator":60,"./encapsulateOpState":65,"./invokeOperator":73}],65:[function(require,module,exports){
+},{"../../tools/typeSafety/assert":78,"../../tools/typeSafety/id":79,"../../tools/typeSafety/typeGuard":82,"../types/Operator":60,"./encapsulateOpState":65,"./invokeOperator":73}],65:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -6596,7 +6635,7 @@ function encapsulateOpState(statefulFλOp) {
 }
 exports.encapsulateOpState = encapsulateOpState;
 
-},{"../../tools/typeSafety/id":78,"../types/Operator":60}],66:[function(require,module,exports){
+},{"../../tools/typeSafety/id":79,"../types/Operator":60}],66:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var id_1 = require("../../tools/typeSafety/id");
@@ -6606,6 +6645,21 @@ var EventTargetLike_1 = require("../types/EventTargetLike");
 var merge_1 = require("./merge");
 var importProxy_1 = require("../importProxy");
 function fromImpl(ctx, target, eventName, options) {
+    if ("then" in target) {
+        var evt_1 = new importProxy_1.importProxy.Evt();
+        var isCtxDone_1 = (function () {
+            var getEvtDonePostCount = function () { return ctx === null || ctx === void 0 ? void 0 : ctx.getEvtDone().postCount; };
+            var n = getEvtDonePostCount();
+            return function () { return n !== getEvtDonePostCount(); };
+        })();
+        target.then(function (data) {
+            if (isCtxDone_1()) {
+                return;
+            }
+            evt_1.post(data);
+        });
+        return evt_1;
+    }
     if ("length" in target) {
         return merge_1.mergeImpl(ctx, Array.from(target).map(function (target) { return fromImpl(ctx, target, eventName, options); }));
     }
@@ -6660,7 +6714,7 @@ function from(ctxOrTarget, targetOrEventName, eventNameOrOptions, options) {
 }
 exports.from = from;
 
-},{"../../tools/typeSafety/assert":77,"../../tools/typeSafety/id":78,"../../tools/typeSafety/typeGuard":81,"../importProxy":56,"../types/EventTargetLike":58,"./merge":74}],67:[function(require,module,exports){
+},{"../../tools/typeSafety/assert":78,"../../tools/typeSafety/id":79,"../../tools/typeSafety/typeGuard":82,"../importProxy":56,"../types/EventTargetLike":58,"./merge":74}],67:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var scan_1 = require("./scan");
@@ -6748,7 +6802,7 @@ function getCtxFactory() {
 }
 exports.getCtxFactory = getCtxFactory;
 
-},{"../importProxy":56,"minimal-polyfills/dist/lib/WeakMap":88}],72:[function(require,module,exports){
+},{"../importProxy":56,"minimal-polyfills/dist/lib/WeakMap":89}],72:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -6836,6 +6890,7 @@ var id_1 = require("../../tools/typeSafety/id");
 var compose_1 = require("./compose");
 var typeGuard_1 = require("../../tools/typeSafety/typeGuard");
 function matchAll() { return true; }
+exports.matchAll = matchAll;
 var canBeOperator = function (p) {
     return (p !== undefined &&
         typeGuard_1.typeGuard(p) &&
@@ -6984,7 +7039,17 @@ function parseOverloadParamsFactory() {
 }
 exports.parseOverloadParamsFactory = parseOverloadParamsFactory;
 
-},{"../../tools/typeSafety/id":78,"../../tools/typeSafety/typeGuard":81,"./compose":64}],76:[function(require,module,exports){
+},{"../../tools/typeSafety/id":79,"../../tools/typeSafety/typeGuard":82,"./compose":64}],76:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+function useEffect(effect, evt, dataFirst) {
+    var i = 0;
+    evt.attach(function (data) { return effect(data, { "isFirst": false, data: data }, i++); });
+    effect(dataFirst === null || dataFirst === void 0 ? void 0 : dataFirst[0], { "isFirst": true }, i++);
+}
+exports.useEffect = useEffect;
+
+},{}],77:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -7010,7 +7075,7 @@ exports.overwriteReadonlyProp = function (obj, propertyName, value) {
     Object.defineProperty(obj, propertyName, __assign(__assign({}, Object.getOwnPropertyDescriptor(obj, propertyName)), { value: value }));
 };
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 function assert(condition, msg) {
@@ -7020,7 +7085,7 @@ function assert(condition, msg) {
 }
 exports.assert = assert;
 
-},{}],78:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 /**
@@ -7060,7 +7125,7 @@ exports.__esModule = true;
  */
 exports.id = function (x) { return x; };
 
-},{}],79:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -7071,7 +7136,7 @@ __export(require("./typeGuard"));
 __export(require("./assert"));
 __export(require("./matchVoid"));
 
-},{"./assert":77,"./id":78,"./matchVoid":80,"./typeGuard":81}],80:[function(require,module,exports){
+},{"./assert":78,"./id":79,"./matchVoid":81,"./typeGuard":82}],81:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var typeGuard_1 = require("./typeGuard");
@@ -7096,7 +7161,7 @@ function matchVoid(o) {
 }
 exports.matchVoid = matchVoid;
 
-},{"./typeGuard":81}],81:[function(require,module,exports){
+},{"./typeGuard":82}],82:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 /**
@@ -7153,7 +7218,7 @@ function typeGuard(o, isMatched) {
 }
 exports.typeGuard = typeGuard;
 
-},{}],82:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -7207,21 +7272,21 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":82}],84:[function(require,module,exports){
+},{"./implementation":83}],85:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
 
 module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
 
-},{"function-bind":83}],85:[function(require,module,exports){
+},{"function-bind":84}],86:[function(require,module,exports){
 // https://tc39.github.io/ecma262/#sec-array.prototype.find
 if (!Array.prototype.find) {
     Object.defineProperty(Array.prototype, 'find', {
@@ -7262,7 +7327,7 @@ if (!Array.prototype.find) {
     });
 }
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var LightMapImpl = /** @class */ (function () {
@@ -7324,7 +7389,7 @@ var LightMapImpl = /** @class */ (function () {
 exports.LightMapImpl = LightMapImpl;
 exports.Polyfill = typeof Map !== "undefined" ? Map : LightMapImpl;
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var Map_1 = require("./Map");
@@ -7357,13 +7422,13 @@ var LightSetImpl = /** @class */ (function () {
 exports.LightSetImpl = LightSetImpl;
 exports.Polyfill = typeof Set !== "undefined" ? Set : LightSetImpl;
 
-},{"./Map":86}],88:[function(require,module,exports){
+},{"./Map":87}],89:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var Map_1 = require("./Map");
 exports.Polyfill = typeof WeakMap !== "undefined" ? WeakMap : Map_1.Polyfill;
 
-},{"./Map":86}],89:[function(require,module,exports){
+},{"./Map":87}],90:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -7656,7 +7721,7 @@ function buildFnCallback(isGlobal, groupRef, fun) {
     return runExclusiveFunction;
 }
 
-},{"minimal-polyfills/dist/lib/WeakMap":88}],90:[function(require,module,exports){
+},{"minimal-polyfills/dist/lib/WeakMap":89}],91:[function(require,module,exports){
 (function (global){
 "use strict";
 var has = require('has');
@@ -7991,7 +8056,7 @@ if (symbolSerializer) exports.symbolSerializer = symbolSerializer;
 exports.create = create;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has":84}],91:[function(require,module,exports){
+},{"has":85}],92:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -8041,7 +8106,7 @@ function get(serializers) {
 }
 exports.get = get;
 
-},{"super-json":90}],92:[function(require,module,exports){
+},{"super-json":91}],93:[function(require,module,exports){
 module.exports={
   "usd": {
     "symbol": "$",
@@ -8950,7 +9015,7 @@ module.exports={
   }
 }
 
-},{}],93:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";

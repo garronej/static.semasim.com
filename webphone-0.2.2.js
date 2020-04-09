@@ -11298,17 +11298,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11378,7 +11367,6 @@ var lib_1 = require("../../../local_modules/phone-number/dist/lib");
 var evt_1 = require("frontend-shared/node_modules/evt");
 var types = require("frontend-shared/dist/lib/types");
 var moment = require("moment");
-var runNowAndWhenEventOccurFactory_1 = require("frontend-shared/dist/tools/runNowAndWhenEventOccurFactory");
 //declare const titlenotifier: any;
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiConversation.html"), "UiConversation");
 require("../templates/UiConversation.less");
@@ -11476,18 +11464,13 @@ var UiConversation = /** @class */ (function () {
         })();
         var userSim = params.userSim, userSimEvts = params.userSimEvts, obsIsSipRegistered = params.obsIsSipRegistered, wdChat = params.wdChat, evtUpdatedOrDeletedWdChat = params.evtUpdatedOrDeletedWdChat, evtNewOrUpdatedMessage = params.evtNewOrUpdatedMessage, fetchOlderWdMessages = params.fetchOlderWdMessages;
         {
-            var runNowAndWhenEventOccur = runNowAndWhenEventOccurFactory_1.runNowAndWhenEventOccurFactory(__assign(__assign({}, userSimEvts), { "evtIsSipRegisteredValueChange": obsIsSipRegistered.evtChange, "evtUpdatedWdChat": (function () {
-                    var out = new evt_1.VoidEvt();
-                    evtUpdatedOrDeletedWdChat.attach(function (eventData) { return eventData === "UPDATED"; }, function () { return out.post(); });
-                    return out;
-                })() })).runNowAndWhenEventOccur;
             var isDialable_1 = lib_1.phoneNumber.isDialable(wdChat.contactNumber);
-            runNowAndWhenEventOccur(function () {
+            evt_1.Evt.useEffect(function () {
                 var _a;
                 return _this.structure.find("span.id_name")
                     .text((_a = wdChat.contactName) !== null && _a !== void 0 ? _a : "");
-            }, ["evtUpdatedWdChat"]);
-            runNowAndWhenEventOccur(function () {
+            }, evtUpdatedOrDeletedWdChat.pipe(function (event) { return event === "UPDATED"; }));
+            evt_1.Evt.useEffect(function () {
                 if (obsIsSipRegistered.value && isDialable_1) {
                     _this.textarea.removeAttr("disabled");
                     _this.aSend.show();
@@ -11496,13 +11479,13 @@ var UiConversation = /** @class */ (function () {
                     _this.textarea.attr("disabled", true);
                     _this.aSend.hide();
                 }
-            }, ["evtIsSipRegisteredValueChange"]);
-            runNowAndWhenEventOccur(function () {
+            }, obsIsSipRegistered.evtChange);
+            evt_1.Evt.useEffect(function () {
                 _this.btnUpdateContact.prop("disabled", (userSim.reachableSimState === undefined ||
                     !isDialable_1));
                 _this.btnDelete.prop("disabled", userSim.reachableSimState === undefined);
-            }, ["evtReachabilityStatusChange"]);
-            runNowAndWhenEventOccur(function () {
+            }, userSimEvts.evtReachabilityStatusChange);
+            evt_1.Evt.useEffect(function () {
                 var _a;
                 return _this.btnCall.prop("disabled", !(isDialable_1 &&
                     obsIsSipRegistered.value &&
@@ -11510,12 +11493,12 @@ var UiConversation = /** @class */ (function () {
                     (userSim.reachableSimState.ongoingCall === undefined ||
                         userSim.reachableSimState.ongoingCall.number === _this.params.wdChat.contactNumber &&
                             !userSim.reachableSimState.ongoingCall.isUserInCall)));
-            }, [
-                "evtIsSipRegisteredValueChange",
-                "evtReachabilityStatusChange",
-                "evtCellularConnectivityChange",
-                "evtOngoingCall"
-            ]);
+            }, evt_1.Evt.merge([
+                obsIsSipRegistered.evtChange,
+                userSimEvts.evtReachabilityStatusChange,
+                userSimEvts.evtCellularConnectivityChange,
+                userSimEvts.evtOngoingCall
+            ]));
         }
         this.structure.find("span.id_number").text(lib_1.phoneNumber.prettyPrint(wdChat.contactNumber, (_b = userSim.sim.country) === null || _b === void 0 ? void 0 : _b.iso));
         evtNewOrUpdatedMessage.attach(function (wdMessage) { return _this.newOrUpdatedMessage(wdMessage); });
@@ -11712,24 +11695,12 @@ var UiBubble = /** @class */ (function () {
 })(UiBubble || (UiBubble = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../../../local_modules/phone-number/dist/lib":64,"../templates/UiConversation.html":150,"../templates/UiConversation.less":151,"buffer":3,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/dist/lib/types":200,"frontend-shared/dist/tools/runNowAndWhenEventOccurFactory":235,"frontend-shared/node_modules/evt":250,"moment":149}],141:[function(require,module,exports){
+},{"../../../local_modules/phone-number/dist/lib":64,"../templates/UiConversation.html":150,"../templates/UiConversation.less":151,"buffer":3,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/dist/lib/types":200,"frontend-shared/node_modules/evt":249,"moment":149}],141:[function(require,module,exports){
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
 var lib_1 = require("../../../local_modules/phone-number/dist/lib");
 var evt_1 = require("frontend-shared/node_modules/evt");
-var runNowAndWhenEventOccurFactory_1 = require("frontend-shared/dist/tools/runNowAndWhenEventOccurFactory");
 var html = loadUiClassHtml_1.loadUiClassHtml(require("../templates/UiHeader.html"), "UiHeader");
 var UiHeader = /** @class */ (function () {
     function UiHeader(params) {
@@ -11740,15 +11711,14 @@ var UiHeader = /** @class */ (function () {
         this.evtJoinCall = new evt_1.Evt();
         var userSim = params.userSim, userSimEvts = params.userSimEvts, obsIsSipRegistered = params.obsIsSipRegistered;
         {
-            var runNowAndWhenEventOccur = runNowAndWhenEventOccurFactory_1.runNowAndWhenEventOccurFactory(__assign(__assign({}, userSimEvts), { "evtIsSipRegisteredValueChange": obsIsSipRegistered.evtChange })).runNowAndWhenEventOccur;
-            runNowAndWhenEventOccur(function () { return _this.structure.find("a.id_friendly_name span")
-                .text(userSim.friendlyName); }, ["evtFriendlyNameChange"]);
-            runNowAndWhenEventOccur(function () { return _this.structure.find(".id_sip_registration_in_progress")[(!userSim.reachableSimState ||
-                obsIsSipRegistered.value) ? "hide" : "show"](); }, [
-                "evtReachabilityStatusChange",
-                "evtIsSipRegisteredValueChange"
-            ]);
-            runNowAndWhenEventOccur(function () {
+            evt_1.Evt.useEffect(function () { return _this.structure.find("a.id_friendly_name span")
+                .text(userSim.friendlyName); }, userSimEvts.evtFriendlyNameChange);
+            evt_1.Evt.useEffect(function () { return _this.structure.find(".id_sip_registration_in_progress")[(!userSim.reachableSimState ||
+                obsIsSipRegistered.value) ? "hide" : "show"](); }, evt_1.Evt.merge([
+                userSimEvts.evtReachabilityStatusChange,
+                obsIsSipRegistered.evtChange
+            ]));
+            evt_1.Evt.useEffect(function () {
                 var text = (function () {
                     if (!userSim.reachableSimState) {
                         return "Sim not reachable";
@@ -11765,11 +11735,11 @@ var UiHeader = /** @class */ (function () {
                 else {
                     $span.show().text(text);
                 }
-            }, [
-                "evtReachabilityStatusChange",
-                "evtCellularConnectivityChange"
-            ]);
-            runNowAndWhenEventOccur(function () { return _this.structure.find("i")
+            }, evt_1.Evt.merge([
+                userSimEvts.evtReachabilityStatusChange,
+                userSimEvts.evtCellularConnectivityChange
+            ]));
+            evt_1.Evt.useEffect(function () { return _this.structure.find("i")
                 .each(function (_i, e) {
                 var $i = $(e);
                 var cellSignalStrength = $i.attr("data-strength");
@@ -11779,16 +11749,15 @@ var UiHeader = /** @class */ (function () {
                 $i[(!!userSim.reachableSimState &&
                     userSim.reachableSimState.isGsmConnectivityOk &&
                     cellSignalStrength === userSim.reachableSimState.cellSignalStrength) ? "show" : "hide"]();
-            }); }, [
-                "evtReachabilityStatusChange",
-                "evtCellularConnectivityChange",
-                "evtCellularSignalStrengthChange"
-            ]);
-            runNowAndWhenEventOccur(function () {
+            }); }, evt_1.Evt.merge([
+                userSimEvts.evtReachabilityStatusChange,
+                userSimEvts.evtCellularConnectivityChange,
+                userSimEvts.evtCellularConnectivityChange
+            ]));
+            evt_1.Evt.useEffect(function () {
+                var _a;
                 var divConf = _this.structure.find(".id_conf");
-                if (!userSim.reachableSimState ||
-                    !userSim.reachableSimState.isGsmConnectivityOk ||
-                    !userSim.reachableSimState.ongoingCall) {
+                if (!((_a = userSim.reachableSimState) === null || _a === void 0 ? void 0 : _a.ongoingCall)) {
                     divConf.hide();
                     return;
                 }
@@ -11832,12 +11801,12 @@ var UiHeader = /** @class */ (function () {
                     .off("click")
                     .click(function () { return _this.evtJoinCall.post(ongoingCall.number); })
                     .show();
-            }, [
-                "evtReachabilityStatusChange",
-                "evtCellularConnectivityChange",
-                "evtOngoingCall",
-                "evtNewUpdatedOrDeletedContact"
-            ]);
+            }, evt_1.Evt.merge([
+                userSimEvts.evtReachabilityStatusChange,
+                userSimEvts.evtCellularConnectivityChange,
+                userSimEvts.evtOngoingCall,
+                userSimEvts.evtNewUpdatedOrDeletedContact
+            ]));
         }
         this.structure.find("a.id_friendly_name")
             .popover({
@@ -11876,7 +11845,7 @@ var UiHeader = /** @class */ (function () {
 }());
 exports.UiHeader = UiHeader;
 
-},{"../../../local_modules/phone-number/dist/lib":64,"../templates/UiHeader.html":152,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/dist/tools/runNowAndWhenEventOccurFactory":235,"frontend-shared/node_modules/evt":250}],142:[function(require,module,exports){
+},{"../../../local_modules/phone-number/dist/lib":64,"../templates/UiHeader.html":152,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/node_modules/evt":249}],142:[function(require,module,exports){
 "use strict";
 //NOTE: Slimscroll must be loaded on the page.
 var __values = (this && this.__values) || function(o) {
@@ -12130,24 +12099,12 @@ var UiContact = /** @class */ (function () {
     return UiContact;
 }());
 
-},{"../../../local_modules/phone-number/dist/lib":64,"../templates/UiPhonebook.html":153,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/dist/lib/types":200,"frontend-shared/node_modules/evt":250}],143:[function(require,module,exports){
+},{"../../../local_modules/phone-number/dist/lib":64,"../templates/UiPhonebook.html":153,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/dist/lib/types":200,"frontend-shared/node_modules/evt":249}],143:[function(require,module,exports){
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var evt_1 = require("frontend-shared/node_modules/evt");
 var loadUiClassHtml_1 = require("frontend-shared/dist/lib/loadUiClassHtml");
 var lib_1 = require("../../../local_modules/phone-number/dist/lib");
-var runNowAndWhenEventOccurFactory_1 = require("frontend-shared/dist/tools/runNowAndWhenEventOccurFactory");
 function uiQuickActionDependencyInjection(params) {
     var dialogApi = params.dialogApi;
     $.validator.addMethod("validateTelInput", function (value, element) {
@@ -12257,20 +12214,21 @@ function uiQuickActionDependencyInjection(params) {
                 }
                 input.intlTelInput("setNumber", "");
             });
-            var runNowAndWhenEventOccur = runNowAndWhenEventOccurFactory_1.runNowAndWhenEventOccurFactory(__assign(__assign({}, userSimEvts), { "evtIsSipRegisteredValueChange": obsIsSipRegistered.evtChange })).runNowAndWhenEventOccur;
-            runNowAndWhenEventOccur(function () { return _this.structure.find(".id_sms")
-                .prop("disabled", !obsIsSipRegistered.value); }, ["evtIsSipRegisteredValueChange"]);
-            runNowAndWhenEventOccur(function () { return _this.structure.find(".id_contact")
-                .prop("disabled", !userSim.reachableSimState); }, ["evtReachabilityStatusChange"]);
-            runNowAndWhenEventOccur(function () { return _this.structure.find(".id_call").prop("disabled", (!obsIsSipRegistered.value ||
+            evt_1.Evt.useEffect(function () {
+                _this.structure.find(".id_sms")
+                    .prop("disabled", !obsIsSipRegistered.value);
+                _this.structure.find(".id_contact")
+                    .prop("disabled", !userSim.reachableSimState);
+            }, obsIsSipRegistered.evtChange);
+            evt_1.Evt.useEffect(function () { return _this.structure.find(".id_call").prop("disabled", (!obsIsSipRegistered.value ||
                 !userSim.reachableSimState ||
                 !userSim.reachableSimState.isGsmConnectivityOk ||
-                !!userSim.reachableSimState.ongoingCall)); }, [
-                "evtIsSipRegisteredValueChange",
-                "evtReachabilityStatusChange",
-                "evtCellularConnectivityChange",
-                "evtOngoingCall"
-            ]);
+                !!userSim.reachableSimState.ongoingCall)); }, evt_1.Evt.merge([
+                obsIsSipRegistered.evtChange,
+                userSimEvts.evtReachabilityStatusChange,
+                userSimEvts.evtCellularConnectivityChange,
+                userSimEvts.evtOngoingCall
+            ]));
         }
         return UiQuickAction;
     }());
@@ -12278,7 +12236,7 @@ function uiQuickActionDependencyInjection(params) {
 }
 exports.uiQuickActionDependencyInjection = uiQuickActionDependencyInjection;
 
-},{"../../../local_modules/phone-number/dist/lib":64,"../templates/UiQuickAction.html":154,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/dist/tools/runNowAndWhenEventOccurFactory":235,"frontend-shared/node_modules/evt":250}],144:[function(require,module,exports){
+},{"../../../local_modules/phone-number/dist/lib":64,"../templates/UiQuickAction.html":154,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/node_modules/evt":249}],144:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12506,7 +12464,7 @@ function uiWebphoneControllerDependencyInjection(params) {
 }
 exports.uiWebphoneControllerDependencyInjection = uiWebphoneControllerDependencyInjection;
 
-},{"../templates/UiWebphoneController.html":156,"./UiConversation":140,"./UiHeader":141,"./UiPhonebook":142,"./UiQuickAction":143,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/node_modules/evt":250}],145:[function(require,module,exports){
+},{"../templates/UiWebphoneController.html":156,"./UiConversation":140,"./UiHeader":141,"./UiPhonebook":142,"./UiQuickAction":143,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/node_modules/evt":249}],145:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -12594,7 +12552,7 @@ $(document).ready(function () { return __awaiter(void 0, void 0, void 0, functio
     });
 }); });
 
-},{"./UiWebphoneController":144,"./phoneCallUiCreateFactory":146,"frontend-shared/dist/lib/appLauncher/appLaunch":161,"frontend-shared/dist/lib/availablePages":163,"frontend-shared/dist/tools/Deferred":206,"frontend-shared/dist/tools/typeSafety/assert":236}],146:[function(require,module,exports){
+},{"./UiWebphoneController":144,"./phoneCallUiCreateFactory":146,"frontend-shared/dist/lib/appLauncher/appLaunch":161,"frontend-shared/dist/lib/availablePages":163,"frontend-shared/dist/tools/Deferred":206,"frontend-shared/dist/tools/typeSafety/assert":235}],146:[function(require,module,exports){
 "use strict";
 //NOTE: Require ion sound loaded on the page.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -12840,7 +12798,7 @@ function phoneCallUiCreateFactoryDependencyInjections(params) {
 }
 exports.phoneCallUiCreateFactoryDependencyInjections = phoneCallUiCreateFactoryDependencyInjections;
 
-},{"../templates/UiVoiceCall.html":155,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/dist/tools/typeSafety/assert":236,"frontend-shared/dist/tools/typeSafety/id":237,"frontend-shared/node_modules/evt":250}],147:[function(require,module,exports){
+},{"../templates/UiVoiceCall.html":155,"frontend-shared/dist/lib/loadUiClassHtml":173,"frontend-shared/dist/tools/typeSafety/assert":235,"frontend-shared/dist/tools/typeSafety/id":236,"frontend-shared/node_modules/evt":249}],147:[function(require,module,exports){
 module.exports = function (css, customDocument) {
   var doc = customDocument || document;
   if (doc.createStyleSheet) {
@@ -17805,16 +17763,6 @@ function onceLoggedIn(params) {
                                         if (_a === (_b.sent())) {
                                             return [2 /*return*/];
                                         }
-                                        /*
-                                declare const require: any;
-                                
-                                //const { firebase }: typeof import("../../../../react-native-app/node_modules/@react-native-firebase/messaging/lib/index") = require("@react-native-firebase/messaging");
-                                const { firebase }: any = require("@react-native-firebase/messaging");
-                                
-                                const default_: import("./index").Default = ()=> firebase.messaging().getToken();
-                                
-                                export default default_;
-                                */
                                         log("Declaring UA");
                                         return [4 /*yield*/, webApi.declareUa({
                                                 "assertJsRuntimeEnv": params.assertJsRuntimeEnv,
@@ -17932,7 +17880,7 @@ function onceLoggedIn(params) {
     });
 }
 
-},{"../../tools/modal":214,"../../tools/modal/dialog":211,"../../tools/typeSafety/assert":236,"../../tools/typeSafety/id":237,"../createSipUserAgentFactory":164,"../createWebphoneFactory":165,"../crypto/appCryptoSetupHelper":166,"../env":172,"../localStorage/AuthenticatedSessionDescriptorSharedData":174,"../localStorage/Credentials":175,"../localStorage/JustRegistered":176,"../localStorage/TowardUserKeys":177,"../localStorage/declaredPushNotificationToken":178,"../networkStateMonitoring":184,"../pageLogic/login":185,"../pageLogic/register":186,"../restartApp":189,"../tryLoginWithStoredCredentialIfNotAlreadyLogedInFactory":196,"../types":200,"../types/Webphone":198,"../webApiCaller":202,"./minimalLaunch":162,"phone-number/dist/lib":64}],162:[function(require,module,exports){
+},{"../../tools/modal":214,"../../tools/modal/dialog":211,"../../tools/typeSafety/assert":235,"../../tools/typeSafety/id":236,"../createSipUserAgentFactory":164,"../createWebphoneFactory":165,"../crypto/appCryptoSetupHelper":166,"../env":172,"../localStorage/AuthenticatedSessionDescriptorSharedData":174,"../localStorage/Credentials":175,"../localStorage/JustRegistered":176,"../localStorage/TowardUserKeys":177,"../localStorage/declaredPushNotificationToken":178,"../networkStateMonitoring":184,"../pageLogic/login":185,"../pageLogic/register":186,"../restartApp":189,"../tryLoginWithStoredCredentialIfNotAlreadyLogedInFactory":196,"../types":200,"../types/Webphone":198,"../webApiCaller":202,"./minimalLaunch":162,"phone-number/dist/lib":64}],162:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18055,7 +18003,7 @@ function minimalLaunch(params) {
 }
 exports.minimalLaunch = minimalLaunch;
 
-},{"../../tools/Deferred":206,"../../tools/typeSafety/assert":236,"../env":172,"../registerInteractiveRemoteNotifyEvtHandlers":187,"../toBackend/connection":190,"../toBackend/remoteApiCaller":194,"../types/UserSim":197}],163:[function(require,module,exports){
+},{"../../tools/Deferred":206,"../../tools/typeSafety/assert":235,"../env":172,"../registerInteractiveRemoteNotifyEvtHandlers":187,"../toBackend/connection":190,"../toBackend/remoteApiCaller":194,"../types/UserSim":197}],163:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -18837,7 +18785,7 @@ function newIceCandidateHandler(rtcICEServer) {
 })(newIceCandidateHandler || (newIceCandidateHandler = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"../gateway/bundledData":157,"../gateway/readImsi":158,"../gateway/serializedUaObjectCarriedOverSipContactParameter":159,"./env":172,"buffer":3,"evt":250,"run-exclusive":284,"ts-sip":72}],165:[function(require,module,exports){
+},{"../gateway/bundledData":157,"../gateway/readImsi":158,"../gateway/serializedUaObjectCarriedOverSipContactParameter":159,"./env":172,"buffer":3,"evt":249,"run-exclusive":284,"ts-sip":72}],165:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -19012,9 +18960,9 @@ function createWebphoneFactory(params) {
                                 var number_raw = _a.number_raw;
                                 return __awaiter(_this, void 0, void 0, function () {
                                     var wdChat_1, contactNumber, contact, wdChat;
-                                    var _b, _c;
-                                    return __generator(this, function (_d) {
-                                        switch (_d.label) {
+                                    var _b, _c, _d;
+                                    return __generator(this, function (_e) {
+                                        switch (_e.label) {
                                             case 0:
                                                 {
                                                     wdChat_1 = wdChats.find(function (_a) {
@@ -19025,7 +18973,7 @@ function createWebphoneFactory(params) {
                                                         return [2 /*return*/, wdChat_1];
                                                     }
                                                 }
-                                                contactNumber = lib_1.phoneNumber.build(number_raw, userSim.sim.country ? userSim.sim.country.iso : undefined);
+                                                contactNumber = lib_1.phoneNumber.build(number_raw, (_b = userSim.sim.country) === null || _b === void 0 ? void 0 : _b.iso);
                                                 contact = userSim.phonebook.find(function (_a) {
                                                     var number_raw = _a.number_raw;
                                                     return lib_1.phoneNumber.areSame(contactNumber, number_raw);
@@ -19033,8 +18981,8 @@ function createWebphoneFactory(params) {
                                                 wdApi.newChat({
                                                     wdChats: wdChats,
                                                     contactNumber: contactNumber,
-                                                    "contactName": (_b = contact === null || contact === void 0 ? void 0 : contact.name) !== null && _b !== void 0 ? _b : "",
-                                                    "contactIndexInSim": (_c = contact === null || contact === void 0 ? void 0 : contact.mem_index) !== null && _c !== void 0 ? _c : null
+                                                    "contactName": (_c = contact === null || contact === void 0 ? void 0 : contact.name) !== null && _c !== void 0 ? _c : "",
+                                                    "contactIndexInSim": (_d = contact === null || contact === void 0 ? void 0 : contact.mem_index) !== null && _d !== void 0 ? _d : null
                                                 });
                                                 return [4 /*yield*/, wdEvts.evtWdChat.waitFor(function (_a) {
                                                         var wdChat = _a.wdChat, eventType = _a.eventType;
@@ -19042,7 +18990,7 @@ function createWebphoneFactory(params) {
                                                             wdChat.contactNumber === contactNumber);
                                                     })];
                                             case 1:
-                                                wdChat = (_d.sent()).wdChat;
+                                                wdChat = (_e.sent()).wdChat;
                                                 return [2 /*return*/, wdChat];
                                         }
                                     });
@@ -19315,7 +19263,7 @@ function synchronizeUserSimAndWdInstance(userSim, wdChats, wdApi) {
     return Promise.all(tasks).then(function () { });
 }
 
-},{"../tools/typeSafety/id":237,"./env":172,"./types":200,"phone-number/dist/lib":64}],166:[function(require,module,exports){
+},{"../tools/typeSafety/id":236,"./env":172,"./types":200,"phone-number/dist/lib":64}],166:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -19953,7 +19901,7 @@ var AuthenticatedSessionDescriptorSharedData;
 })(AuthenticatedSessionDescriptorSharedData = exports.AuthenticatedSessionDescriptorSharedData || (exports.AuthenticatedSessionDescriptorSharedData = {}));
 
 }).call(this,require("buffer").Buffer)
-},{"./localStorageApi":180,"buffer":3,"evt":250}],175:[function(require,module,exports){
+},{"./localStorageApi":180,"buffer":3,"evt":249}],175:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -20454,7 +20402,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var evt_1 = require("evt");
-var evtAesEncryptOrDecryptResult = new evt_1.Evt();
+var evtAesEncryptOrDecryptResult = new evt_1.Evt().setMaxHandlers(17);
 var evtRsaEncryptOrDecryptResult = new evt_1.Evt();
 var evtRsaGenerateKeysResult = new evt_1.Evt();
 exports.apiExposedToHost = {
@@ -20533,7 +20481,7 @@ function rsaGenerateKeys(seedB64, keysLengthBytes) {
 }
 exports.rsaGenerateKeys = rsaGenerateKeys;
 
-},{"evt":250}],182:[function(require,module,exports){
+},{"evt":249}],182:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -20603,7 +20551,7 @@ function kfd(password, saltHex, iterations) {
 exports.kfd = kfd;
 ;
 
-},{"evt":250}],183:[function(require,module,exports){
+},{"evt":249}],183:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var evt_1 = require("evt");
@@ -20618,7 +20566,7 @@ var api = {
 };
 exports.getApi = function () { return Promise.resolve(api); };
 
-},{"evt":250}],184:[function(require,module,exports){
+},{"evt":249}],184:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var impl_1 = require("./impl");
@@ -21105,7 +21053,7 @@ function renewPasswordFactory(params) {
     return { renewPassword: renewPassword };
 }
 
-},{"../../tools/typeSafety/assert":236,"../crypto/cryptoLibProxy":167,"../crypto/generateUaInstanceId":168,"../crypto/keysGeneration":169,"../env":172}],186:[function(require,module,exports){
+},{"../../tools/typeSafety/assert":235,"../crypto/cryptoLibProxy":167,"../crypto/generateUaInstanceId":168,"../crypto/keysGeneration":169,"../env":172}],186:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -21950,7 +21898,7 @@ notConnectedUserFeedback.provideCustomImplementation(
 );
 */
 
-},{"../../tools/typeSafety/assert":236,"../../tools/typeSafety/id":237,"../../tools/urlGetParameters":241,"../env":172,"./localApiHandlers":191,"evt":250,"ts-sip":72}],191:[function(require,module,exports){
+},{"../../tools/typeSafety/assert":235,"../../tools/typeSafety/id":236,"../../tools/urlGetParameters":240,"../env":172,"./localApiHandlers":191,"evt":249,"ts-sip":72}],191:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -22122,7 +22070,7 @@ function getHandlers() {
 }
 exports.getHandlers = getHandlers;
 
-},{"../../sip_api_declarations/uaToBackend":205,"chan-dongle-extended-client/dist/lib/types":243,"evt":250}],192:[function(require,module,exports){
+},{"../../sip_api_declarations/uaToBackend":205,"chan-dongle-extended-client/dist/lib/types":242,"evt":249}],192:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -22593,6 +22541,7 @@ function getGetUserSimEvts(params) {
             return userSim;
         };
         remoteNotifyEvts.evtUserSimChange.attach(function (eventData) {
+            var _a;
             switch (eventData.type) {
                 case "NEW":
                     {
@@ -22649,9 +22598,7 @@ function getGetUserSimEvts(params) {
                 case "IS NOW UNREACHABLE":
                     {
                         var userSim = findUserSim(eventData.imsi);
-                        var hadOngoingCall = (userSim.reachableSimState !== undefined &&
-                            userSim.reachableSimState.isGsmConnectivityOk &&
-                            userSim.reachableSimState.ongoingCall !== undefined);
+                        var hadOngoingCall = !!((_a = userSim.reachableSimState) === null || _a === void 0 ? void 0 : _a.ongoingCall);
                         userSim.reachableSimState = undefined;
                         if (hadOngoingCall) {
                             out.evtOngoingCall.post(userSim);
@@ -22671,9 +22618,11 @@ function getGetUserSimEvts(params) {
                         }
                         //NOTE: True when password changed for example.
                         var wasAlreadyReachable = userSim.reachableSimState !== undefined;
-                        userSim.reachableSimState = isGsmConnectivityOk ?
-                            ({ "isGsmConnectivityOk": true, cellSignalStrength: cellSignalStrength, "ongoingCall": undefined }) :
-                            ({ "isGsmConnectivityOk": false, cellSignalStrength: cellSignalStrength });
+                        userSim.reachableSimState = {
+                            isGsmConnectivityOk: isGsmConnectivityOk,
+                            cellSignalStrength: cellSignalStrength,
+                            "ongoingCall": undefined
+                        };
                         var hasPasswordChanged = userSim.password !== password;
                         userSim.password = password;
                         userSim.dongle = simDongle;
@@ -22692,22 +22641,9 @@ function getGetUserSimEvts(params) {
                     {
                         var userSim = findUserSim(eventData.imsi);
                         var reachableSimState = userSim.reachableSimState;
-                        assert_1.assert(reachableSimState !== undefined);
-                        assert_1.assert(eventData.isGsmConnectivityOk !== reachableSimState.isGsmConnectivityOk);
-                        if (reachableSimState.isGsmConnectivityOk) {
-                            var hadOngoingCall = false;
-                            if (reachableSimState.ongoingCall !== undefined) {
-                                delete reachableSimState.ongoingCall;
-                                hadOngoingCall = true;
-                            }
-                            reachableSimState.isGsmConnectivityOk = false;
-                            if (hadOngoingCall) {
-                                out.evtOngoingCall.post(userSim);
-                            }
-                        }
-                        else {
-                            reachableSimState.isGsmConnectivityOk = true;
-                        }
+                        assert_1.assert(reachableSimState !== undefined &&
+                            eventData.isGsmConnectivityOk !== reachableSimState.isGsmConnectivityOk);
+                        reachableSimState.isGsmConnectivityOk = eventData.isGsmConnectivityOk;
                         out.evtCellularConnectivityChange.post(userSim);
                     }
                     return;
@@ -22729,12 +22665,6 @@ function getGetUserSimEvts(params) {
                                 //NOTE: The event would have been posted in setSimOffline handler.
                                 return;
                             }
-                            if (!reachableSimState.isGsmConnectivityOk) {
-                                //NOTE: If we have had event notifying connectivity lost
-                                //before this event the evtOngoingCall will have been posted
-                                //in notifyGsmConnectivityChange handler function.
-                                return;
-                            }
                             if (reachableSimState.ongoingCall === undefined ||
                                 reachableSimState.ongoingCall.ongoingCallId !== ongoingCallId) {
                                 return;
@@ -22745,7 +22675,6 @@ function getGetUserSimEvts(params) {
                             var ongoingCall = eventData.ongoingCall;
                             var reachableSimState = userSim.reachableSimState;
                             assert_1.assert(reachableSimState !== undefined);
-                            assert_1.assert(reachableSimState.isGsmConnectivityOk);
                             if (reachableSimState.ongoingCall === undefined) {
                                 reachableSimState.ongoingCall = ongoingCall;
                             }
@@ -22888,7 +22817,7 @@ function getGetUserSimEvts(params) {
     };
 }
 
-},{"../../../sip_api_declarations/backendToUa":204,"../../../tools/createObjectWithGivenRef":207,"../../../tools/reducers":228,"../../../tools/typeSafety/assert":236,"../../../tools/typeSafety/id":237,"../../types":200,"evt":250,"phone-number":64}],193:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":204,"../../../tools/createObjectWithGivenRef":207,"../../../tools/reducers":228,"../../../tools/typeSafety/assert":235,"../../../tools/typeSafety/id":236,"../../types":200,"evt":249,"phone-number":64}],193:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -24031,7 +23960,7 @@ function getGetGetWdEvts(params) {
     };
 }
 
-},{"../../../sip_api_declarations/backendToUa":204,"../../../tools/createObjectWithGivenRef":207,"../../../tools/typeSafety":238,"../../../tools/typeSafety/id":237,"../../crypto/cryptoLibProxy":167,"../../types":200,"crypto-lib/dist/async/serializer":17,"evt":250,"md5":279}],196:[function(require,module,exports){
+},{"../../../sip_api_declarations/backendToUa":204,"../../../tools/createObjectWithGivenRef":207,"../../../tools/typeSafety":237,"../../../tools/typeSafety/id":236,"../../crypto/cryptoLibProxy":167,"../../types":200,"crypto-lib/dist/async/serializer":17,"evt":249,"md5":279}],196:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -24162,7 +24091,7 @@ function tryLoginWithStoredCredentialIfNotAlreadyLogedInFactory(params) {
 }
 exports.tryLoginWithStoredCredentialIfNotAlreadyLogedInFactory = tryLoginWithStoredCredentialIfNotAlreadyLogedInFactory;
 
-},{"../tools/typeSafety/assert":236,"./env":172}],197:[function(require,module,exports){
+},{"../tools/typeSafety/assert":235,"./env":172}],197:[function(require,module,exports){
 "use strict";
 var __rest = (this && this.__rest) || function (s, e) {
     var t = {};
@@ -24260,8 +24189,18 @@ var UserSim;
         (function (Evts) {
             function build(params) {
                 var userSims = params.userSims.filter(Usable.match);
+                var ctx = evt_1.Evt.newCtx();
                 var userSimEvts = {
-                    "evtNew": new evt_1.Evt(),
+                    "evtNew": evt_1.Evt.merge([
+                        params.userSimEvts.evtNew
+                            .pipe(ctx, function (data) { return data.cause === "SHARING REQUEST RECEIVED" ? null : [data]; }),
+                        params.userSimEvts.evtNowConfirmed
+                            .pipe(ctx, function (userSim) { return [{ "cause": "SHARED SIM CONFIRMED", userSim: userSim }]; })
+                    ]).pipe(function (_a) {
+                        var userSim = _a.userSim;
+                        userSims.push(userSim);
+                        return true;
+                    }),
                     "evtDelete": new evt_1.Evt(),
                     "evtReachabilityStatusChange": new evt_1.Evt(),
                     "evtSipPasswordRenewed": new evt_1.Evt(),
@@ -24272,42 +24211,6 @@ var UserSim;
                     "evtSharedUserSetChange": new evt_1.Evt(),
                     "evtFriendlyNameChange": new evt_1.Evt()
                 };
-                var ctx = evt_1.Evt.newCtx();
-                params.userSimEvts.evtNew.attach(ctx, function (eventData) {
-                    if (eventData.cause === "SHARING REQUEST RECEIVED") {
-                        return;
-                    }
-                    userSims.push(eventData.userSim);
-                    userSimEvts.evtNew.post(eventData);
-                });
-                params.userSimEvts.evtNowConfirmed.attach(ctx, function (userSim) {
-                    userSims.push(userSim);
-                    userSimEvts.evtNew.post({
-                        "cause": "SHARED SIM CONFIRMED",
-                        userSim: userSim
-                    });
-                });
-                params.userSimEvts.evtDelete.attach(ctx, function (eventData) {
-                    var newEventData;
-                    switch (eventData.cause) {
-                        case "REJECT SHARING REQUEST":
-                            return;
-                        case "PERMISSION LOSS":
-                            if (Shared.NotConfirmed.match(eventData.userSim)) {
-                                return;
-                            }
-                            newEventData = {
-                                "cause": eventData.cause,
-                                "userSim": eventData.userSim
-                            };
-                            break;
-                        case "USER UNREGISTER SIM":
-                            newEventData = eventData;
-                            break;
-                    }
-                    userSims.splice(userSims.indexOf(newEventData.userSim), 1);
-                    userSimEvts.evtDelete.post(newEventData);
-                });
                 Object.keys(userSimEvts).forEach(function (eventName) {
                     var srcEvt = id_1.id(params.userSimEvts[eventName]);
                     if (!!srcEvt.getHandlers().find(function (handler) { return handler.ctx === ctx; })) {
@@ -24324,6 +24227,12 @@ var UserSim;
                         }
                         userSimEvts[eventName].post(eventData);
                     });
+                });
+                userSimEvts.evtDelete = userSimEvts.evtDelete
+                    .pipe(function (_a) {
+                    var userSim = _a.userSim;
+                    userSims.splice(userSims.indexOf(userSim), 1);
+                    return true;
                 });
                 return { userSims: userSims, userSimEvts: userSimEvts };
             }
@@ -24396,7 +24305,7 @@ function buildEvtsForSpecificSimFactory(createNewInstance) {
     build;
 })();
 
-},{"../../tools/typeSafety/assert":236,"../../tools/typeSafety/id":237,"evt":250}],198:[function(require,module,exports){
+},{"../../tools/typeSafety/assert":235,"../../tools/typeSafety/id":236,"evt":249}],198:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -24416,6 +24325,7 @@ var __read = (this && this.__read) || function (o, n) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var wd = require("./webphoneData");
+var lib_1 = require("phone-number/dist/lib");
 var Webphone;
 (function (Webphone) {
     function sortPuttingFirstTheOneThatWasLastUsed(webphone1, webphone2) {
@@ -24440,9 +24350,24 @@ var Webphone;
     }
     Webphone.sortPuttingFirstTheOneThatWasLastUsed = sortPuttingFirstTheOneThatWasLastUsed;
     ;
+    function canCallFactory(webphone) {
+        var userSim = webphone.userSim, obsIsSipRegistered = webphone.obsIsSipRegistered;
+        function canCall(number_raw) {
+            var _a, _b;
+            var isDialable = lib_1.phoneNumber.isDialable(lib_1.phoneNumber.build(number_raw, (_a = userSim.sim.country) === null || _a === void 0 ? void 0 : _a.iso));
+            return (isDialable &&
+                obsIsSipRegistered.value &&
+                !!((_b = userSim.reachableSimState) === null || _b === void 0 ? void 0 : _b.isGsmConnectivityOk) &&
+                (userSim.reachableSimState.ongoingCall === undefined ||
+                    userSim.reachableSimState.ongoingCall.number === this.params.wdChat.contactNumber &&
+                        !userSim.reachableSimState.ongoingCall.isUserInCall));
+        }
+        return { canCall: canCall };
+    }
+    Webphone.canCallFactory = canCallFactory;
 })(Webphone = exports.Webphone || (exports.Webphone = {}));
 
-},{"./webphoneData":201}],199:[function(require,module,exports){
+},{"./webphoneData":201,"phone-number/dist/lib":64}],199:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectSidHttpHeaderName = "x-connect-sid";
@@ -25253,7 +25178,7 @@ exports.getWebApi = getWebApi;
     getWebApi.hasBeenCalled = false;
 })(getWebApi = exports.getWebApi || (exports.getWebApi = {}));
 
-},{"../../tools/typeSafety/assert":236,"../../web_api_declaration":242,"../env":172,"./sendRequest":203,"evt":250}],203:[function(require,module,exports){
+},{"../../tools/typeSafety/assert":235,"../../web_api_declaration":241,"../env":172,"./sendRequest":203,"evt":249}],203:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -25616,7 +25541,7 @@ function createGenericProxyForBootstrapModal($initializedModalDiv) {
 }
 exports.createGenericProxyForBootstrapModal = createGenericProxyForBootstrapModal;
 
-},{"evt":250}],210:[function(require,module,exports){
+},{"evt":249}],210:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var createGenericProxyForBootstrapModal_1 = require("../createGenericProxyForBootstrapModal");
@@ -26483,7 +26408,7 @@ function partition(matcher) {
 }
 exports.partition = partition;
 
-},{"../typeSafety":238,"./reduceify":232}],231:[function(require,module,exports){
+},{"../typeSafety":237,"./reduceify":232}],231:[function(require,module,exports){
 "use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -26671,19 +26596,6 @@ exports.sameAsFactory = sameAsFactory;
 },{"./allEquals":218,"./reduceify":232}],235:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function runNowAndWhenEventOccurFactory(evts) {
-    function runNowAndWhenEventOccur(handler, keys) {
-        keys.forEach(function (key) { return evts[key].attach(handler); });
-        handler();
-    }
-    ;
-    return { runNowAndWhenEventOccur: runNowAndWhenEventOccur };
-}
-exports.runNowAndWhenEventOccurFactory = runNowAndWhenEventOccurFactory;
-
-},{}],236:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 function assert(condition, msg) {
     if (!condition) {
         throw new Error(msg);
@@ -26691,7 +26603,7 @@ function assert(condition, msg) {
 }
 exports.assert = assert;
 
-},{}],237:[function(require,module,exports){
+},{}],236:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
@@ -26743,7 +26655,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 exports.id = function (x) { return x; };
 
-},{}],238:[function(require,module,exports){
+},{}],237:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -26754,7 +26666,7 @@ __export(require("./typeGuard"));
 __export(require("./assert"));
 __export(require("./matchVoid"));
 
-},{"./assert":236,"./id":237,"./matchVoid":239,"./typeGuard":240}],239:[function(require,module,exports){
+},{"./assert":235,"./id":236,"./matchVoid":238,"./typeGuard":239}],238:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var typeGuard_1 = require("./typeGuard");
@@ -26779,7 +26691,7 @@ function matchVoid(o) {
 }
 exports.matchVoid = matchVoid;
 
-},{"./typeGuard":240}],240:[function(require,module,exports){
+},{"./typeGuard":239}],239:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
@@ -26836,7 +26748,7 @@ function typeGuard(o, isMatched) {
 }
 exports.typeGuard = typeGuard;
 
-},{}],241:[function(require,module,exports){
+},{}],240:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function buildUrl(urlPath, params) {
@@ -26862,7 +26774,7 @@ function parseUrl(url) {
 }
 exports.parseUrl = parseUrl;
 
-},{}],242:[function(require,module,exports){
+},{}],241:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registerUser;
@@ -26930,7 +26842,7 @@ var getOrders;
     getOrders.methodName = "get-orders";
 })(getOrders = exports.getOrders || (exports.getOrders = {}));
 
-},{}],243:[function(require,module,exports){
+},{}],242:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Dongle;
@@ -26951,7 +26863,7 @@ var Dongle;
     })(Usable = Dongle.Usable || (Dongle.Usable = {}));
 })(Dongle = exports.Dongle || (exports.Dongle = {}));
 
-},{}],244:[function(require,module,exports){
+},{}],243:[function(require,module,exports){
 var charenc = {
   // UTF-8 encoding
   utf8: {
@@ -26986,7 +26898,7 @@ var charenc = {
 
 module.exports = charenc;
 
-},{}],245:[function(require,module,exports){
+},{}],244:[function(require,module,exports){
 (function() {
   var base64map
       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
@@ -27084,53 +26996,1265 @@ module.exports = charenc;
   module.exports = crypt;
 })();
 
-},{}],246:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"../tools/typeSafety/assert":270,"../tools/typeSafety/typeGuard":274,"./importProxy":249,"./util/LazyEvtFactory":256,"dup":23,"minimal-polyfills/dist/lib/Set":282,"minimal-polyfills/dist/lib/WeakMap":283}],247:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"../tools/overwriteReadonlyProp":269,"../tools/typeSafety/typeGuard":274,"./importProxy":249,"./types/EvtError":252,"./types/Operator":253,"./util/LazyEvtFactory":256,"./util/encapsulateOpState":258,"./util/from":259,"./util/getCtxFactory":264,"./util/invokeOperator":266,"./util/merge":267,"./util/parseOverloadParams":268,"dup":24,"minimal-polyfills/dist/lib/Array.prototype.find":280,"minimal-polyfills/dist/lib/Map":281,"minimal-polyfills/dist/lib/WeakMap":283,"run-exclusive":284}],248:[function(require,module,exports){
+},{}],245:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+exports.__esModule = true;
+var Set_1 = require("minimal-polyfills/dist/lib/Set");
+var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
+var assert_1 = require("../tools/typeSafety/assert");
+var typeGuard_1 = require("../tools/typeSafety/typeGuard");
+var LazyEvtFactory_1 = require("./util/LazyEvtFactory");
+var importProxy_1 = require("./importProxy");
+/** https://docs.evt.land/api/ctx */
+var Ctx = /** @class */ (function () {
+    function Ctx() {
+        this.handlers = new Set_1.Polyfill();
+        this.evtByHandler = new WeakMap_1.Polyfill();
+        {
+            var lazyEvtAttachFactory_1 = new LazyEvtFactory_1.LazyEvtFactory();
+            var lazyEvtDetachFactory_1 = new LazyEvtFactory_1.LazyEvtFactory();
+            this.onHandler = function (isAttach, handler) {
+                return isAttach ?
+                    lazyEvtAttachFactory_1.post(handler) :
+                    lazyEvtDetachFactory_1.post(handler);
+            };
+            this.getEvtAttach = function () { return lazyEvtAttachFactory_1.getEvt(); };
+            this.getEvtDetach = function () { return lazyEvtDetachFactory_1.getEvt(); };
+        }
+        {
+            var lazyEvtDoneFactory_1 = new LazyEvtFactory_1.LazyEvtFactory();
+            this.onDone = function (doneEvtData) { return lazyEvtDoneFactory_1.post(doneEvtData); };
+            this.getEvtDone = function () { return lazyEvtDoneFactory_1.getEvt(); };
+        }
+    }
+    /**
+     *
+     * https://docs.evt.land/api/ctx#ctx-getprdone-timeout
+     *
+     * Return a promise that resolve next time ctx.done(result) is invoked
+     * Reject if ctx.abort(error) is invoked.
+     * Optionally a timeout can be passed, if so the returned promise will reject
+     * with EvtError.Timeout if done(result) is not called * within [timeout]ms.
+     * If the timeout is reached ctx.abort(timeoutError) will be invoked.
+     */
+    Ctx.prototype.getPrDone = function (timeout) {
+        var _this_1 = this;
+        return this.getEvtDone()
+            .waitFor(timeout)
+            .then(function (_a) {
+            var _b = __read(_a, 2), error = _b[0], result = _b[1];
+            if (!!error) {
+                throw error;
+            }
+            return result;
+        }, function (timeoutError) {
+            _this_1.abort(timeoutError);
+            throw timeoutError;
+        });
+    };
+    /**
+     * https://docs.evt.land/api/ctx#ctx-abort-error
+     *
+     * All the handler will be detached.
+     * evtDone will post [ error, undefined, handlers (detached) ]
+     * if getPrDone() was invoked the promise will reject with the error
+     */
+    Ctx.prototype.abort = function (error) {
+        return this.__done(error);
+    };
+    /**
+     * https://docs.evt.land/api/ctx#ctx-done-result
+     *
+     * Detach all handlers.
+     * evtDone will post [ null, result, handlers (detached) ]
+     * If getPrDone() was invoked the promise will result with result
+     */
+    Ctx.prototype.done = function (result) {
+        return this.__done(undefined, result);
+    };
+    /** Detach all handler bound to this context from theirs respective Evt and post getEvtDone() */
+    Ctx.prototype.__done = function (error, result) {
+        var e_1, _a;
+        var handlers = [];
+        try {
+            for (var _b = __values(this.handlers.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var handler = _c.value;
+                var evt = this.evtByHandler.get(handler);
+                var wasStillAttached = handler.detach();
+                //NOTE: It should not be possible
+                if (!wasStillAttached) {
+                    continue;
+                }
+                handlers.push({ handler: handler, evt: evt });
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        this.onDone([
+            error !== null && error !== void 0 ? error : null,
+            result,
+            handlers
+        ]);
+        return handlers;
+    };
+    /** https://docs.evt.land/api/ctx#ctx-gethandlers */
+    Ctx.prototype.getHandlers = function () {
+        var _this_1 = this;
+        return Array.from(this.handlers.values())
+            .map(function (handler) { return ({ handler: handler, "evt": _this_1.evtByHandler.get(handler) }); });
+    };
+    /**
+     * Exposed to enable safe interoperability between mismatching EVT versions.
+     * Should be considered private
+     * */
+    Ctx.prototype.zz__addHandler = function (handler, evt) {
+        assert_1.assert(handler.ctx === this);
+        assert_1.assert(typeGuard_1.typeGuard(handler));
+        this.handlers.add(handler);
+        this.evtByHandler.set(handler, evt);
+        this.onHandler(true, { handler: handler, evt: evt });
+    };
+    /**
+     * Exposed to enable safe interoperability between EVT versions.
+     * Should be considered private
+     * */
+    Ctx.prototype.zz__removeHandler = function (handler) {
+        assert_1.assert(handler.ctx === this);
+        assert_1.assert(typeGuard_1.typeGuard(handler));
+        this.onHandler(false, { handler: handler, "evt": this.evtByHandler.get(handler) });
+        this.handlers["delete"](handler);
+    };
+    return Ctx;
+}());
+exports.Ctx = Ctx;
+importProxy_1.importProxy.Ctx = Ctx;
+/** https://docs.evt.land/api/ctx */
+var VoidCtx = /** @class */ (function (_super) {
+    __extends(VoidCtx, _super);
+    function VoidCtx() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Detach all handlers.
+     * evtDone will post [ null, undefined, handlers (detached) ]
+     * If getPrDone() was invoked the promise will resolve
+     */
+    VoidCtx.prototype.done = function () {
+        return _super.prototype.done.call(this, undefined);
+    };
+    return VoidCtx;
+}(Ctx));
+exports.VoidCtx = VoidCtx;
+importProxy_1.importProxy.VoidCtx = VoidCtx;
+
+},{"../tools/typeSafety/assert":270,"../tools/typeSafety/typeGuard":274,"./importProxy":248,"./util/LazyEvtFactory":255,"minimal-polyfills/dist/lib/Set":282,"minimal-polyfills/dist/lib/WeakMap":283}],246:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+exports.__esModule = true;
+require("minimal-polyfills/dist/lib/Array.prototype.find");
+var Map_1 = require("minimal-polyfills/dist/lib/Map");
+var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
+var runExclusive = require("run-exclusive");
+var EvtError_1 = require("./types/EvtError");
+var overwriteReadonlyProp_1 = require("../tools/overwriteReadonlyProp");
+var encapsulateOpState_1 = require("./util/encapsulateOpState");
+var typeGuard_1 = require("../tools/typeSafety/typeGuard");
+var Operator_1 = require("./types/Operator");
+var invokeOperator_1 = require("./util/invokeOperator");
+var merge_1 = require("./util/merge");
+var from_1 = require("./util/from");
+var parseOverloadParams_1 = require("./util/parseOverloadParams");
+var getCtxFactory_1 = require("./util/getCtxFactory");
+var LazyEvtFactory_1 = require("./util/LazyEvtFactory");
+var importProxy_1 = require("./importProxy");
+var useEffect_1 = require("./util/useEffect");
+/** https://docs.evt.land/api/evt */
+var Evt = /** @class */ (function () {
+    function Evt() {
+        var _this_1 = this;
+        this.__maxHandlers = undefined;
+        //NOTE: Not really readonly but we want to prevent user from setting the value
+        //manually and we cant user accessor because we target es3.
+        /**
+         * https://docs.evt.land/api/evt/post
+         *
+         * Number of times .post(data) have been called.
+         */
+        this.postCount = 0;
+        this.traceId = null;
+        this.handlers = [];
+        this.handlerTriggers = new Map_1.Polyfill();
+        //NOTE: An async handler ( attached with waitFor ) is only eligible to handle a post if the post
+        //occurred after the handler was set. We don't want to waitFor event from the past.
+        //private readonly asyncHandlerChronologyMark = new WeakMap<ImplicitParams.Async, number>();
+        this.asyncHandlerChronologyMark = new WeakMap_1.Polyfill();
+        //NOTE: There is an exception to the above rule, we want to allow async waitFor loop 
+        //do so we have to handle the case where multiple event would be posted synchronously.
+        this.asyncHandlerChronologyExceptionRange = new WeakMap_1.Polyfill();
+        /*
+        NOTE: Used as Date.now() would be used to compare if an event is anterior
+        or posterior to an other. We don't use Date.now() because two call within
+        less than a ms will return the same value unlike this function.
+        */
+        this.getChronologyMark = (function () {
+            var currentChronologyMark = 0;
+            return function () { return currentChronologyMark++; };
+        })();
+        this.statelessByStatefulOp = new WeakMap_1.Polyfill();
+        this.postAsync = runExclusive.buildMethodCb(function (data, postChronologyMark, releaseLock) {
+            var e_1, _a;
+            var promises = [];
+            var chronologyMarkStartResolveTick;
+            //NOTE: Must be before handlerTrigger call.
+            Promise.resolve().then(function () { return chronologyMarkStartResolveTick = _this_1.getChronologyMark(); });
+            var _loop_1 = function (handler) {
+                if (!handler.async) {
+                    return "continue";
+                }
+                var opResult = invokeOperator_1.invokeOperator(_this_1.getStatelessOp(handler.op), data, true);
+                if (Operator_1.Operator.fλ.Result.NotMatched.match(opResult)) {
+                    Evt.doDetachIfNeeded(handler, opResult);
+                    return "continue";
+                }
+                var handlerTrigger = _this_1.handlerTriggers.get(handler);
+                if (!handlerTrigger) {
+                    return "continue";
+                }
+                var shouldCallHandlerTrigger = (function () {
+                    var handlerMark = _this_1.asyncHandlerChronologyMark.get(handler);
+                    if (postChronologyMark > handlerMark) {
+                        return true;
+                    }
+                    var exceptionRange = _this_1.asyncHandlerChronologyExceptionRange.get(handler);
+                    return (exceptionRange !== undefined &&
+                        exceptionRange.lowerMark < postChronologyMark &&
+                        postChronologyMark < exceptionRange.upperMark &&
+                        handlerMark > exceptionRange.upperMark);
+                })();
+                if (!shouldCallHandlerTrigger) {
+                    return "continue";
+                }
+                promises.push(new Promise(function (resolve) { return handler.promise
+                    .then(function () { return resolve(); })["catch"](function () { return resolve(); }); }));
+                handlerTrigger(opResult);
+            };
+            try {
+                for (var _b = __values(__spread(_this_1.handlers)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var handler = _c.value;
+                    _loop_1(handler);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            if (promises.length === 0) {
+                releaseLock();
+                return;
+            }
+            var handlersDump = __spread(_this_1.handlers);
+            Promise.all(promises).then(function () {
+                var e_2, _a;
+                try {
+                    for (var _b = __values(_this_1.handlers), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        var handler = _c.value;
+                        if (!handler.async) {
+                            continue;
+                        }
+                        if (handlersDump.indexOf(handler) >= 0) {
+                            continue;
+                        }
+                        _this_1.asyncHandlerChronologyExceptionRange.set(handler, {
+                            "lowerMark": postChronologyMark,
+                            "upperMark": chronologyMarkStartResolveTick
+                        });
+                    }
+                }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                finally {
+                    try {
+                        if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+                    }
+                    finally { if (e_2) throw e_2.error; }
+                }
+                releaseLock();
+            });
+        });
+        this.__parseOverloadParams = parseOverloadParams_1.parseOverloadParamsFactory();
+        var lazyEvtAttachFactory = new LazyEvtFactory_1.LazyEvtFactory();
+        var lazyEvtDetachFactory = new LazyEvtFactory_1.LazyEvtFactory();
+        this.onHandler = function (isAttach, handler) {
+            return isAttach ?
+                lazyEvtAttachFactory.post(handler) :
+                lazyEvtDetachFactory.post(handler);
+        };
+        this.getEvtAttach = function () { return lazyEvtAttachFactory.getEvt(); };
+        this.getEvtDetach = function () { return lazyEvtDetachFactory.getEvt(); };
+    }
+    Evt.newCtx = function () { return new importProxy_1.importProxy.Ctx(); };
+    /** https://docs.evt.land/api/evt/post */
+    Evt.prototype.postAsyncOnceHandled = function (data) {
+        var _this_1 = this;
+        if (this.isHandled(data)) {
+            return this.post(data);
+        }
+        var resolvePr;
+        var pr = new Promise(function (resolve) { return resolvePr = resolve; });
+        this.getEvtAttach().attachOnce(function (_a) {
+            var op = _a.op;
+            return !!invokeOperator_1.invokeOperator(_this_1.getStatelessOp(op), data);
+        }, function () { return Promise.resolve().then(function () { return resolvePr(_this_1.post(data)); }); });
+        return pr;
+    };
+    /** https://docs.evt.land/api/evt/setdefaultmaxhandlers */
+    Evt.setDefaultMaxHandlers = function (n) {
+        this.__defaultMaxHandlers = isFinite(n) ? n : 0;
+    };
+    /** https://docs.evt.land/api/evt/setmaxhandlers */
+    Evt.prototype.setMaxHandlers = function (n) {
+        this.__maxHandlers = isFinite(n) ? n : 0;
+        return this;
+    };
+    /** https://docs.evt.land/api/evt/enabletrace */
+    Evt.prototype.enableTrace = function (params
+    //NOTE: Not typeof console.log as we don't want to expose types from node
+    ) {
+        var id = params.id, formatter = params.formatter, log = params.log;
+        this.traceId = id;
+        this.traceFormatter = formatter !== null && formatter !== void 0 ? formatter : (function (data) {
+            try {
+                return JSON.stringify(data, null, 2);
+            }
+            catch (_a) {
+                return "" + data;
+            }
+        });
+        this.log =
+            log === undefined ?
+                (function () {
+                    var inputs = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        inputs[_i] = arguments[_i];
+                    }
+                    return console.log.apply(console, __spread(inputs));
+                }) :
+                log === false ? undefined : log;
+    };
+    /** https://docs.evt.land/api/evt/enabletrace */
+    Evt.prototype.disableTrace = function () {
+        this.traceId = null;
+    };
+    Evt.prototype.detachHandler = function (handler, wTimer, rejectPr) {
+        var _a;
+        var index = this.handlers.indexOf(handler);
+        if (index < 0) {
+            return false;
+        }
+        if (typeGuard_1.typeGuard(handler, !!handler.ctx)) {
+            handler.ctx.zz__removeHandler(handler);
+        }
+        this.handlers.splice(index, 1);
+        this.handlerTriggers["delete"](handler);
+        if (wTimer[0] !== undefined) {
+            clearTimeout(wTimer[0]);
+            rejectPr(new EvtError_1.EvtError.Detached());
+        }
+        (_a = this.onHandler) === null || _a === void 0 ? void 0 : _a.call(this, false, handler);
+        return true;
+    };
+    Evt.doDetachIfNeeded = function (handler, opResult, once) {
+        var detach = Operator_1.Operator.fλ.Result.getDetachArg(opResult);
+        if (typeof detach !== "boolean") {
+            var _a = __read(detach, 3), ctx = _a[0], error = _a[1], res = _a[2];
+            if (!!error) {
+                ctx.abort(error);
+            }
+            else {
+                ctx.done(res);
+            }
+        }
+        else if (detach || !!once) {
+            handler.detach();
+        }
+    };
+    Evt.prototype.triggerHandler = function (handler, wTimer, resolvePr, opResult) {
+        var callback = handler.callback, once = handler.once;
+        if (wTimer[0] !== undefined) {
+            clearTimeout(wTimer[0]);
+            wTimer[0] = undefined;
+        }
+        Evt.doDetachIfNeeded(handler, opResult, once);
+        var _a = __read(opResult, 1), transformedData = _a[0];
+        callback === null || callback === void 0 ? void 0 : callback.call(this, transformedData);
+        resolvePr(transformedData);
+    };
+    Evt.prototype.addHandler = function (propsFromArgs, propsFromMethodName) {
+        var _this_1 = this;
+        if (Operator_1.Operator.fλ.Stateful.match(propsFromArgs.op)) {
+            this.statelessByStatefulOp.set(propsFromArgs.op, encapsulateOpState_1.encapsulateOpState(propsFromArgs.op));
+        }
+        var handler = __assign(__assign(__assign({}, propsFromArgs), propsFromMethodName), { "detach": null, "promise": null });
+        if (handler.async) {
+            this.asyncHandlerChronologyMark.set(handler, this.getChronologyMark());
+        }
+        handler.promise = new Promise(function (resolve, reject) {
+            var wTimer = [undefined];
+            if (typeof handler.timeout === "number") {
+                wTimer[0] = setTimeout(function () {
+                    wTimer[0] = undefined;
+                    handler.detach();
+                    reject(new EvtError_1.EvtError.Timeout(handler.timeout));
+                }, handler.timeout);
+            }
+            handler.detach =
+                function () { return _this_1.detachHandler(handler, wTimer, reject); };
+            _this_1.handlerTriggers.set(handler, function (opResult) { return _this_1.triggerHandler(handler, wTimer, resolve, opResult); });
+        });
+        if (handler.prepend) {
+            var i = void 0;
+            for (i = 0; i < this.handlers.length; i++) {
+                if (this.handlers[i].extract) {
+                    continue;
+                }
+                break;
+            }
+            this.handlers.splice(i, 0, handler);
+        }
+        else {
+            this.handlers.push(handler);
+        }
+        this.checkForPotentialMemoryLeak();
+        if (typeGuard_1.typeGuard(handler, !!handler.ctx)) {
+            handler.ctx.zz__addHandler(handler, this);
+        }
+        this.onHandler(true, handler);
+        return handler;
+    };
+    Evt.prototype.checkForPotentialMemoryLeak = function () {
+        var _a;
+        var maxHandlers = (_a = this.__maxHandlers) !== null && _a !== void 0 ? _a : Evt.__defaultMaxHandlers;
+        if (maxHandlers === 0 ||
+            this.handlers.length % (maxHandlers + 1) !== 0) {
+            return;
+        }
+        var message = [
+            "MaxHandlersExceededWarning: Possible Evt memory leak detected.",
+            this.handlers.length + " handlers attached" + (this.traceId ? " to \"" + this.traceId + "\"" : "") + ".\n",
+            "Use Evt.prototype.setMaxHandlers(n) to increase limit on a specific Evt.\n",
+            "Use Evt.setDefaultMaxHandlers(n) to change the default limit currently set to " + Evt.__defaultMaxHandlers + ".\n",
+        ].join("");
+        var map = new Map_1.Polyfill();
+        this.getHandlers()
+            .map(function (_a) {
+            var ctx = _a.ctx, async = _a.async, once = _a.once, prepend = _a.prepend, extract = _a.extract, op = _a.op, callback = _a.callback;
+            return (__assign(__assign({ "hasCtx": !!ctx, once: once,
+                prepend: prepend,
+                extract: extract, "isWaitFor": async }, (op === parseOverloadParams_1.matchAll ? {} : { "op": op.toString() })), (!callback ? {} : { "callback": callback.toString() })));
+        })
+            .map(function (obj) {
+            return "{\n" + Object.keys(obj)
+                .map(function (key) { return "  " + key + ": " + obj[key]; })
+                .join(",\n") + "\n}";
+        })
+            .forEach(function (str) { var _a; return map.set(str, ((_a = map.get(str)) !== null && _a !== void 0 ? _a : 0) + 1); });
+        message += "\n" + Array.from(map.keys())
+            .map(function (str) { return map.get(str) + " handler" + (map.get(str) === 1 ? "" : "s") + " like:\n" + str; })
+            .join("\n") + "\n";
+        if (this.traceId === null) {
+            message += "\n" + [
+                "To validate the identify of the Evt instance that is triggering this warning you can call",
+                "Evt.prototype.enableTrace({ \"id\": \"My evt id\", \"log\": false }) on the Evt that you suspect.\n"
+            ].join(" ");
+        }
+        try {
+            console.warn(message);
+        }
+        catch (_b) {
+        }
+    };
+    /** https://docs.evt.land/api/evt/getstatelessop */
+    Evt.prototype.getStatelessOp = function (op) {
+        return Operator_1.Operator.fλ.Stateful.match(op) ?
+            this.statelessByStatefulOp.get(op) :
+            op;
+    };
+    Evt.prototype.trace = function (data) {
+        var _this_1 = this;
+        var _a;
+        if (this.traceId === null) {
+            return;
+        }
+        var message = "(" + this.traceId + ") ";
+        var isExtracted = !!this.handlers.find(function (_a) {
+            var extract = _a.extract, op = _a.op;
+            return (extract &&
+                !!_this_1.getStatelessOp(op)(data));
+        });
+        if (isExtracted) {
+            message += "extracted ";
+        }
+        else {
+            var handlerCount = this.handlers
+                .filter(function (_a) {
+                var extract = _a.extract, op = _a.op;
+                return !extract &&
+                    !!_this_1.getStatelessOp(op)(data);
+            })
+                .length;
+            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + ", ";
+        }
+        (_a = this.log) === null || _a === void 0 ? void 0 : _a.call(this, message + this.traceFormatter(data));
+    };
+    /**
+     * https://garronej.github.io/ts-evt/#evtattach-evtattachonce-and-evtpost
+     *
+     * Returns post count
+     * */
+    Evt.prototype.post = function (data) {
+        this.trace(data);
+        overwriteReadonlyProp_1.overwriteReadonlyProp(this, "postCount", this.postCount + 1);
+        //NOTE: Must be before postSync.
+        var postChronologyMark = this.getChronologyMark();
+        var isExtracted = this.postSync(data);
+        if (!isExtracted) {
+            this.postAsync(data, postChronologyMark);
+        }
+        return this.postCount;
+    };
+    /** Return isExtracted */
+    Evt.prototype.postSync = function (data) {
+        var e_3, _a;
+        try {
+            for (var _b = __values(__spread(this.handlers)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var handler = _c.value;
+                var async = handler.async, op = handler.op, extract = handler.extract;
+                if (async) {
+                    continue;
+                }
+                var opResult = invokeOperator_1.invokeOperator(this.getStatelessOp(op), data, true);
+                if (Operator_1.Operator.fλ.Result.NotMatched.match(opResult)) {
+                    Evt.doDetachIfNeeded(handler, opResult);
+                    continue;
+                }
+                var handlerTrigger = this.handlerTriggers.get(handler);
+                //NOTE: Possible if detached while in the loop.
+                if (!handlerTrigger) {
+                    continue;
+                }
+                handlerTrigger(opResult);
+                if (extract) {
+                    return true;
+                }
+            }
+        }
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_3) throw e_3.error; }
+        }
+        return false;
+    };
+    Evt.prototype.__waitFor = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": true,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    Evt.prototype.__attach = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": false
+        }).promise;
+    };
+    Evt.prototype.__attachExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    Evt.prototype.__attachPrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    Evt.prototype.__attachOnce = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    Evt.prototype.__attachOncePrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    Evt.prototype.__attachOnceExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    /**
+     * https://docs.evt.land/api/evt/ishandled
+     *
+     * Test if posting a given event data will have an effect.
+     *
+     * Return true if:
+     * -There is at least one handler matching
+     * this event data ( at least one handler's callback function
+     * will be invoked if the data is posted. )
+     * -Handlers could be will be detached
+     * if the event data is posted.
+     *
+     */
+    Evt.prototype.isHandled = function (data) {
+        var _this_1 = this;
+        return !!this.getHandlers()
+            .find(function (_a) {
+            var op = _a.op;
+            return !!_this_1.getStatelessOp(op)(data);
+        });
+    };
+    /** https://docs.evt.land/api/evt/gethandler */
+    Evt.prototype.getHandlers = function () {
+        return __spread(this.handlers);
+    };
+    Evt.prototype.detach = function (ctx) {
+        var e_4, _a;
+        var detachedHandlers = [];
+        try {
+            for (var _b = __values(this.getHandlers()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var handler = _c.value;
+                if (ctx !== undefined && handler.ctx !== ctx) {
+                    continue;
+                }
+                var wasStillAttached = handler.detach();
+                //NOTE: It should not be possible.
+                if (!wasStillAttached) {
+                    continue;
+                }
+                detachedHandlers.push(handler);
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_4) throw e_4.error; }
+        }
+        return detachedHandlers;
+    };
+    Evt.prototype.pipe = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        var evtDelegate = new Evt();
+        this.__attach(__assign(__assign({}, this.__parseOverloadParams(inputs, "pipe")), { "callback": function (transformedData) { return evtDelegate.post(transformedData); } }));
+        return evtDelegate;
+    };
+    Evt.prototype.waitFor = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__waitFor(this.__parseOverloadParams(inputs, "waitFor"));
+    };
+    Evt.prototype.$attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attach.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attach(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOnce.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnce(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOnceExtract.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachExtract(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachPrepend.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachPrepend(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOncePrepend.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOncePrepend(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOnceExtract.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnceExtract(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    /**
+     * https://docs.evt.land/api/evt/getctx
+     *
+     * Evt.weakCtx(obj) always return the same instance of VoidCtx for a given object.
+     * No strong reference to the object is created
+     * when the object is no longer referenced it's associated Ctx will be freed from memory.
+     */
+    Evt.getCtx = getCtxFactory_1.getCtxFactory();
+    /** https://docs.evt.land/api/evt/merge */
+    Evt.merge = merge_1.merge;
+    /** https://docs.evt.land/api/evt/from */
+    Evt.from = from_1.from;
+    /** https://docs.evt.land/api/evt/use-effect */
+    Evt.useEffect = useEffect_1.useEffect;
+    Evt.__defaultMaxHandlers = 25;
+    return Evt;
+}());
+exports.Evt = Evt;
+importProxy_1.importProxy.Evt = Evt;
+/** https://docs.evt.land/api/voidevt */
+var VoidEvt = /** @class */ (function (_super) {
+    __extends(VoidEvt, _super);
+    function VoidEvt() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    VoidEvt.prototype.post = function () {
+        return _super.prototype.post.call(this, undefined);
+    };
+    VoidEvt.prototype.postAsyncOnceHandled = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, _super.prototype.postAsyncOnceHandled.call(this, undefined)];
+            });
+        });
+    };
+    return VoidEvt;
+}(Evt));
+exports.VoidEvt = VoidEvt;
+
+},{"../tools/overwriteReadonlyProp":269,"../tools/typeSafety/typeGuard":274,"./importProxy":248,"./types/EvtError":251,"./types/Operator":252,"./util/LazyEvtFactory":255,"./util/encapsulateOpState":257,"./util/from":258,"./util/getCtxFactory":263,"./util/invokeOperator":265,"./util/merge":266,"./util/parseOverloadParams":267,"./util/useEffect":268,"minimal-polyfills/dist/lib/Array.prototype.find":280,"minimal-polyfills/dist/lib/Map":281,"minimal-polyfills/dist/lib/WeakMap":283,"run-exclusive":284}],247:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"../tools/overwriteReadonlyProp":269,"./Evt":247,"dup":25}],249:[function(require,module,exports){
+},{"../tools/overwriteReadonlyProp":269,"./Evt":246,"dup":25}],248:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],250:[function(require,module,exports){
+},{"dup":26}],249:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"./Ctx":246,"./Evt":247,"./Observable":248,"./types":254,"./util":265,"dup":27}],251:[function(require,module,exports){
+},{"./Ctx":245,"./Evt":246,"./Observable":247,"./types":253,"./util":264,"dup":27}],250:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"../../tools/typeSafety":272,"dup":28}],252:[function(require,module,exports){
+},{"../../tools/typeSafety":272,"dup":28}],251:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],253:[function(require,module,exports){
+},{"dup":29}],252:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"../../tools/typeSafety":272,"dup":30}],254:[function(require,module,exports){
+},{"../../tools/typeSafety":272,"dup":30}],253:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"./EvtError":252,"./Operator":253,"./lib.dom":255,"dup":31}],255:[function(require,module,exports){
+},{"./EvtError":251,"./Operator":252,"./lib.dom":254,"dup":31}],254:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"dup":32}],256:[function(require,module,exports){
+},{"dup":32}],255:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"../../tools/overwriteReadonlyProp":269,"../importProxy":249,"dup":33}],257:[function(require,module,exports){
+},{"../../tools/overwriteReadonlyProp":269,"../importProxy":248,"dup":33}],256:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"../../tools/typeSafety/assert":270,"../../tools/typeSafety/id":271,"../../tools/typeSafety/typeGuard":274,"../types/Operator":253,"./encapsulateOpState":258,"./invokeOperator":266,"dup":34}],258:[function(require,module,exports){
+},{"../../tools/typeSafety/assert":270,"../../tools/typeSafety/id":271,"../../tools/typeSafety/typeGuard":274,"../types/Operator":252,"./encapsulateOpState":257,"./invokeOperator":265,"dup":34}],257:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"../../tools/typeSafety/id":271,"../types/Operator":253,"dup":35}],259:[function(require,module,exports){
-arguments[4][36][0].apply(exports,arguments)
-},{"../../tools/typeSafety/assert":270,"../../tools/typeSafety/id":271,"../../tools/typeSafety/typeGuard":274,"../importProxy":249,"../types/EventTargetLike":251,"./merge":267,"dup":36}],260:[function(require,module,exports){
+},{"../../tools/typeSafety/id":271,"../types/Operator":252,"dup":35}],258:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+var id_1 = require("../../tools/typeSafety/id");
+var assert_1 = require("../../tools/typeSafety/assert");
+var typeGuard_1 = require("../../tools/typeSafety/typeGuard");
+var EventTargetLike_1 = require("../types/EventTargetLike");
+var merge_1 = require("./merge");
+var importProxy_1 = require("../importProxy");
+function fromImpl(ctx, target, eventName, options) {
+    if ("then" in target) {
+        var evt_1 = new importProxy_1.importProxy.Evt();
+        var isCtxDone_1 = (function () {
+            var getEvtDonePostCount = function () { return ctx === null || ctx === void 0 ? void 0 : ctx.getEvtDone().postCount; };
+            var n = getEvtDonePostCount();
+            return function () { return n !== getEvtDonePostCount(); };
+        })();
+        target.then(function (data) {
+            if (isCtxDone_1()) {
+                return;
+            }
+            evt_1.post(data);
+        });
+        return evt_1;
+    }
+    if ("length" in target) {
+        return merge_1.mergeImpl(ctx, Array.from(target).map(function (target) { return fromImpl(ctx, target, eventName, options); }));
+    }
+    var proxy;
+    if (EventTargetLike_1.EventTargetLike.NodeStyleEventEmitter.match(target)) {
+        proxy = {
+            "on": function (listener, eventName) { return target.addListener(eventName, listener); },
+            "off": function (listener, eventName) { return target.removeListener(eventName, listener); }
+        };
+    }
+    else if (EventTargetLike_1.EventTargetLike.JQueryStyleEventEmitter.match(target)) {
+        proxy = {
+            "on": function (listener, eventName) { return target.on(eventName, listener); },
+            "off": function (listener, eventName) { return target.off(eventName, listener); }
+        };
+    }
+    else if (EventTargetLike_1.EventTargetLike.HasEventTargetAddRemove.match(target)) {
+        proxy = {
+            "on": function (listener, eventName, options) { return target.addEventListener(eventName, listener, options); },
+            "off": function (listener, eventName, options) { return target.removeEventListener(eventName, listener, options); }
+        };
+    }
+    else if (EventTargetLike_1.EventTargetLike.RxJSSubject.match(target)) {
+        var subscription_1;
+        proxy = {
+            "on": function (listener) { return subscription_1 = target.subscribe(function (data) { return listener(data); }); },
+            "off": function () { return subscription_1.unsubscribe(); }
+        };
+    }
+    else {
+        id_1.id(target);
+        assert_1.assert(false);
+    }
+    var evt = new importProxy_1.importProxy.Evt();
+    var listener = function (data) { return evt.post(data); };
+    ctx === null || ctx === void 0 ? void 0 : ctx.getEvtDone().attachOnce(function () { return proxy.off(listener, eventName, options); });
+    proxy.on(listener, eventName, options);
+    return evt;
+}
+function from(ctxOrTarget, targetOrEventName, eventNameOrOptions, options) {
+    if ("getEvtDone" in ctxOrTarget) {
+        assert_1.assert(typeGuard_1.typeGuard(targetOrEventName) &&
+            typeGuard_1.typeGuard(eventNameOrOptions) &&
+            typeGuard_1.typeGuard(options));
+        return fromImpl(ctxOrTarget, targetOrEventName, eventNameOrOptions, options);
+    }
+    else {
+        assert_1.assert(typeGuard_1.typeGuard(targetOrEventName) &&
+            typeGuard_1.typeGuard(eventNameOrOptions));
+        return fromImpl(undefined, ctxOrTarget, targetOrEventName, eventNameOrOptions);
+    }
+}
+exports.from = from;
+
+},{"../../tools/typeSafety/assert":270,"../../tools/typeSafety/id":271,"../../tools/typeSafety/typeGuard":274,"../importProxy":248,"../types/EventTargetLike":250,"./merge":266}],259:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"./scan":261,"./throttleTime":262,"./to":263,"dup":37}],261:[function(require,module,exports){
+},{"./scan":260,"./throttleTime":261,"./to":262,"dup":37}],260:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"../compose":257,"dup":38}],262:[function(require,module,exports){
+},{"../compose":256,"dup":38}],261:[function(require,module,exports){
 arguments[4][39][0].apply(exports,arguments)
-},{"../compose":257,"dup":39}],263:[function(require,module,exports){
+},{"../compose":256,"dup":39}],262:[function(require,module,exports){
 arguments[4][40][0].apply(exports,arguments)
-},{"dup":40}],264:[function(require,module,exports){
+},{"dup":40}],263:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"../importProxy":249,"dup":41,"minimal-polyfills/dist/lib/WeakMap":283}],265:[function(require,module,exports){
+},{"../importProxy":248,"dup":41,"minimal-polyfills/dist/lib/WeakMap":283}],264:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"./compose":257,"./genericOperators":260,"./invokeOperator":266,"dup":42}],266:[function(require,module,exports){
+},{"./compose":256,"./genericOperators":259,"./invokeOperator":265,"dup":42}],265:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"../types/Operator":253,"dup":43}],267:[function(require,module,exports){
+},{"../types/Operator":252,"dup":43}],266:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"../importProxy":249,"dup":44}],268:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"../../tools/typeSafety/id":271,"../../tools/typeSafety/typeGuard":274,"./compose":257,"dup":45}],269:[function(require,module,exports){
+},{"../importProxy":248,"dup":44}],267:[function(require,module,exports){
+"use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+exports.__esModule = true;
+var id_1 = require("../../tools/typeSafety/id");
+var compose_1 = require("./compose");
+var typeGuard_1 = require("../../tools/typeSafety/typeGuard");
+function matchAll() { return true; }
+exports.matchAll = matchAll;
+var canBeOperator = function (p) {
+    return (p !== undefined &&
+        typeGuard_1.typeGuard(p) &&
+        (typeof p === "function" ||
+            typeof p[0] === "function"));
+};
+function parseOverloadParamsFactory() {
+    var defaultParams = id_1.id({
+        "op": matchAll,
+        "ctx": undefined,
+        "timeout": undefined,
+        "callback": undefined
+    });
+    return function parseOverloadParams(inputs, methodName) {
+        switch (methodName) {
+            case "pipe":
+                {
+                    //[]
+                    //[undefined] ( not valid but user would expect it to work )
+                    //[ ctx, ...op[] ]
+                    //[ ...op[] ]
+                    var getOpWrap = function (ops) {
+                        return ops.length === 0 ?
+                            {}
+                            :
+                                { "op": ops.length === 1 ? ops[0] : compose_1.compose.apply(void 0, __spread(ops)) };
+                    };
+                    if (canBeOperator(inputs[0])) {
+                        //[ ...op[] ]
+                        return id_1.id(__assign(__assign({}, defaultParams), getOpWrap(inputs)));
+                    }
+                    else {
+                        //[]
+                        //[ ctx, ...Operator.fλ[] ]
+                        var _a = __read(inputs), ctx = _a[0], rest = _a.slice(1);
+                        return id_1.id(__assign(__assign(__assign({}, defaultParams), (ctx !== undefined ? { ctx: ctx } : {})), getOpWrap(rest)));
+                    }
+                }
+                break;
+            case "waitFor":
+                {
+                    //[ op, ctx, timeout ]
+                    //[ op, ctx, undefined ]
+                    //[ op, ctx ]
+                    //[ op, timeout ]
+                    //[ op, undefined ]
+                    //[ ctx, timeout ]
+                    //[ ctx, undefined ]
+                    //[ op ]
+                    //[ ctx ]
+                    //[ timeout ]
+                    //[ undefined ]
+                    //[ callback ]
+                    return parseOverloadParams(__spread(inputs.filter(function (value, index) { return !(index === inputs.length - 1 &&
+                        value === undefined); }), [
+                        defaultParams.callback
+                    ]), "attach*");
+                }
+                break;
+            case "attach*":
+                {
+                    //NOTE: when callback is undefined call has been forward from waitFor.
+                    //[ op, ctx, timeout, callback ]
+                    //[ op, ctx, timeout, undefined ]
+                    //[ op, ctx, callback ]
+                    //[ op, ctx, undefined ]
+                    //[ op, timeout, callback ]
+                    //[ op, timeout, undefined ]
+                    //[ ctx, timeout, callback ]
+                    //[ ctx, timeout, undefined ]
+                    //[ op, callback ]
+                    //[ op, undefined ]
+                    //[ ctx, callback ]
+                    //[ ctx, undefined ]
+                    //[ timeout, callback ]
+                    //[ timeout, undefined ]
+                    //[ callback ]
+                    //[ undefined ]
+                    var n = inputs.length;
+                    switch (n) {
+                        case 4: {
+                            //[ op, ctx, timeout, callback ]
+                            var _b = __read(inputs, 4), p1 = _b[0], p2 = _b[1], p3 = _b[2], p4 = _b[3];
+                            return id_1.id(__assign(__assign({}, defaultParams), { "op": p1, "ctx": p2, "timeout": p3, "callback": p4 }));
+                        }
+                        case 3: {
+                            //[ op, ctx, callback ]
+                            //[ op, timeout, callback ]
+                            //[ ctx, timeout, callback ]
+                            var _c = __read(inputs, 3), p1 = _c[0], p2 = _c[1], p3 = _c[2];
+                            if (typeof p2 === "number") {
+                                //[ op, timeout, callback ]
+                                //[ ctx, timeout, callback ]
+                                var timeout = p2;
+                                var callback = p3;
+                                if (canBeOperator(p1)) {
+                                    //[ op, timeout, callback ]
+                                    return id_1.id(__assign(__assign({}, defaultParams), { timeout: timeout,
+                                        callback: callback, "op": p1 }));
+                                }
+                                else {
+                                    //[ ctx, timeout, callback ]
+                                    return id_1.id(__assign(__assign({}, defaultParams), { timeout: timeout,
+                                        callback: callback, "ctx": p1 }));
+                                }
+                            }
+                            else {
+                                //[ op, ctx, callback ]
+                                return id_1.id(__assign(__assign({}, defaultParams), { "op": p1, "ctx": p2, "callback": p3 }));
+                            }
+                        }
+                        case 2: {
+                            //[ op, callback ]
+                            //[ ctx, callback ]
+                            //[ timeout, callback ]
+                            var _d = __read(inputs, 2), p1 = _d[0], p2 = _d[1];
+                            if (typeof p1 === "number") {
+                                //[ timeout, callback ]
+                                return id_1.id(__assign(__assign({}, defaultParams), { "timeout": p1, "callback": p2 }));
+                            }
+                            else {
+                                //[ op, callback ]
+                                //[ ctx, callback ]
+                                var callback = p2;
+                                if (canBeOperator(p1)) {
+                                    return id_1.id(__assign(__assign({}, defaultParams), { callback: callback, "op": p1 }));
+                                }
+                                else {
+                                    return id_1.id(__assign(__assign({}, defaultParams), { callback: callback, "ctx": p1 }));
+                                }
+                            }
+                        }
+                        case 1: {
+                            //[ callback ]
+                            var _e = __read(inputs, 1), p = _e[0];
+                            return id_1.id(__assign(__assign({}, defaultParams), { "callback": p }));
+                        }
+                        case 0: {
+                            return id_1.id(__assign({}, defaultParams));
+                        }
+                    }
+                }
+                break;
+        }
+    };
+}
+exports.parseOverloadParamsFactory = parseOverloadParamsFactory;
+
+},{"../../tools/typeSafety/id":271,"../../tools/typeSafety/typeGuard":274,"./compose":256}],268:[function(require,module,exports){
+"use strict";
+exports.__esModule = true;
+function useEffect(effect, evt, dataFirst) {
+    var i = 0;
+    evt.attach(function (data) { return effect(data, { "isFirst": false, data: data }, i++); });
+    effect(dataFirst === null || dataFirst === void 0 ? void 0 : dataFirst[0], { "isFirst": true }, i++);
+}
+exports.useEffect = useEffect;
+
+},{}],269:[function(require,module,exports){
 arguments[4][46][0].apply(exports,arguments)
 },{"dup":46}],270:[function(require,module,exports){
 arguments[4][47][0].apply(exports,arguments)
@@ -27333,7 +28457,7 @@ function isSlowBuffer (obj) {
 
 })();
 
-},{"charenc":244,"crypt":245,"is-buffer":278}],280:[function(require,module,exports){
+},{"charenc":243,"crypt":244,"is-buffer":278}],280:[function(require,module,exports){
 arguments[4][56][0].apply(exports,arguments)
 },{"dup":56}],281:[function(require,module,exports){
 arguments[4][57][0].apply(exports,arguments)
@@ -27584,7 +28708,7 @@ function extractBundledDataFromHeaders(headers, decryptor) {
 }
 exports.extractBundledDataFromHeaders = extractBundledDataFromHeaders;
 
-},{"./urlSafeBase64encoderDecoder":294,"crypto-lib/dist/async/serializer":308,"transfer-tools/dist/lib/stringTransform":359}],292:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":294,"crypto-lib/dist/async/serializer":308,"transfer-tools/dist/lib/stringTransform":360}],292:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var urlSafeBase64encoderDecoder_1 = require("./urlSafeBase64encoderDecoder");
@@ -27694,7 +28818,7 @@ var cid;
     cid.read = read;
 })(cid = exports.cid || (exports.cid = {}));
 
-},{"./urlSafeBase64encoderDecoder":294,"ts-sip":369}],294:[function(require,module,exports){
+},{"./urlSafeBase64encoderDecoder":294,"ts-sip":370}],294:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 //NOTE: Transpiled to ES3.
@@ -27704,7 +28828,7 @@ exports.urlSafeB64 = stringTransform.transcode("base64", {
     "/": "-"
 });
 
-},{"transfer-tools/dist/lib/stringTransform":359}],295:[function(require,module,exports){
+},{"transfer-tools/dist/lib/stringTransform":360}],295:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiPath = "/api";
@@ -27739,37 +28863,753 @@ arguments[4][86][0].apply(exports,arguments)
 arguments[4][87][0].apply(exports,arguments)
 },{"./has-flag.js":306,"_process":7,"dup":87,"os":5}],308:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"../sync/utils/toBuffer":309,"buffer":3,"dup":17,"transfer-tools/dist/lib/JSON_CUSTOM":357}],309:[function(require,module,exports){
+},{"../sync/utils/toBuffer":309,"buffer":3,"dup":17,"transfer-tools/dist/lib/JSON_CUSTOM":358}],309:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
 },{"buffer":3,"dup":22}],310:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"../tools/typeSafety/assert":334,"../tools/typeSafety/typeGuard":338,"./importProxy":313,"./util/LazyEvtFactory":320,"dup":23,"minimal-polyfills/dist/lib/Set":344,"minimal-polyfills/dist/lib/WeakMap":345}],311:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"../tools/overwriteReadonlyProp":333,"../tools/typeSafety/typeGuard":338,"./importProxy":313,"./types/EvtError":316,"./types/Operator":317,"./util/LazyEvtFactory":320,"./util/encapsulateOpState":322,"./util/from":323,"./util/getCtxFactory":328,"./util/invokeOperator":330,"./util/merge":331,"./util/parseOverloadParams":332,"dup":24,"minimal-polyfills/dist/lib/Array.prototype.find":342,"minimal-polyfills/dist/lib/Map":343,"minimal-polyfills/dist/lib/WeakMap":345,"run-exclusive":346}],312:[function(require,module,exports){
+arguments[4][245][0].apply(exports,arguments)
+},{"../tools/typeSafety/assert":335,"../tools/typeSafety/typeGuard":339,"./importProxy":313,"./util/LazyEvtFactory":320,"dup":245,"minimal-polyfills/dist/lib/Set":346,"minimal-polyfills/dist/lib/WeakMap":347}],311:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+exports.__esModule = true;
+require("minimal-polyfills/dist/lib/Array.prototype.find");
+var Map_1 = require("minimal-polyfills/dist/lib/Map");
+var WeakMap_1 = require("minimal-polyfills/dist/lib/WeakMap");
+var runExclusive = require("run-exclusive");
+var EvtError_1 = require("./types/EvtError");
+var overwriteReadonlyProp_1 = require("../tools/overwriteReadonlyProp");
+var encapsulateOpState_1 = require("./util/encapsulateOpState");
+var typeGuard_1 = require("../tools/typeSafety/typeGuard");
+var Operator_1 = require("./types/Operator");
+var invokeOperator_1 = require("./util/invokeOperator");
+var merge_1 = require("./util/merge");
+var from_1 = require("./util/from");
+var parseOverloadParams_1 = require("./util/parseOverloadParams");
+var getCtxFactory_1 = require("./util/getCtxFactory");
+var LazyEvtFactory_1 = require("./util/LazyEvtFactory");
+var importProxy_1 = require("./importProxy");
+var useEffect_1 = require("./util/useEffect");
+/** https://docs.evt.land/api/evt */
+var Evt = /** @class */ (function () {
+    function Evt() {
+        var _this_1 = this;
+        this.__maxHandlers = 25;
+        //NOTE: Not really readonly but we want to prevent user from setting the value
+        //manually and we cant user accessor because we target es3.
+        /**
+         * https://docs.evt.land/api/evt/post
+         *
+         * Number of times .post(data) have been called.
+         */
+        this.postCount = 0;
+        this.traceId = null;
+        this.handlers = [];
+        this.handlerTriggers = new Map_1.Polyfill();
+        //NOTE: An async handler ( attached with waitFor ) is only eligible to handle a post if the post
+        //occurred after the handler was set. We don't want to waitFor event from the past.
+        //private readonly asyncHandlerChronologyMark = new WeakMap<ImplicitParams.Async, number>();
+        this.asyncHandlerChronologyMark = new WeakMap_1.Polyfill();
+        //NOTE: There is an exception to the above rule, we want to allow async waitFor loop 
+        //do so we have to handle the case where multiple event would be posted synchronously.
+        this.asyncHandlerChronologyExceptionRange = new WeakMap_1.Polyfill();
+        /*
+        NOTE: Used as Date.now() would be used to compare if an event is anterior
+        or posterior to an other. We don't use Date.now() because two call within
+        less than a ms will return the same value unlike this function.
+        */
+        this.getChronologyMark = (function () {
+            var currentChronologyMark = 0;
+            return function () { return currentChronologyMark++; };
+        })();
+        this.statelessByStatefulOp = new WeakMap_1.Polyfill();
+        this.postAsync = runExclusive.buildMethodCb(function (data, postChronologyMark, releaseLock) {
+            var e_1, _a;
+            var promises = [];
+            var chronologyMarkStartResolveTick;
+            //NOTE: Must be before handlerTrigger call.
+            Promise.resolve().then(function () { return chronologyMarkStartResolveTick = _this_1.getChronologyMark(); });
+            var _loop_1 = function (handler) {
+                if (!handler.async) {
+                    return "continue";
+                }
+                var opResult = invokeOperator_1.invokeOperator(_this_1.getStatelessOp(handler.op), data, true);
+                if (Operator_1.Operator.fλ.Result.NotMatched.match(opResult)) {
+                    Evt.doDetachIfNeeded(handler, opResult);
+                    return "continue";
+                }
+                var handlerTrigger = _this_1.handlerTriggers.get(handler);
+                if (!handlerTrigger) {
+                    return "continue";
+                }
+                var shouldCallHandlerTrigger = (function () {
+                    var handlerMark = _this_1.asyncHandlerChronologyMark.get(handler);
+                    if (postChronologyMark > handlerMark) {
+                        return true;
+                    }
+                    var exceptionRange = _this_1.asyncHandlerChronologyExceptionRange.get(handler);
+                    return (exceptionRange !== undefined &&
+                        exceptionRange.lowerMark < postChronologyMark &&
+                        postChronologyMark < exceptionRange.upperMark &&
+                        handlerMark > exceptionRange.upperMark);
+                })();
+                if (!shouldCallHandlerTrigger) {
+                    return "continue";
+                }
+                promises.push(new Promise(function (resolve) { return handler.promise
+                    .then(function () { return resolve(); })["catch"](function () { return resolve(); }); }));
+                handlerTrigger(opResult);
+            };
+            try {
+                for (var _b = __values(__spread(_this_1.handlers)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    var handler = _c.value;
+                    _loop_1(handler);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            if (promises.length === 0) {
+                releaseLock();
+                return;
+            }
+            var handlersDump = __spread(_this_1.handlers);
+            Promise.all(promises).then(function () {
+                var e_2, _a;
+                try {
+                    for (var _b = __values(_this_1.handlers), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        var handler = _c.value;
+                        if (!handler.async) {
+                            continue;
+                        }
+                        if (handlersDump.indexOf(handler) >= 0) {
+                            continue;
+                        }
+                        _this_1.asyncHandlerChronologyExceptionRange.set(handler, {
+                            "lowerMark": postChronologyMark,
+                            "upperMark": chronologyMarkStartResolveTick
+                        });
+                    }
+                }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                finally {
+                    try {
+                        if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+                    }
+                    finally { if (e_2) throw e_2.error; }
+                }
+                releaseLock();
+            });
+        });
+        this.__parseOverloadParams = parseOverloadParams_1.parseOverloadParamsFactory();
+        var lazyEvtAttachFactory = new LazyEvtFactory_1.LazyEvtFactory();
+        var lazyEvtDetachFactory = new LazyEvtFactory_1.LazyEvtFactory();
+        this.onHandler = function (isAttach, handler) {
+            return isAttach ?
+                lazyEvtAttachFactory.post(handler) :
+                lazyEvtDetachFactory.post(handler);
+        };
+        this.getEvtAttach = function () { return lazyEvtAttachFactory.getEvt(); };
+        this.getEvtDetach = function () { return lazyEvtDetachFactory.getEvt(); };
+    }
+    Evt.newCtx = function () { return new importProxy_1.importProxy.Ctx(); };
+    /** https://docs.evt.land/api/evt/post */
+    Evt.prototype.postAsyncOnceHandled = function (data) {
+        var _this_1 = this;
+        if (this.isHandled(data)) {
+            return this.post(data);
+        }
+        var resolvePr;
+        var pr = new Promise(function (resolve) { return resolvePr = resolve; });
+        this.getEvtAttach().attachOnce(function (_a) {
+            var op = _a.op;
+            return !!invokeOperator_1.invokeOperator(_this_1.getStatelessOp(op), data);
+        }, function () { return Promise.resolve().then(function () { return resolvePr(_this_1.post(data)); }); });
+        return pr;
+    };
+    /**
+     *
+     * By default EventEmitters will print a warning if more than 25 handlers are added for
+     * a particular event. This is a useful default that helps finding memory leaks.
+     * Not all events should be limited to 25 handlers. The evt.setMaxHandlers() method allows the limit to be
+     * modified for this specific EventEmitter instance.
+     * The value can be set to Infinity (or 0) to indicate an unlimited number of listeners.
+     * Returns a reference to the EventEmitter, so that calls can be chained.
+     *
+     */
+    Evt.prototype.setMaxHandlers = function (n) {
+        this.__maxHandlers = isFinite(n) ? n : 0;
+        return this;
+    };
+    /** https://docs.evt.land/api/evt/enabletrace */
+    Evt.prototype.enableTrace = function (id, formatter, log
+    //NOTE: Not typeof console.log as we don't want to expose types from node
+    ) {
+        this.traceId = id;
+        this.traceFormatter = formatter !== null && formatter !== void 0 ? formatter : (function (data) {
+            try {
+                return JSON.stringify(data, null, 2);
+            }
+            catch (_a) {
+                return "" + data;
+            }
+        });
+        this.log = log !== null && log !== void 0 ? log : (function () {
+            var inputs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                inputs[_i] = arguments[_i];
+            }
+            return console.log.apply(console, __spread(inputs));
+        });
+    };
+    /** https://docs.evt.land/api/evt/enabletrace */
+    Evt.prototype.disableTrace = function () {
+        this.traceId = null;
+    };
+    Evt.prototype.detachHandler = function (handler, wTimer, rejectPr) {
+        var _a;
+        var index = this.handlers.indexOf(handler);
+        if (index < 0) {
+            return false;
+        }
+        if (typeGuard_1.typeGuard(handler, !!handler.ctx)) {
+            handler.ctx.zz__removeHandler(handler);
+        }
+        this.handlers.splice(index, 1);
+        this.handlerTriggers["delete"](handler);
+        if (wTimer[0] !== undefined) {
+            clearTimeout(wTimer[0]);
+            rejectPr(new EvtError_1.EvtError.Detached());
+        }
+        (_a = this.onHandler) === null || _a === void 0 ? void 0 : _a.call(this, false, handler);
+        return true;
+    };
+    Evt.doDetachIfNeeded = function (handler, opResult, once) {
+        var detach = Operator_1.Operator.fλ.Result.getDetachArg(opResult);
+        if (typeof detach !== "boolean") {
+            var _a = __read(detach, 3), ctx = _a[0], error = _a[1], res = _a[2];
+            if (!!error) {
+                ctx.abort(error);
+            }
+            else {
+                ctx.done(res);
+            }
+        }
+        else if (detach || !!once) {
+            handler.detach();
+        }
+    };
+    Evt.prototype.triggerHandler = function (handler, wTimer, resolvePr, opResult) {
+        var callback = handler.callback, once = handler.once;
+        if (wTimer[0] !== undefined) {
+            clearTimeout(wTimer[0]);
+            wTimer[0] = undefined;
+        }
+        Evt.doDetachIfNeeded(handler, opResult, once);
+        var _a = __read(opResult, 1), transformedData = _a[0];
+        callback === null || callback === void 0 ? void 0 : callback.call(this, transformedData);
+        resolvePr(transformedData);
+    };
+    Evt.prototype.addHandler = function (propsFromArgs, propsFromMethodName) {
+        var _this_1 = this;
+        var _a;
+        if (Operator_1.Operator.fλ.Stateful.match(propsFromArgs.op)) {
+            this.statelessByStatefulOp.set(propsFromArgs.op, encapsulateOpState_1.encapsulateOpState(propsFromArgs.op));
+        }
+        var handler = __assign(__assign(__assign({}, propsFromArgs), propsFromMethodName), { "detach": null, "promise": null });
+        if (handler.async) {
+            this.asyncHandlerChronologyMark.set(handler, this.getChronologyMark());
+        }
+        handler.promise = new Promise(function (resolve, reject) {
+            var wTimer = [undefined];
+            if (typeof handler.timeout === "number") {
+                wTimer[0] = setTimeout(function () {
+                    wTimer[0] = undefined;
+                    handler.detach();
+                    reject(new EvtError_1.EvtError.Timeout(handler.timeout));
+                }, handler.timeout);
+            }
+            handler.detach =
+                function () { return _this_1.detachHandler(handler, wTimer, reject); };
+            _this_1.handlerTriggers.set(handler, function (opResult) { return _this_1.triggerHandler(handler, wTimer, resolve, opResult); });
+        });
+        if (handler.prepend) {
+            var i = void 0;
+            for (i = 0; i < this.handlers.length; i++) {
+                if (this.handlers[i].extract) {
+                    continue;
+                }
+                break;
+            }
+            this.handlers.splice(i, 0, handler);
+        }
+        else {
+            this.handlers.push(handler);
+        }
+        if (this.__maxHandlers !== 0 &&
+            this.handlers.length % (this.__maxHandlers + 1) === 0) {
+            var message = [
+                "MaxHandlersExceededWarning: Possible Evt memory leak detected.",
+                this.handlers.length + " handlers attached" + (this.traceId ? " to " + this.traceId : "") + ".",
+                "Use evt.setMaxHandlers() to increase limit."
+            ].join(" ");
+            try {
+                console.warn(message);
+            }
+            catch (_b) {
+            }
+        }
+        if (typeGuard_1.typeGuard(handler, !!handler.ctx)) {
+            handler.ctx.zz__addHandler(handler, this);
+        }
+        (_a = this.onHandler) === null || _a === void 0 ? void 0 : _a.call(this, true, handler);
+        return handler;
+    };
+    /** https://docs.evt.land/api/evt/getstatelessop */
+    Evt.prototype.getStatelessOp = function (op) {
+        return Operator_1.Operator.fλ.Stateful.match(op) ?
+            this.statelessByStatefulOp.get(op) :
+            op;
+    };
+    Evt.prototype.trace = function (data) {
+        var _this_1 = this;
+        if (this.traceId === null) {
+            return;
+        }
+        var message = "(" + this.traceId + ") ";
+        var isExtracted = !!this.handlers.find(function (_a) {
+            var extract = _a.extract, op = _a.op;
+            return (extract &&
+                !!_this_1.getStatelessOp(op)(data));
+        });
+        if (isExtracted) {
+            message += "extracted ";
+        }
+        else {
+            var handlerCount = this.handlers
+                .filter(function (_a) {
+                var extract = _a.extract, op = _a.op;
+                return !extract &&
+                    !!_this_1.getStatelessOp(op)(data);
+            })
+                .length;
+            message += handlerCount + " handler" + ((handlerCount > 1) ? "s" : "") + " => ";
+        }
+        this.log(message + this.traceFormatter(data));
+    };
+    /**
+     * https://garronej.github.io/ts-evt/#evtattach-evtattachonce-and-evtpost
+     *
+     * Returns post count
+     * */
+    Evt.prototype.post = function (data) {
+        this.trace(data);
+        overwriteReadonlyProp_1.overwriteReadonlyProp(this, "postCount", this.postCount + 1);
+        //NOTE: Must be before postSync.
+        var postChronologyMark = this.getChronologyMark();
+        var isExtracted = this.postSync(data);
+        if (!isExtracted) {
+            this.postAsync(data, postChronologyMark);
+        }
+        return this.postCount;
+    };
+    /** Return isExtracted */
+    Evt.prototype.postSync = function (data) {
+        var e_3, _a;
+        try {
+            for (var _b = __values(__spread(this.handlers)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var handler = _c.value;
+                var async = handler.async, op = handler.op, extract = handler.extract;
+                if (async) {
+                    continue;
+                }
+                var opResult = invokeOperator_1.invokeOperator(this.getStatelessOp(op), data, true);
+                if (Operator_1.Operator.fλ.Result.NotMatched.match(opResult)) {
+                    Evt.doDetachIfNeeded(handler, opResult);
+                    continue;
+                }
+                var handlerTrigger = this.handlerTriggers.get(handler);
+                //NOTE: Possible if detached while in the loop.
+                if (!handlerTrigger) {
+                    continue;
+                }
+                handlerTrigger(opResult);
+                if (extract) {
+                    return true;
+                }
+            }
+        }
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_3) throw e_3.error; }
+        }
+        return false;
+    };
+    Evt.prototype.__waitFor = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": true,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    Evt.prototype.__attach = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": false
+        }).promise;
+    };
+    Evt.prototype.__attachExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    Evt.prototype.__attachPrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": false,
+            "prepend": true
+        }).promise;
+    };
+    Evt.prototype.__attachOnce = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": false
+        }).promise;
+    };
+    Evt.prototype.__attachOncePrepend = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": false,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    Evt.prototype.__attachOnceExtract = function (attachParams) {
+        return this.addHandler(attachParams, {
+            "async": false,
+            "extract": true,
+            "once": true,
+            "prepend": true
+        }).promise;
+    };
+    /**
+     * https://docs.evt.land/api/evt/ishandled
+     *
+     * Test if posting a given event data will have an effect.
+     *
+     * Return true if:
+     * -There is at least one handler matching
+     * this event data ( at least one handler's callback function
+     * will be invoked if the data is posted. )
+     * -Handlers could be will be detached
+     * if the event data is posted.
+     *
+     */
+    Evt.prototype.isHandled = function (data) {
+        var _this_1 = this;
+        return !!this.getHandlers()
+            .find(function (_a) {
+            var op = _a.op;
+            return !!_this_1.getStatelessOp(op)(data);
+        });
+    };
+    /** https://docs.evt.land/api/evt/gethandler */
+    Evt.prototype.getHandlers = function () {
+        return __spread(this.handlers);
+    };
+    Evt.prototype.detach = function (ctx) {
+        var e_4, _a;
+        var detachedHandlers = [];
+        try {
+            for (var _b = __values(this.getHandlers()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var handler = _c.value;
+                if (ctx !== undefined && handler.ctx !== ctx) {
+                    continue;
+                }
+                var wasStillAttached = handler.detach();
+                //NOTE: It should not be possible.
+                if (!wasStillAttached) {
+                    continue;
+                }
+                detachedHandlers.push(handler);
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_4) throw e_4.error; }
+        }
+        return detachedHandlers;
+    };
+    Evt.prototype.pipe = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        var evtDelegate = new Evt();
+        this.__attach(__assign(__assign({}, this.__parseOverloadParams(inputs, "pipe")), { "callback": function (transformedData) { return evtDelegate.post(transformedData); } }));
+        return evtDelegate;
+    };
+    Evt.prototype.waitFor = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__waitFor(this.__parseOverloadParams(inputs, "waitFor"));
+    };
+    Evt.prototype.$attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attach.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attach = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attach(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOnce.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachOnce = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnce(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOnceExtract.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachExtract(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachPrepend.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachPrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachPrepend(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOncePrepend.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachOncePrepend = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOncePrepend(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    Evt.prototype.$attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.attachOnceExtract.apply(this, __spread(inputs));
+    };
+    Evt.prototype.attachOnceExtract = function () {
+        var inputs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            inputs[_i] = arguments[_i];
+        }
+        return this.__attachOnceExtract(this.__parseOverloadParams(inputs, "attach*"));
+    };
+    /**
+     * https://docs.evt.land/api/evt/getctx
+     *
+     * Evt.weakCtx(obj) always return the same instance of VoidCtx for a given object.
+     * No strong reference to the object is created
+     * when the object is no longer referenced it's associated Ctx will be freed from memory.
+     */
+    Evt.getCtx = getCtxFactory_1.getCtxFactory();
+    /** https://docs.evt.land/api/evt/merge */
+    Evt.merge = merge_1.merge;
+    /** https://docs.evt.land/api/evt/from */
+    Evt.from = from_1.from;
+    /** https://docs.evt.land/api/evt/use-effect */
+    Evt.useEffect = useEffect_1.useEffect;
+    return Evt;
+}());
+exports.Evt = Evt;
+importProxy_1.importProxy.Evt = Evt;
+/** https://docs.evt.land/api/voidevt */
+var VoidEvt = /** @class */ (function (_super) {
+    __extends(VoidEvt, _super);
+    function VoidEvt() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    VoidEvt.prototype.post = function () {
+        return _super.prototype.post.call(this, undefined);
+    };
+    VoidEvt.prototype.postAsyncOnceHandled = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, _super.prototype.postAsyncOnceHandled.call(this, undefined)];
+            });
+        });
+    };
+    return VoidEvt;
+}(Evt));
+exports.VoidEvt = VoidEvt;
+
+},{"../tools/overwriteReadonlyProp":334,"../tools/typeSafety/typeGuard":339,"./importProxy":313,"./types/EvtError":316,"./types/Operator":317,"./util/LazyEvtFactory":320,"./util/encapsulateOpState":322,"./util/from":323,"./util/getCtxFactory":328,"./util/invokeOperator":330,"./util/merge":331,"./util/parseOverloadParams":332,"./util/useEffect":333,"minimal-polyfills/dist/lib/Array.prototype.find":344,"minimal-polyfills/dist/lib/Map":345,"minimal-polyfills/dist/lib/WeakMap":347,"run-exclusive":340}],312:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"../tools/overwriteReadonlyProp":333,"./Evt":311,"dup":25}],313:[function(require,module,exports){
+},{"../tools/overwriteReadonlyProp":334,"./Evt":311,"dup":25}],313:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
 },{"dup":26}],314:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
 },{"./Ctx":310,"./Evt":311,"./Observable":312,"./types":318,"./util":329,"dup":27}],315:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"../../tools/typeSafety":336,"dup":28}],316:[function(require,module,exports){
+},{"../../tools/typeSafety":337,"dup":28}],316:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
 },{"dup":29}],317:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"../../tools/typeSafety":336,"dup":30}],318:[function(require,module,exports){
+},{"../../tools/typeSafety":337,"dup":30}],318:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
 },{"./EvtError":316,"./Operator":317,"./lib.dom":319,"dup":31}],319:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
 },{"dup":32}],320:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"../../tools/overwriteReadonlyProp":333,"../importProxy":313,"dup":33}],321:[function(require,module,exports){
+},{"../../tools/overwriteReadonlyProp":334,"../importProxy":313,"dup":33}],321:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"../../tools/typeSafety/assert":334,"../../tools/typeSafety/id":335,"../../tools/typeSafety/typeGuard":338,"../types/Operator":317,"./encapsulateOpState":322,"./invokeOperator":330,"dup":34}],322:[function(require,module,exports){
+},{"../../tools/typeSafety/assert":335,"../../tools/typeSafety/id":336,"../../tools/typeSafety/typeGuard":339,"../types/Operator":317,"./encapsulateOpState":322,"./invokeOperator":330,"dup":34}],322:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"../../tools/typeSafety/id":335,"../types/Operator":317,"dup":35}],323:[function(require,module,exports){
-arguments[4][36][0].apply(exports,arguments)
-},{"../../tools/typeSafety/assert":334,"../../tools/typeSafety/id":335,"../../tools/typeSafety/typeGuard":338,"../importProxy":313,"../types/EventTargetLike":315,"./merge":331,"dup":36}],324:[function(require,module,exports){
+},{"../../tools/typeSafety/id":336,"../types/Operator":317,"dup":35}],323:[function(require,module,exports){
+arguments[4][258][0].apply(exports,arguments)
+},{"../../tools/typeSafety/assert":335,"../../tools/typeSafety/id":336,"../../tools/typeSafety/typeGuard":339,"../importProxy":313,"../types/EventTargetLike":315,"./merge":331,"dup":258}],324:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
 },{"./scan":325,"./throttleTime":326,"./to":327,"dup":37}],325:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
@@ -27779,7 +29619,7 @@ arguments[4][39][0].apply(exports,arguments)
 arguments[4][40][0].apply(exports,arguments)
 },{"dup":40}],328:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"../importProxy":313,"dup":41,"minimal-polyfills/dist/lib/WeakMap":345}],329:[function(require,module,exports){
+},{"../importProxy":313,"dup":41,"minimal-polyfills/dist/lib/WeakMap":347}],329:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
 },{"./compose":321,"./genericOperators":324,"./invokeOperator":330,"dup":42}],330:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
@@ -27787,84 +29627,86 @@ arguments[4][43][0].apply(exports,arguments)
 arguments[4][44][0].apply(exports,arguments)
 },{"../importProxy":313,"dup":44}],332:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"../../tools/typeSafety/id":335,"../../tools/typeSafety/typeGuard":338,"./compose":321,"dup":45}],333:[function(require,module,exports){
+},{"../../tools/typeSafety/id":336,"../../tools/typeSafety/typeGuard":339,"./compose":321,"dup":45}],333:[function(require,module,exports){
+arguments[4][268][0].apply(exports,arguments)
+},{"dup":268}],334:[function(require,module,exports){
 arguments[4][46][0].apply(exports,arguments)
-},{"dup":46}],334:[function(require,module,exports){
+},{"dup":46}],335:[function(require,module,exports){
 arguments[4][47][0].apply(exports,arguments)
-},{"dup":47}],335:[function(require,module,exports){
+},{"dup":47}],336:[function(require,module,exports){
 arguments[4][48][0].apply(exports,arguments)
-},{"dup":48}],336:[function(require,module,exports){
+},{"dup":48}],337:[function(require,module,exports){
 arguments[4][49][0].apply(exports,arguments)
-},{"./assert":334,"./id":335,"./matchVoid":337,"./typeGuard":338,"dup":49}],337:[function(require,module,exports){
+},{"./assert":335,"./id":336,"./matchVoid":338,"./typeGuard":339,"dup":49}],338:[function(require,module,exports){
 arguments[4][50][0].apply(exports,arguments)
-},{"./typeGuard":338,"dup":50}],338:[function(require,module,exports){
+},{"./typeGuard":339,"dup":50}],339:[function(require,module,exports){
 arguments[4][51][0].apply(exports,arguments)
-},{"dup":51}],339:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],340:[function(require,module,exports){
-arguments[4][53][0].apply(exports,arguments)
-},{"./implementation":339,"dup":53}],341:[function(require,module,exports){
-arguments[4][54][0].apply(exports,arguments)
-},{"dup":54,"function-bind":340}],342:[function(require,module,exports){
-arguments[4][56][0].apply(exports,arguments)
-},{"dup":56}],343:[function(require,module,exports){
-arguments[4][57][0].apply(exports,arguments)
-},{"dup":57}],344:[function(require,module,exports){
-arguments[4][58][0].apply(exports,arguments)
-},{"./Map":343,"dup":58}],345:[function(require,module,exports){
-arguments[4][59][0].apply(exports,arguments)
-},{"./Map":343,"dup":59}],346:[function(require,module,exports){
+},{"dup":51}],340:[function(require,module,exports){
 arguments[4][60][0].apply(exports,arguments)
-},{"dup":60,"minimal-polyfills/dist/lib/WeakMap":345}],347:[function(require,module,exports){
+},{"dup":60,"minimal-polyfills/dist/lib/WeakMap":347}],341:[function(require,module,exports){
+arguments[4][52][0].apply(exports,arguments)
+},{"dup":52}],342:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"./implementation":341,"dup":53}],343:[function(require,module,exports){
+arguments[4][54][0].apply(exports,arguments)
+},{"dup":54,"function-bind":342}],344:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"dup":56}],345:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57}],346:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"./Map":345,"dup":58}],347:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"./Map":345,"dup":59}],348:[function(require,module,exports){
 arguments[4][125][0].apply(exports,arguments)
-},{"./lib/alea":348,"./lib/tychei":349,"./lib/xor128":350,"./lib/xor4096":351,"./lib/xorshift7":352,"./lib/xorwow":353,"./seedrandom":354,"dup":125}],348:[function(require,module,exports){
+},{"./lib/alea":349,"./lib/tychei":350,"./lib/xor128":351,"./lib/xor4096":352,"./lib/xorshift7":353,"./lib/xorwow":354,"./seedrandom":355,"dup":125}],349:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"dup":126}],349:[function(require,module,exports){
+},{"dup":126}],350:[function(require,module,exports){
 arguments[4][127][0].apply(exports,arguments)
-},{"dup":127}],350:[function(require,module,exports){
+},{"dup":127}],351:[function(require,module,exports){
 arguments[4][128][0].apply(exports,arguments)
-},{"dup":128}],351:[function(require,module,exports){
+},{"dup":128}],352:[function(require,module,exports){
 arguments[4][129][0].apply(exports,arguments)
-},{"dup":129}],352:[function(require,module,exports){
+},{"dup":129}],353:[function(require,module,exports){
 arguments[4][130][0].apply(exports,arguments)
-},{"dup":130}],353:[function(require,module,exports){
+},{"dup":130}],354:[function(require,module,exports){
 arguments[4][131][0].apply(exports,arguments)
-},{"dup":131}],354:[function(require,module,exports){
+},{"dup":131}],355:[function(require,module,exports){
 arguments[4][132][0].apply(exports,arguments)
-},{"crypto":2,"dup":132}],355:[function(require,module,exports){
+},{"crypto":2,"dup":132}],356:[function(require,module,exports){
 arguments[4][133][0].apply(exports,arguments)
-},{"dup":133}],356:[function(require,module,exports){
+},{"dup":133}],357:[function(require,module,exports){
 arguments[4][61][0].apply(exports,arguments)
-},{"dup":61,"has":341}],357:[function(require,module,exports){
+},{"dup":61,"has":343}],358:[function(require,module,exports){
 arguments[4][62][0].apply(exports,arguments)
-},{"dup":62,"super-json":356}],358:[function(require,module,exports){
+},{"dup":62,"super-json":357}],359:[function(require,module,exports){
 arguments[4][136][0].apply(exports,arguments)
-},{"./JSON_CUSTOM":357,"./stringTransform":359,"./stringTransformExt":360,"./testing":361,"dup":136}],359:[function(require,module,exports){
+},{"./JSON_CUSTOM":358,"./stringTransform":360,"./stringTransformExt":361,"./testing":362,"dup":136}],360:[function(require,module,exports){
 arguments[4][137][0].apply(exports,arguments)
-},{"buffer":3,"dup":137}],360:[function(require,module,exports){
+},{"buffer":3,"dup":137}],361:[function(require,module,exports){
 arguments[4][138][0].apply(exports,arguments)
-},{"./stringTransform":359,"dup":138}],361:[function(require,module,exports){
+},{"./stringTransform":360,"dup":138}],362:[function(require,module,exports){
 arguments[4][139][0].apply(exports,arguments)
-},{"./stringTransform":359,"dup":139,"seedrandom":347}],362:[function(require,module,exports){
+},{"./stringTransform":360,"dup":139,"seedrandom":348}],363:[function(require,module,exports){
 arguments[4][65][0].apply(exports,arguments)
-},{"buffer":3,"dup":65,"evt":314}],363:[function(require,module,exports){
+},{"buffer":3,"dup":65,"evt":314}],364:[function(require,module,exports){
 arguments[4][66][0].apply(exports,arguments)
-},{"./IConnection":362,"./api/ApiMessage":364,"./core":368,"./misc":372,"colors":300,"dup":66,"evt":314}],364:[function(require,module,exports){
+},{"./IConnection":363,"./api/ApiMessage":365,"./core":369,"./misc":373,"colors":300,"dup":66,"evt":314}],365:[function(require,module,exports){
 arguments[4][67][0].apply(exports,arguments)
-},{"../core":368,"../misc":372,"buffer":3,"dup":67,"transfer-tools":358}],365:[function(require,module,exports){
+},{"../core":369,"../misc":373,"buffer":3,"dup":67,"transfer-tools":359}],366:[function(require,module,exports){
 arguments[4][68][0].apply(exports,arguments)
-},{"../misc":372,"./ApiMessage":364,"colors":300,"dup":68,"util":10}],366:[function(require,module,exports){
+},{"../misc":373,"./ApiMessage":365,"colors":300,"dup":68,"util":10}],367:[function(require,module,exports){
 arguments[4][69][0].apply(exports,arguments)
-},{"../misc":372,"./ApiMessage":364,"dup":69,"evt":314,"setprototypeof":355}],367:[function(require,module,exports){
+},{"../misc":373,"./ApiMessage":365,"dup":69,"evt":314,"setprototypeof":356}],368:[function(require,module,exports){
 arguments[4][70][0].apply(exports,arguments)
-},{"./Server":365,"./client":366,"dup":70}],368:[function(require,module,exports){
+},{"./Server":366,"./client":367,"dup":70}],369:[function(require,module,exports){
 arguments[4][71][0].apply(exports,arguments)
-},{"./legacy/sdp":370,"./legacy/sip":371,"buffer":3,"dup":71,"setprototypeof":355}],369:[function(require,module,exports){
+},{"./legacy/sdp":371,"./legacy/sip":372,"buffer":3,"dup":71,"setprototypeof":356}],370:[function(require,module,exports){
 arguments[4][72][0].apply(exports,arguments)
-},{"./Socket":363,"./api":367,"./core":368,"./misc":372,"dup":72}],370:[function(require,module,exports){
+},{"./Socket":364,"./api":368,"./core":369,"./misc":373,"dup":72}],371:[function(require,module,exports){
 arguments[4][73][0].apply(exports,arguments)
-},{"dup":73}],371:[function(require,module,exports){
+},{"dup":73}],372:[function(require,module,exports){
 arguments[4][74][0].apply(exports,arguments)
-},{"dup":74}],372:[function(require,module,exports){
+},{"dup":74}],373:[function(require,module,exports){
 arguments[4][75][0].apply(exports,arguments)
-},{"./core":368,"buffer":3,"dup":75}]},{},[145]);
+},{"./core":369,"buffer":3,"dup":75}]},{},[145]);

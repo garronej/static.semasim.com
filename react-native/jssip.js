@@ -1,0 +1,1 @@
+../js/libs/jssip_compat/jssip.js
