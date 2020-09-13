@@ -9084,7 +9084,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Webphone = void 0;
 var wd = require("./webphoneData");
 var lib_1 = require("phone-number/dist/lib");
-var evt_1 = require("evt");
 var Webphone;
 (function (Webphone) {
     function sortPuttingFirstTheOneThatWasLastUsed(webphone1, webphone2) {
@@ -9109,37 +9108,34 @@ var Webphone;
     }
     Webphone.sortPuttingFirstTheOneThatWasLastUsed = sortPuttingFirstTheOneThatWasLastUsed;
     ;
-    function useEffectCanCall(canCallEffect, _a) {
-        var evtWebphone = _a.evtWebphone, evtPhoneNumberRaw = _a.evtPhoneNumberRaw, _b = _a.ctx, ctx = _b === void 0 ? evt_1.Evt.newCtx() : _b;
-        var ctx_ = evt_1.Evt.newCtx();
-        ctx.evtDoneOrAborted.attachOnce(function () { return ctx_.done(); });
-        evt_1.Evt.useEffect(function () {
-            ctx_.done();
-            var _a = evtWebphone.state, _b = _a.userSim, reachableSimState = _b.reachableSimState, country = _b.sim.country, userSimEvts = _a.userSimEvts, evtIsSipRegistered = _a.evtIsSipRegistered;
-            var evtPhoneNumber = evtPhoneNumberRaw
-                .toStateful(ctx_)
-                .pipe(function () { return [
-                lib_1.phoneNumber.build(evtPhoneNumberRaw.state, country === null || country === void 0 ? void 0 : country.iso)
-            ]; });
-            var evtIsPhoneNumberDialable = evtPhoneNumber.pipe(function (phoneNumber) { return [lib_1.phoneNumber.isDialable(phoneNumber)]; });
-            evt_1.Evt.useEffect(function () { return canCallEffect(evtIsPhoneNumberDialable.state &&
+    var canCall;
+    (function (canCall) {
+        function getValue(params) {
+            var webphone = params.webphone, phoneNumber = params.phoneNumber;
+            var reachableSimState = webphone.userSim.reachableSimState, evtIsSipRegistered = webphone.evtIsSipRegistered;
+            return (lib_1.phoneNumber.isDialable(phoneNumber) &&
                 evtIsSipRegistered.state &&
                 !!(reachableSimState === null || reachableSimState === void 0 ? void 0 : reachableSimState.isGsmConnectivityOk) &&
                 (reachableSimState.ongoingCall === undefined ||
-                    reachableSimState.ongoingCall.number === evtPhoneNumber.state &&
-                        !reachableSimState.ongoingCall.isUserInCall)); }, evt_1.Evt.merge(ctx_, [
-                evtIsPhoneNumberDialable.evtChange,
+                    reachableSimState.ongoingCall.number === phoneNumber &&
+                        !reachableSimState.ongoingCall.isUserInCall));
+        }
+        canCall.getValue = getValue;
+        function getAffectedByEvts(params) {
+            var webphone = params.webphone;
+            var userSimEvts = webphone.userSimEvts, evtIsSipRegistered = webphone.evtIsSipRegistered;
+            return [
                 userSimEvts.evtReachabilityStatusChange,
                 userSimEvts.evtCellularConnectivityChange,
                 userSimEvts.evtOngoingCall,
                 evtIsSipRegistered.evtChange
-            ]));
-        }, evtWebphone.evtChange.pipe(ctx));
-    }
-    Webphone.useEffectCanCall = useEffectCanCall;
+            ];
+        }
+        canCall.getAffectedByEvts = getAffectedByEvts;
+    })(canCall = Webphone.canCall || (Webphone.canCall = {}));
 })(Webphone = exports.Webphone || (exports.Webphone = {}));
 
-},{"./webphoneData":63,"evt":149,"phone-number/dist/lib":189}],60:[function(require,module,exports){
+},{"./webphoneData":63,"phone-number/dist/lib":189}],60:[function(require,module,exports){
 arguments[4][55][0].apply(exports,arguments)
 },{"dup":55}],61:[function(require,module,exports){
 "use strict";

@@ -3390,14 +3390,12 @@ var UiConversation = /** @class */ (function () {
                     !isDialable_1));
                 _this.btnDelete.prop("disabled", userSim.reachableSimState === undefined);
             }, userSimEvts.evtReachabilityStatusChange);
-            types.Webphone.useEffectCanCall(function (canCall) { return _this.btnCall.prop("disabled", !canCall); }, {
-                "evtWebphone": evt_1.Evt.create({
-                    userSim: userSim,
-                    userSimEvts: userSimEvts,
-                    evtIsSipRegistered: evtIsSipRegistered
-                }),
-                "evtPhoneNumberRaw": evt_1.Evt.create(this.params.wdChat.contactNumber)
-            });
+            evt_1.Evt.useEffect(function () { return _this.btnCall.prop("disabled", !types.Webphone.canCall.getValue({
+                "webphone": { userSim: userSim, evtIsSipRegistered: evtIsSipRegistered },
+                "phoneNumber": _this.params.wdChat.contactNumber
+            })); }, evt_1.Evt.merge(types.Webphone.canCall.getAffectedByEvts({
+                "webphone": { evtIsSipRegistered: evtIsSipRegistered, userSimEvts: userSimEvts }
+            })));
         }
         this.structure.find("span.id_number").text(phone_number_1.phoneNumber.prettyPrint(wdChat.contactNumber, (_b = userSim.sim.country) === null || _b === void 0 ? void 0 : _b.iso));
         evtNewOrUpdatedMessage.attach(function (wdMessage) { return _this.newOrUpdatedMessage(wdMessage); });
@@ -4002,6 +4000,26 @@ var UiContact = /** @class */ (function () {
 
 },{"../templates/UiPhonebook.html":24,"frontend-shared/dist/lib/loadUiClassHtml":44,"frontend-shared/dist/lib/types":75,"frontend-shared/node_modules/evt":163,"frontend-shared/node_modules/phone-number":203}],14:[function(require,module,exports){
 "use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uiQuickActionDependencyInjection = void 0;
 var evt_1 = require("frontend-shared/node_modules/evt");
@@ -4131,30 +4149,14 @@ function uiQuickActionDependencyInjection(params) {
                 _this.structure.find(".id_contact")
                     .prop("disabled", !userSim.reachableSimState);
             }, evtIsSipRegistered.evtChange);
-            types.Webphone.useEffectCanCall(function (canCall) { return _this.structure.find(".id_call").prop("disabled", !canCall); }, {
-                "evtWebphone": evt_1.Evt.create({
-                    userSim: userSim,
-                    userSimEvts: userSimEvts,
-                    evtIsSipRegistered: evtIsSipRegistered
-                }),
-                "evtPhoneNumberRaw": evtPhoneNumber
-            });
-            /*
-            Evt.useEffect(
-                () => this.structure.find(".id_call").prop("disabled", (
-                    !evtIsSipRegistered.state ||
-                    !userSim.reachableSimState ||
-                    !userSim.reachableSimState.isGsmConnectivityOk ||
-                    !!userSim.reachableSimState.ongoingCall
-                )),
-                Evt.merge([
-                    evtIsSipRegistered.evtChange,
-                    userSimEvts.evtReachabilityStatusChange,
-                    userSimEvts.evtCellularConnectivityChange,
-                    userSimEvts.evtOngoingCall
-                ])
-            );
-            */
+            evt_1.Evt.useEffect(function () { return _this.structure.find(".id_call").prop("disabled", !types.Webphone.canCall.getValue({
+                "webphone": { userSim: userSim, evtIsSipRegistered: evtIsSipRegistered },
+                "phoneNumber": evtPhoneNumber.state
+            })); }, evt_1.Evt.merge(__spread(types.Webphone.canCall.getAffectedByEvts({
+                "webphone": { evtIsSipRegistered: evtIsSipRegistered, userSimEvts: userSimEvts }
+            }), [
+                evtPhoneNumber.evtChange
+            ])));
         }
         return UiQuickAction;
     }());
@@ -4770,7 +4772,7 @@ module.exports = require('cssify');
 
 },{"cssify":18}],20:[function(require,module,exports){
 //! moment.js
-//! version : 2.27.0
+//! version : 2.28.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
@@ -9175,7 +9177,7 @@ module.exports = require('cssify');
             eras = this.localeData().eras();
         for (i = 0, l = eras.length; i < l; ++i) {
             // truncate time
-            val = this.startOf('day').valueOf();
+            val = this.clone().startOf('day').valueOf();
 
             if (eras[i].since <= val && val <= eras[i].until) {
                 return eras[i].name;
@@ -9195,7 +9197,7 @@ module.exports = require('cssify');
             eras = this.localeData().eras();
         for (i = 0, l = eras.length; i < l; ++i) {
             // truncate time
-            val = this.startOf('day').valueOf();
+            val = this.clone().startOf('day').valueOf();
 
             if (eras[i].since <= val && val <= eras[i].until) {
                 return eras[i].narrow;
@@ -9215,7 +9217,7 @@ module.exports = require('cssify');
             eras = this.localeData().eras();
         for (i = 0, l = eras.length; i < l; ++i) {
             // truncate time
-            val = this.startOf('day').valueOf();
+            val = this.clone().startOf('day').valueOf();
 
             if (eras[i].since <= val && val <= eras[i].until) {
                 return eras[i].abbr;
@@ -9238,7 +9240,7 @@ module.exports = require('cssify');
             dir = eras[i].since <= eras[i].until ? +1 : -1;
 
             // truncate time
-            val = this.startOf('day').valueOf();
+            val = this.clone().startOf('day').valueOf();
 
             if (
                 (eras[i].since <= val && val <= eras[i].until) ||
@@ -10389,7 +10391,7 @@ module.exports = require('cssify');
 
     //! moment.js
 
-    hooks.version = '2.27.0';
+    hooks.version = '2.28.0';
 
     setHookCallback(createLocal);
 
@@ -17421,7 +17423,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Webphone = void 0;
 var wd = require("./webphoneData");
 var lib_1 = require("phone-number/dist/lib");
-var evt_1 = require("evt");
 var Webphone;
 (function (Webphone) {
     function sortPuttingFirstTheOneThatWasLastUsed(webphone1, webphone2) {
@@ -17446,37 +17447,34 @@ var Webphone;
     }
     Webphone.sortPuttingFirstTheOneThatWasLastUsed = sortPuttingFirstTheOneThatWasLastUsed;
     ;
-    function useEffectCanCall(canCallEffect, _a) {
-        var evtWebphone = _a.evtWebphone, evtPhoneNumberRaw = _a.evtPhoneNumberRaw, _b = _a.ctx, ctx = _b === void 0 ? evt_1.Evt.newCtx() : _b;
-        var ctx_ = evt_1.Evt.newCtx();
-        ctx.evtDoneOrAborted.attachOnce(function () { return ctx_.done(); });
-        evt_1.Evt.useEffect(function () {
-            ctx_.done();
-            var _a = evtWebphone.state, _b = _a.userSim, reachableSimState = _b.reachableSimState, country = _b.sim.country, userSimEvts = _a.userSimEvts, evtIsSipRegistered = _a.evtIsSipRegistered;
-            var evtPhoneNumber = evtPhoneNumberRaw
-                .toStateful(ctx_)
-                .pipe(function () { return [
-                lib_1.phoneNumber.build(evtPhoneNumberRaw.state, country === null || country === void 0 ? void 0 : country.iso)
-            ]; });
-            var evtIsPhoneNumberDialable = evtPhoneNumber.pipe(function (phoneNumber) { return [lib_1.phoneNumber.isDialable(phoneNumber)]; });
-            evt_1.Evt.useEffect(function () { return canCallEffect(evtIsPhoneNumberDialable.state &&
+    var canCall;
+    (function (canCall) {
+        function getValue(params) {
+            var webphone = params.webphone, phoneNumber = params.phoneNumber;
+            var reachableSimState = webphone.userSim.reachableSimState, evtIsSipRegistered = webphone.evtIsSipRegistered;
+            return (lib_1.phoneNumber.isDialable(phoneNumber) &&
                 evtIsSipRegistered.state &&
                 !!(reachableSimState === null || reachableSimState === void 0 ? void 0 : reachableSimState.isGsmConnectivityOk) &&
                 (reachableSimState.ongoingCall === undefined ||
-                    reachableSimState.ongoingCall.number === evtPhoneNumber.state &&
-                        !reachableSimState.ongoingCall.isUserInCall)); }, evt_1.Evt.merge(ctx_, [
-                evtIsPhoneNumberDialable.evtChange,
+                    reachableSimState.ongoingCall.number === phoneNumber &&
+                        !reachableSimState.ongoingCall.isUserInCall));
+        }
+        canCall.getValue = getValue;
+        function getAffectedByEvts(params) {
+            var webphone = params.webphone;
+            var userSimEvts = webphone.userSimEvts, evtIsSipRegistered = webphone.evtIsSipRegistered;
+            return [
                 userSimEvts.evtReachabilityStatusChange,
                 userSimEvts.evtCellularConnectivityChange,
                 userSimEvts.evtOngoingCall,
                 evtIsSipRegistered.evtChange
-            ]));
-        }, evtWebphone.evtChange.pipe(ctx));
-    }
-    Webphone.useEffectCanCall = useEffectCanCall;
+            ];
+        }
+        canCall.getAffectedByEvts = getAffectedByEvts;
+    })(canCall = Webphone.canCall || (Webphone.canCall = {}));
 })(Webphone = exports.Webphone || (exports.Webphone = {}));
 
-},{"./webphoneData":76,"evt":163,"phone-number/dist/lib":203}],73:[function(require,module,exports){
+},{"./webphoneData":76,"phone-number/dist/lib":203}],73:[function(require,module,exports){
 arguments[4][68][0].apply(exports,arguments)
 },{"dup":68}],74:[function(require,module,exports){
 "use strict";
